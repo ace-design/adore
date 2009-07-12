@@ -5,9 +5,24 @@ lexer grammar AdoreLexer;
 /** KEYWORDS **/
 ORCH: 		'orchestration';
 EVOL:		'evolution';
+ACTIVITIES:	'activities';
+RELATIONS:	'relations';
+RECEIVE:	'receive';
+REPLY:		'reply';
+THROW:		'throw';
+//DO:		'do';
+
+/** PUNCTUATION**/
 DBL_COL:	'::';
 LFT_BRCKT:	'\{';
-RGHT_BRCKT:	'\}';	
+RGHT_BRCKT:	'\}';
+LEFT_PAREN:	'(';
+RIGHT_PAREN:	')';
+SEMI_COLON:	';';
+LT:		'<';
+ASSIGN:		':=';
+COMMA:		',';
+COLON:		':';	
 
 /** Expected tokens **/
 IDENTIFIER:	('a'..'z') ID;

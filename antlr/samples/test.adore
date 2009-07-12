@@ -1,5 +1,22 @@
 orchestration service::operation {
 
+  activities {
+    a0) id(a);
+    a1) receive();
+    a2) fuck(a);
+    a3) foo::bar(a,b,c);
+  }
+
+  relations {
+    a1 < a2 ;
+    a2 < a3 ;
+  }
 }
 
-evolution addCache {}
+evolution addCache {
+  activities {
+    e1) receive();
+    e2) receive();
+    e3) receive();
+  }
+}
