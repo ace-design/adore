@@ -1,0 +1,47 @@
+// Implentation of the Peano Machine using ADORE concrete syntax
+// @author: Sebastien Mosser
+// @date:   07 / 13 / 2009
+
+// isZero(n) => true if n == 0, false elsewhere
+orchestration peanoMachine::isZero {
+  variables {
+    n as integer;
+    const zero := '0' as integer;
+    r as boolean;
+  }
+  activities {
+    a0) n := receive();
+    a1) r := equals(n,zero);
+    a2) reply(r);
+  }
+  relations { a0 < a1; a1 < a2; }
+}
+
+// next(n) => n + 1 
+orchestration peanoMachine::next {
+  variables {
+    n as integer;
+    const inc := '1' as integer;
+  }
+  activities {	
+    a0) n := receive();
+    a1) n := plus(n,inc);
+    a2) reply(n);
+  } 
+  relations { a0 < a1; a1 < a2; } 
+}
+
+// pred(n) => n - 1 
+orchestration peanoMachine::pred {	   
+  variables {
+    n as integer;
+    const decr := '1' as integer;
+  }
+  activities {	
+    a0) n := receive();
+    a1) n := minus(n,decr);
+    a2) reply(n);
+  } 
+  relations { a0 < a1; a1 < a2; } 
+}
+

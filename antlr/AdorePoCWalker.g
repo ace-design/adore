@@ -1,3 +1,25 @@
+/** This file is part of ADORE [ www.adore-design.org ]
+ *
+ * Copyright (C) 2008-  Sebastien Mosser
+ *
+ * ADORE is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * ADORE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with jSeduite:DataCache; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * @author      Main SŽbastien Mosser          [mosser@polytech.unice.fr]
+ * @remarks: 	this is a QUICK AND DIRTY compiler ... really ...
+ *		Do not do this at home ... !
+ **/
 tree grammar AdorePoCWalker;
 
 options {
@@ -5,83 +27,171 @@ options {
   tokenVocab=AdoreParser;
 }
 
-@header { package fr.unice.i3s.modalis.adore.language; }
-@member { import java.util.ArrayList; }
+@header { 
+package fr.unice.i3s.modalis.adore.language; 
+import java.util.ArrayList;
+import java.io.*;
+}
 
+@members {  
+
+  private void safeAdd(ArrayList<String> target, ArrayList<String> source) {
+    if(null != source)
+      target.addAll(source);
+  }
+
+  private void trace(ArrayList<String> facts,String o, String n, String kind, String cxt) {
+  	String f = "traceRename(" + kind + "," + o + "," + n + ",compile("+cxt+"))";
+  	facts.add(f);
+  }
+}
+
+  
 definitions returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	:	^(DEFINITIONS (definition {$facts.addAll($definition.facts);} )+);
-	
+	:	^(DEFINITIONS (definition 		{ $facts.addAll($definition.facts); })+)
+	;
+
 definition returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	:	^(ORCHESTRATION s=IDENTIFIER o=IDENTIFIER behaviour[$s+"_"+$o]) 
-			{ String name = $s.text+"_"+$o.text;
-			  $facts.add("defProcess("+name+")");
-			  $facts.addAll($behaviour.activitiesFacts);
-			  $facts.addAll($behaviour.relationsFacts); }
-	|	^(EVOLUTION n=IDENTIFIER behaviour[$n.text]) 
-			{ $facts.add("defProcess("+$n.text+")");
-			  //$facts.add("defEvolution("+$n.text+")"); 
-			  $facts.addAll($behaviour.activitiesFacts);
-			  $facts.addAll($behaviour.relationsFacts); };
+	: ^(DEF ^(REQUIRE f=STR)) 		{ Compiler c = new Compiler();
+						  try {
+		 				    safeAdd($facts,c.run($f.text.substring(1,$f.text.length()-1)));
+		 				  } catch(Exception e) {
+		 				    System.err.println("\%\% " + e);
+		 				  }
+						} 
+	| ^(DEF ^(ORCHESTRATION s=ID o=ID) core[$s+"_"+$o])	
+						{ String name = $s.text + "_" + $o.text;
+						  $facts.add("defProcess("+name+")");
+						  safeAdd($facts, $core.facts);
+						}
+	| ^(DEF ^(FRAGMENT n=ID) core[$n.text])	{ $facts.add("defProcess("+$n.text+")");
+						  $facts.add("defAsFragment("+$n.text+")");
+						  safeAdd($facts, $core.facts);
+						}
+	;
 
-behaviour [String owner] 
-	returns [ArrayList<String> activitiesFacts, ArrayList<String> relationsFacts]
-	@init{ $activitiesFacts = new ArrayList<String>(); 
-	       $relationsFacts = new ArrayList<String>();}
-	:	^(BEHAVIOUR activities[$owner]relations?) 
-			{ $activitiesFacts.addAll($activities.facts);
-			  if($relations.facts != null)
-			  	$relationsFacts.addAll($relations.facts);
-			 };
-
-activities [String owner]
+core	[String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	:	^(ACTIVITIES (activity[$owner] 
-			{$facts.addAll($activity.facts);} )+ );
-
-activity [String owner] 
+	:	vars[$cxt] acts[$cxt] rels[$cxt]?	{ safeAdd($facts, $vars.facts);
+							  safeAdd($facts, $acts.facts);
+						  	  safeAdd($facts, $rels.facts);
+							} 
+	;
+	
+vars	[String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	: 	^(ACTIVITY id=IDENTIFIER kind[$id.text] inputs[$id.text])
-			{ $facts.add("defActivity("+$id.text+")");
-			  $facts.add("defBelongsTo("+$id.text+","+$owner+")");
-			  $facts.addAll($inputs.facts);  
-			  $facts.add($kind.f); };
+	: ^(VARIABLES (decl_var[$cxt]	{ safeAdd($facts,$decl_var.facts); }  )+ )	
+	;
 
-kind[String id]
-	returns[String f]
-	: ^(KIND RECEIVE) 			{ $f = "defKind("+$id+",receive)"; } 
-	| ^(KIND REPLY) 			{ $f = "defKind("+$id+",reply)"; } 
-	| ^(KIND THROW) 			{ $f = "defKind("+$id+",throw)"; } 
-	| ^(KIND ASSIGNMENT fct=IDENTIFIER) 	{ $f = "defKind("+$id+",assign("+$fct.text+"))"; } 
-	| ^(KIND INVOKE s=IDENTIFIER o=IDENTIFIER) 
-		{$f = "defKind("+$id+",invoke("+$s.text+","+$o.text+"))";} ;
-
-inputs[String id]
+decl_var  [String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	:	^(INPUTS param_list)
-			{ for(String ident: $param_list.identifiers)
-				$facts.add("defAsInput("+ident+","+id+")"); };
+	:	^(VAR n=ID t=ID) 		{ String name = cxt+"_"+$n.text;
+						  $facts.add("defVariable("+name+")");
+					 	  $facts.add("defVariableType("+name+","+$t.text+")");
+					 	  trace($facts, $n.text, name, "variable", $cxt);
+					 	}
+	|	^(VAR n=ID t=ID v=STR)		{ String name = cxt+"_"+$n.text;
+						  $facts.add("defVariable("+$n.text+")");
+					 	  $facts.add("defVariableType("+$n.text+","+$t.text+")");
+						  $facts.add("defInitValue("+$n.text+","+$v.text+")");
+						  trace($facts, $n.text, name, "variable", $cxt);
+						}
+	|	^(CONST n=ID t=ID v=STR) 	{ String name = cxt+"_"+$n.text;
+						  $facts.add("defVariable("+$n.text+")");
+					 	  $facts.add("defVariableType("+$n.text+","+$t.text+")");
+						  $facts.add("defInitValue("+$n.text+","+$v.text+")");
+						  $facts.add("defAsConstant("+$n.text+")");
+						  trace($facts, $n.text, name, "constant", $cxt);
+						}
+	;
 
-param_list 
-	returns [ArrayList<String> identifiers]
-	@init{ $identifiers = new ArrayList<String>(); }
-	: ^(PARAMETERS (i=IDENTIFIER { $identifiers.add($i.text); })*) ; 
-
-
-relations
+acts	[String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	:	^(RELATIONS (relation { $facts.addAll($relation.facts); } )+);
-
-
-relation
+	: ^(ACTIVITIES (activity[$cxt]		 { safeAdd($facts, $activity.facts); })+)
+	;
+	
+activity [String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	: ^(WAIT_FOR l=IDENTIFIER r=IDENTIFIER) {$facts.add("defWaitFor("+$l.text+","+$r.text+")");};
+	: ^(ACT id=ID content[$id.text, $cxt])	{ String name = $cxt + "_" + $id.text;
+						  $facts.add("defActivity("+name+")");
+						  safeAdd($facts,$content.facts);
+					 	  $facts.add("defBelongsTo("+name+","+$cxt+")");
+					 	  trace($facts,$id.text,name,"activity", $cxt);
+						} 
+	;
+
+content	[String id, String cxt]
+	returns [ArrayList<String> facts]
+	@init{ $facts = new ArrayList<String>(); }
+	: ^(KIND kind[$cxt+"_"+$id]) ^(INS vlist[$id,$cxt])		
+							{ safeAdd($facts,$kind.facts) ;
+							  for(String v: $vlist.identifiers)
+							    $facts.add("defAsInput("+v+","+$cxt+"_"+$id+")");
+							  safeAdd($facts,$vlist.facts);
+							}
+	| ^(KIND kind[$cxt+"_"+$id]) ^(INS i=vlist[$id,$cxt]) ^(OUTS o=vlist[$id,$cxt])	
+							{ safeAdd($facts,$kind.facts) ;
+							  for(String v: $i.identifiers)
+							    $facts.add("defAsInput("+v+","+$cxt+"_"+$id+")");
+							  safeAdd($facts,$i.facts);
+							  for(String v: $o.identifiers)
+							    $facts.add("defAsOutput("+v+","+$cxt+"_"+$id+")");
+							  safeAdd($facts,$o.facts);
+							}
+	| ^(KIND kind[$cxt+"_"+$id]) INS ^(OUTS vlist[$id,$cxt])	
+							{ safeAdd($facts,$kind.facts) ;
+							  for(String v: $vlist.identifiers)
+							    $facts.add("defAsOutput("+v+","+$cxt+"_"+$id+")");
+							  safeAdd($facts,$vlist.facts);
+							}
+	;
+
+kind	[String actId]
+	returns [ArrayList<String> facts]
+	@init{ $facts = new ArrayList<String>(); }
+	:	RECEIVE			{ $facts.add("defActivityKind("+$actId+",receive)"); }
+	|	REPLY			{ $facts.add("defActivityKind("+$actId+",reply)");}
+	|	THROW			{ $facts.add("defActivityKind("+$actId+",throw)");}
+	| 	INVOKE s=ID o=ID	{ $facts.add("defActivityKind("+$actId+",invoke)");
+					  $facts.add("defInvokedService("+$actId+","+$s.text+")");
+					  $facts.add("defInvokedOperation("+$actId+","+$o.text+")");
+					}
+	|	ASSIGNMENT		{ $facts.add("defActivityKind("+$actId+",assign)");
+					  $facts.add("defAssignmentFunction("+$actId+",id)");
+					}
+	| 	ASSIGNMENT fct=ID	{ $facts.add("defActivityKind("+$actId+",assign)");
+					  $facts.add("defAssignmentFunction("+$actId+","+$fct.text+")");
+					}
+	;
+
+vlist [String actId, String cxt]
+ 	returns [ArrayList<String> identifiers, ArrayList<String> facts]
+	@init{ $identifiers = new ArrayList<String>(); $facts = new ArrayList<String>(); }
+	: ((v=ID)		{ $identifiers.add($cxt+"_"+$v.text); }
+	   |^(BIND v=ID m=ID) 	{ $identifiers.add($cxt+"_"+$v.text);
+	   			  $facts.add("defMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$v.text+")"); 
+	   			})*;
+	
+rels	[String cxt]
+	returns [ArrayList<String> facts]
+	@init{ $facts = new ArrayList<String>(); }
+	: ^(RELATIONS (rel[$cxt] 	{ safeAdd($facts,$rel.facts); })+) ;
+	
+rel	[String cxt]
+ 	returns [ArrayList<String> facts]
+	@init{ $facts = new ArrayList<String>(); }
+	: ^(WAIT_FOR r=ID l=ID)		{ $facts.add("defWaitFor("+$cxt+"_"+$r.text+","+$cxt+"_"+$l.text+")"); }
+	| ^(COND_TRUE r=ID l=ID c=ID)	{ $facts.add("defGuard("+$cxt+"_"+$r.text+","+$cxt+"_"+$l.text+","+$cxt+"_"+$c.text+",true)");  }
+	| ^(COND_FALSE r=ID l=ID c=ID)	{ $facts.add("defGuard("+$cxt+"_"+$r.text+","+$cxt+"_"+$l.text+","+$cxt+"_"+$c.text+",false)"); }
+	;
+	
 	
 	
 	

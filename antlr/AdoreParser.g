@@ -1,3 +1,26 @@
+/** This file is part of ADORE [ www.adore-design.org ]
+ *
+ * Copyright (C) 2008-  Sebastien Mosser
+ *
+ * ADORE is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * ADORE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with jSeduite:DataCache; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * @author      Main SŽbastien Mosser          [mosser@polytech.unice.fr]
+ * @remarks: 	this is a QUICK AND DIRTY compiler ... really ...
+ *		Do not do this at home ... !
+ **/
+ 
 parser grammar AdoreParser;
 
 options {
@@ -8,64 +31,91 @@ options {
 
 tokens {
 	DEFINITIONS;
+	DEF;
 	ORCHESTRATION;
-	EVOLUTION;
-	BEHAVIOUR;
+	FRAGMENT;
+	REQUIRE;
+	VARIABLES;
+	VAR;
+	RELATIONS;
 	ACTIVITIES;
-	ACTIVITY;
-	WAIT_FOR;
-	PARAMETERS;
-	INPUTS;
-	OUTPUTS;
+	ACT;
+	OUTS;
+	INS;
+	BIND;
 	KIND;
 	INVOKE;
 	ASSIGNMENT;
+	WAIT_FOR;
+	COND_TRUE;
+	COND_FALSE;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
 
 definitions
-	:	definition+ 
-			-> ^(DEFINITIONS definition+);
+	:	definition+ 				-> ^(DEFINITIONS definition+);
 definition
-	:	ORCH s=IDENTIFIER DBL_COL o=IDENTIFIER behaviour 
-			-> ^(ORCHESTRATION $s $o behaviour) 
-	|	EVOL n=IDENTIFIER behaviour
-			-> ^(EVOLUTION $n behaviour) ;
-behaviour
-	:	LFT_BRCKT activities relations? RGHT_BRCKT 
-			-> ^(BEHAVIOUR activities relations?)  ;
-		
-activities
-	:	ACTIVITIES LFT_BRCKT activity+ RGHT_BRCKT
-			-> ^(ACTIVITIES activity+);
+	:	REQU f=STR SEMI				-> ^(DEF ^(REQUIRE $f))
+	|	ORCH s=ID DBL_COL o=ID core 		-> ^(DEF ^(ORCHESTRATION $s $o) core)
+	|	FRAG n=ID core 				-> ^(DEF ^(FRAGMENT $n) core);
 
+core	
+	:	LFT_BRCKT vars acts rels? RGHT_BRCKT	-> vars acts rels? ;
+
+vars
+	: 	VARS LFT_BRCKT decl_var+ RGHT_BRCKT 	-> ^(VARIABLES decl_var+);
+
+decl_var
+	:	variable -> ^(VAR variable)
+	|	constant -> ^(CONST constant);
+	
+variable
+	:	v=ID AS t=ID SEMI			-> $v $t
+	|	n=ID ASSIGN v=STR AS t=ID SEMI		-> $n $t $v ;
+
+constant
+	:	CONST c=ID ASSIGN v=STR AS t=ID SEMI	-> $c $t $v;
+	
+acts	
+	:	ACTS LFT_BRCKT activity+ RGHT_BRCKT 	-> ^(ACTIVITIES activity+) ;
+	
 activity
-	:	 id=IDENTIFIER RIGHT_PAREN  kind in=param_list SEMI_COLON 
-			-> ^(ACTIVITY $id kind ^(INPUTS $in));
+	:	id=ID RGHT_PAREN content SEMI 		-> ^(ACT $id content);
 
+content	
+	:	kind inputs 				-> ^(KIND kind) inputs 
+	|	l=ID ASSIGN r=ID			-> ^(KIND ASSIGNMENT) ^(INS $r) ^(OUTS $l)
+	|	outputs kind inputs			-> ^(KIND kind) inputs outputs;
+
+outputs	
+	:	v=ID	ASSIGN				-> ^(OUTS $v)
+	|	LFT_PAREN plist+ RGHT_PAREN ASSIGN 	-> ^(OUTS plist+);
+	
 kind	
-	:	RECEIVE -> ^(KIND RECEIVE)
-	|	REPLY	-> ^(KIND REPLY)
-	|	THROW	-> ^(KIND THROW)
-	|	f=IDENTIFIER 				-> ^(KIND ASSIGNMENT $f)
-	|	s=IDENTIFIER DBL_COL o=IDENTIFIER 	-> ^(KIND INVOKE $s $o);	 
+	:	RECEIVE | REPLY | THROW 
+	|	s=ID DBL_COL o=ID 			-> INVOKE $s $o
+	|	fct=ID					-> ASSIGNMENT $fct;
 
-param_list
-	:	LEFT_PAREN RIGHT_PAREN -> ^(PARAMETERS)
-	|	LEFT_PAREN var_list RIGHT_PAREN -> ^(PARAMETERS var_list);
+inputs	
+	:	LFT_PAREN vlist? RGHT_PAREN 		-> ^(INS vlist?);	
 
-var_list:	id=IDENTIFIER -> $id
-	|	id=IDENTIFIER COMMA var_list -> $id var_list;
+vlist	:	plist | nplist;
+plist
+	: 	id=ID					-> $id
+	|	id=ID COMMA plist 			-> $id plist;
 
-relations
-	:	RELATIONS LFT_BRCKT relation+ RGHT_BRCKT
-			-> ^(RELATIONS relation+);
+nplist  
+	:	left=ID COLON right=ID 			-> ^(BIND $right $left)
+	|	left=ID COLON right=ID COMMA nplist 	-> ^(BIND $right $left) nplist ;
+		
+rels	
+	:	RELS LFT_BRCKT  rel+ RGHT_BRCKT 	-> ^(RELATIONS rel+);
 
-relation
-	:	wait_for ;
+rel	
+	:	l=ID LT r=ID SEMI 			-> ^(WAIT_FOR $r $l)
+	| 	l=ID LT r=ID WHEN c=ID SEMI		-> ^(COND_TRUE $r $l $c)
+	|	l=ID LT r=ID WHEN NOT c=ID SEMI		-> ^(COND_FALSE $r $l $c)
+	;
+	
 
-wait_for
-	:	left=IDENTIFIER LT right=IDENTIFIER SEMI_COLON
-			-> ^(WAIT_FOR $left $right);
-			

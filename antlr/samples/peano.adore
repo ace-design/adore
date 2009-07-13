@@ -1,0 +1,29 @@
+// Implentation of the Peano Machine inductive operations
+// @author: Sebastien Mosser
+// @date:   07 / 13 / 2009
+
+//require './samples/peano_atomic.adore' ;
+
+orchestration peanoMachine::add {
+
+  variables {
+    a as integer; b as integer;
+    c as boolean; r as integer;
+  }
+
+  activities {
+    a0) (a,b) := receive();
+    a1) c := peanoMachine::isZero(b);
+    a2) reply(a);
+    a3) a := peanoMachine::next(n: a);
+    a4) b := peanoMachine::pred(n: b);
+    a5) r := peanoMachine::add(a,b);
+    a6) reply(r);
+  }
+
+  relations {
+    a0 < a1; a1 < a2 when c;
+    a1 < a3 when !c; a1 < a4 when !c;
+    a3 < a5; a4 < a5; a5 < a6;
+  }
+}
