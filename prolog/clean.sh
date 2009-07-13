@@ -1,3 +1,4 @@
+#!/bin/bash
 ####
 ## This file is part of ADORE [ www.adore-design.org ]
 ##
@@ -20,4 +21,4 @@
 ## @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 ####
 
-find . -name *~ -exec rm -f '{}' \;  
+find . -name *~ -exec rm -vf '{}' \;  

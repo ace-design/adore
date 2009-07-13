@@ -22,8 +22,8 @@
 
 
 
-loadFiles :- [debug], [config],  [metamodel], [actions], [functions], 
-	[conflicts].
+loadFiles :- [debug], [trace], [config],  [metamodel], [actions], 
+	[functions], [conflicts].
 
 header :- 
 	write('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
@@ -36,7 +36,7 @@ header :-
         write('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
         write('%%  This program comes with ABSOLUTELY NO WARRANTY.    %%'), nl,
         write('%%  This is free software, and you are welcome to      %%'), nl,
-        write('%% redistribute it under certain conditions.           %%'), nl,
+        write('%%  redistribute it under certain conditions.          %%'), nl,
         write('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl.
 
 :-  header, loadFiles, performDebugSubscription.

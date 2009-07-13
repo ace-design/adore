@@ -63,11 +63,11 @@ definition returns [ArrayList<String> facts]
 						} 
 	| ^(DEF ^(ORCHESTRATION s=ID o=ID) core[$s+"_"+$o])	
 						{ String name = $s.text + "_" + $o.text;
-						  $facts.add("defProcess("+name+")");
+						  $facts.add("createProcess("+name+")");
 						  safeAdd($facts, $core.facts);
 						}
-	| ^(DEF ^(FRAGMENT n=ID) core[$n.text])	{ $facts.add("defProcess("+$n.text+")");
-						  $facts.add("defAsFragment("+$n.text+")");
+	| ^(DEF ^(FRAGMENT n=ID) core[$n.text])	{ $facts.add("createProcess("+$n.text+")");
+						  $facts.add("setAsFragment("+$n.text+")");
 						  safeAdd($facts, $core.facts);
 						}
 	;
@@ -91,21 +91,21 @@ decl_var  [String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
 	:	^(VAR n=ID t=ID) 		{ String name = cxt+"_"+$n.text;
-						  $facts.add("defVariable("+name+")");
-					 	  $facts.add("defVariableType("+name+","+$t.text+")");
+						  $facts.add("createVariable("+name+")");
+					 	  $facts.add("setVariableType("+name+","+$t.text+")");
 					 	  trace($facts, $n.text, name, "variable", $cxt);
 					 	}
 	|	^(VAR n=ID t=ID v=STR)		{ String name = cxt+"_"+$n.text;
-						  $facts.add("defVariable("+$n.text+")");
-					 	  $facts.add("defVariableType("+$n.text+","+$t.text+")");
-						  $facts.add("defInitValue("+$n.text+","+$v.text+")");
+						  $facts.add("createVariable("+$n.text+")");
+					 	  $facts.add("setVariableType("+$n.text+","+$t.text+")");
+						  $facts.add("setInitValue("+$n.text+","+$v.text+")");
 						  trace($facts, $n.text, name, "variable", $cxt);
 						}
 	|	^(CONST n=ID t=ID v=STR) 	{ String name = cxt+"_"+$n.text;
-						  $facts.add("defVariable("+$n.text+")");
-					 	  $facts.add("defVariableType("+$n.text+","+$t.text+")");
-						  $facts.add("defInitValue("+$n.text+","+$v.text+")");
-						  $facts.add("defAsConstant("+$n.text+")");
+						  $facts.add("createVariable("+$n.text+")");
+					 	  $facts.add("setVariableType("+$n.text+","+$t.text+")");
+						  $facts.add("setInitValue("+$n.text+","+$v.text+")");
+						  $facts.add("setConstancy("+$n.text+")");
 						  trace($facts, $n.text, name, "constant", $cxt);
 						}
 	;
@@ -120,9 +120,9 @@ activity [String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
 	: ^(ACT id=ID content[$id.text, $cxt])	{ String name = $cxt + "_" + $id.text;
-						  $facts.add("defActivity("+name+")");
+						  $facts.add("createActivity("+name+")");
 						  safeAdd($facts,$content.facts);
-					 	  $facts.add("defBelongsTo("+name+","+$cxt+")");
+					 	  $facts.add("setContainment("+name+","+$cxt+")");
 					 	  trace($facts,$id.text,name,"activity", $cxt);
 						} 
 	;
@@ -133,22 +133,22 @@ content	[String id, String cxt]
 	: ^(KIND kind[$cxt+"_"+$id]) ^(INS vlist[$id,$cxt])		
 							{ safeAdd($facts,$kind.facts) ;
 							  for(String v: $vlist.identifiers)
-							    $facts.add("defAsInput("+v+","+$cxt+"_"+$id+")");
+							    $facts.add("addAsInput("+v+","+$cxt+"_"+$id+")");
 							  safeAdd($facts,$vlist.facts);
 							}
 	| ^(KIND kind[$cxt+"_"+$id]) ^(INS i=vlist[$id,$cxt]) ^(OUTS o=vlist[$id,$cxt])	
 							{ safeAdd($facts,$kind.facts) ;
 							  for(String v: $i.identifiers)
-							    $facts.add("defAsInput("+v+","+$cxt+"_"+$id+")");
+							    $facts.add("addAsInput("+v+","+$cxt+"_"+$id+")");
 							  safeAdd($facts,$i.facts);
 							  for(String v: $o.identifiers)
-							    $facts.add("defAsOutput("+v+","+$cxt+"_"+$id+")");
+							    $facts.add("addAsOutput("+v+","+$cxt+"_"+$id+")");
 							  safeAdd($facts,$o.facts);
 							}
 	| ^(KIND kind[$cxt+"_"+$id]) INS ^(OUTS vlist[$id,$cxt])	
 							{ safeAdd($facts,$kind.facts) ;
 							  for(String v: $vlist.identifiers)
-							    $facts.add("defAsOutput("+v+","+$cxt+"_"+$id+")");
+							    $facts.add("addAsOutput("+v+","+$cxt+"_"+$id+")");
 							  safeAdd($facts,$vlist.facts);
 							}
 	;
@@ -156,18 +156,18 @@ content	[String id, String cxt]
 kind	[String actId]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	:	RECEIVE			{ $facts.add("defActivityKind("+$actId+",receive)"); }
-	|	REPLY			{ $facts.add("defActivityKind("+$actId+",reply)");}
-	|	THROW			{ $facts.add("defActivityKind("+$actId+",throw)");}
-	| 	INVOKE s=ID o=ID	{ $facts.add("defActivityKind("+$actId+",invoke)");
-					  $facts.add("defInvokedService("+$actId+","+$s.text+")");
-					  $facts.add("defInvokedOperation("+$actId+","+$o.text+")");
+	:	RECEIVE			{ $facts.add("setActivityKind("+$actId+",receive)"); }
+	|	REPLY			{ $facts.add("setActivityKind("+$actId+",reply)");}
+	|	THROW			{ $facts.add("setActivityKind("+$actId+",throw)");}
+	| 	INVOKE s=ID o=ID	{ $facts.add("setActivityKind("+$actId+",invoke)");
+					  $facts.add("setInvokedService("+$actId+","+$s.text+")");
+					  $facts.add("setInvokedOperation("+$actId+","+$o.text+")");
 					}
-	|	ASSIGNMENT		{ $facts.add("defActivityKind("+$actId+",assign)");
-					  $facts.add("defAssignmentFunction("+$actId+",id)");
+	|	ASSIGNMENT		{ $facts.add("setActivityKind("+$actId+",assign)");
+					  $facts.add("setFunction("+$actId+",id)");
 					}
-	| 	ASSIGNMENT fct=ID	{ $facts.add("defActivityKind("+$actId+",assign)");
-					  $facts.add("defAssignmentFunction("+$actId+","+$fct.text+")");
+	| 	ASSIGNMENT fct=ID	{ $facts.add("setActivityKind("+$actId+",assign)");
+					  $facts.add("setFunction("+$actId+","+$fct.text+")");
 					}
 	;
 
@@ -176,7 +176,7 @@ vlist [String actId, String cxt]
 	@init{ $identifiers = new ArrayList<String>(); $facts = new ArrayList<String>(); }
 	: ((v=ID)		{ $identifiers.add($cxt+"_"+$v.text); }
 	   |^(BIND v=ID m=ID) 	{ $identifiers.add($cxt+"_"+$v.text);
-	   			  $facts.add("defMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$v.text+")"); 
+	   			  $facts.add("setMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$v.text+")"); 
 	   			})*;
 	
 rels	[String cxt]

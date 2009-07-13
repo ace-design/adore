@@ -26,43 +26,43 @@
 %% Available DEBUG channel declaration %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- debug(debug,_,_).
-:- debug(def,_,_).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Rule to activate a channel %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- debug(debug). %% Debugging the debug functionalities ... ^_^
-% Subscribe the engine for messages on a given channel
-activateDebug(Channel) :- 
-	debug(debug,' * Activating debug channel #~w',Channel),
-	call(debug(Channel)).
 	
-
 %% Activate debug for all declared channel
-performDebugSubscription :- findall(X, debugSubscription(X), Channels),
-	Channels = [], true, !.
-
-performDebugSubscription :- findall(X, debugSubscription(X), Channels),
-	\+ Channels = [],
-	debug(debug,' *** Debug Subscription started',_),
-	maplist(activateDebug,Channels), 
-	debug(debug,' *** done !',_),
-	list_debug_topics.
+performDebugSubscription :- 
+	findall(X, debugSubscription(X), Channels),
+	Channels == [], !.
+performDebugSubscription :- 
+	findall(X, debugSubscription(X), Channels),
+	maplist(debug,Channels).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% Debugging framework %%
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% Public interface for using debug functionalities
+dinfo(Channel,Msg,Args) :- dlog(Channel,info,Msg,Args).
+dwarn(Channel,Msg,Args) :- dlog(Channel,warning,Msg,Args).
+dfail(Channel,Msg,Args) :- dlog(Channel,failure,Msg,Args), fail.
+
+%% Do not use directly (biohazard or assimilated!)
 debugLevel(failure,'FAIL').
 debugLevel(info,'INFO').
 debugLevel(warning,'WARN').
 
 dlog(_,L,_,_) :- \+ debugLevel(L,_), true, !.
-dlog(Chan, Lvl, Msg, Args) :- debugLevel(Lvl, LvlMsg), 
+dlog(C,_,_,_) :- \+ debugSubscription(C), !.
+dlog(Chan, Lvl, Msg, Args) :- 
+	debugLevel(Lvl, LvlMsg), 
 	string_concat(LvlMsg,': ',Tmp),
 	string_concat(Tmp,Msg, Final),
 	debug(Chan,Final, Args).
 	
+

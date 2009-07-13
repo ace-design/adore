@@ -20,5 +20,8 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-existsPath(X,Y) :- waitFor(X,Y).
-existsPath(X,Y) :- waitFor(X,Z), existsPath(Z,Y).
+path(X,Y) :- waitFor(Y,X).
+path(X,Y) :- isGuardedBy(Y,X,_,_).
+
+existsPath(X,Y) :- path(X,Y).
+existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).

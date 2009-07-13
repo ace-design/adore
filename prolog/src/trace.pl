@@ -20,10 +20,15 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%% Debugging ADORE ...
+%% We leave 'peebbles' after us (cf 'Le petit poucet').
+:- dynamic pebble/4.
 
-debugSubscription(create).
-debugSubscription(def).
-debugSubscription(set).
 
-%% ...
+%%%%%% traceRename/4: traceRename(K,O,N,C)
+%%  -> K: pick one from  activity|variable|constant
+%%  -> O: old name
+%%  -> N: new name
+%%  -> C: context of renaming (compile, duplication, merge).
+
+traceRename(Kind, Old, New, Context) :-
+	assert(pebble(rename(Kind), Old, New, Context)).

@@ -21,23 +21,63 @@
 %%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                              %%
 %% ADORE metamodel represented as logical facts %%
+%%                                              %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%
+%% Vocabulary
+%%%%
+
+%% P: a valid process identidier
+%% V: a valid variable identifier
+%% T: a valid variable type name
+%% A: a valid activity identifier
+%% K: a valid activity kind
+%% I: an a priori unknown identifier 
+%% S: a "string" literal
+%% 'valid' means syntactic & existing when needed 
 
 %%%%
-%%  Business Process
+%%  Business Processes (Orchestration / Fragment)
 %%%%
 
-:- dynamic isActivity/1.   %% defActivity/1 
-:- dynamic waitFor/2.      %% defWaitFor/2
-:- dynamic isProcess/1.    %% defProcess/1
-:- dynamic belongsTo/2.    %% defBelongsTo/2
+:- dynamic process/1.          %%  createProcess(P)
+:- dynamic isFragment/1.       %%  setAsFragment(P)
 
-:- dynamic isVariable/2.   %% defVariable/2
-:- dynamic usesAsInput/2.  %% defAsInput/2
-:- dynamic usesAsOutput/2. %% defAsOutput/2
+%%%%
+%% Activities
+%%%%
 
- 
+:- dynamic activity/1.         %%  createActivity(A)
+:- dynamic hasForKind/2.       %%  setActivityKind(A,K)
+:- dynamic isContainedBy/2.    %%  setContainment(A,P)
 
+
+:- dynamic hasForService/2.    %%  setInvokedService(A,I)
+:- dynamic hasForOperation/2.  %%  setInvokedOperation(A,I)
+:- dynamic usesAsBinding/3.    %%  setMessageBinding(A,I,V)
+:- dynamic hasForFunction/2.   %%  setFunction(A,I)  
+
+
+%%%%
+%% Variables 
+%%%%
+
+:- dynamic variable/1.         %%  createVariable(V)
+:- dynamic hasForType/2.       %%  setVariableType(V,T)
+:- dynamic hasForInitValue/2.  %%  setInitValue(V,S)
+:- dynamic isConstant/1.       %%  setConstancy(V).
+
+:- dynamic hasForInput/2.      %%  addAsInput(V,A)
+:- dynamic hasForOutput/2.     %%  addAsOutput(V,A)
+
+
+%%%%
+%% Relations
+%%%%
+
+:- dynamic waitFor/2.          %%  defWaitFor(A,A)
+:- dynamic isGuardedBy/4.      %%  defGuard(A,A,V,true|false)
 
