@@ -44,12 +44,23 @@ import java.io.*;
   	String f = "traceRename(" + kind + "," + o + "," + n + ",compile("+cxt+"))";
   	facts.add(f);
   }
+  
+  private void fragmentize(ArrayList<String> facts,String process) {
+  	facts.add("createActivity("+process+"_preds)");
+  	facts.add("setActivityKind("+process+"_preds,predecessors)");
+  	facts.add("setContainment("+process+"_preds,"+process+")");
+  	facts.add("createActivity("+process+"_succs)");
+  	facts.add("setActivityKind("+process+"_succs,successors)");
+  	facts.add("setContainment("+process+"_succs,"+process+")");
+  }
 }
 
   
 definitions returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	:	^(DEFINITIONS (definition 		{ $facts.addAll($definition.facts); })+)
+	:	^(DEFINITIONS 	( definition 		{ $facts.addAll($definition.facts); })+
+		)
+				
 	;
 
 definition returns [ArrayList<String> facts]
@@ -64,12 +75,17 @@ definition returns [ArrayList<String> facts]
 	| ^(DEF ^(ORCHESTRATION s=ID o=ID) core[$s+"_"+$o])	
 						{ String name = $s.text + "_" + $o.text;
 						  $facts.add("createProcess("+name+")");
+						  $facts.add("setService("+name+","+$s.text+")");
+						  $facts.add("setOperation("+name+","+$o.text+")");
 						  safeAdd($facts, $core.facts);
 						}
 	| ^(DEF ^(FRAGMENT n=ID) core[$n.text])	{ $facts.add("createProcess("+$n.text+")");
 						  $facts.add("setAsFragment("+$n.text+")");
+						  fragmentize($facts, $n.text);
 						  safeAdd($facts, $core.facts);
 						}
+						
+	| ^(DEF merge)				{ safeAdd($facts,$merge.facts); }	
 	;
 
 core	[String cxt]
@@ -84,7 +100,7 @@ core	[String cxt]
 vars	[String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	: ^(VARIABLES (decl_var[$cxt]	{ safeAdd($facts,$decl_var.facts); }  )+ )	
+	: ^(VARIABLES (decl_var[$cxt]	{ safeAdd($facts,$decl_var.facts); }  )* )	
 	;
 
 decl_var  [String cxt]
@@ -102,10 +118,10 @@ decl_var  [String cxt]
 						  trace($facts, $n.text, name, "variable", $cxt);
 						}
 	|	^(CONST n=ID t=ID v=STR) 	{ String name = cxt+"_"+$n.text;
-						  $facts.add("createVariable("+$n.text+")");
-					 	  $facts.add("setVariableType("+$n.text+","+$t.text+")");
-						  $facts.add("setInitValue("+$n.text+","+$v.text+")");
-						  $facts.add("setConstancy("+$n.text+")");
+						  $facts.add("createVariable("+name+")");
+					 	  $facts.add("setVariableType("+name+","+$t.text+")");
+						  $facts.add("setInitValue("+name+","+$v.text+")");
+						  $facts.add("setConstancy("+name+")");
 						  trace($facts, $n.text, name, "constant", $cxt);
 						}
 	;
@@ -119,39 +135,37 @@ acts	[String cxt]
 activity [String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	: ^(ACT id=ID content[$id.text, $cxt])	{ String name = $cxt + "_" + $id.text;
+	: ^(ACT id=ID  ^(KIND kind[$cxt+"_"+$id]) act_io[$id.text, $cxt])	
+						{ String name = $cxt + "_" + $id.text;
 						  $facts.add("createActivity("+name+")");
-						  safeAdd($facts,$content.facts);
-					 	  $facts.add("setContainment("+name+","+$cxt+")");
-					 	  trace($facts,$id.text,name,"activity", $cxt);
+						  safeAdd($facts,$kind.facts);
+						  safeAdd($facts,$act_io.facts);
+						  $facts.add("setContainment("+name+","+$cxt+")");
+						  trace($facts,$id.text,name,"activity", $cxt);
 						} 
 	;
 
-content	[String id, String cxt]
+act_io	[String id, String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	: ^(KIND kind[$cxt+"_"+$id]) ^(INS vlist[$id,$cxt])		
-							{ safeAdd($facts,$kind.facts) ;
-							  for(String v: $vlist.identifiers)
-							    $facts.add("addAsInput("+v+","+$cxt+"_"+$id+")");
-							  safeAdd($facts,$vlist.facts);
-							}
-	| ^(KIND kind[$cxt+"_"+$id]) ^(INS i=vlist[$id,$cxt]) ^(OUTS o=vlist[$id,$cxt])	
-							{ safeAdd($facts,$kind.facts) ;
-							  for(String v: $i.identifiers)
-							    $facts.add("addAsInput("+v+","+$cxt+"_"+$id+")");
-							  safeAdd($facts,$i.facts);
-							  for(String v: $o.identifiers)
-							    $facts.add("addAsOutput("+v+","+$cxt+"_"+$id+")");
-							  safeAdd($facts,$o.facts);
-							}
-	| ^(KIND kind[$cxt+"_"+$id]) INS ^(OUTS vlist[$id,$cxt])	
-							{ safeAdd($facts,$kind.facts) ;
-							  for(String v: $vlist.identifiers)
-							    $facts.add("addAsOutput("+v+","+$cxt+"_"+$id+")");
-							  safeAdd($facts,$vlist.facts);
-							}
-	;
+	: INS OUTS 				{}
+	| ^(INS vlist[$id,$cxt]) OUTS 		{ for(String v: $vlist.identifiers)
+						    $facts.add("addAsInput("+v+","+$cxt+"_"+$id+")");
+						  safeAdd($facts,$vlist.facts);
+						}
+	| INS ^(OUTS vlist[$id,$cxt])		{ for(String v: $vlist.identifiers)
+						    $facts.add("addAsOutput("+v+","+$cxt+"_"+$id+")");
+						  safeAdd($facts,$vlist.facts);
+						}
+	| ^(INS i=vlist[$id,$cxt]) ^(OUTS o=vlist[$id,$cxt])	
+						{ for(String v: $i.identifiers)
+						    $facts.add("addAsInput("+v+","+$cxt+"_"+$id+")");
+						  safeAdd($facts,$i.facts);
+						  for(String v: $o.identifiers)
+					  	    $facts.add("addAsOutput("+v+","+$cxt+"_"+$id+")");
+						  safeAdd($facts,$o.facts);
+						}
+	; 
 
 kind	[String actId]
 	returns [ArrayList<String> facts]
@@ -159,6 +173,7 @@ kind	[String actId]
 	:	RECEIVE			{ $facts.add("setActivityKind("+$actId+",receive)"); }
 	|	REPLY			{ $facts.add("setActivityKind("+$actId+",reply)");}
 	|	THROW			{ $facts.add("setActivityKind("+$actId+",throw)");}
+	|	HOOK			{ $facts.add("setActivityKind("+$actId+",hook)");}
 	| 	INVOKE s=ID o=ID	{ $facts.add("setActivityKind("+$actId+",invoke)");
 					  $facts.add("setInvokedService("+$actId+","+$s.text+")");
 					  $facts.add("setInvokedOperation("+$actId+","+$o.text+")");
@@ -183,16 +198,35 @@ rels	[String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
 	: ^(RELATIONS (rel[$cxt] 	{ safeAdd($facts,$rel.facts); })+) ;
-	
+
+ord	[String cxt]
+	returns [String id]
+	:	r=ID	{ $id = $cxt + "_" + $r.text; }
+	| 	PREDS	{ $id = $cxt + "_preds"; }
+	| 	SUCCS	{ $id = $cxt + "_succs"; }
+	;
+
 rel	[String cxt]
  	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	: ^(WAIT_FOR r=ID l=ID)		{ $facts.add("defWaitFor("+$cxt+"_"+$r.text+","+$cxt+"_"+$l.text+")"); }
-	| ^(COND_TRUE r=ID l=ID c=ID)	{ $facts.add("defGuard("+$cxt+"_"+$r.text+","+$cxt+"_"+$l.text+","+$cxt+"_"+$c.text+",true)");  }
-	| ^(COND_FALSE r=ID l=ID c=ID)	{ $facts.add("defGuard("+$cxt+"_"+$r.text+","+$cxt+"_"+$l.text+","+$cxt+"_"+$c.text+",false)"); }
+	: ^(WAIT_FOR r=ord[$cxt] l=ord[$cxt])		{ $facts.add("defWaitFor("+$r.id+","+$l.id+")"); }
+	| ^(COND_TRUE r=ord[$cxt] l=ord[$cxt] c=ID)	{ $facts.add("defGuard("+$r.id+","+$l.id+","+$cxt+"_"+$c.text+",true)");  }
+	| ^(COND_FALSE r=ord[$cxt] l=ord[$cxt] c=ID)	{ $facts.add("defGuard("+$r.id+","+$l.id+","+$cxt+"_"+$c.text+",false)"); }
 	;
 	
+merge 	returns [ArrayList<String> facts]
+	@init{ $facts = new ArrayList<String>(); }
+	: ^(UNIT s=ID o=ID (directive[$s.text,$o.text]	{ safeAdd($facts,$directive.facts); })+)
+	;
 	
+idList	returns [ArrayList<String> identifiers]
+	@init{ $identifiers = new ArrayList<String>(); }
+	: (v=ID						{ $identifiers.add($v.text); })+
+	;
 	
-	
+directive [String s, String o]
+	returns [ArrayList<String> facts]
+	@init{ $facts = new ArrayList<String>(); }
+	: ^(MERGE_FRAG e=ID a=ID)			{ $facts.add("defMergeOrder("+$s+","+$o+","+$a.text+","+$e.text+")"); }
+	;
 	

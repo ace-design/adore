@@ -49,26 +49,31 @@ tokens {
 	WAIT_FOR;
 	COND_TRUE;
 	COND_FALSE;
+	UNIT;
+	MERGE_FRAG;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
 
 definitions
-	:	definition+ 				-> ^(DEFINITIONS definition+);
+	:	definition+ 				-> ^(DEFINITIONS definition+) ;
+
 definition
 	:	REQU f=STR SEMI				-> ^(DEF ^(REQUIRE $f))
 	|	ORCH s=ID DBL_COL o=ID core 		-> ^(DEF ^(ORCHESTRATION $s $o) core)
-	|	FRAG n=ID core 				-> ^(DEF ^(FRAGMENT $n) core);
+	|	FRAG n=ID core 				-> ^(DEF ^(FRAGMENT $n) core)
+	|	MERGE s=ID DBL_COL o=ID merge_core	-> ^(DEF ^(UNIT $s $o merge_core))
+	;
 
 core	
 	:	LFT_BRCKT vars acts rels? RGHT_BRCKT	-> vars acts rels? ;
 
 vars
-	: 	VARS LFT_BRCKT decl_var+ RGHT_BRCKT 	-> ^(VARIABLES decl_var+);
+	: 	VARS LFT_BRCKT decl_var* RGHT_BRCKT 	-> ^(VARIABLES decl_var*);
 
 decl_var
-	:	variable -> ^(VAR variable)
-	|	constant -> ^(CONST constant);
+	:	variable 				-> ^(VAR variable)
+	|	constant 				-> ^(CONST constant);
 	
 variable
 	:	v=ID AS t=ID SEMI			-> $v $t
@@ -84,7 +89,7 @@ activity
 	:	id=ID RGHT_PAREN content SEMI 		-> ^(ACT $id content);
 
 content	
-	:	kind inputs 				-> ^(KIND kind) inputs 
+	:	kind inputs 				-> ^(KIND kind) inputs ^(OUTS)
 	|	l=ID ASSIGN r=ID			-> ^(KIND ASSIGNMENT) ^(INS $r) ^(OUTS $l)
 	|	outputs kind inputs			-> ^(KIND kind) inputs outputs;
 
@@ -93,7 +98,7 @@ outputs
 	|	LFT_PAREN plist+ RGHT_PAREN ASSIGN 	-> ^(OUTS plist+);
 	
 kind	
-	:	RECEIVE | REPLY | THROW 
+	:	RECEIVE | REPLY | THROW | HOOK 
 	|	s=ID DBL_COL o=ID 			-> INVOKE $s $o
 	|	fct=ID					-> ASSIGNMENT $fct;
 
@@ -112,10 +117,19 @@ nplist
 rels	
 	:	RELS LFT_BRCKT  rel+ RGHT_BRCKT 	-> ^(RELATIONS rel+);
 
+ord	: 	(a=ID -> $a)  | PREDS | SUCCS;
+
 rel	
-	:	l=ID LT r=ID SEMI 			-> ^(WAIT_FOR $r $l)
-	| 	l=ID LT r=ID WHEN c=ID SEMI		-> ^(COND_TRUE $r $l $c)
-	|	l=ID LT r=ID WHEN NOT c=ID SEMI		-> ^(COND_FALSE $r $l $c)
+	:	l=ord LT r=ord SEMI 			-> ^(WAIT_FOR $r $l)
+	| 	l=ord LT r=ord WHEN c=ID SEMI		-> ^(COND_TRUE $r $l $c)
+	|	l=ord LT r=ord WHEN NOT c=ID SEMI	-> ^(COND_FALSE $r $l $c)
 	;
 	
+merge_core
+	:	LFT_BRCKT directive+ RGHT_BRCKT 	-> directive+
+	;
+
+directive
+	:	APPLY e=ID INTO a=ID SEMI 		-> ^(MERGE_FRAG $e $a)
+	;
 

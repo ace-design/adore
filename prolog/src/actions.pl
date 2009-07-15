@@ -47,6 +47,21 @@ setAsFragment(P) :-
 	assert(isFragment(P)), 
 	dinfo(set,'Process \'~w\' flagged as fragment.',P).
 
+%% setService/2: setService(P,I).
+setService(P,_) :- %% \not \exists p \in Process* => fail
+	\+ process(P), !,
+	dfail(set,'setService/2: Unkown process \'~w\'!',P).
+setService(P,I) :- 
+	assert(hasForSrvName(P,I)).
+
+%% setOperation/2: setOperation(P,I).
+setOperation(P,_) :- %% \not \exists p \in Process* => fail
+	\+ process(P), !,
+	dfail(set,'setOperation/2: Unkown process \'~w\'!',P).
+setOperation(P,I) :- 
+	assert(hasForOpName(P,I)).
+
+
 
 %%%%
 %% Activities
@@ -201,13 +216,28 @@ defWaitFor(A1,A2) :-
 %% defGuard/4: defGuard((A,A,V,B)
 defGuard(A,_,_,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
-	dfail(def,'deGuard/4: Unknown activity \'~w\'!',A).
+	dfail(def,'defGuard/4: Unknown activity \'~w\'!',A).
 defGuard(_,A,_,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
-	dfail(def,'deGuard/4: Unknown activity \'~w\'!',A).
+	dfail(def,'defGuard/4: Unknown activity \'~w\'!',A).
 defGuard(_,A,V,_) :- %% v \not \in Outputs(a) => fail
 	\+ hasForOutput(A,V), !, 
-	dfail(def,'deGuard/4: Activity \'~w\' doesn\'t assign \'~w\'!',[A,V]).
+	dfail(def,'defGuard/4: Activity \'~w\' doesn\'t assign \'~w\'!',[A,V]).
 defGuard(A1,A2,V,B) :- 
 	assert(isGuardedBy(A1,A2,V,B)),
 	dinfo(def,'Relation \'~w\' < \'~w\' when \'~w\' (\'~w\') is defined.',[A1,A2,V,B]).
+
+%%%%
+%% Actions over the metamodel (aka merge)
+%%%%
+%% TODO ... verifier les hypothèses ...
+
+%% defMergeOrder/4: defMergeOrder(Is,Os,A,P).
+defMergeOrder(Is,Os,_,_) :- %% \not exists (is,os) \in Service* \times Operation* => fail
+	\+ (hasForSrvName(P,Is), hasForOpName(P,Os)),  !,
+	dfail(def,'defMergeOrder/4: Unknown entity \'~w::~w\" !',[Is,Os]).
+defMergeOrder(Is,Os,A,_) :- %% \not exists a \in Activities(Is,Os) => fail
+	hasForSrvName(P,Is), hasForOpName(P,Os),
+	\+ (activity(A), isContainedBy(A,P)), !, 
+	dfail(def,'defMergeOrder/4: Activity \'~w\' is not contained inside service name \'~w\'!',Is).
+	

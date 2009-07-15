@@ -28,16 +28,3 @@ orchestration peanoMachine::add {
   }
 }
 
-fragment swapWhenLesser {
-
-  variable { a as free; b as free; c as boolean;  tmp as free;}
-  activities {
-    a0) (a,b) := hook() ;
-    a1) c := isLesserThan(a,b) ;
-    a2) tmp := a;
-    a2) a := b ;
-    a3) b := tmp;
-  }
-  relations {
-  }
-}

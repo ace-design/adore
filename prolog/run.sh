@@ -21,8 +21,42 @@
 ####
   
 SWIPL_HOME='/opt/local/bin/'
+COMPILER='../antlr/genFacts.sh'
 
 ## Do not edit after this line ##
 
+if [ -z $ADORE_HOME ]
+    then
+    echo "You need to define the ADORE_HOME env. variable"
+    exit 1
+fi
 
-$SWIPL_HOME/swipl -s src/init.pl -g [$@]
+
+FILE=''
+echo "%%%%%%"
+echo "%% Adore Shell Wrapper"
+if [ $# -eq 0 ]
+then
+    echo "%% Facts database is empty"
+else
+    echo "$1" | grep -q '\.adore$' 2> /dev/null
+    if [ $? -eq 0 ]
+    then
+	echo "%% Compiling conrete syntax into facts ..."
+	echo "%%  - Input: '$1'"
+	TMP=`mktemp -t run_sh_XXXXXX`
+	trap "rm $TMP* 2>/dev/null" 0
+	echo "%%  - Output: '$TMP'"
+	$COMPILER $1 > $TMP
+	FILE=\'$TMP\'
+    else
+	FILE=\'$TMP\'
+    fi
+    echo "%% Using $FILE as facts database"
+fi
+
+echo "%%%%%%"
+
+
+
+$SWIPL_HOME/swipl -s src/init.pl -g [$FILE]

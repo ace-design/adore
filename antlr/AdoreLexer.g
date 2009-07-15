@@ -33,16 +33,19 @@ RELS:		'relations';
 RECEIVE	:	'receive';
 REPLY:		'reply';
 THROW:		'throw';
+HOOK:		'hook';
 VARS:		'variables';
 AS:		'as';
 CONST:		'const';
 REQU:		'require';
 WHEN:		'when';
-NOT:		'!';
-
-//DO:		'do';
+MERGE:		'merge';
+APPLY	:	'apply';
 
 /** PUNCTUATION**/
+NOT:		'!';
+PREDS:		'^';
+SUCCS:		'$';
 DBL_COL:	'::';
 LFT_BRCKT:	'\{';
 RGHT_BRCKT:	'\}';
@@ -52,13 +55,14 @@ SEMI:		';';
 LT:		'<';
 ASSIGN:		':=';
 COMMA:		',';
-COLON:		':';	
+COLON:		':';
+INTO:		'=>';	
 
 /** Expected tokens **/
 ID:	('a'..'z') ('A'..'Z'|'0'..'9'|'a'..'z')* ;
 STR:	'\'' ~'\''* '\'';
 	
 /** IGNORED **/
-INLN_COM: 	'//' ~('\r' | '\n')* NL 		{ skip(); };
-NL: 		('\r'? '\n')+				{ skip(); };
-WSPCE: 		(' '|'\t')+ 				{ skip(); };
+INLN_COM: 	'//' ~('\r' | '\n')* NL 	{ skip(); };
+NL: 		('\r'? '\n')+			{ skip(); };
+WSPCE: 		(' '|'\t')+ 			{ skip(); };

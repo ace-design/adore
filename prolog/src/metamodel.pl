@@ -46,6 +46,9 @@
 :- dynamic process/1.          %%  createProcess(P)
 :- dynamic isFragment/1.       %%  setAsFragment(P)
 
+:- dynamic hasForSrvName/2.    %%  TODO: setService(P,I) TODO
+:- dynamic hasForOpName/2.     %%  TODO: setOperation(P,I) 
+
 %%%%
 %% Activities
 %%%%
@@ -80,4 +83,10 @@
 
 :- dynamic waitFor/2.          %%  defWaitFor(A,A)
 :- dynamic isGuardedBy/4.      %%  defGuard(A,A,V,true|false)
+
+%%%%
+%% Actions over the metamodel (aka merge)
+%%%%
+
+:- dynamic mergeOrder/4.       %% defMergeOrder(I,I,A,P)
 
