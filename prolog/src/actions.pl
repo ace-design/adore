@@ -233,11 +233,7 @@ defGuard(A1,A2,V,B) :-
 %% TODO ... verifier les hypothèses ...
 
 %% defMergeOrder/4: defMergeOrder(Is,Os,A,P).
-defMergeOrder(Is,Os,_,_) :- %% \not exists (is,os) \in Service* \times Operation* => fail
-	\+ (hasForSrvName(P,Is), hasForOpName(P,Os)),  !,
-	dfail(def,'defMergeOrder/4: Unknown entity \'~w::~w\" !',[Is,Os]).
-defMergeOrder(Is,Os,A,_) :- %% \not exists a \in Activities(Is,Os) => fail
-	hasForSrvName(P,Is), hasForOpName(P,Os),
-	\+ (activity(A), isContainedBy(A,P)), !, 
-	dfail(def,'defMergeOrder/4: Activity \'~w\' is not contained inside service name \'~w\'!',Is).
+defMergeOrder(Is,Os,A,P) :- 
+	assert(mergeOrder(Is,Os,A,P)),
+	dinfo(def,'Merge directive (~w,~w,~w,~w) added.',[Is,Os,A,P]).
 	

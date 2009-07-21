@@ -1,5 +1,15 @@
 #!/bin/sh
 
+
+if [ -z $ADORE_HOME ]
+    then
+    echo "You need to define the ADORE_HOME env. variable"
+    exit 1
+fi
+
+OLD=`pwd`
+cd $ADORE_HOME/antlr
+
 CP='fr/unice/i3s/modalis/adore/language/'
 echo "####"
 echo "## Generating Java Source file"
@@ -13,3 +23,4 @@ echo "## Creating JAR file"
 cd bin
 jar cmf ../manifest.txt ../adore-compiler.jar  fr Main.class
 echo "####"
+cd $OLD

@@ -6,6 +6,15 @@ if [ -z $ADORE_HOME ]
     exit 1
 fi
 
-JAR=$ADORE_HOME/antlr/adore-compiler.jar
+JAR="$ADORE_HOME/antlr/adore-compiler.jar"
 
-java -jar $JAR $@
+if [ -e $JAR ]
+then
+    java -jar $JAR $@
+else
+    $ADORE_HOME/antlr/build.sh
+    java -jar $JAR $@
+fi
+
+
+
