@@ -191,7 +191,7 @@ vlist [String actId, String cxt]
 	@init{ $identifiers = new ArrayList<String>(); $facts = new ArrayList<String>(); }
 	: ((v=ID)		{ $identifiers.add($cxt+"_"+$v.text); }
 	   |^(BIND v=ID m=ID) 	{ $identifiers.add($cxt+"_"+$v.text);
-	   			  $facts.add("setMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$v.text+")"); 
+	   			  $facts.add("setMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$cxt+"_"+$v.text+")"); 
 	   			})*;
 	
 rels	[String cxt]
