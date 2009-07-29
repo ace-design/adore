@@ -95,7 +95,7 @@ content
 
 outputs	
 	:	v=ID	ASSIGN				-> ^(OUTS $v)
-	|	LFT_PAREN plist+ RGHT_PAREN ASSIGN 	-> ^(OUTS plist+);
+	|	LFT_PAREN vlist+ RGHT_PAREN ASSIGN 	-> ^(OUTS vlist+);
 	
 kind	
 	:	RECEIVE | REPLY | THROW | HOOK 
