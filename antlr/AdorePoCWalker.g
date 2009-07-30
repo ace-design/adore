@@ -106,23 +106,35 @@ vars	[String cxt]
 decl_var  [String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	:	^(VAR n=ID t=ID) 		{ String name = cxt+"_"+$n.text;
-						  $facts.add("createVariable("+name+")");
-					 	  $facts.add("setVariableType("+name+","+$t.text+")");
-					 	  trace($facts, $n.text, name, "variable", $cxt);
-					 	}
-	|	^(VAR n=ID t=ID v=STR)		{ String name = cxt+"_"+$n.text;
-						  $facts.add("createVariable("+$n.text+")");
-					 	  $facts.add("setVariableType("+$n.text+","+$t.text+")");
-						  $facts.add("setInitValue("+$n.text+","+$v.text+")");
-						  trace($facts, $n.text, name, "variable", $cxt);
-						}
-	|	^(CONST n=ID t=ID v=STR) 	{ String name = cxt+"_"+$n.text;
-						  $facts.add("createVariable("+name+")");
-					 	  $facts.add("setVariableType("+name+","+$t.text+")");
-						  $facts.add("setInitValue("+name+","+$v.text+")");
-						  $facts.add("setConstancy("+name+")");
-						  trace($facts, $n.text, name, "constant", $cxt);
+	:	^(VAR varname[$cxt] t=ID) 		{ safeAdd($facts, $varname.facts);
+							  String name = $cxt + "_" + $varname.id;
+						 	  $facts.add("setVariableType("+name+","+$t.text+")");
+						 	  trace($facts, $varname.id, name, "variable", $cxt);
+						 	}
+	|	^(VAR varname[$cxt] t=ID v=STR)		{ 
+							  safeAdd($facts, $varname.facts);
+							  String name = $cxt + "_" + $varname.id;
+						 	  $facts.add("setVariableType("+name+","+$t.text+")");
+							  $facts.add("setInitValue("+name+","+$v.text+")");
+							  trace($facts, $varname.id, name, "variable", $cxt);
+							}
+	|	^(CONST varname[$cxt] t=ID v=STR) 	{ safeAdd($facts, $varname.facts);
+							  String name = $cxt + "_" + $varname.id;
+						 	  $facts.add("setVariableType("+name+","+$t.text+")");
+							  $facts.add("setInitValue("+name+","+$v.text+")");
+							  $facts.add("setConstancy("+name+")");
+							  trace($facts, $varname.id, name, "constant", $cxt);
+							}
+	;
+
+varname	[String cxt]
+	returns [ArrayList<String> facts, String id]
+	@init{ $facts = new ArrayList<String>(); $id="";}
+	:	^(SCALAR n=ID)			{ $id = $n.text;
+						  $facts.add("createVariable("+ $cxt+"_"+ $id + ")"); }
+	|	^(SET n=ID)			{ $id = $n.text+"_star";
+						  $facts.add("createVariable("+$cxt+"_"+ $id+")");
+						  $facts.add("flagAsSet("+$cxt+"_"+ $id+")");
 						}
 	;
 
@@ -185,7 +197,7 @@ kind	[String actId]
 					  $facts.add("setFunction("+$actId+","+$fct.text+")");
 					}
 	;
-
+/**
 vlist [String actId, String cxt]
  	returns [ArrayList<String> identifiers, ArrayList<String> facts]
 	@init{ $identifiers = new ArrayList<String>(); $facts = new ArrayList<String>(); }
@@ -193,7 +205,20 @@ vlist [String actId, String cxt]
 	   |^(BIND v=ID m=ID) 	{ $identifiers.add($cxt+"_"+$v.text);
 	   			  $facts.add("setMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$cxt+"_"+$v.text+")"); 
 	   			})*;
-	
+**/
+vlist 	[String actId, String cxt]
+ 	returns [ArrayList<String> identifiers, ArrayList<String> facts]
+	@init{ $identifiers = new ArrayList<String>(); $facts = new ArrayList<String>(); }
+	: ((v=varaccess[$cxt])			{ $identifiers.add($v.id); }
+	   |^(BIND b=varaccess[$cxt] m=ID) 	{ $identifiers.add($b.id);
+	   			  	  $facts.add("setMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$b.id+")"); 
+	   				})*;
+varaccess	[String cxt]
+ 		returns [String id]
+ 	:	^(SCALAR n=ID)			{ $id = $cxt +"_" + $n.text;         }
+	|	^(SET n=ID)			{ $id = $cxt + "_" + $n.text+"_star"; }
+ 	;
+	   			
 rels	[String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
@@ -218,12 +243,12 @@ merge 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
 	: ^(UNIT s=ID o=ID (directive[$s.text,$o.text]	{ safeAdd($facts,$directive.facts); })+)
 	;
-	
+/**	
 idList	returns [ArrayList<String> identifiers]
 	@init{ $identifiers = new ArrayList<String>(); }
 	: (v=ID						{ $identifiers.add($v.text); })+
 	;
-	
+**/	
 directive [String s, String o]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }

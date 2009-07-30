@@ -51,6 +51,8 @@ tokens {
 	COND_FALSE;
 	UNIT;
 	MERGE_FRAG;
+	SCALAR;
+	SET;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
@@ -76,11 +78,17 @@ decl_var
 	|	constant 				-> ^(CONST constant);
 	
 variable
-	:	v=ID AS t=ID SEMI			-> $v $t
-	|	n=ID ASSIGN v=STR AS t=ID SEMI		-> $n $t $v ;
+	:	varname AS t=ID SEMI			-> varname $t
+	|	varname ASSIGN v=STR AS t=ID SEMI	-> varname $t $v ;
+
+
+varname
+	:	v=ID					-> ^(SCALAR $v)
+	|	v=ID STAR				-> ^(SET $v)
+	;
 
 constant
-	:	CONST c=ID ASSIGN v=STR AS t=ID SEMI	-> $c $t $v;
+	:	CONST varname ASSIGN v=STR AS t=ID SEMI	-> varname $t $v;
 	
 acts	
 	:	ACTS LFT_BRCKT activity+ RGHT_BRCKT 	-> ^(ACTIVITIES activity+) ;
@@ -88,31 +96,37 @@ acts
 activity
 	:	id=ID RGHT_PAREN content SEMI 		-> ^(ACT $id content);
 
+kind	
+	:	RECEIVE | REPLY | THROW | HOOK 
+	|	s=ID DBL_COL o=ID 			-> INVOKE $s $o
+	|	fct=ID					-> ASSIGNMENT $fct;
+	
 content	
 	:	kind inputs 				-> ^(KIND kind) inputs ^(OUTS)
 	|	l=ID ASSIGN r=ID			-> ^(KIND ASSIGNMENT) ^(INS $r) ^(OUTS $l)
 	|	outputs kind inputs			-> ^(KIND kind) inputs outputs;
 
 outputs	
-	:	v=ID	ASSIGN				-> ^(OUTS $v)
+	:	varaccess ASSIGN			-> ^(OUTS varaccess)
 	|	LFT_PAREN vlist+ RGHT_PAREN ASSIGN 	-> ^(OUTS vlist+);
 	
-kind	
-	:	RECEIVE | REPLY | THROW | HOOK 
-	|	s=ID DBL_COL o=ID 			-> INVOKE $s $o
-	|	fct=ID					-> ASSIGNMENT $fct;
-
 inputs	
 	:	LFT_PAREN vlist? RGHT_PAREN 		-> ^(INS vlist?);	
 
+
 vlist	:	plist | nplist;
 plist
-	: 	id=ID					-> $id
-	|	id=ID COMMA plist 			-> $id plist;
+	: 	varaccess				-> varaccess
+	|	varaccess COMMA plist 			-> varaccess plist;
 
 nplist  
-	:	left=ID COLON right=ID 			-> ^(BIND $right $left)
-	|	left=ID COLON right=ID COMMA nplist 	-> ^(BIND $right $left) nplist ;
+	:	left=ID COLON varaccess 		-> ^(BIND varaccess $left)
+	|	left=ID COLON varaccess COMMA nplist 	-> ^(BIND varaccess $left) nplist ;
+
+varaccess
+	:	id=ID					-> ^(SCALAR $id)
+	|	id=ID STAR				-> ^(SET $id)
+	;	
 		
 rels	
 	:	RELS LFT_BRCKT  rel+ RGHT_BRCKT 	-> ^(RELATIONS rel+);

@@ -34,6 +34,7 @@ RECEIVE	:	'receive';
 REPLY:		'reply';
 THROW:		'throw';
 HOOK:		'hook';
+NOP	:	'nop';
 VARS:		'variables';
 AS:		'as';
 CONST:		'const';
@@ -43,6 +44,7 @@ MERGE:		'merge';
 APPLY	:	'apply';
 
 /** PUNCTUATION**/
+STAR:		'*';
 NOT:		'!';
 PREDS:		'^';
 SUCCS:		'$';
@@ -59,7 +61,9 @@ COLON:		':';
 INTO:		'=>';	
 
 /** Expected tokens **/
-ID:	('a'..'z') ('A'..'Z'|'0'..'9'|'a'..'z')* ;
+ID:		('a'..'z') ('A'..'Z'|'0'..'9'|'a'..'z')* ;
+//VAR_NAME:	 ID STAR?;
+
 STR:	'\'' ~'\''* '\'';
 	
 /** IGNORED **/
