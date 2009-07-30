@@ -53,6 +53,7 @@ tokens {
 	MERGE_FRAG;
 	SCALAR;
 	SET;
+	ANONYMOUS;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
@@ -126,6 +127,7 @@ nplist
 varaccess
 	:	id=ID					-> ^(SCALAR $id)
 	|	id=ID STAR				-> ^(SET $id)
+	|	value=STR AS type=ID			-> ^(ANONYMOUS $value $type)
 	;	
 		
 rels	

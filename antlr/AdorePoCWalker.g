@@ -53,6 +53,11 @@ import java.io.*;
   	facts.add("setActivityKind("+process+"_succs,successors)");
   	facts.add("setContainment("+process+"_succs,"+process+")");
   }
+  
+  private static int ANONYMOUS_CPT = 0;
+  private String generateAnonymousId() {
+    return "lambda_" + ANONYMOUS_CPT++;
+  }
 }
 
   
@@ -161,21 +166,21 @@ act_io	[String id, String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
 	: INS OUTS 				{}
-	| ^(INS vlist[$id,$cxt]) OUTS 		{ for(String v: $vlist.identifiers)
+	| ^(INS vlist[$id,$cxt]) OUTS 		{ safeAdd($facts,$vlist.facts);
+						  for(String v: $vlist.identifiers)
 						    $facts.add("addAsInput("+v+","+$cxt+"_"+$id+")");
-						  safeAdd($facts,$vlist.facts);
 						}
-	| INS ^(OUTS vlist[$id,$cxt])		{ for(String v: $vlist.identifiers)
+	| INS ^(OUTS vlist[$id,$cxt])		{ safeAdd($facts,$vlist.facts);
+						  for(String v: $vlist.identifiers)
 						    $facts.add("addAsOutput("+v+","+$cxt+"_"+$id+")");
-						  safeAdd($facts,$vlist.facts);
 						}
 	| ^(INS i=vlist[$id,$cxt]) ^(OUTS o=vlist[$id,$cxt])	
-						{ for(String v: $i.identifiers)
+						{ safeAdd($facts,$i.facts);
+						  for(String v: $i.identifiers)
 						    $facts.add("addAsInput("+v+","+$cxt+"_"+$id+")");
-						  safeAdd($facts,$i.facts);
+						  safeAdd($facts,$o.facts);
 						  for(String v: $o.identifiers)
 					  	    $facts.add("addAsOutput("+v+","+$cxt+"_"+$id+")");
-						  safeAdd($facts,$o.facts);
 						}
 	; 
 
@@ -209,14 +214,25 @@ vlist [String actId, String cxt]
 vlist 	[String actId, String cxt]
  	returns [ArrayList<String> identifiers, ArrayList<String> facts]
 	@init{ $identifiers = new ArrayList<String>(); $facts = new ArrayList<String>(); }
-	: ((v=varaccess[$cxt])			{ $identifiers.add($v.id); }
-	   |^(BIND b=varaccess[$cxt] m=ID) 	{ $identifiers.add($b.id);
-	   			  	  $facts.add("setMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$b.id+")"); 
-	   				})*;
+	: ((v=varaccess[$cxt])			{ safeAdd($facts,$v.facts);
+						  $identifiers.add($v.id); }
+	   |^(BIND b=varaccess[$cxt] m=ID) 	{ safeAdd($facts,$v.facts);
+	   					  $identifiers.add($b.id);
+	   			  	 	  $facts.add("setMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$b.id+")"); 
+	   					})*;
 varaccess	[String cxt]
- 		returns [String id]
+ 		returns [ArrayList<String> facts, String id]
+ 	@init{ $facts = new ArrayList<String>(); }
  	:	^(SCALAR n=ID)			{ $id = $cxt +"_" + $n.text;         }
 	|	^(SET n=ID)			{ $id = $cxt + "_" + $n.text+"_star"; }
+	|	^(ANONYMOUS v=STR t=ID)		{ String id = generateAnonymousId();
+						  $id = $cxt+"_" + id;
+						  $facts.add("createVariable("+ $id + ")"); 
+						  $facts.add("setVariableType("+ $id+","+$t.text+")");
+						  $facts.add("setInitValue("+$id+","+$v.text+")");
+						  $facts.add("setConstancy("+$id+")");
+						  trace($facts, id, $id, "generated", $cxt);
+						}
  	;
 	   			
 rels	[String cxt]
