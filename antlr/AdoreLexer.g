@@ -34,7 +34,7 @@ RECEIVE	:	'receive';
 REPLY:		'reply';
 THROW:		'throw';
 HOOK:		'hook';
-NOP	:	'nop';
+NOP:		'nop';
 VARS:		'variables';
 AS:		'as';
 CONST:		'const';

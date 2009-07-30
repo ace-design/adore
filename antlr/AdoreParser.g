@@ -98,7 +98,7 @@ activity
 	:	id=ID RGHT_PAREN content SEMI 		-> ^(ACT $id content);
 
 kind	
-	:	RECEIVE | REPLY | THROW | HOOK 
+	:	RECEIVE | REPLY | THROW | HOOK | NOP
 	|	s=ID DBL_COL o=ID 			-> INVOKE $s $o
 	|	fct=ID					-> ASSIGNMENT $fct;
 	

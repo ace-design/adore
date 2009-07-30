@@ -191,6 +191,7 @@ kind	[String actId]
 	|	REPLY			{ $facts.add("setActivityKind("+$actId+",reply)");}
 	|	THROW			{ $facts.add("setActivityKind("+$actId+",throw)");}
 	|	HOOK			{ $facts.add("setActivityKind("+$actId+",hook)");}
+	|	NOP			{ $facts.add("setActivityKind("+$actId+",nop)");}
 	| 	INVOKE s=ID o=ID	{ $facts.add("setActivityKind("+$actId+",invoke)");
 					  $facts.add("setInvokedService("+$actId+","+$s.text+")");
 					  $facts.add("setInvokedOperation("+$actId+","+$o.text+")");
