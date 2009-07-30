@@ -37,7 +37,7 @@ createProcess(P) :- %% \exists p \in Process* => fail
 	dfail(create,'Cannot create process \'~w\': it exists!',P).
 createProcess(P) :- 
 	assert(process(P)), 
-	dinfo(create,'Process \'~w\' created.',P).
+	dinfo(create,'Process  \'~w\' created.',P).
 
 %% setAsFragment/1: setAsFragment(P)
 setAsFragment(P) :- %% \not \exists p \in Process* => fail
@@ -45,7 +45,7 @@ setAsFragment(P) :- %% \not \exists p \in Process* => fail
 	dfail(set,'setAsFragment/2: Unkown process \'~w\'!',P).
 setAsFragment(P) :-
 	assert(isFragment(P)), 
-	dinfo(set,'Process \'~w\' flagged as fragment.',P).
+	dinfo(set,'Process  \'~w\' flagged as fragment.',P).
 
 %% setService/2: setService(P,I).
 setService(P,_) :- %% \not \exists p \in Process* => fail
@@ -91,7 +91,7 @@ setContainment(_,P) :- %% \not \exists p \in Process* => fail
 	dfail(set,'setContainment/2: Unkown process \'~w\'!',P).
 setContainment(A,P) :- 
 	assert(isContainedBy(A,P)),
-	dinfo(set,'Activity  \'~w\' contained by  \'~w\'',[A,P]).
+	dinfo(set,'Activity \'~w\' contained by  \'~w\'',[A,P]).
 
 %% setInvokedService/2: setInvokedService(A,I)
 setInvokedService(A,_) :- %% \not \exists a \in Activity* => fail
@@ -102,7 +102,7 @@ setInvokedService(A,_) :- %% kind(a) != invoke => fail
 	dfail(set,'setInvokedService/2: Activity \'~w\' isn\'t an invocation!',A).
 setInvokedService(A,I) :- 
 	assert(hasForService(A,I)), 
-	dinfo(set,'Activity  \'~w\' invokes service  \'~w\'',[A,I]).
+	dinfo(set,'Activity \'~w\' invokes service  \'~w\'',[A,I]).
 
 %% setInvokedOperation/2: setInvokedOperation(A,I)
 setInvokedOperation(A,_) :- %% \not \exists a \in Activity* => fail
@@ -113,7 +113,7 @@ setInvokedOperation(A,_) :- %% kind(a) != invoke => fail
 	dfail(set,'setInvokedOperation/2: Activity \'~w\' isn\'t an invocation!',A).
 setInvokedOperation(A,I) :- 
 	assert(hasForOperation(A,I)), 
-	dinfo(set,'Activity  \'~w\' invokes operation  \'~w\'',[A,I]).
+	dinfo(set,'Activity \'~w\' invokes operation  \'~w\'',[A,I]).
 
 %% setMessageBinding/3: setMessageBinding(A,I,V)
 setMessageBinding(A,_,_) :- %% \not \exists a \in Activity* => fail
@@ -121,7 +121,7 @@ setMessageBinding(A,_,_) :- %% \not \exists a \in Activity* => fail
 	dfail(set,'setMessageBinding/2: Unknown activity \'~w\'!',A).
 setMessageBinding(A,I,V) :-
 	assert(usesAsBinding(A,V,I)), 
-	dinfo(set,'Activity  \'~w\' binds variable \'~w\' to part \'~w\'',[A,V,I]).
+	dinfo(set,'Activity \'~w\' binds variable \'~w\' to part \'~w\'',[A,V,I]).
 
 %% setFunction/2: setFunction(A,I)
 setFunction(A,_) :- %% \not \exists a \in Activity* => fail
@@ -132,7 +132,7 @@ setFunction(A,_) :- %% kind(a) != assign => fail
 	dfail(set,'setFunction/2: Activity \'~w\' isn\'t an assignment!',A).
 setFunction(A,I) :- 
 	assert(hasForFunction(A,I)),
-	dinfo(set,'Activity  \'~w\' uses function \'~w\'',[A,I]).
+	dinfo(set,'Activity \'~w\' uses function \'~w\'',[A,I]).
 
 %%%%
 %% Variables
@@ -169,6 +169,15 @@ setConstancy(V) :- %% \not \exists v \in Variable* => fail
 setConstancy(V) :-
 	assert(isConstant(V)), 
 	dinfo(set,'Variable \'~w\' flagged as constant',V).
+
+%% flagAsSet/1: flagAsSet(V)
+flagAsSet(V) :- %% \not \exists v \in Variable* => fail
+	\+ variable(V), !, 
+	dfail(set,'flagAsSet/1: Unknown variable \'~w\'!',V).
+flagAsSet(V) :-
+	assert(isConstant(V)), 
+	dinfo(set,'Variable \'~w\' flagged as a dataset',V).
+
 
 %% addAsInput/2: addAsInput(V,A)
 addAsInput(V,_) :- %% \not \exists v \in Variable* => fail

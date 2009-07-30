@@ -216,7 +216,7 @@ vlist 	[String actId, String cxt]
 	@init{ $identifiers = new ArrayList<String>(); $facts = new ArrayList<String>(); }
 	: ((v=varaccess[$cxt])			{ safeAdd($facts,$v.facts);
 						  $identifiers.add($v.id); }
-	   |^(BIND b=varaccess[$cxt] m=ID) 	{ safeAdd($facts,$v.facts);
+	   |^(BIND b=varaccess[$cxt] m=ID) 	{ safeAdd($facts,$b.facts);
 	   					  $identifiers.add($b.id);
 	   			  	 	  $facts.add("setMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$b.id+")"); 
 	   					})*;

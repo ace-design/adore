@@ -46,8 +46,8 @@
 :- dynamic process/1.          %%  createProcess(P)
 :- dynamic isFragment/1.       %%  setAsFragment(P)
 
-:- dynamic hasForSrvName/2.    %%  TODO: setService(P,I) TODO
-:- dynamic hasForOpName/2.     %%  TODO: setOperation(P,I) 
+:- dynamic hasForSrvName/2.    %%  setService(P,I)
+:- dynamic hasForOpName/2.     %%  setOperation(P,I) 
 
 %%%%
 %% Activities
@@ -72,6 +72,7 @@
 :- dynamic hasForType/2.       %%  setVariableType(V,T)
 :- dynamic hasForInitValue/2.  %%  setInitValue(V,S)
 :- dynamic isConstant/1.       %%  setConstancy(V).
+:- dynamic isSet/1.            %% flagAsSet(V).
 
 :- dynamic hasForInput/2.      %%  addAsInput(V,A)
 :- dynamic hasForOutput/2.     %%  addAsOutput(V,A)
