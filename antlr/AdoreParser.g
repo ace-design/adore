@@ -47,6 +47,7 @@ tokens {
 	INVOKE;
 	ASSIGNMENT;
 	WAIT_FOR;
+	WEAK_WAIT;
 	COND_TRUE;
 	COND_FALSE;
 	UNIT;
@@ -137,6 +138,7 @@ ord	: 	(a=ID -> $a)  | PREDS | SUCCS;
 
 rel	
 	:	l=ord LT r=ord SEMI 			-> ^(WAIT_FOR $r $l)
+	|	l=ord LT LT r=ord SEMI			-> ^(WEAK_WAIT $r $l)
 	| 	l=ord LT r=ord WHEN c=ID SEMI		-> ^(COND_TRUE $r $l $c)
 	|	l=ord LT r=ord WHEN NOT c=ID SEMI	-> ^(COND_FALSE $r $l $c)
 	;

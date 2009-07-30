@@ -83,6 +83,7 @@
 %%%%
 
 :- dynamic waitFor/2.          %%  defWaitFor(A,A)
+:- dynamic weakWait/2.         %%  defWeakWait(A,A)
 :- dynamic isGuardedBy/4.      %%  defGuard(A,A,V,true|false)
 
 %%%%

@@ -222,6 +222,24 @@ defWaitFor(A1,A2) :-
 	assert(waitFor(A1,A2)), 
 	dinfo(def,'Relation \'~w\' < \'~w\' is defined.',[A2,A1]).
 
+%% defWeakWait/2: defWeakWait(A,A)
+defWeakWait(A,_) :- %% \not \exists a \in Activity* => fail
+	\+ activity(A), !, 
+	dfail(def,'defWeakWait/2: Unknown activity \'~w\'!',A).
+defWeakWait(_,A) :- %% \not \exists a \in Activity* => fail
+	\+ activity(A), !, 
+	dfail(def,'defWeakWait/2: Unknown activity \'~w\'!',A).
+defWeakWait(A1,A2) :- %% \exists path(a1 -> a2) \in WeakWait* => fail
+	existsPath(A1,A2), !, 
+	dfail(def,'defWeakWait/2: \'~w\' < \'~w\' introduces a cycle!',[A2,A1]).
+defWeakWait(A1,A2) :- %% \exists a2 < a1 \in WeakWait* => warning
+	weakWait(A1,A2), !, 
+	dwarn(def,'defWeakWait/2: \'~w\' << \'~w\' still exists!',[A2,A1]).
+defWeakWait(A1,A2) :- 
+	assert(weakWait(A1,A2)), 
+	dinfo(def,'Relation \'~w\' << \'~w\' is defined.',[A2,A1]).
+
+
 %% defGuard/4: defGuard((A,A,V,B)
 defGuard(A,_,_,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 

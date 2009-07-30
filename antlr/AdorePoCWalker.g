@@ -252,6 +252,7 @@ rel	[String cxt]
  	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
 	: ^(WAIT_FOR r=ord[$cxt] l=ord[$cxt])		{ $facts.add("defWaitFor("+$r.id+","+$l.id+")"); }
+	| ^(WEAK_WAIT r=ord[$cxt] l=ord[$cxt])		{ $facts.add("defWeakWait("+$r.id+","+$l.id+")"); }
 	| ^(COND_TRUE r=ord[$cxt] l=ord[$cxt] c=ID)	{ $facts.add("defGuard("+$r.id+","+$l.id+","+$cxt+"_"+$c.text+",true)");  }
 	| ^(COND_FALSE r=ord[$cxt] l=ord[$cxt] c=ID)	{ $facts.add("defGuard("+$r.id+","+$l.id+","+$cxt+"_"+$c.text+",false)"); }
 	;
