@@ -20,10 +20,16 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+loadFiles :- 
+	write('%% Loading ADORE kernel'),
+	[debug], [trace], [config],  [metamodel], [actions], [functions], 
+	[conflicts], 
+	write('%% Loading Transformations'),
+	loadTransfo('adore2dot').
 
 
-loadFiles :- [debug], [trace], [config],  [metamodel], [actions], 
-	[functions], [conflicts].
+loadTransfo(Name) :- 
+	string_concat('../transformations/',Name,File),	[File].
 
 header :- 
 	write('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
