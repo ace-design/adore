@@ -1,0 +1,16 @@
+
+orchestration peanoMachine::isZero {
+  variables {
+    n* as integer;
+    const zero := '0' as integer;
+    r as boolean;
+  }
+  activities {
+    a0) n := receive();
+    a1) r := equals(n*,'0' as integer);
+    a2) reply(r);
+  }
+  relations { a0 < a1; a1 < a2; }
+}
+
+

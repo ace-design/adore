@@ -45,6 +45,7 @@
 
 :- dynamic process/1.          %%  createProcess(P)
 :- dynamic isFragment/1.       %%  setAsFragment(P)
+:- dynamic hasForParameter/2.  %%  setAsFragmentParameter(P,I)
 
 :- dynamic hasForSrvName/2.    %%  setService(P,I)
 :- dynamic hasForOpName/2.     %%  setOperation(P,I) 
@@ -90,5 +91,8 @@
 %% Actions over the metamodel (aka merge)
 %%%%
 
-:- dynamic mergeOrder/4.       %% defMergeOrder(I,I,A,P)
+:- dynamic context/1.          %% defCompositionContext(P)
+:- dynamic applyFragment/4.    %% defApply(I,P,A,P)
+:- dynamic applyParameter/3.   %% setApplyParam(I,I,S)
+
 

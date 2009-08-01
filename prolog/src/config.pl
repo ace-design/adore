@@ -22,8 +22,9 @@
 
 %% Debugging ADORE ...
 
-debugSubscription(create).
-debugSubscription(def).
-debugSubscription(set).
+%debugSubscription(create).
+%%debugSubscription(def).
+%%debugSubscription(set).
+debugSubscription(transfo).
 
 %% ...

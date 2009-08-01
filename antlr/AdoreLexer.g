@@ -40,8 +40,9 @@ AS:		'as';
 CONST:		'const';
 REQU:		'require';
 WHEN:		'when';
-MERGE:		'merge';
+COMPOSITION:	'composition';
 APPLY	:	'apply';
+
 
 /** PUNCTUATION**/
 STAR:		'*';
@@ -55,6 +56,7 @@ LFT_PAREN:	'(';
 RGHT_PAREN:	')';
 SEMI:		';';
 LT:		'<';
+GT	:	'>';
 ASSIGN:		':=';
 COMMA:		',';
 COLON:		':';
@@ -62,7 +64,6 @@ INTO:		'=>';
 
 /** Expected tokens **/
 ID:		('a'..'z') ('A'..'Z'|'0'..'9'|'a'..'z')* ;
-//VAR_NAME:	 ID STAR?;
 
 STR:	'\'' ~'\''* '\'';
 	

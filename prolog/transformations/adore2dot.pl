@@ -20,3 +20,7 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+%% adore2dot/2: adore2dot(P,F)
+adore2dot(P,_) :- %% \not \exists p \in Process* => fail.
+	\+ process(P), !, 
+	dfail(transfo,'adore2/1: Unkown process \'~w\'!',P).

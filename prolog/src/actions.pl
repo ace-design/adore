@@ -42,10 +42,21 @@ createProcess(P) :-
 %% setAsFragment/1: setAsFragment(P)
 setAsFragment(P) :- %% \not \exists p \in Process* => fail
 	\+ process(P), !, 
-	dfail(set,'setAsFragment/2: Unkown process \'~w\'!',P).
+	dfail(set,'setAsFragment/1: Unkown process \'~w\'!',P).
 setAsFragment(P) :-
 	assert(isFragment(P)), 
 	dinfo(set,'Process  \'~w\' flagged as fragment.',P).
+
+%% setAsFragmentParameter/1: setAsFragmentParameter(P,I)
+setAsFragmentParameter(P,_) :- %% \not \exists p \in Process* => fail
+	\+ process(P), !, 
+	dfail(set,'setAsFragmentParameter/2: Unkown process \'~w\'!',P).
+setAsFragmentParameter(P,_) :- %% \not isFragment(p) => fail
+	\+ isFragment(P), !, 
+	dfail(set,'setAsFragmentParameter/2: Process \'~w\' is not a fragment!',P).
+setAsFragmentParameter(P,I) :- %% \not \exists p \in Process* => fail
+	assert(hasForParameter(P,I)), !, 
+	dinfo(set,'Fragment \'~w\' uses \'~w\' as parameter.',[P,I]).
 
 %% setService/2: setService(P,I).
 setService(P,_) :- %% \not \exists p \in Process* => fail
@@ -60,8 +71,6 @@ setOperation(P,_) :- %% \not \exists p \in Process* => fail
 	dfail(set,'setOperation/2: Unkown process \'~w\'!',P).
 setOperation(P,I) :- 
 	assert(hasForOpName(P,I)).
-
-
 
 %%%%
 %% Activities
@@ -255,12 +264,41 @@ defGuard(A1,A2,V,B) :-
 	dinfo(def,'Relation \'~w\' < \'~w\' when \'~w\' (\'~w\') is defined.',[A1,A2,V,B]).
 
 %%%%
-%% Actions over the metamodel (aka merge)
+%% Composition directives
 %%%%
-%% TODO ... verifier les hypothèses ...
 
-%% defMergeOrder/4: defMergeOrder(Is,Os,A,P).
-defMergeOrder(Is,Os,A,P) :- 
-	assert(mergeOrder(Is,Os,A,P)),
-	dinfo(def,'Merge directive (~w,~w,~w,~w) added.',[Is,Os,A,P]).
-	
+defCompositionContext(P) :- %% \not \exists p \in Process* => fail
+	\+ process(P), !, 
+	dfail(def,'defCompositionContext/1: Unkown process \'~w\'!',P).
+defCompositionContext(P) :- %% \exists p in Context* => warning
+	context(P),!,
+	dwarn(def,'Context  \'~w\' still exists!',P).
+defCompositionContext(P) :-
+	assert(context(P)),
+	dinfo(def,'Context  \'~w\' created with success!',P).
+
+%% defApply/4: defApply(I,P,A,P).
+defApply(I,_,_,_) :- %% \exists i \in Id(Context*) => fail
+	applyFragment(I,_,_,_), !, 
+	dfail(def,'defApply/4: Directive identifier \'~w\' still exists!',I).
+defApply(_,P,_,_) :- %% \not \exists p \in Process* => fail
+	\+ process(P), !, 
+	dfail(def,'defApply/4: Unkown process \'~w\'!',P).
+defApply(_,P,A,_) :- %% \not \exists a \in Activities(p) => fail
+	\+ isContainedBy(A,P), !, 
+	dfail(def,'defApply/4: Activity \'~w\' is not contained by process \'~w\'!',[A,P]).
+defApply(I,O,A,F) :- 
+	assert(applyFragment(I,O,A,F)),
+	dinfo(def,'Directive apply \'~w\' to \'~w\' successfuly created in context \'~w\' with id \'~w\'!',[F,A,O,I]).
+
+%% setApplyParam/3: setApplyParam(I,I,S).
+setApplyParam(I,_,_) :- 
+	\+ applyFragment(I,_,_,_), !, 
+	dfail(set,'setApplyParameter/3: Unknown directive identifier \'~w\'!',I).
+setApplyParam(ApplyId, I,_) :- 
+	applyFragment(ApplyId,_,_,F), 
+	\+ hasForParameter(F,I), !, 
+	dfail(set,'setApplyParameter/3: unknown parameter \'~w\' for fragment \'~w\'!',[I,F]).
+setApplyParam(ApplyId, I, S) :-
+	assert(applyParameter(ApplyId,I,S)),
+	dinfo(set,'Directive \'~w\' uses \'~w\' for \'~w\' parameter',[ApplyId,S,I]).

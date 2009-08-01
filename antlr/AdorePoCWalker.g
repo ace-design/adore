@@ -58,6 +58,11 @@ import java.io.*;
   private String generateAnonymousId() {
     return "lambda_" + ANONYMOUS_CPT++;
   }
+  
+  private String generateAnonymousApply(){
+    return "apply_" + ANONYMOUS_CPT++;
+  }
+  
 }
 
   
@@ -84,15 +89,22 @@ definition returns [ArrayList<String> facts]
 						  $facts.add("setOperation("+name+","+$o.text+")");
 						  safeAdd($facts, $core.facts);
 						}
-	| ^(DEF ^(FRAGMENT n=ID) core[$n.text])	{ $facts.add("createProcess("+$n.text+")");
+	| ^(DEF ^(FRAGMENT n=ID param[$n.text]) core[$n.text])	
+						{ $facts.add("createProcess("+$n.text+")");
 						  $facts.add("setAsFragment("+$n.text+")");
 						  fragmentize($facts, $n.text);
 						  safeAdd($facts, $core.facts);
+						  safeAdd($facts, $param.facts); 
 						}
 						
-	| ^(DEF merge)				{ safeAdd($facts,$merge.facts); }	
+	| ^(DEF merge) { safeAdd($facts,$merge.facts); }	
 	;
 
+param [String cxt]
+	returns [ArrayList<String> facts]
+	@init{ $facts = new ArrayList<String>(); }
+	: 	^(PARAMS (^(SCALAR i=ID) { $facts.add("setAsFragmentParameter("+$cxt+","+$i.text+")"); })*)				
+	;
 core	[String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
@@ -259,17 +271,17 @@ rel	[String cxt]
 	
 merge 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	: ^(UNIT s=ID o=ID (directive[$s.text,$o.text]	{ safeAdd($facts,$directive.facts); })+)
+	: ^(UNIT s=ID o=ID 	{ String id = $s.text + "_" + $o.text;
+				  $facts.add("defCompositionContext("+id+")"); }
+		(directive[id]{ safeAdd($facts,$directive.facts); })+) 
 	;
-/**	
-idList	returns [ArrayList<String> identifiers]
-	@init{ $identifiers = new ArrayList<String>(); }
-	: (v=ID						{ $identifiers.add($v.text); })+
-	;
-**/	
-directive [String s, String o]
+
+	
+directive [String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	: ^(MERGE_FRAG e=ID a=ID)			{ $facts.add("defMergeOrder("+$s+","+$o+","+$a.text+","+$e.text+")"); }
+	: ^(MERGE_FRAG e=ID a=ID { String id = generateAnonymousApply();
+				   $facts.add("defApply("+id+","+$cxt+","+$cxt+"_"+$a.text+","+$e.text+")"); }
+			(^(BIND v=STR x=ID) { $facts.add("setApplyParam("+id+","+$x.text+","+$v.text+")"); })*)
 	;
 	

@@ -55,6 +55,7 @@ tokens {
 	SCALAR;
 	SET;
 	ANONYMOUS;
+	PARAMS;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
@@ -65,10 +66,13 @@ definitions
 definition
 	:	REQU f=STR SEMI				-> ^(DEF ^(REQUIRE $f))
 	|	ORCH s=ID DBL_COL o=ID core 		-> ^(DEF ^(ORCHESTRATION $s $o) core)
-	|	FRAG n=ID core 				-> ^(DEF ^(FRAGMENT $n) core)
-	|	MERGE s=ID DBL_COL o=ID merge_core	-> ^(DEF ^(UNIT $s $o merge_core))
+	|	FRAG n=ID params? core 			-> ^(DEF ^(FRAGMENT $n ^(PARAMS params?)) core)
+	|	COMPOSITION s=ID DBL_COL o=ID merge_core	-> ^(DEF ^(UNIT $s $o merge_core))
 	;
 
+params	
+	:	LT plist GT				-> plist
+	;	
 core	
 	:	LFT_BRCKT vars acts rels? RGHT_BRCKT	-> vars acts rels? ;
 
@@ -148,6 +152,10 @@ merge_core
 	;
 
 directive
-	:	APPLY e=ID INTO a=ID SEMI 		-> ^(MERGE_FRAG $e $a)
+	:	APPLY e=ID INTO a=ID SEMI 				-> ^(MERGE_FRAG $e $a)
+	| 	APPLY e=ID LFT_PAREN  pBind RGHT_PAREN INTO a=ID SEMI	-> ^(MERGE_FRAG $e $a pBind)
 	;
 
+pBind  
+	:	left=ID COLON s=STR 			-> ^(BIND $s $left)
+	|	left=ID COLON s=STR COMMA pBind 	-> ^(BIND $s $left) pBind ;

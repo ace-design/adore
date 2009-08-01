@@ -1,4 +1,4 @@
-fragment e1 {
+fragment e1<x,y> {
   variables  {}
   activities { h)  hook() ; }
   relations  { ^ < h; h < $; }
@@ -23,8 +23,7 @@ orchestration helloWorld::sayHello {
   relations { a1 < a2; a2 < a3; }
 }
 
-merge helloWorld::sayHello { 
-      apply e1 => a2 ; 
-      apply e2 => a2;
+composition helloWorld::sayHello { 
+      apply e1(x: 'X', y: 'bar') => a2 ; 
+      apply e2 => a3;
 }
-
