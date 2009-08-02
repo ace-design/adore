@@ -20,11 +20,21 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+%%%%
 %% Debugging ADORE ...
-
-%debugSubscription(create).
-%%debugSubscription(def).
-%%debugSubscription(set).
+%%%%
+debugSubscription(create).
+debugSubscription(def).
+debugSubscription(set).
 debugSubscription(transfo).
 
-%% ...
+%%%%
+%% Model transformation parameters: 
+%%%%
+
+%% Adore -> DOT model transformation
+
+%% Adore -> PNG model transformation
+adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+adore2png_param(viewer, 'open -a Preview').
+

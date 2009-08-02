@@ -75,8 +75,8 @@
 :- dynamic isConstant/1.       %%  setConstancy(V).
 :- dynamic isSet/1.            %% flagAsSet(V).
 
-:- dynamic hasForInput/2.      %%  addAsInput(V,A)
-:- dynamic hasForOutput/2.     %%  addAsOutput(V,A)
+:- dynamic usesAsInput/2.      %%  addAsInput(V,A)
+:- dynamic usesAsOutput/2.     %%  addAsOutput(V,A)
 
 
 %%%%

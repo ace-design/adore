@@ -18,6 +18,7 @@ orchestration helloWorld::sayHello {
   activities {
     a1) name := receive();
     a2) name := stringConcat(prefix,name);
+    a20) foo::bar(geek: prefix);
     a3) reply(name);
   }
   relations { a1 < a2; a2 < a3; }

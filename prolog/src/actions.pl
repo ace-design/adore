@@ -196,7 +196,7 @@ addAsInput(_,A) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(set,'addAsInput/2: Unknown activity \'~w\'!',A).
 addAsInput(V,A) :- 
-	assert(hasForInput(A,V)), 
+	assert(usesAsInput(A,V)), 
 	dinfo(set,'Variable \'~w\' used as \'~w\' input.',[V,A]).
 
 %% addAsOutput/2: addAsOutput(V,A)
@@ -207,7 +207,7 @@ addAsOutput(_,A) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(set,'addAsOutput/2: Unknown activity \'~w\'!',A).
 addAsOutput(V,A) :- 
-	assert(hasForOutput(A,V)), 
+	assert(usesAsOutput(A,V)), 
 	dinfo(set,'Variable \'~w\' used as \'~w\' input.',[V,A]).
 
 %%%%
@@ -257,7 +257,7 @@ defGuard(_,A,_,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(def,'defGuard/4: Unknown activity \'~w\'!',A).
 defGuard(_,A,V,_) :- %% v \not \in Outputs(a) => fail
-	\+ hasForOutput(A,V), !, 
+	\+ usesAsOutput(A,V), !, 
 	dfail(def,'defGuard/4: Activity \'~w\' doesn\'t assign \'~w\'!',[A,V]).
 defGuard(A1,A2,V,B) :- 
 	assert(isGuardedBy(A1,A2,V,B)),

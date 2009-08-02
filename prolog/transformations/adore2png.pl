@@ -20,18 +20,16 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%% We leave 'pebbles' after us (cf 'Le petit poucet' and his 'petits cailloux').
-:- dynamic pebble/4.
+%% adore2png/2: adore2png(+P,+F)
+adore2png(P,F) :- 
+	adore2dot(P,DotCode), tmp_file('adore2dot',Tmp), open(Tmp,write,Stream), 
+	write(Stream,DotCode), close(Stream), adore2png_param(exec,E), 
+	swritef(Cmd,'%w -Tpng %w > %w',[E,Tmp,F]), shell(Cmd).
 
-
-%%%%%% traceRename/4: traceRename(K,O,N,C)
-%%  -> K: pick one from  activity|variable|constant
-%%  -> O: old name
-%%  -> N: new name
-%%  -> C: context of renaming (compile, duplication, merge).
-
-traceRename(Kind, Old, New, Context) :-
-	assert(pebble(rename(Kind), Old, New, Context)).
-
-getPreviousName(New,Old) :- pebble(_,Old,New,_),!.
-getPreviousName(New,New). %% i.e. there is no pebble to lead us (no renaming).
+%% display/2: display(+P,-F)
+display(P,Tmp) :- 
+	tmp_file('adore2png',Tmp), adore2png(P,Tmp), 
+	adore2png_param(viewer,E), swritef(Cmd,'%w %w',[E,Tmp]), shell(Cmd).
+	
+	
+	

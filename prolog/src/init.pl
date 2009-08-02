@@ -23,9 +23,9 @@
 loadFiles :- 
 	write('%% Loading ADORE kernel'),
 	[debug], [trace], [config],  [metamodel], [actions], [functions], 
-	[conflicts], 
+	[conflicts], [helpers], 
 	write('%% Loading Transformations'),
-	loadTransfo('adore2dot').
+	loadTransfo('adore2dot'), loadTransfo('adore2png').
 
 
 loadTransfo(Name) :- 

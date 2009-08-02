@@ -22,6 +22,7 @@
 
 path(X,Y) :- waitFor(Y,X).
 path(X,Y) :- isGuardedBy(Y,X,_,_).
+path(X,Y) :- weakWait(Y,X).
 
 existsPath(X,Y) :- path(X,Y).
 existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).
