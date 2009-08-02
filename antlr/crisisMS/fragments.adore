@@ -1,0 +1,225 @@
+//
+//To build the initial scenario
+
+merge  cms::resolve  { 
+ apply toSet => selectedMission;
+ apply toSet => internalRessource;
+ apply toSet => externalRessource;
+}
+
+
+fragment notify(observer, what, who) {
+  variables  {s as service;
+              b as boolean ;
+              a as boolean }
+  activities {
+    h)  hook() ;
+    notify) observer::notify(what,who);
+  relations  { ^ < h;  h < $; h<notify;  }
+}
+
+
+
+//extension 1a de 4.2.1
+//1a. Coordinator is not logged in. 
+//1a.1 Coordinator authenticates with System (UC 10). 
+//1a.2 Use case continues with step 1. 
+
+//Xor???
+//bizarre loinn et authent.. et UC 10... ras le bol
+fragment log {
+  variables  {s as service;
+              b as boolean ;
+              a as boolean }
+  activities {
+    logTest) b := s::isLogged();
+    h)  hook() ;
+    authent) a := s::authenticates(); //Uc 10???
+    h1) hook() 
+    e) throw accessDenied;}
+  relations  { ^ < logTest; logTest<h when b ; h < $; 
+              logTest < authent when !b; 
+                 authent<h1 when a;  h1<$;
+		 authent<e when !a;  }
+}
+
+
+
+
+//extension 5a de 4.2.1
+//5a. External resource is not available after step 5. 
+//5a.1 Use case continues in parallel with step 2. 
+//bizarre elle est la meme que la 4a mais en reduction
+//Il faudrait un delegate qui prenne nop
+fragment ressourceAvailabilityDegrated { 
+  variables  {s as service;
+              v as ressource ;
+              b as boolean;
+ 	      r as ressource ; }
+  activities {
+    availabilityTest) b :=  ressourceManager::isAvailable(v);
+    h)  hook() ; 
+    cont) nop;
+  }
+  relations  { ^ < availabilityTest; availabilityTest<h when b ; h < $; 
+              availabilityTest < nop when !b; nop<$;
+  }
+}
+
+
+
+//4a. Internal resource is not available after step 4. 
+//4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5).
+//extension 4a de 4.2.1
+//Il faudrait un delegate qui prenne r ask et ass
+fragment ressourceAvailability { 
+  variables  {s as service;
+              v as ressource ;
+              b as boolean;
+ 	      r as ressource ; }
+  activities {
+    availabilityTest) b :=  ressourceManager::isAvailable(v);
+    h)  hook() ; 
+    ask) r := ressourceManager::getCorrespondingExternalRessource(v);
+    ass) cms::assignExternalRessources(er,m);
+  }
+  relations  { ^ < availabilityTest; availabilityTest<h when b ; h < $; 
+              availabilityTest < ask when !b; ask<ass ;  ass<$;
+  }
+}
+
+
+
+
+
+
+//extension 6a de 4.2.1
+//6a. System determines that the crisis location is unreachable by standard transportation means, but reachable 
+by helicopter. 
+//6a.1 System informs the Coordinator about the problem. 
+//6a.2 Coordinator instructs System to execute a helicopter transport mission (UC 09). 
+//6a.3 Use case continues with step 6. 
+//une constante de temps?
+//pbme dans un lien faible... je rajoute l'ordre.. l'aurions nous bien detecté?...
+
+//je reflechis en unaire... je me fais du souci sur ce que je voudrais pour passer à N
+//ne faudrait il pas que l'helicopter soit cree au plus une fois??
+//comment le passage à n va gerer ca???
+fragment Unreachable { 
+  variables  {timeout as integer;
+             
+              b as boolean;
+ 	       }
+  activities {
+    a0) timeout := '0' as integer;
+    timestart) timeout := Timer::timeout('2');
+    h)  hook() ; 
+    test) b := diff(timeout,'0' as integer);
+    e) throw unreachable;
+  }
+  relations  { ^ < a0; a0< timestart; ^< h ;  h<< test; timestart<< test; a0 < test;
+               test < $ when !b;
+               test < e when b; }
+}
+
+fragment reachByHelicopter { 
+  variables  {s as service;
+              m as mission ;
+              b as boolean;
+ 	      r as ressource ; }
+  activities {
+    a0a) catch unreachable; //on hook catch unreachable 
+    a0b) hook;
+    a1) coordinatorSystem::notify('locationUnreachable', r, m);
+    a2) m := cms::createHelicopterTransportMission(m);
+    a3) call; //pour le distinguer du call...
+    a4) r := getRessource(m);
+    a5) cms::manageRessource(ir,m);
+  }
+  relations  { ^ < a0a; ^ < a0b; h<<$;a5<<$;
+  	      a0a< a1; a1< a2 ; a2< a3; a3 < a4; a4 <a5; } 
+}
+
+
+
+
+
+//6b  du  4.2.1 non faite...
+//pour plein de raisons
+//que se passe-til si j'ai recu l'alerte et est lancé un helicopter
+//avant de recevoir l'avsi
+//je n'ai pas defini le secnario du worker etc...
+
+//6c  du  4.2.1 non faite...
+//bizarre c'est peut etre la mienne en fait comme je ne savais pas
+//detecter le cote unreachable.... a revoir probablement...
+
+//7a  du  4.2.1 
+//pas assez claire...
+//cette approche ne correspond pas bien je m'emmelle encore parce que
+//je pense en local 
+//7a. One or more further missions are required in step 6. 
+//7a.1 Use case continues in parallel with step 2. 
+fragment otherMissionRequired { 
+  variables  {s as service;
+              m as mission ;
+              b as boolean;
+ 	      r as ressource ; }
+  activities {
+    test) b := cms::otherMissionRequired();
+    a0) hook;
+    a1) m :=  cms::missionToDo();
+    a2) cms::manageRessource(m);
+  }
+  relations  { ^ < test; ^ < a0;a0<$;
+  	      a1< a2 ; } 
+}
+
+
+//1.a 1.b from 4.2.2
+//Incoherent dans ma comprehesnion..si on perd la connection on envoie
+//les images....
+fragment reach { 
+  variables  {s as service;
+              m as mission ;
+              b as boolean;
+ 	      r as ressource ; }
+  activities {
+    a0a) catch unreachable; //on hook catch unreachable 
+    a0b) hook;
+    a1) feeder := SurveillanceSystem::getVideo();
+    a2) coordinatorSystem::setVideo(feeder);
+    a3) call; //pour le distinguer du call...
+    a4) r := getRessource(m);
+    a5) cms::manageRessource(ir,m);
+  }
+  relations  { ^ < a0a; ^ < a0b; h<<$;a5<<$;
+  	      a0a< a1; a1< a2 ; a2< a3; a3 < a4; a4 <a5; } 
+}
+
+
+//besoin d'en mettre sur plusieurs... elles sont liées entre elles... 
+// comment capturer l'info????
+
+merge cms::resolve { 
+ apply log => a1;
+ apply ressourceAvailability => a4a2;
+ apply ressourceAvailabilityDegrated => a5a2;
+ apply reachByHelicopter => a4a3;
+ apply reachByHelicopter => a5a3;
+
+}
+
+merge cms::manageRessource  { 
+ apply unreachable => a1;
+ apply otherMissionRequired => a1;
+}
+
+
+
+
+
+merge cms::witnessReportCapture  { 
+ apply unreachable => a1;a2;
+}
+
