@@ -56,6 +56,7 @@ tokens {
 	SET;
 	ANONYMOUS;
 	PARAMS;
+	FIELDS;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
@@ -130,11 +131,16 @@ nplist
 	|	left=ID COLON varaccess COMMA nplist 	-> ^(BIND varaccess $left) nplist ;
 
 varaccess
-	:	id=ID					-> ^(SCALAR $id)
+	:	id=ID 					-> ^(SCALAR $id)
+	|	id=ID fieldaccess+ STAR?		-> ^(SCALAR $id ^(FIELDS fieldaccess+ STAR?))
 	|	id=ID STAR				-> ^(SET $id)
 	|	value=STR AS type=ID			-> ^(ANONYMOUS $value $type)
 	;	
-		
+
+fieldaccess
+	:	DOT i=ID				-> $i
+	;
+
 rels	
 	:	RELS LFT_BRCKT  rel+ RGHT_BRCKT 	-> ^(RELATIONS rel+);
 

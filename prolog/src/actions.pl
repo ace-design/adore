@@ -115,7 +115,7 @@ setInvokedService(A,I) :-
 
 %% setInvokedOperation/2: setInvokedOperation(A,I)
 setInvokedOperation(A,_) :- %% \not \exists a \in Activity* => fail
-	\+ activity(A), !, 
+                       	\+ activity(A), !, 
 	dfail(set,'setInvokedOperation/2: Unknown activity \'~w\'!',A).
 setInvokedOperation(A,_) :- %% kind(a) != invoke => fail
 	\+ hasForKind(A,invoke), !, 
@@ -209,6 +209,19 @@ addAsOutput(_,A) :- %% \not \exists a \in Activity* => fail
 addAsOutput(V,A) :- 
 	assert(usesAsOutput(A,V)), 
 	dinfo(set,'Variable \'~w\' used as \'~w\' input.',[V,A]).
+
+%% accessToField/3: accesstoField(A,V,L)
+setFieldAccess(A,_,_) :-%% \not \exists a \in Activity* => fail
+	\+ activity(A), !, 
+	dfail(set,'setFieldAccess/3: Unknown activity \'~w\'!',A).
+setFieldAccess(_,V,_) :-  %% \not \exists v \in Variable* => fail
+	\+ variable(V), !, 
+	dfail(set,'setFieldAccess/3: Unknown variable \'~w\'!',V).
+setFieldAccess(_,_,[]) :- %% isEmpty(l) => fail
+	dfail(set,'setFieldAccess/3: Empty field list!',[]).
+setFieldAccess(A,V,L) :- 
+	assert(accessToField(A,V,L)),
+	dinfo(set,'Activity \'~w\' access to fields ~w of variable \'~w\'',[A,L,V]).
 
 %%%%
 %% Relations

@@ -1,14 +1,17 @@
+
 fragment e1<x,y> {
   variables  {}
   activities { h)  hook() ; }
   relations  { ^ < h; h < $; }
 }
 
+
 fragment e2 {
   variables  {}
   activities { h)  hook() ; }
   relations  { ^ < h; h < $; }
 }
+
 
 orchestration helloWorld::sayHello {
   variables { 
@@ -17,14 +20,15 @@ orchestration helloWorld::sayHello {
   }
   activities {
     a1) name := receive();
-    a2) name := stringConcat(prefix,name);
-    a20) foo::bar(geek: prefix);
+    a2) name := stringConcat(prefix, name.length.duration*);
     a3) reply(name);
   }
   relations { a1 < a2; a2 < a3; }
 }
 
+/**
 composition helloWorld::sayHello { 
       apply e1(x: 'X', y: 'bar') => a2 ; 
       apply e2 => a3;
 }
+**/

@@ -227,16 +227,21 @@ vlist [String actId, String cxt]
 vlist 	[String actId, String cxt]
  	returns [ArrayList<String> identifiers, ArrayList<String> facts]
 	@init{ $identifiers = new ArrayList<String>(); $facts = new ArrayList<String>(); }
-	: ((v=varaccess[$cxt])			{ safeAdd($facts,$v.facts);
+	: ((v=varaccess[$cxt,$actId])		{ safeAdd($facts,$v.facts);
 						  $identifiers.add($v.id); }
-	   |^(BIND b=varaccess[$cxt] m=ID) 	{ safeAdd($facts,$b.facts);
+	   |^(BIND b=varaccess[$cxt,$actId] m=ID) 	
+	   					{ safeAdd($facts,$b.facts);
 	   					  $identifiers.add($b.id);
 	   			  	 	  $facts.add("setMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$b.id+")"); 
 	   					})*;
-varaccess	[String cxt]
+varaccess	[String cxt, String actId]
  		returns [ArrayList<String> facts, String id]
  	@init{ $facts = new ArrayList<String>(); }
  	:	^(SCALAR n=ID)			{ $id = $cxt +"_" + $n.text;         }
+ 	|	^(SCALAR n=ID fields[$cxt+"_"+$actId, $cxt+"_"+$n.text])	
+ 						{ $id = $cxt +"_" + $n.text;
+ 						  safeAdd($facts, $fields.facts); 
+ 						}
 	|	^(SET n=ID)			{ $id = $cxt + "_" + $n.text+"_star"; }
 	|	^(ANONYMOUS v=STR t=ID)		{ String id = generateAnonymousId();
 						  $id = $cxt+"_" + id;
@@ -248,6 +253,12 @@ varaccess	[String cxt]
 						}
  	;
 	   			
+fields [String actId, String vId]
+	returns [ArrayList<String> facts]
+	@init{ $facts = new ArrayList<String>(); String access=""; }
+	: ^(FIELDS (i=ID { access += $i +","; })+ (i=ID STAR { access += $i+"_star,";})?)	
+						{ $facts.add("setFieldAccess("+$actId+","+$vId+",["+access.substring(0,access.length() -1)+"])"); }
+	;
 rels	[String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }

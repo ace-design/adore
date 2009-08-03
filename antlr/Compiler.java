@@ -39,7 +39,7 @@ public class Compiler {
     public ArrayList<String> run(String path) throws Exception {	
 	CommonTree ast = getAST(new FileReader(path));
 	if(debug)
-	    System.out.println(ast.toStringTree());
+	    System.err.println(ast.toStringTree());
 	return processAST(ast);
     }
 

@@ -61,6 +61,7 @@ ASSIGN:		':=';
 COMMA:		',';
 COLON:		':';
 INTO:		'=>';	
+DOT:		'.';
 
 /** Expected tokens **/
 ID:		('a'..'z') ('A'..'Z'|'0'..'9'|'a'..'z')* ;
@@ -69,5 +70,6 @@ STR:	'\'' ~'\''* '\'';
 	
 /** IGNORED **/
 INLN_COM: 	'//' ~('\r' | '\n')* NL 	{ skip(); };
+COMMENT	:	'/*' .* '*/'		{ skip(); };
 NL: 		('\r'? '\n')+			{ skip(); };
 WSPCE: 		(' '|'\t')+ 			{ skip(); };

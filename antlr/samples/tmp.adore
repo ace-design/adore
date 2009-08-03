@@ -1,16 +1,15 @@
 
-orchestration peanoMachine::isZero {
-  variables {
-    n* as integer;
-    const zero := '0' as integer;
-    r as boolean;
-  }
-  activities {
-    a0) n := receive();
-    a1) r := equals(n*,'0' as integer);
-    a2) reply(r);
-  }
-  relations { a0 < a1; a1 < a2; }
-}
-
-
+orchestration cms::setNewCrisisInformation{
+ variables {
+   i as crisisInformation;
+   relevant as boolean;
+ }
+ activities {
+   a0) (i) := receive();
+   //a12) coordinatorSystem::notify('newInfo'  as string,i);
+   a1) relevant := cms::isRelevantInformation(i);
+   a10) ressourceManager::notify(i);
+   r) reply();
+ }
+ relations { a0 < a1; a1 < a1O when relevant; a1 < r when !relevant;}
+} 

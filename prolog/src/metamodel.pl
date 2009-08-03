@@ -37,6 +37,7 @@
 %% K: a valid activity kind
 %% I: an a priori unknown identifier 
 %% S: a "string" literal
+%% L: A prolog list
 %% 'valid' means syntactic & existing when needed 
 
 %%%%
@@ -77,6 +78,7 @@
 
 :- dynamic usesAsInput/2.      %%  addAsInput(V,A)
 :- dynamic usesAsOutput/2.     %%  addAsOutput(V,A)
+:- dynamic accessToField/3.    %% setFieldAccess(A,V,L).
 
 
 %%%%
@@ -88,7 +90,12 @@
 :- dynamic isGuardedBy/4.      %%  defGuard(A,A,V,true|false)
 
 %%%%
-%% Actions over the metamodel (aka merge)
+%% Policies
+%%%%
+
+
+%%%%
+%% Composition directive
 %%%%
 
 :- dynamic context/1.          %% defCompositionContext(P)
