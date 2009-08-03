@@ -66,6 +66,11 @@ import java.io.*;
   private String generateFieldAccess(){
     return "field_" + ANONYMOUS_CPT++;
   }  
+
+  private String generateBlock(){
+    return "block_" + ANONYMOUS_CPT++;
+  }  
+  
 }
 
   
@@ -218,15 +223,7 @@ kind	[String actId]
 					  $facts.add("setFunction("+$actId+","+$fct.text+")");
 					}
 	;
-/**
-vlist [String actId, String cxt]
- 	returns [ArrayList<String> identifiers, ArrayList<String> facts]
-	@init{ $identifiers = new ArrayList<String>(); $facts = new ArrayList<String>(); }
-	: ((v=ID)		{ $identifiers.add($cxt+"_"+$v.text); }
-	   |^(BIND v=ID m=ID) 	{ $identifiers.add($cxt+"_"+$v.text);
-	   			  $facts.add("setMessageBinding("+$cxt+"_"+$actId+","+$m.text+","+$cxt+"_"+$v.text+")"); 
-	   			})*;
-**/
+
 vlist 	[String actId, String cxt]
  	returns [ArrayList<String> identifiers, ArrayList<String> facts]
 	@init{ $identifiers = new ArrayList<String>(); $facts = new ArrayList<String>(); }
@@ -293,8 +290,18 @@ merge 	returns [ArrayList<String> facts]
 directive [String cxt]
 	returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	: ^(MERGE_FRAG e=ID a=ID { String id = generateAnonymousApply();
-				   $facts.add("defApply("+id+","+$cxt+","+$cxt+"_"+$a.text+","+$e.text+")"); }
-			(^(BIND v=STR x=ID) { $facts.add("setApplyParam("+id+","+$x.text+","+$v.text+")"); })*)
+	: ^(MERGE_FRAG e=ID block[$cxt] 	{ String id = generateAnonymousApply();
+						  $facts.add($block.fact);
+					   	  $facts.add("defApply("+id+","+$cxt+","+$block.id+","+$e.text+")"); 
+					   	 }
+			(^(BIND v=STR x=ID)	{ $facts.add("setApplyParam("+id+","+$x.text+","+$v.text+")"); })*)
 	;
-	
+
+block [String cxt]
+	returns [String fact, String id]
+	@init{ String members = ""; }
+	: ^(BLOCK (a=ID { members += $cxt+"_"+$a.text+","; })+) 	
+							{ $id = generateBlock(); 
+							  $fact = "defActivityBlock("+$id+",["+members.substring(0,members.length()-1)+"])";
+							}
+	;

@@ -290,6 +290,17 @@ defCompositionContext(P) :-
 	assert(context(P)),
 	dinfo(def,'Context  \'~w\' created with success!',P).
 
+%% defActivityBlock/2: defActivityBlock(I,L)
+defActivityBlock(I,_) :- 
+	activityBlock(I,_), !, 
+	dfail(def,'defActivityBlock/2: Block identifier \'~w\' still exists!',I).
+defActivityBlock(_,L) :- 
+	\+ maplist(activity,L), !,
+	dfail(def,'defActivityBlock/2: Unknown activity in  ~w!',[L]).
+defActivityBlock(I,L) :- 
+	assert(activityBlock(I,L)),
+	dinfo(def,'Block \'~w\' containing activities ~w created!',[I,L]).
+
 %% defApply/4: defApply(I,P,A,P).
 defApply(I,_,_,_) :- %% \exists i \in Id(Context*) => fail
 	applyFragment(I,_,_,_), !, 
@@ -297,9 +308,15 @@ defApply(I,_,_,_) :- %% \exists i \in Id(Context*) => fail
 defApply(_,P,_,_) :- %% \not \exists p \in Process* => fail
 	\+ process(P), !, 
 	dfail(def,'defApply/4: Unkown process \'~w\'!',P).
-defApply(_,P,A,_) :- %% \not \exists a \in Activities(p) => fail
-	\+ isContainedBy(A,P), !, 
-	dfail(def,'defApply/4: Activity \'~w\' is not contained by process \'~w\'!',[A,P]).
+defApply(_,_,_,F) :- %% \not \exists p \in Fragment* => fail
+	\+ isFragment(F), 
+	dfail(def,'defApply/4: Unkown fragment \'~w\'!',F).
+
+defApply(_,P,B,_) :- %% \not \exists a \in Activities(p) => fail
+	findall(A,isContainedBy(A,P),Acts),
+	activityBlock(B,Content),
+	\+ subset(Content,Acts), !,
+	dfail(def,'defApply/4: Activities in ~w are not strictly contained by process \'~w\'!',[Content,P]).
 defApply(I,O,A,F) :- 
 	assert(applyFragment(I,O,A,F)),
 	dinfo(def,'Directive apply \'~w\' to \'~w\' successfuly created in context \'~w\' with id \'~w\'!',[F,A,O,I]).

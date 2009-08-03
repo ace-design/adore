@@ -57,6 +57,7 @@ tokens {
 	ANONYMOUS;
 	PARAMS;
 	FIELDS;
+	BLOCK;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
@@ -158,10 +159,22 @@ merge_core
 	;
 
 directive
-	:	APPLY e=ID INTO a=ID SEMI 				-> ^(MERGE_FRAG $e $a)
-	| 	APPLY e=ID LFT_PAREN  pBind RGHT_PAREN INTO a=ID SEMI	-> ^(MERGE_FRAG $e $a pBind)
+	:	APPLY e=ID INTO actBlock  SEMI 		
+							-> ^(MERGE_FRAG $e actBlock)
+	| 	APPLY e=ID LFT_PAREN  pBind RGHT_PAREN INTO  actBlock  SEMI	
+							-> ^(MERGE_FRAG $e actBlock pBind)
 	;
 
+actBlock
+	:	a=ID	-> ^(BLOCK $a)
+	|	LFT_BRCKT actList RGHT_BRCKT -> ^(BLOCK actList)
+	;
+
+actList
+	: 	a=ID					-> $a
+	|	a=ID COMMA actList			-> $a actList
+	;
+	
 pBind  
 	:	left=ID COLON s=STR 			-> ^(BIND $s $left)
 	|	left=ID COLON s=STR COMMA pBind 	-> ^(BIND $s $left) pBind ;

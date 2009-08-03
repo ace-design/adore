@@ -99,7 +99,8 @@
 %%%%
 
 :- dynamic context/1.          %% defCompositionContext(P)
-:- dynamic applyFragment/4.    %% defApply(I,P,A,P)
+:- dynamic activityBlock/2.    %% defActivityBlock(I,L)
+:- dynamic applyFragment/4.    %% defApply(I,P,I,P)
 :- dynamic applyParameter/3.   %% setApplyParam(I,I,S)
 
 
