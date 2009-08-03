@@ -15,10 +15,10 @@ orchestration peanoMachine::add {
     a0) (a,b) := receive();
     a1) c := peanoMachine::isZero(b);
     a2) reply(a);
-    a3) a := peanoMachine::next(n: a);
-    a4) b := peanoMachine::pred(n: b);
+    a3) a := peanoMachine::next(a);
+    a4) b := peanoMachine::pred(b);
     a5) r := peanoMachine::add(a,b);
-    a6) reply(r);
+    a6) reply(result: r);
   }
 
   relations {
@@ -26,5 +26,58 @@ orchestration peanoMachine::add {
     a1 < a3 when !c; a1 < a4 when !c;
     a3 < a5; a4 < a5; a5 < a6;
   }
+}
+
+orchestration peanoMachine::mult {
+
+  variables {
+    a as integer; b as integer;
+    c as boolean; tmp as integer;
+    r as integer;
+  }
+
+  activities {
+    a0) (a,b) := receive();
+    a1) c := peanoMachine::isZero(b);
+    a2) reply('0' as integer);
+    a3) b := peanoMachine::pred(b);
+    a4) tmp := peanMachine::mult(a,b);
+    a5) r := peanoMachine::add(a,tmp);
+    a6) reply(result: r);
+  }
+
+  relations {
+    a0 < a1; a1 < a2 when c;
+    a1 < a3 when !c; a3 < a4; a4 < a5; a5 < a6;
+  }
+}
+
+
+fragment swapReceivedData<function> {
+
+  variables {
+    shouldSwap as boolean;
+    x as integer; y as integer;
+    tmp as integer;
+  }
+
+  activities {
+    h) (x,y) := hook();
+    s0) shouldSwap := function(x,y);
+    s1) tmp := x;
+    s2) x := y;
+    s3) y := tmp; 
+  }
+
+  relations {
+    ^ < h; 
+    h < s0;
+    s0 < s1 when shouldSwap; s1 < s2; s2 < s3; s3 < $;
+    s0 < $  when !shouldSwap;
+  }
+}
+
+composition peanoMachine::add {
+  apply swapReceivedData(function: 'isLesserThan') => a0;
 }
 

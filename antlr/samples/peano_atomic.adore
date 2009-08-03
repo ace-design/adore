@@ -11,7 +11,7 @@ orchestration peanoMachine::isZero {
   activities {
     a0) n := receive();
     a1) r := equals(n,'0' as integer);
-    a2) reply(r);
+    a2) reply(result: r);
   }
   relations { a0 < a1; a1 < a2; }
 }
@@ -24,7 +24,7 @@ orchestration peanoMachine::next {
   activities {	
     a0) n := receive();
     a1) n := plus(n,'1' as integer);
-    a2) reply(n);
+    a2) reply(result: n);
   } 
   relations { a0 < a1; a1 < a2; } 
 }
@@ -37,7 +37,7 @@ orchestration peanoMachine::pred {
   activities {	
     a0) n := receive();
     a1) n := minus(n,'1' as integer);
-    a2) reply(n);
+    a2) reply(result: n);
   } 
   relations { a0 < a1; a1 < a2; } 
 }

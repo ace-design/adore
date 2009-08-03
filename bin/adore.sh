@@ -21,9 +21,10 @@
 ####
   
 SWIPL_HOME='/opt/local/bin/'
-COMPILER='../antlr/genFacts.sh'
 
 ## Do not edit after this line ##
+
+COMPILER='adore2facts.sh'
 
 if [ -z $ADORE_HOME ]
     then
@@ -58,5 +59,4 @@ fi
 echo "%%%%%%"
 
 
-
-$SWIPL_HOME/swipl -s src/init.pl -g [$FILE]
+$SWIPL_HOME/swipl -s $ADORE_HOME/prolog/src/init.pl -g [$FILE]

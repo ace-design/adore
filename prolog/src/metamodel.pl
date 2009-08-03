@@ -59,7 +59,6 @@
 :- dynamic hasForKind/2.       %%  setActivityKind(A,K)
 :- dynamic isContainedBy/2.    %%  setContainment(A,P)
 
-
 :- dynamic hasForService/2.    %%  setInvokedService(A,I)
 :- dynamic hasForOperation/2.  %%  setInvokedOperation(A,I)
 :- dynamic usesAsBinding/3.    %%  setMessageBinding(A,I,V)

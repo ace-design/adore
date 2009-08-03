@@ -111,7 +111,8 @@ kind
 	
 content	
 	:	kind inputs 				-> ^(KIND kind) inputs ^(OUTS)
-	|	l=ID ASSIGN r=ID			-> ^(KIND ASSIGNMENT) ^(INS $r) ^(OUTS $l)
+	|	l=ID ASSIGN r=ID			-> ^(KIND ASSIGNMENT) ^(INS ^(SCALAR $r)) ^(OUTS ^(SCALAR $l))
+	|	l=ID STAR ASSIGN r=ID STAR 		-> ^(KIND ASSIGNMENT) ^(INS ^(SET $r)) ^(OUTS ^(SET $l))
 	|	outputs kind inputs			-> ^(KIND kind) inputs outputs;
 
 outputs	
