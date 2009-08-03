@@ -55,20 +55,20 @@ orchestration cms::manageRessource{
 
 
 
-orchestration cms::setNewCrisisInformation{
-  variables {
-    i as crisisInformation;
-    relevant as boolean;
-  }
-  activities {
-    a0) (i) := receive();
-    //a12) coordinatorSystem::notify('newInfo'  as string,i);
-    a1) relevant := cms::isRelevantInformation(i);
-    a10) ressourceManager::notify(i);
-    r) reply();
-  }
-  relations { a0 < a1; a1 < a1O when relevant; a1 << r when !relevant;}
-}
+//orchestration cms::setNewCrisisInformation{
+//  variables {
+//    i as crisisInformation;
+//    relevant as boolean;
+//  }
+//  activities {
+//    a0) (i) := receive();
+//    //a12) coordinatorSystem::notify('newInfo'  as string,i);
+//    a1) relevant := cms::isRelevantInformation(i);
+//    a10) ressourceManager::notify(i);
+//    r) reply();
+//  }
+//  relations { a0 < a1; a1 < a1O when relevant; a1 < r ;}
+//}
 
 
 // 4.2.2
@@ -87,7 +87,7 @@ orchestration cms::witnessReportCapture {
     a1) wi := coordinatorSystem::provideWitnessInformation();
     a2) li := coordinatorSystem::provideLocationInformation();
     a2a12) adress := phoneCompany::getClientInformation(wi);
-    a2a3) exact := cms::validateInformation(adressInformation,li);
+    a2a3) exact := cms::validateInformation(adress,li);
     a3) cl := cms::computeCheckList();
     a4) ci := coordinatorSystem::provideCrisisInformation(cl);
     a5) setCurrentCrisisActive(cms,ci);
@@ -124,10 +124,7 @@ orchestration cms::assignExternalResource {
   variables {
     m as mission;
     eS as externalRessource;
-    li as locationInformation;
-    adressInformation as adressInformation;
-    accept as boolean;
-    ci as crisisInformation;
+    allocatedRessource as externalRessource;
   }
   activities {	
     a0) m := receive();
@@ -150,10 +147,10 @@ orchestration cms::setNewVictimInformation {
     a0) info := receive();
    //System requests victim’s medical history information "from all"connected HospitalResourceSystems. 
    a1) hostpitalInfo := hospitalResourceSystems::getInfo(info);
-   a2) reply(hospitalInfo);
+   a2) reply(hostpitalInfo);
   } 
-  relations { a0 < a1; a1 < a2; a2b<a2c ;a2<a3;a3<a4;a4<a9; } 
-}
+  relations { a0 < a1; a1 < a2; } 
+
 
 
 
@@ -161,6 +158,7 @@ orchestration cms::setNewVictimInformation {
 
 
 //4.2.5
+//n'importequoi a revoir totalement
 orchestration superObserver::executeMission {
   variables {
     m as mission;
@@ -175,18 +173,18 @@ orchestration superObserver::executeMission {
     //SuperObserver feeds System with crisis information 
     //(one by one according to the check list)
     //a2 onSet(cL,q,next,all)   
-    a2) q := next(cl);
+    a2) q := next(cL);
     a2b) ci := superObserver::getInformation(q);
     a2c) cms::setNewCrisisInformation(ci);
     // end set
     //System suggests crisis-speciﬁc missions to SuperObserver
     a3) mission* := cms::missionsToDo();
    //SuperObserver notiﬁes System of the type of mission he wants to create...step 4 to 8
-    a4) superObserver::dealWithMissions(missions*);
+    a4) superObserver::dealWithMissions(mission*);
    //SuperObserver judges that his presence is no longer needed at the crisis location. 
     a9) ressourceManager::setExcutionEnd(m);
   } 
-  relations { a0 < a1; a1 < a2; a2b<a2c ;a2<a3;a3<a4;a4<a9; } 
+  relations { a0 < a1; a1 < a2; a2<a2b; a2b<a2c ;a2<a3;a3<a4;a4<a9; } 
 }
 
 
@@ -217,9 +215,9 @@ orchestration workerSystem::executeMission {
     //System suggests crisis-speciﬁc missions to SuperObserver
     a3) mission* := cms::missionsToDo();
    //SuperObserver notiﬁes System of the type of mission he wants to create...step 4 to 8
-    a4) superObserver::dealWithMissions(missions*);
+    a4) superObserver::dealWithMissions(mission*);
    //SuperObserver judges that his presence is no longer needed at the crisis location. 
     a9) ressourceManager::setExcutionEnd(m);
   } 
-  relations { a0 < a1; a1 < a2; a2b<a2c ;a2<a3;a3<a4;a4<a9; } 
+  relations { a0 < a1a; a1a < a1b; a0<a2a; a2a<a2b ;a2b<x;a1b<a3;a3<a4;a4<a9; } 
 }
