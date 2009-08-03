@@ -109,13 +109,39 @@ adore2dot_genVar(A,V,R) :-
 	swritef(R,'%w: \'%w\'',[Part,Val]), !.
 adore2dot_genVar(A,V,R) :- 
 	usesAsBinding(A,V,Part),
-	getPreviousName(V,Name),
-	swritef(R,'%w: %w',[Part,Name]), !.
+	adore2dot_genVarLabel(V,Label),
+	swritef(R,'%w: %w',[Part,Label]), !.
 adore2dot_genVar(_,V,R) :- 
 	isConstant(V), hasForInitValue(V,Val),
 	swritef(R,'\'%w\'',[Val]),!.
 adore2dot_genVar(_,V,R) :- 
-	getPreviousName(V,R).
+	adore2dot_genVarLabel(V,R).
+
+%% A var label is it's user readable name
+adore2dot_genVarLabel(V,Label) :- 
+	getVariable(V,Tmp), %% a variable, not an anonymous field access
+	getPreviousName(Tmp,OldName), %% The REAL name, not the renamed one
+	adore2dot_suffixToStar(OldName, PrettyName), %% '_star' <-> '*'
+	adore2dot_genFields(V,Fields), %% fields as x.y.z
+	swritef(Label,"%w%w",[PrettyName,Fields]). %% that's all folks
+
+adore2dot_genFields(I,'') :- \+ fieldAccess(I,_,_), !.
+adore2dot_genFields(I,R) :- fieldAccess(I,_,L), adore2dot_showAsPoint(L,R).
+
+adore2dot_showAsPoint([],'').
+adore2dot_showAsPoint([H],R) :-  
+	adore2dot_suffixToStar(H,V),swritef(R,'.%w',[V]),!.
+adore2dot_showAsPoint([H|T],R) :- 
+	adore2dot_showAsPoint(T,O),
+	swritef(R,".%w%w",[H,O]).
+
+adore2dot_suffixToStar(V,R) :- 
+	\+ is_list(V), string_to_list(V,L), adore2dot_suffixToStar(L,R).
+adore2dot_suffixToStar([],'') :- !.
+adore2dot_suffixToStar("_star",'*')  :- !.
+adore2dot_suffixToStar([H|T],R) :- 
+	string_to_list(C,[H]), adore2dot_suffixToStar(T,O),
+	swritef(R,"%w%w",[C,O]).
 
 %%%%
 %% Orders: 

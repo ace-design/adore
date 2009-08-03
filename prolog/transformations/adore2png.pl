@@ -32,4 +32,3 @@ display(P,Tmp) :-
 	adore2png_param(viewer,E), swritef(Cmd,'%w %w',[E,Tmp]), shell(Cmd).
 	
 	
-	

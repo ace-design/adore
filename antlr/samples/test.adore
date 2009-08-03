@@ -17,10 +17,11 @@ orchestration helloWorld::sayHello {
   variables { 
     name as string; 
     const prefix := 'Hello, ' as string;
+    v as record;
   }
   activities {
     a1) name := receive();
-    a2) name := stringConcat(prefix, name.length.duration*);
+    a2) name.toto* := stringConcat(prefix, name.length*);
     a3) reply(name);
   }
   relations { a1 < a2; a2 < a3; }

@@ -190,8 +190,8 @@ flagAsSet(V) :-
 
 %% addAsInput/2: addAsInput(V,A)
 addAsInput(V,_) :- %% \not \exists v \in Variable* => fail
-	\+ variable(V), !, 
-	dfail(set,'addAsInput/2: Unknown variable \'~w\'!',V).
+	getVariable(V,Rv), \+ variable(Rv), !, 
+	dfail(set,'addAsInput/2: Unknown variable \'~w\'!',Rv).
 addAsInput(_,A) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(set,'addAsInput/2: Unknown activity \'~w\'!',A).
@@ -201,8 +201,8 @@ addAsInput(V,A) :-
 
 %% addAsOutput/2: addAsOutput(V,A)
 addAsOutput(V,_) :- %% \not \exists v \in Variable* => fail
-	\+ variable(V), !, 
-	dfail(set,'addAsOutput/2: Unknown variable \'~w\'!',V).
+	getVariable(V,Rv), \+ variable(Rv), !, 
+	dfail(set,'addAsOutput/2: Unknown variable \'~w\'!',Rv).
 addAsOutput(_,A) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(set,'addAsOutput/2: Unknown activity \'~w\'!',A).
@@ -210,18 +210,18 @@ addAsOutput(V,A) :-
 	assert(usesAsOutput(A,V)), 
 	dinfo(set,'Variable \'~w\' used as \'~w\' input.',[V,A]).
 
-%% accessToField/3: accesstoField(A,V,L)
-setFieldAccess(A,_,_) :-%% \not \exists a \in Activity* => fail
-	\+ activity(A), !, 
-	dfail(set,'setFieldAccess/3: Unknown activity \'~w\'!',A).
-setFieldAccess(_,V,_) :-  %% \not \exists v \in Variable* => fail
+%% fieldAccess/3: accesstoField(I,V,L)
+createFieldAccess(I,_,_) :- %% \exists i \in FieldAccess* => fail
+	fieldAccess(I,_,_), !, 
+	dfail(create,'Cannot create field access \'~w\': it exists!',I).
+createFieldAccess(_,V,_) :-  %% \not \exists v \in Variable* => fail
 	\+ variable(V), !, 
-	dfail(set,'setFieldAccess/3: Unknown variable \'~w\'!',V).
-setFieldAccess(_,_,[]) :- %% isEmpty(l) => fail
-	dfail(set,'setFieldAccess/3: Empty field list!',[]).
-setFieldAccess(A,V,L) :- 
-	assert(accessToField(A,V,L)),
-	dinfo(set,'Activity \'~w\' access to fields ~w of variable \'~w\'',[A,L,V]).
+	dfail(create,'createFieldAccess/3: Unknown variable \'~w\'!',V).
+createFieldAccess(_,_,[]) :- %% isEmpty(l) => fail
+	dfail(set,'createFieldAccess/3: Empty field list!',[]).
+createFieldAccess(I,V,L) :- 
+	assert(fieldAccess(I,V,L)),
+	dinfo(create,'Creating named access \'~w\' to fields ~w of variable \'~w\'',[I,L,V]).
 
 %%%%
 %% Relations

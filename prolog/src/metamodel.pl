@@ -78,7 +78,7 @@
 
 :- dynamic usesAsInput/2.      %%  addAsInput(V,A)
 :- dynamic usesAsOutput/2.     %%  addAsOutput(V,A)
-:- dynamic accessToField/3.    %% setFieldAccess(A,V,L).
+:- dynamic fieldAccess/3.      %%  sFieldAccess(I,V,L).
 
 
 %%%%

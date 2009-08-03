@@ -20,9 +20,24 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+%%%%
+%% Relations between activities
+%%%%
+
+%% path/2: path(+A,+B) => a direct path exists between A and B
 path(X,Y) :- waitFor(Y,X).
 path(X,Y) :- isGuardedBy(Y,X,_,_).
 path(X,Y) :- weakWait(Y,X).
 
+%% existsPath/2: existsPath(+A,+B) => transitive closure for path
 existsPath(X,Y) :- path(X,Y).
 existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).
+
+
+%%%%
+%% Access to variable
+%%%%
+
+%% getVariable/2: getVariable(+V,-R): retrieve the variable associated to V
+getVariable(F,V) :- fieldAccess(F,V,_). %% as it can be a field access
+getVariable(V,V) :- variable(V).        %% or simply the variable.

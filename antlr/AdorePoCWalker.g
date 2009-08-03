@@ -62,7 +62,10 @@ import java.io.*;
   private String generateAnonymousApply(){
     return "apply_" + ANONYMOUS_CPT++;
   }
-  
+
+  private String generateFieldAccess(){
+    return "field_" + ANONYMOUS_CPT++;
+  }  
 }
 
   
@@ -238,9 +241,9 @@ varaccess	[String cxt, String actId]
  		returns [ArrayList<String> facts, String id]
  	@init{ $facts = new ArrayList<String>(); }
  	:	^(SCALAR n=ID)			{ $id = $cxt +"_" + $n.text;         }
- 	|	^(SCALAR n=ID fields[$cxt+"_"+$actId, $cxt+"_"+$n.text])	
- 						{ $id = $cxt +"_" + $n.text;
- 						  safeAdd($facts, $fields.facts); 
+ 	|	^(SCALAR n=ID fields)	
+ 						{ $id = generateFieldAccess();
+ 						  $facts.add("createFieldAccess("+$id+","+$cxt+"_"+$n.text+","+$fields.access+")");
  						}
 	|	^(SET n=ID)			{ $id = $cxt + "_" + $n.text+"_star"; }
 	|	^(ANONYMOUS v=STR t=ID)		{ String id = generateAnonymousId();
@@ -253,11 +256,10 @@ varaccess	[String cxt, String actId]
 						}
  	;
 	   			
-fields [String actId, String vId]
-	returns [ArrayList<String> facts]
-	@init{ $facts = new ArrayList<String>(); String access=""; }
-	: ^(FIELDS (i=ID { access += $i +","; })+ (i=ID STAR { access += $i+"_star,";})?)	
-						{ $facts.add("setFieldAccess("+$actId+","+$vId+",["+access.substring(0,access.length() -1)+"])"); }
+fields 	returns [String access]
+	@init{ $access = ""; }
+	: ^(FIELDS (i=ID { $access += $i +","; })* (i=ID STAR { $access += $i+"_star,";})?)	
+						{ $access = "[" + $access.substring(0,access.length() -1)+"]"; }
 	;
 rels	[String cxt]
 	returns [ArrayList<String> facts]
