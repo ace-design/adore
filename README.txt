@@ -35,22 +35,20 @@ The rest of this file assumes that these tools are correctly installed.
 ## ADORE initial setup
 ####
 
-  1. Set the ADORE_HOME environment variable in your ~/.bash_profile . You can
-     also add the bin directory in your PATH, so Adore will be available
-     everywhere
+  1. Set the ADORE_HOME environment variable in your ~/.bash_profile . You need
+     to define a SWIPL_HOME variable to indicate where ADORE can find the 
+     Prolog engine on your computer. You can also add the bin directory in 
+     your PATH, so ADORE will be available everywhere. 
 
-ADORE_HOME=/Users/mosser/repositories/adore
+SWIPL_HOME='/opt/local/bin/'
+ADORE_HOME=/absolute/path/to/adore
 PATH=$ADORE_HOME/bin:$PATH
 export ADORE_HOME PATH
 
-  2. Edit the $ADORE_HOME/bin/adore.sh shell script, and set the SWIPL_HOME
-     variable.
-SWIPL_HOME='/opt/local/bin/'
-
-  3. check $ADORE_HOME/prolog/src/config.pl and adapt it to your settings
+  2. check $ADORE_HOME/prolog/src/config.pl and adapt it to your settings:
 
   - debugSubscription(channel): print debug info at runtime for the given 
-      channel. Channels should be commented in normal usage
+      channel. All facts should be commented in normal usage.
 
   - adore2png: these parameters deal with the ADORE -> Graph transformation
     - exec: path to the 'dot' executable. It can defines some parameters
@@ -65,11 +63,23 @@ It defines syntax coloring, indentation rules (derived from c-mode)
 
 (load-file (concat (getenv "ADORE_HOME") "/adore.el"))
 
+/!\ Warning: Emacs inherits its environment from its parent process. So, even
+    with an adequate .bash_profile, if the parent process doesn't use it, 
+    the $ADORE_HOME variable will ne be set, and the adore mode will not
+    be loaded. It basically happends when running Emacs from the Dock on an
+    Apple Computer. To fix this mistake, you can use the following ugly hack
+    in your ~/.emacs file:
+
+(setenv "ADORE_HOME" "/absolute/path/to/adore")
+(setenv "PATH" (concat (getenv "PATH") ":" (getenv "ADORE_HOME") "/bin"))
+(load-file (concat (getenv "ADORE_HOME") "/adore.el"))
+
   2. With anything else: just ... write!
 
 ####
 ## Running ADORE from command line 
 ####
+
   - Generating Facts from an ADORE file: the adore2facts.sh scripts wraps the 
     ANTLR-based ADORE compiler.
 
@@ -91,4 +101,41 @@ To run the engine on an ADORE file $F (calls silently the compiler)
 ####
 ## Running ADORE from Emacs
 ####
+
+ADORE defines a major mode to be fully operational with Emacs. The mode is
+automaticaly loaded when you open a file "*.adore", if you've followed the
+emacs setup part of this file.
+
+You can interact with ADORE using the associated Menu, keyboard shortcuts or
+interactive functions. Each action is described using the following pattern:
+  - Menu Item [Keyboard Shortcut, FunctionName]
+
+The ADORE mode defines 4 actions to interact with the engine: 
+
+  - Run the Adore engine [C-c C-r, adore-run]: 
+      => starts the engine using the current file as ADORE code
+
+The engine pops in a new frame. You can interact with it directly as a 
+prolog interpreter => just ask questions, it'll find answers for you!
+Ther is only ONE engine running at time. So performing a 're-run' will simply 
+destroy the previous engine and build a new one.
+
+  - Kill the Adore engine [C-c C-k, adore-kill]: 
+      => kill the ADORE engine
+
+This command destructs the Adore engine and its related Emacs artefacts (Frame, 
+buffer and process). It's actually the good way to clean your environment.
+
+  - Generate picture [C-c C-p, adore-pict]:
+      => generate the associated graph of a given process.
+
+This command loads the current file into ADORE, and asks you for a process is
+through the minibuffer. It then generates the expected graph which should pops
+in a new window
+
+  - Generate facts [C-c C-f, adore-facts]:
+      => generate and display the elementary facts associated to your file
+
+when running this command, a new frame will pop, and display the associated 
+facts for the code you're editing. 
 
