@@ -3,8 +3,8 @@
 fragment notify <observer, what, who> {
   variables  {}
   activities {
-    h)  hook() ;
-    notify) observer::notify(what,who);
+    h.  hook() ;
+    notify. observer::notify(what,who);
   relations  { ^ < h;  h < $; h<notify;  }
 }
 
@@ -16,8 +16,8 @@ fragment cession <error> {
               b as boolean;
  	      r as ressource ; }
   activities {
-    h) b := hook;
-    t) throw error;
+    h. b := hook;
+    t. throw error;
   }
   relations  { ^ < h; h<$ when b ;h < t when !b; } 
 }
@@ -26,10 +26,10 @@ fragment cession <error> {
 fragment stop <error> { 
   variables  { }
   activities {
-    h) hook;
-    o) reply();
+    h. hook;
+    o. reply();
   }
-  relations  { ^ < h;  h<$ ; h < o on failure error; } 
+  relations  { ^ < h;  h<$ ; fail(h,error) < o ; } 
 }
 
 //------------------
@@ -39,10 +39,10 @@ fragment continue <error> {
   activities {
     h) hook;
   }
-  relations  { ^ < h; h<$;  h<$ on failure error; } 
+ relations  { ^ < h; h<$;  fail(h,error)<$ ; } 
 }
 
-
+//------------------
 //extension 1a de 4.2.1
 //1a. Coordinator is not logged in. 
 //1a.1 Coordinator authenticates with System (UC 10). 
@@ -55,11 +55,11 @@ fragment log <authenticationService,logger>{
               isLogged as boolean ;
               a as boolean }
   activities {
-    logTest) isLogged := authenticationService::isLogged(logger);
-    h)  hook() ;
-    authent) a := authenticationService::authenticates(logger); //Uc 10???
-    h1) hook() 
-    e) throw accessDenied;}
+    logTest. isLogged := authenticationService::isLogged(logger);
+    h.  hook() ;
+    authent. a := authenticationService::authenticates(logger); //Uc 10???
+    h1. hook() 
+    e. throw accessDenied;}
   relations  { ^ < logTest; logTest<h when isLogged ; h < $; 
               logTest < authent when !isLogged; 
               authent<h1 when a;  h1<$;
@@ -80,9 +80,9 @@ fragment ressourceAvailabilityDegrated <ressource>{
               b as boolean;
  	      r as ressource ; }
   activities {
-    availabilityTest) b :=  ressourceManager::isAvailable(ressource);
-    h)  hook() ; 
-    cont) nop;
+    availabilityTest. b :=  ressourceManager::isAvailable(ressource);
+    h.  hook() ; 
+    cont. nop;
   }
   relations  { ^ < availabilityTest; availabilityTest<h when b ; h < $; 
               availabilityTest < nop when !b; nop<$;
@@ -90,7 +90,7 @@ fragment ressourceAvailabilityDegrated <ressource>{
 }
 
 
-
+//------------------
 //4a. Internal resource is not available after step 4. 
 //4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5).
 //Il faudrait un delegate qui prenne : ask et ass
@@ -100,9 +100,9 @@ fragment ressourceAvailability <ressource,mission> {
  	      r as ressource ; }
   activities {
     availabilityTest) b :=  ressourceManager::isAvailable(ressource);
-    h)  hook() ; 
-    ask) r := ressourceManager::getCorrespondingExternalRessource(ressource);
-    ass) cms::assignExternalRessources(r,mission);
+    h.  hook() ; 
+    ask. r := ressourceManager::getCorrespondingExternalRessource(ressource);
+    ass. cms::assignExternalRessources(r,mission);
   }
   relations  { ^ < availabilityTest; availabilityTest<h when b ; h < $; 
               availabilityTest < ask when !b; ask<ass ;  ass<$;
@@ -111,36 +111,62 @@ fragment ressourceAvailability <ressource,mission> {
 
 
 
-
-//NON REVUE... TOUT EST ENCORE EMMELE...
-
-//extension 6a de 4.2.1
-//6a. System determines that the crisis location is unreachable by standard transportation means, but reachable by helicopter. 
-//6a.1 System informs the Coordinator about the problem. 
-//6a.2 Coordinator instructs System to execute a helicopter transport mission (UC 09). 
-//6a.3 Use case continues with step 6. 
+//------------------
 //une constante de temps?
-//pbme dans un lien faible... je rajoute l'ordre.. l'aurions nous bien detecté?...
-
-//je reflechis en unaire... je me fais du souci sur ce que je voudrais pour passer à N
-//ne faudrait il pas que l'helicopter soit cree au plus une fois??
-//comment le passage à n va gerer ca???
-fragment Unreachable { 
+//pbme dans un lien faible... je rajoute l'ordre.. l'aurions nous bien detecté?
+fragment unreachable <deadline> { 
   variables  {timeout as integer;
              
               b as boolean;
  	       }
   activities {
-    a0) timeout := '0' as integer;
-    timestart) timeout := Timer::timeout('2');
-    h)  hook() ; 
-    test) b := diff(timeout,'0' as integer);
-    e) throw unreachable;
+    a0. timeout := '0' as integer;
+    timestart. timeout := Timer::timeout(deadline);
+    h.  hook() ; 
+    test. b := diff(timeout,'0' as integer);
+    e. throw unreachable;
   }
   relations  { ^ < a0; a0< timestart; ^< h ;  h<< test; timestart<< test; a0 < test;
                test < $ when !b;
                test < e when b; }
 }
+
+//------------------
+//From 4.2.3 Assign Internal Resource
+//1b. CMSEmployee is unavailable (( or unresponsive. is detected by another fragment)
+//1b.1 System selects the next appropriate CMSEmployee.
+//1b.2 Use case continues at step 1.
+//1b.1a No other CMSEmployee is available. Use case ends in failure.
+//Perso :  I leave the propagation of the error  raised by selectEmployee
+//Perso : comment dire si faux ou catch autrement...
+//Perso : des delegate....
+//CMSEmployee informs System that he cannot accept the mission.
+//2a.1 System selects the next appropriate CMSEmployee.
+//2a.2 Use case continues at step 1.
+//2a.2a No other CMSEmployee is available. Use case ends in failure.
+//Perso : The both extensions are designed together.
+
+fragment unavailable <employee> { 
+  variables  {cmsEmployee as employee;
+              m as mission;
+              b as boolean;
+ 	       }
+  activities {
+    h.  b := hook(m) ; 
+    a1. cms::unavailable4(m,employee); //To remember the unavailability
+    a2. cmsEmployee := cms::assignInternalResource(m);
+    a3. reply(cmsEmployee);
+    a1catch. cms::unavailable4(m,employee); //To remember the unavailability
+    a2catch. cmsEmployee := cms::assignInternalResource(m);
+    a3catch. reply(cmsEmployee);
+  }
+  relations  { ^ < h; h<$ when b;
+    h< a1 when !b; a1<a2; a2<a3;
+    fail(h)< a1catch;  a1catch<a2catch; a2catch<a3catch; }
+}
+
+//------------------
+
 
 fragment reachByHelicopter { 
   variables  {s as service;
@@ -148,13 +174,13 @@ fragment reachByHelicopter {
               b as boolean;
  	      r as ressource ; }
   activities {
-    a0a) catch unreachable; //on hook catch unreachable 
-    a0b) hook;
-    a1) coordinatorSystem::notify('locationUnreachable', r, m);
-    a2) m := cms::createHelicopterTransportMission(m);
-    a3) call; //pour le distinguer du call...
-    a4) r := getRessource(m);
-    a5) cms::manageRessource(ir,m);
+    a0a. catch unreachable; //on hook catch unreachable 
+    a0b. hook;
+    a1. coordinatorSystem::notify('locationUnreachable', r, m);
+    a2. m := cms::createHelicopterTransportMission(m);
+    a3. call; //pour le distinguer du call...
+    a4. r := getRessource(m);
+    a5. cms::manageRessource(ir,m);
   }
   relations  { ^ < a0a; ^ < a0b; h<<$;a5<<$;
   	      a0a< a1; a1< a2 ; a2< a3; a3 < a4; a4 <a5; } 
@@ -167,8 +193,8 @@ fragment cession <error> {
               b as boolean;
  	      r as ressource ; }
   activities {
-    h) b := hook;
-    t) throw error;
+    h. b := hook;
+    t. throw error;
   }
   relations  { ^ < h; h<$ when b ;h < t when !b; } 
 }
@@ -199,10 +225,10 @@ fragment otherMissionRequired {
               b as boolean;
  	      r as ressource ; }
   activities {
-    test) b := cms::otherMissionRequired();
-    a0) hook;
-    a1) m :=  cms::missionToDo();
-    a2) cms::manageRessource(m);
+    test. b := cms::otherMissionRequired();
+    a0. hook;
+    a1. m :=  cms::missionToDo();
+    a2. cms::manageRessource(m);
   }
   relations  { ^ < test; ^ < a0;a0<$;
   	      a1< a2 ; } 
@@ -222,9 +248,9 @@ fragment otherMissionRequired {
 fragment requestVideoSurveillance { 
   variables  {}
   activities {
-    h) hook;
-    a1) feeder := SurveillanceSystem::getVideo();
-    a2) coordinatorSystem::setVideo(feeder);
+    h. hook;
+    a1. feeder := SurveillanceSystem::getVideo();
+    a2. coordinatorSystem::setVideo(feeder);
   }
   relations  { ^ < h; h < $; 
                h<a1 on failure unreachable;
@@ -243,11 +269,28 @@ fragment onRequestVideoSurveillanceCheckForFakeCrisis {
 //require requestVideoSurveillance to make sense
   variables  {}
   activities {
-    h) hook;
-    a1) ok :=  coordinatorSystem::isFakeCrisis()
+    h. hook;
+    a1. ok :=  coordinatorSystem::isFakeCrisis() 
   }
   relations  { ^ < h; h < a1; a1< $ when ok;  } 
 }
+
+//From 4.2.3 Assign Internal Resource
+//1b. CMSEmployee is unavailable or unresponsive.
+//1b.1 System selects the next appropriate CMSEmployee.
+//1b.2 Use case continues at step 1.
+//1b.1a No other CMSEmployee is available. Use case ends in failure.
+
+fragment CMSEmployeeUnresponsive { 
+//require requestVideoSurveillance to make sense
+  variables  {}
+  activities {
+    h. hook;
+    a1. ok :=  coordinatorSystem::isFakeCrisis() 
+  }
+  relations  { ^ < h; h < a1; a1< $ when ok;  } 
+}
+
 
 //besoin d'en mettre sur plusieurs... elles sont liées entre elles... 
 // comment capturer l'info????

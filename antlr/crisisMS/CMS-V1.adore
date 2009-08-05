@@ -38,20 +38,20 @@ orchestration cms::resolve {
     externalRessource as ressource;
   }
   activities {
-    a0) receive();
-    a1) cms::witnessReportCapture();
-    a2) mission* := cms::missionsToDo();
-    a3) selectedMission := coordinatorSystem::select(mission*);
+    a0. receive();
+    a1. cms::witnessReportCapture();
+    a2. mission* := cms::missionsToDo();
+    a3. selectedMission := coordinatorSystem::select(mission*);
      //System assigns internal Ressource(s)
-       a4a) internalRessource := getInternalRessources(selectedMission);
-       a4a2) cms::assignInternalRessources(internalRessource,selectedMission);
-       a4a3) cms::manageRessource(internalRessource,selectedMission);
+       a4a. internalRessource := getInternalRessources(selectedMission);
+       a4a2. cms::assignInternalRessources(internalRessource,selectedMission);
+       a4a3. cms::manageRessource(internalRessource,selectedMission);
       //System requests external Ressources    
-       a5a) externalRessource := getExternallRessources(selectedMission);
-       a5a2) cms::assignExternalRessources(externalRessource,selectedMission);
-       a5a3) cms::manageRessource(externalRessource,selectedMission);  
-    a13) coordinatorSystem::close();
-    a6)reply();
+       a5a. externalRessource := getExternallRessources(selectedMission);
+       a5a2. cms::assignExternalRessources(externalRessource,selectedMission);
+       a5a3. cms::manageRessource(externalRessource,selectedMission);  
+    a13. coordinatorSystem::close();
+    a6.reply();
   }
   relations { a0 < a1; a1 < a2; a2<a3; a3<a4a ; a4a<a4a2; a4a2<a4a3; a4a3<a13; a3<a5a;a5a<a5a2;a5a2<a5a3;a5a3<a13; a13<a6;}
 }
@@ -66,13 +66,13 @@ orchestration cms::manageRessource{
     m as mission;
   }
   activities {
-    a0) (r,m) := receive();
-    a1) ressourceManager::askForArrival(r,m);
-    //a1a)coordinatorSystem::notify('arrived' as string,r,m);
-    a2) ressourceManager::askForExecutionEnd(r,m);
-    //a2a)coordinatorSystem::notify('endExecution'  as string,r,m);
-    a11)ressourceManager::askForfinalMissionReport(r,m);
-    a3) reply('true' as boolean);
+    a0. (r,m) := receive();
+    a1. ressourceManager::askForArrival(r,m);
+    //a1a.coordinatorSystem::notify('arrived' as string,r,m);
+    a2. ressourceManager::askForExecutionEnd(r,m);
+    //a2a.coordinatorSystem::notify('endExecution'  as string,r,m);
+    a11.ressourceManager::askForfinalMissionReport(r,m);
+    a3. reply('true' as boolean);
   }
   relations { a0 < a1;  a1 < a2;a2<a11; a11<a3;}
 }
@@ -87,11 +87,11 @@ orchestration cms::setNewCrisisInformation{
     relevant as boolean;
   }
   activities {
-    a0) (i) := receive();
-    //a12) coordinatorSystem::notify('newInfo'  as string,i);
-    a1) relevant := cms::isRelevantInformation(i);
-    a10) ressourceManager::notify(i);
-    r) reply();
+    a0. (i) := receive();
+    //a12. coordinatorSystem::notify('newInfo'  as string,i);
+    a1. relevant := cms::isRelevantInformation(i);
+    a10. ressourceManager::notify(i);
+    r. reply();
   }
   relations { a0 < a1; a1 < a10 when relevant; a1 < r ;}
 }
@@ -123,15 +123,15 @@ orchestration cms::witnessReportCapture {
     cms as crisisManager;
   }
   activities {	
-    a0) receive();
-    a1) wi := coordinatorSystem::provideWitnessInformation();
-    a2) li := coordinatorSystem::provideLocationInformation();
-    a2a12) adress := phoneCompany::getClientInformation(wi);
-    a2a3) exact := cms::validateInformation(adress,wi);
-    a3) cl := cms::computeCheckList();
-    a4) ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5) setCurrentCrisisActive(cms,ci);
-    a6) reply();
+    a0. receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation();
+    a2. li := coordinatorSystem::provideLocationInformation();
+    a2a12. adress := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(adress,wi);
+    a3. cl := cms::computeCheckList();
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
+    a5. setCurrentCrisisActive(cms,ci);
+    a6. reply();
 
   } 
   relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a6;} 
@@ -151,16 +151,14 @@ orchestration cms::witnessReportCapture {
 orchestration cms::assignInternalResource {
   variables {
     m as mission;
-    li as locationInformation;
-    adressInformation as adressInformation;
     accept as boolean;
-    ci as crisisInformation;
+    cmsEmployee as employee;
   }
   activities {	
-    a0) m := receive();
-    a1) cmsEmployee := cms::selectEmployee(m);
-    a2) accept := cmsEmployee::askFor(m);
-    a6) reply(cmsEmployee);
+    a0. m := receive();
+    a1. cmsEmployee := cms::selectEmployee(m);
+    a2. accept := cmsEmployee::askFor(m);
+    a6. reply(cmsEmployee);
 
   } 
   relations { a0 < a1; a1 < a2; a2<a6 ; } 
@@ -175,10 +173,10 @@ orchestration cms::assignExternalResource {
     allocatedRessource as externalRessource;
   }
   activities {	
-    a0) m := receive();
-    a1) eS := cms::selectExternalRessource(m);
-    a2) allocatedRessource := eRS::request(eS,m);
-    a6) reply(allocatedRessource);
+    a0. m := receive();
+    a1. eS := cms::selectExternalRessource(m);
+    a2. allocatedRessource := eRS::request(eS,m);
+    a6. reply(allocatedRessource);
 
   } 
   relations { a0 < a1; a1 < a2; a2<a6 ; } 
@@ -192,13 +190,13 @@ orchestration cms::setNewVictimInformation {
     hostpitalInfo as information;
   }
   activities {	
-    a0) info := receive();
+    a0. info := receive();
    //System requests victim’s medical history information "from all"connected HospitalResourceSystems. 
-   a1) hostpitalInfo := hospitalResourceSystems::getInfo(info);
-   a2) reply(hostpitalInfo);
+   a1. hostpitalInfo := hospitalResourceSystems::getInfo(info);
+   a2. reply(hostpitalInfo);
   } 
   relations { a0 < a1; a1 < a2; } 
-
+ } 
 
 
 
@@ -216,27 +214,24 @@ orchestration superObserver::executeMission {
     ci as crisisInformation;
   }
   activities {	
-    a0) m := receive();
-    a1) cL := cms::getCrisisSpecificCheckList(m);
+    a0. m := receive();
+    a1. cL := cms::getCrisisSpecificCheckList(m);
     //SuperObserver feeds System with crisis information 
     //(one by one according to the check list)
     //a2 onSet(cL,q,next,all)   
-    a2) q := next(cL);
-    a2b) ci := superObserver::getInformation(q);
-    a2c) cms::setNewCrisisInformation(ci);
+    a2. q := next(cL);
+    a2b. ci := superObserver::getInformation(q);
+    a2c. cms::setNewCrisisInformation(ci);
     // end set
     //System suggests crisis-speciﬁc missions to SuperObserver
-    a3) mission* := cms::missionsToDo();
+    a3. mission* := cms::missionsToDo();
    //SuperObserver notiﬁes System of the type of mission he wants to create...step 4 to 8
-    a4) superObserver::dealWithMissions(mission*);
+    a4. superObserver::dealWithMissions(mission*);
    //SuperObserver judges that his presence is no longer needed at the crisis location. 
-    a9) ressourceManager::setExcutionEnd(m);
+    a9. ressourceManager::setExcutionEnd(m);
   } 
   relations { a0 < a1; a1 < a2; a2<a2b; a2b<a2c ;a2<a3;a3<a4;a4<a9; } 
-}
-
-
-
+} 
 
 orchestration workerSystem::executeMission {
   variables {
@@ -249,23 +244,23 @@ orchestration workerSystem::executeMission {
     b as boolean;
   }
   activities {	
-    a0) m := receive();
+    a0. m := receive();
     //FirstAidWorker transmits injury information of victim to System. 
-    a1a) ci := workerSystem::getVictimInjuryInformation();
-    a1b) cms::setNewCrisisInformation(ci);
+    a1a. ci := workerSystem::getVictimInjuryInformation();
+    a1b. cms::setNewCrisisInformation(ci);
     //2. FirstAidWorker determines victim’s identity and communicates it to System. 
-    a2a)  (b,info) := workerSystem::getVictimInformation();
-    a2b) cms::setNewVictimInformation(b);
+    a2a.  (b,info) := workerSystem::getVictimInformation();
+    a2b. cms::setNewVictimInformation(b);
     //
-    x) cms::getHospitalFor(ci);
+    x. cms::getHospitalFor(ci);
 
     // end set
     //System suggests crisis-speciﬁc missions to SuperObserver
-    a3) mission* := cms::missionsToDo();
+    a3. mission* := cms::missionsToDo();
    //SuperObserver notiﬁes System of the type of mission he wants to create...step 4 to 8
-    a4) superObserver::dealWithMissions(mission*);
+    a4. superObserver::dealWithMissions(mission*);
    //SuperObserver judges that his presence is no longer needed at the crisis location. 
-    a9) ressourceManager::setExcutionEnd(m);
+    a9. ressourceManager::setExcutionEnd(m);
   } 
   relations { a0 < a1a; a1a < a1b; a0<a2a; a2a<a2b ;a2b<x;a1b<a3;a3<a4;a4<a9; } 
 }

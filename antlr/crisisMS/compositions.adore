@@ -70,6 +70,8 @@ composition cms::resolve {
 //4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5). 
 composition cms::resolve { 
  apply ressourceAvailability (ressource : internalRessource , mission : selectedMission ) => a4a2;
+
+
  }
 
 //5a. External resource is not available after step 5. 
@@ -92,6 +94,21 @@ composition cms::resolve {
 //1a.3 Use case continues at step 1. 
 composition cms::assignInternalResource { 
  apply log (authenticationService : authentification100,logger : cmsEmployee) => a2;
-
  }
 
+
+
+
+
+//From 4.2.3 Assign Internal Resource
+//1b. CMSEmployee is unavailable or unresponsive.
+//1b.1 System selects the next appropriate CMSEmployee.
+//1b.2 Use case continues at step 1.
+//1b.1a No other CMSEmployee is available. Use case ends in failure.
+//Warning : catch et throw on the same activity
+
+
+composition cms::assignInternalResource { 
+ apply unreachable => a2; 
+ apply unavailable(employee : cmsEmployee) => a2;
+ }
