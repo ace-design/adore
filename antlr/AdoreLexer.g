@@ -70,6 +70,6 @@ STR:	'\'' ~'\''* '\'';
 	
 /** IGNORED **/
 INLN_COM: 	'//' ~('\r' | '\n')* NL 	{ skip(); };
-COMMENT	:	'/*' .* '*/'		{ skip(); };
+COMMENT	:	'/*' .* '*/'			{ skip(); };
 NL: 		('\r'? '\n')+			{ skip(); };
 WSPCE: 		(' '|'\t')+ 			{ skip(); };

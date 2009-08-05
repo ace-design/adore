@@ -280,43 +280,71 @@ defGuard(A1,A2,V,B) :-
 %% Composition directives
 %%%%
 
-defCompositionContext(P) :- %% \not \exists p \in Process* => fail
-	\+ process(P), !, 
-	dfail(def,'defCompositionContext/1: Unkown process \'~w\'!',P).
-defCompositionContext(P) :- %% \exists p in Context* => warning
-	context(P),!,
-	dwarn(def,'Context  \'~w\' still exists!',P).
-defCompositionContext(P) :-
-	assert(context(P)),
-	dinfo(def,'Context  \'~w\' created with success!',P).
+%% defCompositionContext/1: defCompositionContext(I)
+defCompositionContext(I) :- %% \exists p in Context* => fail
+	context(I),!,
+	dfail(def,'defCompositionContext/1: Context  \'~w\' still exists!',I).
+defCompositionContext(I) :-
+	assert(context(I)),
+	dinfo(def,'Context  \'~w\' created with success!',I).
 
-%% defActivityBlock/2: defActivityBlock(I,L)
-defActivityBlock(I,_) :- 
-	activityBlock(I,_), !, 
-	dfail(def,'defActivityBlock/2: Block identifier \'~w\' still exists!',I).
-defActivityBlock(_,L) :- 
-	\+ maplist(activity,L), !,
-	dfail(def,'defActivityBlock/2: Unknown activity in  ~w!',[L]).
-defActivityBlock(I,L) :- 
-	assert(activityBlock(I,L)),
-	dinfo(def,'Block \'~w\' containing activities ~w created!',[I,L]).
+%% setCompositionTarget/2: setCompositionTarget(I,P)
+setCompositionTarget(I,_) :- %% \not \exists i in Context* => fail
+	\+ context(I), !,
+	dfail(set,'setCompositionTarget/2: Unknown context identifier \'~w\'',I).
+setCompositionTarget(_,P) :- %% \not \exists p in Process* => fail
+	\+ process(P), !,
+	dfail(set,'setCompositionTarget/2: Unknown process \'~w\'',P).
+setCompositionTarget(I,P) :- 
+	assert(contextTarget(I,P)),
+	dinfo(set,'Context \'~w\' uses \'~w\' as infered target',[I,P]).
+
+%% setContextOutput/2: setContextOutput(I,I)
+setContextOutput(I,_) :- 
+	\+ context(I), !,
+	dfail(set,'setContextOutput/2: Unknown context identifier \'~w\'',I).
+setContextOutput(_,I) :- 
+	process(I), !, 
+	dfail(def,'setContextOutput/2: Process \'~w\' still exists!',I).
+setContextOutput(I,P) :- 
+	assert(contextOutput(I,P)),
+	dinfo(set,'Context \'~w\' uses \'~w\' as identified result',[I,P]).
+
+
+%% defActivityBlock/3: defActivityBlock(I,I,L)
+defActivityBlock(C,_,_) :- 
+	\+ context(C), !, 
+	dfail(def,'defActivityBlock/3: Unknown context \'~w\' !',C).
+defActivityBlock(_,I,_) :- 
+	activityBlock(_,I,_), !, 
+	dfail(def,'defActivityBlock/3: Block identifier \'~w\' still exists!',I).
+defActivityBlock(C,_,L) :- 
+	getAbsoluteNames(C,L,Acts),
+	\+ maplist(activity,Acts), !,
+	dfail(def,'defActivityBlock/3: Some elements in  ~w are not regular activities!',[Acts]).
+defActivityBlock(C,I,L) :- 
+	getAbsoluteNames(C,L,Acts),
+	assert(activityBlock(C,I,Acts)),
+	dinfo(def,'Block \'~w\' containing activities ~w created!',[I,Acts]).
 
 %% defApply/4: defApply(I,P,A,P).
-defApply(I,_,_,_) :- %% \exists i \in Id(Context*) => fail
+defApply(I,_,_,_) :- %% \exists i \in Apply* => fail
 	applyFragment(I,_,_,_), !, 
 	dfail(def,'defApply/4: Directive identifier \'~w\' still exists!',I).
-defApply(_,P,_,_) :- %% \not \exists p \in Process* => fail
-	\+ process(P), !, 
-	dfail(def,'defApply/4: Unkown process \'~w\'!',P).
+defApply(_,C,_,_) :- %% \not \exists C \in Context* => fail
+	\+ context(P), !, 
+	dfail(def,'defApply/4: Unkown context \'~w\'!',P).
 defApply(_,_,_,F) :- %% \not \exists p \in Fragment* => fail
 	\+ isFragment(F), 
 	dfail(def,'defApply/4: Unkown fragment \'~w\'!',F).
 
-defApply(_,P,B,_) :- %% \not \exists a \in Activities(p) => fail
-	findall(A,isContainedBy(A,P),Acts),
-	activityBlock(B,Content),
-	\+ subset(Content,Acts), !,
-	dfail(def,'defApply/4: Activities in ~w are not strictly contained by process \'~w\'!',[Content,P]).
+defApply(_,C,B,_) :- %% \not \exists a \in Activities(p) => fail
+	activityBlock(Cxt,B,Content),
+	map(isContainedBy,Content,Processes),
+	sort(Processes,Targets),
+	length(Targets, L),
+	\+ L == 1, !,
+	dfail(def,'defApply/4: Activities in ~w come from different processes \'~w\'!',[Content,Targets]).
 defApply(I,O,A,F) :- 
 	assert(applyFragment(I,O,A,F)),
 	dinfo(def,'Directive apply \'~w\' to \'~w\' successfuly created in context \'~w\' with id \'~w\'!',[F,A,O,I]).

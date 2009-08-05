@@ -58,6 +58,9 @@ tokens {
 	PARAMS;
 	FIELDS;
 	BLOCK;
+	TARGET;
+	ELEM_REF;
+	OUTPUT;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
@@ -69,7 +72,12 @@ definition
 	:	REQU f=STR SEMI				-> ^(DEF ^(REQUIRE $f))
 	|	ORCH s=ID DBL_COL o=ID core 		-> ^(DEF ^(ORCHESTRATION $s $o) core)
 	|	FRAG n=ID params? core 			-> ^(DEF ^(FRAGMENT $n ^(PARAMS params?)) core)
-	|	COMPOSITION s=ID DBL_COL o=ID merge_core	-> ^(DEF ^(UNIT $s $o merge_core))
+	|	composition				-> ^(DEF composition)
+	;
+
+composition
+	:	COMPOSITION (s=ID (DBL_COL o=ID)?)? (AS out=ID)? merge_core	
+							-> ^(UNIT ^(TARGET $s? $o?) ^(OUTPUT $out?) merge_core)
 	;
 
 params	
@@ -166,14 +174,16 @@ directive
 							-> ^(MERGE_FRAG $e actBlock pBind)
 	;
 
+elemRef	:	s=ID ((DBL_COL o=ID)? DBL_COL a=ID)?	-> ^(ELEM_REF $s $o? $a?)
+	;
 actBlock
-	:	a=ID	-> ^(BLOCK $a)
-	|	LFT_BRCKT actList RGHT_BRCKT -> ^(BLOCK actList)
+	:	elemRef					-> ^(BLOCK elemRef)
+	|	LFT_BRCKT actList RGHT_BRCKT 		-> ^(BLOCK actList)
 	;
 
 actList
-	: 	a=ID					-> $a
-	|	a=ID COMMA actList			-> $a actList
+	: 	elemRef					-> elemRef
+	|	elemRef COMMA actList			-> elemRef actList
 	;
 	
 pBind  

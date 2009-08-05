@@ -97,8 +97,10 @@
 %% Composition directive
 %%%%
 
-:- dynamic context/1.          %% defCompositionContext(P)
-:- dynamic activityBlock/2.    %% defActivityBlock(I,L)
+:- dynamic context/1.          %% defCompositionContext(I)
+:- dynamic contextTarget/2.    %% setCompositionTarget(I,P)
+:- dynamic contextOutput/2.    %% setContextOutput(I,I)
+:- dynamic activityBlock/3.    %% defActivityBlock(I,L)
 :- dynamic applyFragment/4.    %% defApply(I,P,I,P)
 :- dynamic applyParameter/3.   %% setApplyParam(I,I,S)
 

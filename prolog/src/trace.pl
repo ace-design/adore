@@ -35,3 +35,4 @@ traceRename(Kind, Old, New, Context) :-
 
 getPreviousName(New,Old) :- pebble(_,Old,New,_),!.
 getPreviousName(New,New). %% i.e. there is no pebble to lead us (no renaming).
+

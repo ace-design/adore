@@ -20,6 +20,29 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+%% concatenate/2: transform a list of strings into a newline-separated string
 concatenate([],'').
 concatenate([H|T],R) :- 
 	concatenate(T,Tmp), swritef(R,'%w\n%w',[H,Tmp]).
+
+%% map/3: Prolog doesn't provides a REAL unary map implementation.
+map(_,[],[]).
+map(P,[H|T],[R|O]) :-
+	call(P,H,R), map(P,T,O).
+
+
+getAbsoluteNames(_,[],[]).
+getAbsoluteNames(Cxt,[H|T],[R|O]) :- 
+	getAbsoluteName(Cxt,H,R), getAbsoluteNames(Cxt,T,O).
+getAbsoluteName(_,absoluteReference(S,O,E),R) :-
+	swritef(Str,"%w_%w_%w",[S,O,E]),
+	string_to_atom(Str,R).
+getAbsoluteName(_,absoluteReference(F,E),R) :-
+	swritef(Str,"%w_%w",[F,E]),
+	string_to_atom(Str,R).
+getAbsoluteName(Cxt,inferedReference(E),R) :-
+	context(Cxt), contextTarget(Cxt,T),
+	swritef(Str,"%w_%w",[T,E]),
+	string_to_atom(Str,R).
+
+	

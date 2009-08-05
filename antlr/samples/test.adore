@@ -1,5 +1,5 @@
 
-fragment e1<x,y> {
+fragment e1 <x,y> {
   variables  {}
   activities { h. hook() ; }
   relations  { ^ < h; h < $; }
@@ -28,8 +28,8 @@ orchestration helloWorld::sayHello {
 }
 
 
-composition helloWorld::sayHello { 
+composition helloWorld::sayHello as foo { 
       apply e1(x: 'X', y: 'bar') => {a1,a2} ; 
-      apply e2 => a3;
+      apply e2 => e1::h;
 }
 

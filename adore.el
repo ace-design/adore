@@ -123,7 +123,8 @@
   (defvar adore-keywords-regexp (regexp-opt adore-keywords 'words))
 
   (defvar adore-activities
-    '("nop" "receive" "reply" "throw" "when" "as" "apply" "hook" "^" "$"))
+    '("const" "nop" "receive" "reply" "throw" "when" "as" "apply" 
+      "hook" "^" "$"))
   (defvar adore-activities-regexp (regexp-opt adore-activities 'words))
 
   (defvar adore-internal

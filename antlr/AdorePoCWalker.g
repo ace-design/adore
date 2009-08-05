@@ -71,6 +71,9 @@ import java.io.*;
     return "block_" + ANONYMOUS_CPT++;
   }  
   
+  private String generateContext(){
+    return "context_" + ANONYMOUS_CPT++;
+  }  
 }
 
   
@@ -280,10 +283,14 @@ rel	[String cxt]
 	;
 	
 merge 	returns [ArrayList<String> facts]
-	@init{ $facts = new ArrayList<String>(); }
-	: ^(UNIT s=ID o=ID 	{ String id = $s.text + "_" + $o.text;
-				  $facts.add("defCompositionContext("+id+")"); }
-		(directive[id]{ safeAdd($facts,$directive.facts); })+) 
+	@init{ $facts = new ArrayList<String>(); String targetId ="";}
+	: ^(UNIT 					{ String id = generateContext(); 
+							  $facts.add("defCompositionContext("+id+")"); 				}
+		   	^(TARGET (s=ID 			{ targetId = $s.text; 							} 
+		   		 	(o=ID 		{targetId += "_" + $o.text; 						})?
+		   		 			{ $facts.add("setCompositionTarget("+id+","+targetId+")");		})?)
+		   	^(OUTPUT (out=ID		{ $facts.add("setContextOutput("+id+","+$out.text+")");			})?)
+		(directive[id]				{ safeAdd($facts,$directive.facts); 					})+) 
 	;
 
 	
@@ -300,8 +307,15 @@ directive [String cxt]
 block [String cxt]
 	returns [String fact, String id]
 	@init{ String members = ""; }
-	: ^(BLOCK (a=ID { members += $cxt+"_"+$a.text+","; })+) 	
+	: ^(BLOCK (actref[$cxt] { members += $actref.id +","; })+) 	
 							{ $id = generateBlock(); 
-							  $fact = "defActivityBlock("+$id+",["+members.substring(0,members.length()-1)+"])";
+							  $fact = "defActivityBlock("+$cxt+","+$id+",["+members.substring(0,members.length()-1)+"])";
 							}
+	;
+
+actref 	[String cxt]
+	returns [String id]
+	:	^(ELEM_REF a=ID) 		{ id = "inferedReference("+$a.text+")"; }
+	|	^(ELEM_REF f=ID a=ID)		{ id = "absoluteReference("+$f.text+","+$a.text+")";}
+	| 	^(ELEM_REF s=ID o=ID a=ID) 	{ id="absoluteReference("+$s.text+","+$o.text+","+$a.text+")"; }
 	;
