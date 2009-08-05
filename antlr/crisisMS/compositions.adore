@@ -40,6 +40,7 @@ apply stop (infoDoesNotMatch) => cms::resolve.a2a3;
 //++++++++++++
 //5b. Camera vision of the location is perfect, but Coordinator cannot conﬁrm the situation that the witness describes or the Coordinator determines that the witness is calling in a fake crisis. 
 //5b.1 The base use case is terminated. 
+//WARNING: approche basique... que se passe-t-il en composant tout ca....
 composition   { 
 apply requestVideoSurveillance =>  cms::witnessReportCapture. {a1,a2};
 apply onRequestVideoSurveillanceCheckForFakeCrisis 
@@ -56,6 +57,41 @@ composition   {
 apply continue (unreachable) =>  cms::witnessReportCapture. {a1,a2,a3,a4,a5, a2a12, a2a3};
 }
 
+//from 4.2.1
+//1a. Coordinator is not logged in. 
+//1a.1 Coordinator authenticates with System (UC 10). 
+//1a.2 Use case continues with step 1. 
+composition cms::resolve { 
+ apply log (authenticationService : authentification100, logger : coordinatorSystem) => a1;
+
+ }
+
+//4a. Internal resource is not available after step 4. 
+//4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5). 
+composition cms::resolve { 
+ apply ressourceAvailability (ressource : internalRessource , mission : selectedMission ) => a4a2;
+ }
+
+//5a. External resource is not available after step 5. 
+//5a.1 Use case continues in parallel with step 2. 
+composition cms::resolve { 
+ apply ressourceAvailabilityDegrated (ressource : externalRessource) =>  a5a2;
+ }
 
 
+//6a. System determines that the crisis location is unreachable by standard transportation means, but reachable by helicopter. 
+//6a.1 System informs the Coordinator about the problem. 
+//6a.2 Coordinator instructs System to execute a helicopter transport mission (UC 09). 
+//6a.3 Use case continues with step 6. 
+
+
+//from 4.2.3
+//1a. CMSEmployee is not logged in. 
+//1a.1 System requests the CMSEmployee to login. 
+//1a.2 CMSEmployee authenticates with System (UC 10). 
+//1a.3 Use case continues at step 1. 
+composition cms::assignInternalResource { 
+ apply log (authenticationService : authentification100,logger : cmsEmployee) => a2;
+
+ }
 

@@ -1,5 +1,5 @@
 
-
+//------------
 fragment notify <observer, what, who> {
   variables  {}
   activities {
@@ -9,7 +9,7 @@ fragment notify <observer, what, who> {
 }
 
 
-
+//--------------
 fragment cession <error> { 
   variables  {s as service;
               m as mission ;
@@ -22,6 +22,7 @@ fragment cession <error> {
   relations  { ^ < h; h<$ when b ;h < t when !b; } 
 }
 
+//----------------
 fragment stop <error> { 
   variables  { }
   activities {
@@ -31,6 +32,7 @@ fragment stop <error> {
   relations  { ^ < h;  h<$ ; h < o on failure error; } 
 }
 
+//------------------
 //Bizarre
 fragment continue <error> { 
   variables  { }
@@ -44,24 +46,24 @@ fragment continue <error> {
 //extension 1a de 4.2.1
 //1a. Coordinator is not logged in. 
 //1a.1 Coordinator authenticates with System (UC 10). 
-//1a.2 Use case continues with step 1. 
+//1a.2 Use case continues with step 1.
 
-//Xor???
-//bizarre loinn et authent.. et UC 10... ras le bol
-fragment log {
-  variables  {s as service;
-              b as boolean ;
+//Perso : ?? verifier cette écriture
+
+fragment log <authenticationService,logger>{
+  variables  {
+              isLogged as boolean ;
               a as boolean }
   activities {
-    logTest) b := s::isLogged();
+    logTest) isLogged := authenticationService::isLogged(logger);
     h)  hook() ;
-    authent) a := s::authenticates(); //Uc 10???
+    authent) a := authenticationService::authenticates(logger); //Uc 10???
     h1) hook() 
     e) throw accessDenied;}
-  relations  { ^ < logTest; logTest<h when b ; h < $; 
-              logTest < authent when !b; 
-                 authent<h1 when a;  h1<$;
-		 authent<e when !a;  }
+  relations  { ^ < logTest; logTest<h when isLogged ; h < $; 
+              logTest < authent when !isLogged; 
+              authent<h1 when a;  h1<$;
+	      authent<e when !a;  }
 }
 
 
@@ -73,13 +75,12 @@ fragment log {
 //5a.1 Use case continues in parallel with step 2. 
 //bizarre elle est la meme que la 4a mais en reduction
 //Il faudrait un delegate qui prenne nop
-fragment ressourceAvailabilityDegrated { 
-  variables  {s as service;
-              v as ressource ;
+fragment ressourceAvailabilityDegrated <ressource>{ 
+  variables  {
               b as boolean;
  	      r as ressource ; }
   activities {
-    availabilityTest) b :=  ressourceManager::isAvailable(v);
+    availabilityTest) b :=  ressourceManager::isAvailable(ressource);
     h)  hook() ; 
     cont) nop;
   }
@@ -92,18 +93,16 @@ fragment ressourceAvailabilityDegrated {
 
 //4a. Internal resource is not available after step 4. 
 //4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5).
-//extension 4a de 4.2.1
-//Il faudrait un delegate qui prenne r ask et ass
-fragment ressourceAvailability { 
-  variables  {s as service;
-              v as ressource ;
+//Il faudrait un delegate qui prenne : ask et ass
+fragment ressourceAvailability <ressource,mission> { 
+  variables  {
               b as boolean;
  	      r as ressource ; }
   activities {
-    availabilityTest) b :=  ressourceManager::isAvailable(v);
+    availabilityTest) b :=  ressourceManager::isAvailable(ressource);
     h)  hook() ; 
-    ask) r := ressourceManager::getCorrespondingExternalRessource(v);
-    ass) cms::assignExternalRessources(er,m);
+    ask) r := ressourceManager::getCorrespondingExternalRessource(ressource);
+    ass) cms::assignExternalRessources(r,mission);
   }
   relations  { ^ < availabilityTest; availabilityTest<h when b ; h < $; 
               availabilityTest < ask when !b; ask<ass ;  ass<$;
@@ -113,11 +112,10 @@ fragment ressourceAvailability {
 
 
 
-
+//NON REVUE... TOUT EST ENCORE EMMELE...
 
 //extension 6a de 4.2.1
-//6a. System determines that the crisis location is unreachable by standard transportation means, but reachable 
-by helicopter. 
+//6a. System determines that the crisis location is unreachable by standard transportation means, but reachable by helicopter. 
 //6a.1 System informs the Coordinator about the problem. 
 //6a.2 Coordinator instructs System to execute a helicopter transport mission (UC 09). 
 //6a.3 Use case continues with step 6. 
@@ -242,6 +240,7 @@ fragment requestVideoSurveillance {
 
 
 fragment onRequestVideoSurveillanceCheckForFakeCrisis { 
+//require requestVideoSurveillance to make sense
   variables  {}
   activities {
     h) hook;
@@ -254,9 +253,9 @@ fragment onRequestVideoSurveillanceCheckForFakeCrisis {
 // comment capturer l'info????
 
 merge cms::resolve { 
- apply log => a1;
- apply ressourceAvailability => a4a2;
- apply ressourceAvailabilityDegrated => a5a2;
+ //apply log => a1;
+ //apply ressourceAvailability => a4a2;
+ //apply ressourceAvailabilityDegrated => a5a2;
  apply reachByHelicopter => a4a3;
  apply reachByHelicopter => a5a3;
 

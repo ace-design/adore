@@ -139,10 +139,18 @@ orchestration cms::witnessReportCapture {
 
 
 // 4.2.2
+//Main Success Scenario: 
+//System selects an appropriate CMSEmployee based on the mission type, the emergency level, location and 
+//requested expertise. 
+//TODO/Perso : We have to take care of the following requirements in an evolution.
+// In very urgent cases, steps 1 and 2 can be performed for several CMSEmployees concur- 
+//rently, until one of the contacted employees accepts the mission. 
+//1. System sends CMSEmployee mission information. 
+//2. CMSEmployee informs System that he accepts the mission. 
+//Use case ends in success.
 orchestration cms::assignInternalResource {
   variables {
     m as mission;
-    e as employee;
     li as locationInformation;
     adressInformation as adressInformation;
     accept as boolean;
@@ -150,9 +158,9 @@ orchestration cms::assignInternalResource {
   }
   activities {	
     a0) m := receive();
-    a1) e := cms::selectEmployee(m);
-    a2) accept := employeeCms::askFor(e,m);
-    a6) reply(e);
+    a1) cmsEmployee := cms::selectEmployee(m);
+    a2) accept := cmsEmployee::askFor(m);
+    a6) reply(cmsEmployee);
 
   } 
   relations { a0 < a1; a1 < a2; a2<a6 ; } 
