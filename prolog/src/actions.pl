@@ -262,7 +262,7 @@ defWeakWait(A1,A2) :-
 	dinfo(def,'Relation \'~w\' << \'~w\' is defined.',[A2,A1]).
 
 
-%% defGuard/4: defGuard((A,A,V,B)
+%% defGuard/4: defGuard(A,A,V,B)
 defGuard(A,_,_,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(def,'defGuard/4: Unknown activity \'~w\'!',A).
@@ -274,7 +274,19 @@ defGuard(_,A,V,_) :- %% v \not \in Outputs(a) => fail
 	dfail(def,'defGuard/4: Activity \'~w\' doesn\'t assign \'~w\'!',[A,V]).
 defGuard(A1,A2,V,B) :- 
 	assert(isGuardedBy(A1,A2,V,B)),
-	dinfo(def,'Relation \'~w\' < \'~w\' when \'~w\' (\'~w\') is defined.',[A1,A2,V,B]).
+	dinfo(def,'Relation \'~w\' < \'~w\' when \'~w\' is ~w is defined.',[A2,A1,V,B]).
+
+%% defOnFail/3: defOnFail(A,A,S)
+defOnFail(A,_,_) :- %% \not \exists a \in Activity* => fail
+	\+ activity(A), !, 
+	dfail(def,'defOnFail/3: Unknown activity \'~w\'!',A).
+defOnFail(_,A,_) :- %% \not \exists a \in Activity* => fail
+	\+ activity(A), !, 
+	dfail(def,'defOnFail/3: Unknown activity \'~w\'!',A).
+defOnFail(A1,A2,M) :- 
+	assert(onFailure(A1,A2,M)),
+	dinfo(def,'Relation \'~w\' < \'~w\' exists on failure \'~w\'',[A2,A1,M]).
+	
 
 %%%%
 %% Composition directives
@@ -332,14 +344,14 @@ defApply(I,_,_,_) :- %% \exists i \in Apply* => fail
 	applyFragment(I,_,_,_), !, 
 	dfail(def,'defApply/4: Directive identifier \'~w\' still exists!',I).
 defApply(_,C,_,_) :- %% \not \exists C \in Context* => fail
-	\+ context(P), !, 
-	dfail(def,'defApply/4: Unkown context \'~w\'!',P).
+	\+ context(C), !, 
+	dfail(def,'defApply/4: Unkown context \'~w\'!',C).
 defApply(_,_,_,F) :- %% \not \exists p \in Fragment* => fail
 	\+ isFragment(F), 
 	dfail(def,'defApply/4: Unkown fragment \'~w\'!',F).
 
 defApply(_,C,B,_) :- %% \not \exists a \in Activities(p) => fail
-	activityBlock(Cxt,B,Content),
+	activityBlock(C,B,Content),
 	map(isContainedBy,Content,Processes),
 	sort(Processes,Targets),
 	length(Targets, L),
@@ -360,3 +372,15 @@ setApplyParam(ApplyId, I,_) :-
 setApplyParam(ApplyId, I, S) :-
 	assert(applyParameter(ApplyId,I,S)),
 	dinfo(set,'Directive \'~w\' uses \'~w\' for \'~w\' parameter',[ApplyId,S,I]).
+
+%% defSetify/2: defSetify(I,V)
+defSetify(C,_) :- 
+	\+ context(C), !, 
+	dfail(def,'defSetify/2: Unkown context \'~w\'!',C).
+defSetify(C,V) :- 
+	getAbsoluteName(C,V,Name),
+	\+variable(Name), !,
+	dfail(def,'defSetify/2: Unkown variable \'~w\' (from ~w)!',[Name,V]).
+defSetify(C,V) :- 
+	getAbsoluteName(C,V,Name),
+	dinfo(def,'ToSet directive stored for variable \'~w\'.',[Name]).

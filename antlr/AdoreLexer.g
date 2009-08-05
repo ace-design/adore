@@ -41,8 +41,9 @@ CONST:		'const';
 REQU:		'require';
 WHEN:		'when';
 COMPOSITION:	'composition';
-APPLY	:	'apply';
-
+APPLY:		'apply';
+TOSET:		'toSet';
+FAILURE	:	'fail';
 
 /** PUNCTUATION**/
 STAR:		'*';

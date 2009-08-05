@@ -61,6 +61,8 @@ tokens {
 	TARGET;
 	ELEM_REF;
 	OUTPUT;
+	SETIFY;
+	ON_FAIL;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
@@ -161,6 +163,8 @@ rel
 	|	l=ord LT LT r=ord SEMI			-> ^(WEAK_WAIT $r $l)
 	| 	l=ord LT r=ord WHEN c=ID SEMI		-> ^(COND_TRUE $r $l $c)
 	|	l=ord LT r=ord WHEN NOT c=ID SEMI	-> ^(COND_FALSE $r $l $c)
+	|	FAILURE LFT_PAREN l=ord (COMMA s=STR)? RGHT_PAREN LT r=ord SEMI
+							-> ^(ON_FAIL $r $l $s?) 
 	;
 	
 merge_core
@@ -168,10 +172,9 @@ merge_core
 	;
 
 directive
-	:	APPLY e=ID INTO actBlock  SEMI 		
-							-> ^(MERGE_FRAG $e actBlock)
-	| 	APPLY e=ID LFT_PAREN  pBind RGHT_PAREN INTO  actBlock  SEMI	
-							-> ^(MERGE_FRAG $e actBlock pBind)
+	: 	APPLY e=ID (LFT_PAREN  pBind RGHT_PAREN)? INTO  actBlock  SEMI	
+							-> ^(MERGE_FRAG $e actBlock pBind?)
+	|	TOSET elemRef SEMI			-> ^(SETIFY elemRef)
 	;
 
 elemRef	:	s=ID ((DBL_COL o=ID)? DBL_COL a=ID)?	-> ^(ELEM_REF $s $o? $a?)

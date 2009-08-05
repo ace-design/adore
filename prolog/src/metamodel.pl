@@ -87,11 +87,7 @@
 :- dynamic waitFor/2.          %%  defWaitFor(A,A)
 :- dynamic weakWait/2.         %%  defWeakWait(A,A)
 :- dynamic isGuardedBy/4.      %%  defGuard(A,A,V,true|false)
-
-%%%%
-%% Policies
-%%%%
-
+:- dynamic onFailure/3.        %%  defOnFail(A,A,S|'*')
 
 %%%%
 %% Composition directive
@@ -103,5 +99,10 @@
 :- dynamic activityBlock/3.    %% defActivityBlock(I,L)
 :- dynamic applyFragment/4.    %% defApply(I,P,I,P)
 :- dynamic applyParameter/3.   %% setApplyParam(I,I,S)
+:- dynamic setify/2.           %% defSetify(I,V)
 
+
+%%%%
+%% Policies
+%%%%
 

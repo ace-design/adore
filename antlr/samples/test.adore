@@ -17,19 +17,20 @@ orchestration helloWorld::sayHello {
   variables { 
     name as string; 
     const prefix := 'Hello, ' as string;
-    v as record;
+    v as struct;
   }
   activities {
     a1. name := receive();
     a2. name.toto* := stringConcat(prefix, name.length*);
     a3. reply(name);
   }
-  relations { a1 < a2; a2 < a3; }
+  relations { a1 < a2; fail(a2,'foo') < a3; fail(a2) < a3; }
 }
 
 
 composition helloWorld::sayHello as foo { 
-      apply e1(x: 'X', y: 'bar') => {a1,a2} ; 
       apply e2 => e1::h;
+      apply e1(x: 'X', y: 'bar') => {a1,a2} ; 
+      toSet name ;
 }
 

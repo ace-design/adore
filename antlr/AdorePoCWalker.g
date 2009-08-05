@@ -275,11 +275,13 @@ ord	[String cxt]
 
 rel	[String cxt]
  	returns [ArrayList<String> facts]
-	@init{ $facts = new ArrayList<String>(); }
+	@init{ $facts = new ArrayList<String>();}
 	: ^(WAIT_FOR r=ord[$cxt] l=ord[$cxt])		{ $facts.add("defWaitFor("+$r.id+","+$l.id+")"); }
 	| ^(WEAK_WAIT r=ord[$cxt] l=ord[$cxt])		{ $facts.add("defWeakWait("+$r.id+","+$l.id+")"); }
 	| ^(COND_TRUE r=ord[$cxt] l=ord[$cxt] c=ID)	{ $facts.add("defGuard("+$r.id+","+$l.id+","+$cxt+"_"+$c.text+",true)");  }
 	| ^(COND_FALSE r=ord[$cxt] l=ord[$cxt] c=ID)	{ $facts.add("defGuard("+$r.id+","+$l.id+","+$cxt+"_"+$c.text+",false)"); }
+	| ^(ON_FAIL r=ord[$cxt] l=ord[$cxt] 		{ String m = "'*'"; }
+			(e=STR				{ m = $e.text;        })?  {$facts.add("defOnFail("+$r.id+","+$l.id+","+m+")"); }) 
 	;
 	
 merge 	returns [ArrayList<String> facts]
@@ -302,18 +304,19 @@ directive [String cxt]
 					   	  $facts.add("defApply("+id+","+$cxt+","+$block.id+","+$e.text+")"); 
 					   	 }
 			(^(BIND v=STR x=ID)	{ $facts.add("setApplyParam("+id+","+$x.text+","+$v.text+")"); })*)
+	| ^(SETIFY elemref[$cxt])		{ $facts.add("defSetify("+$cxt+","+$elemref.id+")");           }
 	;
 
 block [String cxt]
 	returns [String fact, String id]
 	@init{ String members = ""; }
-	: ^(BLOCK (actref[$cxt] { members += $actref.id +","; })+) 	
+	: ^(BLOCK (elemref[$cxt] { members += $elemref.id +","; })+) 	
 							{ $id = generateBlock(); 
 							  $fact = "defActivityBlock("+$cxt+","+$id+",["+members.substring(0,members.length()-1)+"])";
 							}
 	;
 
-actref 	[String cxt]
+elemref [String cxt]
 	returns [String id]
 	:	^(ELEM_REF a=ID) 		{ id = "inferedReference("+$a.text+")"; }
 	|	^(ELEM_REF f=ID a=ID)		{ id = "absoluteReference("+$f.text+","+$a.text+")";}

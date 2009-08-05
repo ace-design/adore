@@ -79,7 +79,8 @@
     (setq adore-process (get-buffer-process b))
     (adore-init-display b)
     (setq mode-name "ADORE Engine"
-	  comint-prompt-regexp "^| [ ?][- ] *")))
+	  comint-prompt-regexp "^| [ ?][- ] *")
+    (use-local-map adore-mode-map)))
   
  ;; high level function for the UI
 (defun adore-run   () (interactive) (adore-run-engine))
@@ -124,7 +125,7 @@
 
   (defvar adore-activities
     '("const" "nop" "receive" "reply" "throw" "when" "as" "apply" 
-      "hook" "^" "$"))
+      "hook" "^" "$" "toSet" "fail"))
   (defvar adore-activities-regexp (regexp-opt adore-activities 'words))
 
   (defvar adore-internal
