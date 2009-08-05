@@ -1,23 +1,44 @@
-//
-//To build the initial scenario
-
-merge  cms::resolve  { 
- apply toSet => selectedMission;
- apply toSet => internalRessource;
- apply toSet => externalRessource;
-}
 
 
-fragment notify(observer, what, who) {
-  variables  {s as service;
-              b as boolean ;
-              a as boolean }
+fragment notify <observer, what, who> {
+  variables  {}
   activities {
     h)  hook() ;
     notify) observer::notify(what,who);
   relations  { ^ < h;  h < $; h<notify;  }
 }
 
+
+
+fragment cession <error> { 
+  variables  {s as service;
+              m as mission ;
+              b as boolean;
+ 	      r as ressource ; }
+  activities {
+    h) b := hook;
+    t) throw error;
+  }
+  relations  { ^ < h; h<$ when b ;h < t when !b; } 
+}
+
+fragment stop <error> { 
+  variables  { }
+  activities {
+    h) hook;
+    o) reply();
+  }
+  relations  { ^ < h;  h<$ ; h < o on failure error; } 
+}
+
+//Bizarre
+fragment continue <error> { 
+  variables  { }
+  activities {
+    h) hook;
+  }
+  relations  { ^ < h; h<$;  h<$ on failure error; } 
+}
 
 
 //extension 1a de 4.2.1
@@ -42,6 +63,7 @@ fragment log {
                  authent<h1 when a;  h1<$;
 		 authent<e when !a;  }
 }
+
 
 
 
@@ -100,11 +122,11 @@ by helicopter.
 //6a.2 Coordinator instructs System to execute a helicopter transport mission (UC 09). 
 //6a.3 Use case continues with step 6. 
 //une constante de temps?
-//pbme dans un lien faible... je rajoute l'ordre.. l'aurions nous bien detecté?...
+//pbme dans un lien faible... je rajoute l'ordre.. l'aurions nous bien detectÃ©?...
 
-//je reflechis en unaire... je me fais du souci sur ce que je voudrais pour passer à N
+//je reflechis en unaire... je me fais du souci sur ce que je voudrais pour passer Ã  N
 //ne faudrait il pas que l'helicopter soit cree au plus une fois??
-//comment le passage à n va gerer ca???
+//comment le passage Ã  n va gerer ca???
 fragment Unreachable { 
   variables  {timeout as integer;
              
@@ -141,12 +163,25 @@ fragment reachByHelicopter {
 }
 
 
+fragment cession <error> { 
+  variables  {s as service;
+              m as mission ;
+              b as boolean;
+ 	      r as ressource ; }
+  activities {
+    h) b := hook;
+    t) throw error;
+  }
+  relations  { ^ < h; h<$ when b ;h < t when !b; } 
+}
+
+
 
 
 
 //6b  du  4.2.1 non faite...
 //pour plein de raisons
-//que se passe-til si j'ai recu l'alerte et est lancé un helicopter
+//que se passe-til si j'ai recu l'alerte et est lancÃ© un helicopter
 //avant de recevoir l'avsi
 //je n'ai pas defini le secnario du worker etc...
 
@@ -176,29 +211,46 @@ fragment otherMissionRequired {
 }
 
 
-//1.a 1.b from 4.2.2
-//Incoherent dans ma comprehesnion..si on perd la connection on envoie
-//les images....
-fragment reach { 
-  variables  {s as service;
-              m as mission ;
-              b as boolean;
- 	      r as ressource ; }
+
+
+
+
+//1a,2a. The call is disconnected. The base use case terminates. 
+//In parallel to steps 3-4, if the crisis location is covered by camera surveillance: 
+//3a.1 System requests video feed from SurveillanceSystem. 
+//3a.2 SurveillanceSystem starts sending video feed to System. 
+//3a.3 System starts displaying video feed for Coordinator. 
+
+fragment requestVideoSurveillance { 
+  variables  {}
   activities {
-    a0a) catch unreachable; //on hook catch unreachable 
-    a0b) hook;
+    h) hook;
     a1) feeder := SurveillanceSystem::getVideo();
     a2) coordinatorSystem::setVideo(feeder);
-    a3) call; //pour le distinguer du call...
-    a4) r := getRessource(m);
-    a5) cms::manageRessource(ir,m);
   }
-  relations  { ^ < a0a; ^ < a0b; h<<$;a5<<$;
-  	      a0a< a1; a1< a2 ; a2< a3; a3 < a4; a4 <a5; } 
+  relations  { ^ < h; h < $; 
+               h<a1 on failure unreachable;
+               a2<<$;
+  	       a1< a2 ;  } 
 }
 
 
-//besoin d'en mettre sur plusieurs... elles sont liées entre elles... 
+//5b. Camera vision of the location is perfect, but Coordinator cannot conï¬rm the situation that the witness describes or the Coordinator determines that the witness is calling in a fake crisis. 
+//5b.1 The base use case is terminated. 
+
+//Perso: Definition liÃ©e Ã  une autre evolution....
+
+
+fragment onRequestVideoSurveillanceCheckForFakeCrisis { 
+  variables  {}
+  activities {
+    h) hook;
+    a1) ok :=  coordinatorSystem::isFakeCrisis()
+  }
+  relations  { ^ < h; h < a1; a1< $ when ok;  } 
+}
+
+//besoin d'en mettre sur plusieurs... elles sont liÃ©es entre elles... 
 // comment capturer l'info????
 
 merge cms::resolve { 

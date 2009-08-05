@@ -1,9 +1,34 @@
-// Implentation of the Peano Machine using ADORE concrete syntax
-// @author: Sebastien Mosser
-// @date:   07 / 13 / 2009
+// 
+
+//CMS => Crisis Management System 
+//coordinatorSystem => User Interface for Coordinator 
 
 //4.2.1 Not finished
-//add currentCrisis as a parameter....
+//I assume that the system deals with only one Crisis at once.
+
+//Use Case 1: Resolve Crisis 
+//The initial scenario is defined without loops.
+//They are expressed as evolutions : We no more work on a ressource but on a set of ressources.
+
+//Witness places a call to the crisis centre, where it is answered by a Coordinator. 
+//1. Coordinator captures witness report (UC 2). 
+//2. System recommends to Coordinator the missions that are to be executed based on the current information about the crisis and resources. 
+//3. Coordinator selects one or more missions recommended by the system. 
+//Perso : 1) We define the initial scenario with one mission. An evolution adds the possibility for the coordinator to select a set of missions.
+//For each mission in parallel: 
+//4. For each internal resource required by a selected mission, System assigns an internal resource (UC 3). 
+//5. For each external resource required by a selected mission, System requests an external resource (UC 4). 
+//Perso : the following steps 6-11 are taken into account in manageRessource
+  //6. Resource notiﬁes System of arrival at mission location. 
+  //7. Resource executes the mission (UC 5). 
+  //8. Resource notiﬁes System of departure from mission location. 
+  //9. In parallel to steps 6-8, Coordinator receives updates on the mission status from System. 
+  //10. In parallel to steps 6-8, System informs Resource of relevant changes to mission / crisis information. 
+  //11. Resource submits the ﬁnal mission report to System. 
+//Perso : a dedicated service is defined for the following : cms::setNewCrisisInformation, 
+   //12. In parallel to steps 4-8, Coordinator receives new information about the crisis from System. 
+//13. Coordinator closes the ﬁle for the crisis resolution. 
+//Use case ends in success. 
 orchestration cms::resolve {
   variables {
     
@@ -55,6 +80,7 @@ orchestration cms::manageRessource{
 
 
 
+
 orchestration cms::setNewCrisisInformation{
   variables {
     i as crisisInformation;
@@ -72,6 +98,20 @@ orchestration cms::setNewCrisisInformation{
 
 
 // 4.2.2
+//Capture Witness Report 
+//Use Case 2: Capture Witness Report 
+//Scope: Car Crash Crisis Management System 
+//1. Coordinator provides witness information1 to System as reported by the witness. 
+//2. Coordinator informs System of location and type of crisis as reported by the witness. 
+//In parallel to steps 2-4: 
+//2a.1 System contacts PhoneCompany to verify witness information. 
+//2a.2 PhoneCompany sends address/phone information to System. 
+//2a.3 System validates information received from the PhoneCompany. 
+//3. System provides Coordinator with a crisis-focused checklist. 
+//4. Coordinator provides crisis information2 to System as reported by the witness. 
+//5. System assigns an initial emergency level to the crisis and sets the crisis status to active. 
+//Use case ends in success. 
+
 orchestration cms::witnessReportCapture {
   variables {
     wi as witnessInformation;
@@ -87,14 +127,14 @@ orchestration cms::witnessReportCapture {
     a1) wi := coordinatorSystem::provideWitnessInformation();
     a2) li := coordinatorSystem::provideLocationInformation();
     a2a12) adress := phoneCompany::getClientInformation(wi);
-    a2a3) exact := cms::validateInformation(adress,li);
+    a2a3) exact := cms::validateInformation(adress,wi);
     a3) cl := cms::computeCheckList();
     a4) ci := coordinatorSystem::provideCrisisInformation(cl);
     a5) setCurrentCrisisActive(cms,ci);
     a6) reply();
 
   } 
-  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a2a12<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;} 
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a6;} 
 }
 
 
