@@ -100,8 +100,8 @@
   
   (define-key adore-mode-map [remap comment-dwim] 'adore-comment-dwim)
   (define-key adore-mode-map [menu-bar] (make-sparse-keymap))
-  (let ((menuMap (make-sparse-keymap "ADORE"))) 
-    (define-key adore-mode-map [menu-bar adore] (cons "ADORE" menuMap)) 
+  (let ((menuMap (make-sparse-keymap "Adore"))) 
+    (define-key adore-mode-map [menu-bar adore] (cons "Adore" menuMap)) 
     (define-key menuMap [facts] '("Generate facts" . adore-facts))
     (define-key menuMap [pict] '("Generate picture" . adore-pict))
     (define-key menuMap [s1] '("--"))
@@ -111,44 +111,36 @@
 ;;;;
 ;; ADORE Mode
 ;;;;
-(define-derived-mode adore-mode fundamental-mode
+(define-derived-mode adore-mode c-mode
   "adore mode"
   "Major mode for editing ADORE textual descriptions"
-  (c-mode)
-  (setq mode-name "ADORE")
+  (setq mode-name "Adore Editor")
   (setq c-basic-offset 2)
   (use-local-map adore-mode-map)
 
   (defvar adore-keywords 
     '("require" "orchestration" "fragment" "composition" ))
   (defvar adore-keywords-regexp (regexp-opt adore-keywords 'words))
-  (setq adore-keywords nil)
 
   (defvar adore-activities
     '("nop" "receive" "reply" "throw" "when" "as" "apply" "hook" "^" "$"))
   (defvar adore-activities-regexp (regexp-opt adore-activities 'words))
-  (setq adore-activities nil)
 
   (defvar adore-internal
     '("variables" "activities" "relations"))
   (defvar adore-internal-regexp (regexp-opt adore-internal 'words))
-  (setq adore-internal nil)
 
   (defvar adore-types
     '("integer" "boolean" "struct" "float" "string" "time" "date" "dateTime"))
   (defvar adore-types-regexp (regexp-opt adore-types 'words))
-  (setq adore-types nil)
   
   (setq adore-font-lock-keywords
 	`((,adore-activities-regexp . font-lock-builtin-face)
 	  (,adore-keywords-regexp .   font-lock-keyword-face)
 	  (,adore-internal-regexp .   font-lock-constant-face)
 	  (,adore-types-regexp .      font-lock-type-face)))
-  (setq font-lock-defaults '((adore-font-lock-keywords)))
+  (setq font-lock-defaults '((adore-font-lock-keywords))))
 
-  (setq adore-keywords-regexp nil)
-  (setq adore-activities-regexp nil)
-  (setq adore-types-regexp nil)
-  (setq adore-internal-regexp nil))
-
+;; External interface: providing adore-mode, and enhancing the autoloading
+(provide 'adore-mode)
 (setq auto-mode-alist (append '(("\\.adore$" . adore-mode)) auto-mode-alist))

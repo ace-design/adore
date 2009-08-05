@@ -11,10 +11,10 @@ orchestration abstractSource::getInfos {
   }
 
   activities {
-    a0) (identifier: id) := receive();
-    a1) shouldCall := sourceManager::shouldCall(device: id, 
+    a0. (identifier: id) := receive();
+    a1. shouldCall := sourceManager::shouldCall(device: id, 
          	      				source: 'abstractSource' as string);
-    a2) reply(result: emptyList*);
+    a2. reply(result: emptyList*);
   }
 
   relations {

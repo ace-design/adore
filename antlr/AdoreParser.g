@@ -102,7 +102,7 @@ acts
 	:	ACTS LFT_BRCKT activity+ RGHT_BRCKT 	-> ^(ACTIVITIES activity+) ;
 	
 activity
-	:	id=ID RGHT_PAREN content SEMI 		-> ^(ACT $id content);
+	:	id=ID DOT content SEMI 			-> ^(ACT $id content);
 
 kind	
 	:	RECEIVE | REPLY | THROW | HOOK | NOP

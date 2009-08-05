@@ -2,7 +2,7 @@
 // @author: Sebastien Mosser
 // @date:   07 / 13 / 2009
 
-require '../antlr/samples/peano_atomic.adore' ;
+require 'peano_atomic.adore' ;
 
 orchestration peanoMachine::add {
   
@@ -80,4 +80,3 @@ fragment swapReceivedData<function> {
 composition peanoMachine::add {
   apply swapReceivedData(function: 'isLesserThan') => a0;
 }
-

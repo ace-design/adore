@@ -9,9 +9,9 @@ orchestration peanoMachine::isZero {
     r as boolean;
   }
   activities {
-    a0) n := receive();
-    a1) r := equals(n,'0' as integer);
-    a2) reply(result: r);
+    a0. n := receive();
+    a1. r := equals(n,'0' as integer);
+    a2. reply(result: r);
   }
   relations { a0 < a1; a1 < a2; }
 }
@@ -22,9 +22,9 @@ orchestration peanoMachine::next {
     n as integer;
   }
   activities {	
-    a0) n := receive();
-    a1) n := plus(n,'1' as integer);
-    a2) reply(result: n);
+    a0. n := receive();
+    a1. n := plus(n,'1' as integer);
+    a2. reply(result: n);
   } 
   relations { a0 < a1; a1 < a2; } 
 }
@@ -35,9 +35,9 @@ orchestration peanoMachine::pred {
     n as integer;
   }
   activities {	
-    a0) n := receive();
-    a1) n := minus(n,'1' as integer);
-    a2) reply(result: n);
+    a0. n := receive();
+    a1. n := minus(n,'1' as integer);
+    a2. reply(result: n);
   } 
   relations { a0 < a1; a1 < a2; } 
 }
