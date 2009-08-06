@@ -71,6 +71,7 @@ It defines syntax coloring, indentation rules (derived from c-mode)
     in your ~/.emacs file:
 
 (setenv "ADORE_HOME" "/absolute/path/to/adore")
+(setenv "SWIPL_HOME" "/opt/local/bin/")
 (setenv "PATH" (concat (getenv "PATH") ":" (getenv "ADORE_HOME") "/bin"))
 (load-file (concat (getenv "ADORE_HOME") "/adore.el"))
 
