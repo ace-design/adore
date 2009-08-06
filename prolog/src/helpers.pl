@@ -20,20 +20,19 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%% concatenate/2: transform a list of strings into a newline-separated string
-concatenate([],'').
-concatenate([H|T],R) :- 
-	concatenate(T,Tmp), swritef(R,'%w\n%w',[H,Tmp]).
+%% concatenate/2: transform a list of strings into a separated string
+concatenate(L,C) :- concatenate(L,C,'\n').
+concatenate([],'',_).
+concatenate([E],R,_) :- swritef(R,'%w',[E]),!.
+concatenate([H|T],R,Sep) :- 
+	concatenate(T,Tmp,Sep), swritef(R,'%w%w%w',[H,Sep,Tmp]).
 
 %% map/3: Prolog doesn't provides a REAL unary map implementation.
 map(_,[],[]).
 map(P,[H|T],[R|O]) :-
 	call(P,H,R), map(P,T,O).
 
-
-getAbsoluteNames(_,[],[]).
-getAbsoluteNames(Cxt,[H|T],[R|O]) :- 
-	getAbsoluteName(Cxt,H,R), getAbsoluteNames(Cxt,T,O).
+%% getAbsoluteName: retrieve a named element from a context
 getAbsoluteName(_,absoluteReference(S,O,E),R) :-
 	swritef(Str,"%w_%w_%w",[S,O,E]),
 	string_to_atom(Str,R).
@@ -45,4 +44,12 @@ getAbsoluteName(Cxt,inferedReference(E),R) :-
 	swritef(Str,"%w_%w",[T,E]),
 	string_to_atom(Str,R).
 
-	
+%% getAbsoluteNames: iterate over a list of name references
+getAbsoluteNames(_,[],[]).
+getAbsoluteNames(Cxt,[H|T],[R|O]) :- 
+	getAbsoluteName(Cxt,H,R), getAbsoluteNames(Cxt,T,O).
+
+%% writeList => display a List on the terminal
+writeList([]).
+writeList([[H]|T]) :- 
+	write(H), nl, writeList(T).

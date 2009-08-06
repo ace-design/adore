@@ -23,10 +23,10 @@
 %%%%
 %% Debugging ADORE ...
 %%%%
-debugSubscription(create).
-debugSubscription(def).
-debugSubscription(set).
-debugSubscription(transfo).
+%debugSubscription(create).
+%debugSubscription(def).
+%debugSubscription(set).
+%debugSubscription(transfo).
 
 %%%%
 %% Model transformation parameters: 

@@ -21,24 +21,28 @@
 %%%%
 
 %%%%
-%% Relations between activities
+%% Extracts dependencies between processes
 %%%%
 
-%% path/2: path(+A,+B) => a direct path exists between A and B
-path(X,Y) :- waitFor(Y,X).
-path(X,Y) :- isGuardedBy(Y,X,_,_).
-path(X,Y) :- weakWait(Y,X).
-path(X,Y) :- onFailure(Y,X,_).
 
-%% existsPath/2: existsPath(+A,+B) => transitive closure for path
-existsPath(X,Y) :- path(X,Y).
-existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).
+%% isExtService(?S): an external service is invoked but not defined.
+isExtService(S) :- 
+	hasForService(_,S), \+ hasForSrvName(_,S).
 
+inferServiceOperations(S,Ops) :- 
+	findall(O,hasForServiceAndOperation(S,O),L),
+	sort(L,Ops).
+	
+hasForServiceAndOperation(S,O) :- 
+	hasForService(A,S), hasForOperation(A,O).
 
-%%%%
-%% Access to variable
-%%%%
+getProcessPartners(P,Partners) :- 
+	findall([S,O],isPartnerOf(P,S,O),Tmp),
+	sort(Tmp,Partners).
 
-%% getVariable/2: getVariable(+V,-R): retrieve the variable associated to V
-getVariable(F,V) :- fieldAccess(F,V,_). %% as it can be a field access
-getVariable(V,V) :- variable(V).        %% or simply the variable.
+isPartnerOf(P,S,O) :- 
+	process(P), activity(A), isContainedBy(A,P), 
+	hasForService(A,S), hasForOperation(A,O).
+
+isDefinedAsAProcess(S,O,P) :- 
+	hasForSrvName(P,S), hasForOpName(P,O).
