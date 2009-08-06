@@ -1,10 +1,12 @@
+require 'fragments.adore'
+
 //
 //To build the initial scenario
 //1)
 composition  cms::resolve  { 
- apply toSet => selectedMission;
- apply toSet => internalRessource;
- apply toSet => externalRessource;
+  toSet => selectedMission;
+  toSet => internalRessource;
+  toSet => externalRessource;
 }
 
 
@@ -111,4 +113,11 @@ composition cms::assignInternalResource {
 composition cms::assignInternalResource { 
  apply unreachable => a2; 
  apply unavailable(employee : cmsEmployee) => a2;
+ }
+
+//From 4.2.6
+composition superObserver::executeMission { 
+ toset => mission; 
+ apply notify (observer : superObserver, what : 'MissionCreated', who : mission) => a7;
+ apply notify (observer : superObserver, what : 'endMission', who : mission) => a8;
  }

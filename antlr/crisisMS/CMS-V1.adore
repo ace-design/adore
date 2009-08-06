@@ -166,6 +166,20 @@ orchestration cms::assignInternalResource {
 
 
 // 4.2.2
+/* 4.2.4 Request External Resource */
+/* Use Case 4: Request External Resource */
+/* Scope: Car Crash Crisis Management System */
+/* Primary Actor: Coordinator */
+/* Secondary Actor: ExternalResourceSystem (ERS) */
+/* Intention: The System requests a mission from an external resource, such as a fire station, police station or external */
+/* ambulance service. */
+/* Main Success Scenario: */
+/* 1. System sends mission request to ERS, along with mission-specific information1. */
+/* 2. ERS informs System that request can be processed. */
+/* Use case ends in success. */
+//Perso : Following extensions are managed by the return allocated ressource or an error
+//2a. ERS notifies System that it partially approves request for resources. Use case ends in degraded success.
+//2a. ERS notifies System that it partially approves request for resources. Use case ends in degraded success.
 orchestration cms::assignExternalResource {
   variables {
     m as mission;
@@ -174,12 +188,11 @@ orchestration cms::assignExternalResource {
   }
   activities {	
     a0. m := receive();
-    a1. eS := cms::selectExternalRessource(m);
-    a2. allocatedRessource := eRS::request(eS,m);
-    a6. reply(allocatedRessource);
+    a1. allocatedRessource := eRS::request(m);
+    a2. reply(allocatedRessource);
 
   } 
-  relations { a0 < a1; a1 < a2; a2<a6 ; } 
+  relations { a0 < a1; a1 < a2 ; } 
 }
 
 
@@ -205,33 +218,82 @@ orchestration cms::setNewVictimInformation {
 
 //4.2.5
 //n'importequoi a revoir totalement
+/* Use Case 6: Execute SuperObserver Mission */
+/* Scope: Car Crash Crisis Management System */
+/* Primary Actor: SuperObserver */
+/* Secondary Actor: None */
+/* Intention: The intention of the SuperObserver is to observe the situation at the crisis site to be able to order */
+/* appropriate missions. */
+/* 19 */
+/* Main Success Scenario: */
+/* SuperObserver is at the crisis location. */
+/* 1. System sends a crisis-specific checklist to SuperObserver. */
+/* 2. SuperObserver feeds System with crisis information. */
+/* 3. System suggests crisis-specific missions to SuperObserver. */
+/* Steps 4-8 is repeated as many times as needed. */
+/* 4. SuperObserver notifies System of the type of mission he wants to create. */
+/* 5. System sends a mission-specific information request to SuperObserver. */
+/* 6. SuperObserver sends mission-specific information1 to System. */
+/* 7. System acknowledges the mission creation to SuperObserver. */
+/* 8. System informs SuperObserver that mission was completed successfully. */
+/* 9. SuperObserver judges that his presence is no longer needed at the crisis location. */
+/* Use case ends in success. */
 orchestration superObserver::executeMission {
   variables {
     m as mission;
     mission* as mission;
     cL as checkList;
-    q as question;
     ci as crisisInformation;
   }
   activities {	
     a0. m := receive();
     a1. cL := cms::getCrisisSpecificCheckList(m);
-    //SuperObserver feeds System with crisis information 
-    //(one by one according to the check list)
-    //a2 onSet(cL,q,next,all)   
-    a2. q := next(cL);
-    a2b. ci := superObserver::getInformation(q);
+    a2. ci := superObserver::feed(cL);
     a2c. cms::setNewCrisisInformation(ci);
     // end set
     //System suggests crisis-speciﬁc missions to SuperObserver
     a3. mission* := cms::missionsToDo();
+    a3a. superObserver::suggest(mission*);
    //SuperObserver notiﬁes System of the type of mission he wants to create...step 4 to 8
-    a4. superObserver::dealWithMissions(mission*);
+    a89. superObserver::manageMissions();
    //SuperObserver judges that his presence is no longer needed at the crisis location. 
-    a9. ressourceManager::setExcutionEnd(m);
+    a9. ressourceManager::setExecutionEnd(m,superObserver);
   } 
-  relations { a0 < a1; a1 < a2; a2<a2b; a2b<a2c ;a2<a3;a3<a4;a4<a9; } 
+  relations { a0 < a1; a1 < a2; a2<a2c; a2c<a3;a3<a89;a89<a9; } 
 } 
+
+//4. SuperObserver notifies System of the type of mission he wants to create.
+//5. System sends a mission-specific information request to SuperObserver.
+//6. SuperObserver sends mission-specific information1 to System.
+//7. System acknowledges the mission creation to SuperObserver.
+//8. System informs SuperObserver that mission was completed successfully
+//Perso : il faudrait factoriser le create mission....
+//Je hais cette orchestration...n'importe quoi....
+orchestration superObserver::manageMissions {
+  variables {
+    mission as mission;
+    cL as checkList;
+    ci as crisisInformation;
+    again as boolean;
+  }
+  activities {	
+    a0.  receive();
+    a4. mission := whichMission();
+    a5. request := cms::getMissionSpecificRequest(mission);
+    a6. mission := superObserver::fillRequest(request);
+    a7. mission := cms::createMission(mission);
+    a8. cms::manageMission(mission);
+    stop. again := askForMissionCreation();
+    loop. superObserver::manageMissions();
+    end. reply();
+
+  } 
+  relations { a0 < a4; a4 < a5; a5<a6; a6<a7;a7<a8;a8<stop;stop<loop when again; stop<end when !again; } 
+}
+
+
+
+
 
 orchestration workerSystem::executeMission {
   variables {
