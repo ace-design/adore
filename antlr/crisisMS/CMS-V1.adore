@@ -42,23 +42,41 @@ orchestration cms::resolve {
     a1. cms::witnessReportCapture();
     a2. mission* := cms::missionsToDo();
     a3. selectedMission := coordinatorSystem::select(mission*);
-     //System assigns internal Ressource(s)
-       a4a. internalRessource := getInternalRessources(selectedMission);
-       a4a2. cms::assignInternalRessources(internalRessource,selectedMission);
-       a4a3. cms::manageRessource(internalRessource,selectedMission);
-      //System requests external Ressources    
-       a5a. externalRessource := getExternallRessources(selectedMission);
-       a5a2. cms::assignExternalRessources(externalRessource,selectedMission);
-       a5a3. cms::manageRessource(externalRessource,selectedMission);  
+    a45. cms::dealWithOneMission(selectedMission);
     a13. coordinatorSystem::close();
     a6.reply();
   }
-  relations { a0 < a1; a1 < a2; a2<a3; a3<a4a ; a4a<a4a2; a4a2<a4a3; a4a3<a13; a3<a5a;a5a<a5a2;a5a2<a5a3;a5a3<a13; a13<a6;}
+  relations { a0 < a1; a1 < a2; a2<a3; a3<a45 ; a45<a13; a13<a6;}
+}
+
+orchestration cms::dealWithOneMission {
+  variables {
+    
+    m as mission;
+    internalRessource as ressource;
+    externalRessource as ressource;
+  }
+  activities {
+    a0. m := receive();
+     //System assigns internal Ressource(s)
+       a4a. internalRessource := getInternalRessources(m);
+       a4a2. cms::assignInternalRessources(internalRessource,m);
+       a4a3. cms::manageRessource(internalRessource,m);
+      //System requests external Ressources    
+       a5a. externalRessource := getExternallRessources(m);
+       a5a2. cms::assignExternalRessources(externalRessource,m);
+       a5a3. cms::manageRessource(externalRessource,m);  
+    a6.reply();
+  }
+  relations { a0 <a4a ; a4a<a4a2; a4a2<a4a3; a4a3<a6; a0<a5a;a5a<a5a2;a5a2<a5a3;a5a3<a6;}
 }
 
 
 
-
+//From 4.2.1
+//Resource notifies System of arrival at mission location.
+//Resource notifies System of departure from mission location.
+//Resource submits the final mission report to System.
 
 orchestration cms::manageRessource{
   variables {
@@ -68,7 +86,7 @@ orchestration cms::manageRessource{
   activities {
     a0. (r,m) := receive();
     a1. ressourceManager::askForArrival(r,m);
-    //a1a.coordinatorSystem::notify('arrived' as string,r,m);
+    //a1a.coordinatorSystem::notify('arrived' as string,r);
     a2. ressourceManager::askForExecutionEnd(r,m);
     //a2a.coordinatorSystem::notify('endExecution'  as string,r,m);
     a11.ressourceManager::askForfinalMissionReport(r,m);
@@ -80,7 +98,8 @@ orchestration cms::manageRessource{
 
 
 
-
+//From 4.2.1
+//10.  System informs Resource of relevant changes to mission / crisis information.
 orchestration cms::setNewCrisisInformation{
   variables {
     i as crisisInformation;
@@ -292,18 +311,38 @@ orchestration superObserver::manageMissions {
 }
 
 
+//4.2.7 Execute Rescue Mission
+//Use Case 7: Execute Rescue Mission
+//Scope: Car Crash Crisis Management System
+//Primary Actor: FirstAidWorker
+//Secondary Actor: HospitalRS
+//Intention: The intention of the FirstAidWorker is to accept and then execute a rescue mission that involves transporting a victim to the most appropriate hospital.
+//Main Success Scenario:
+//FirstAidWorker is at the crisis location.
+//1. FirstAidWorker transmits injury information of victim to System.
+//Steps 2 and 3 are optional.
+//2. FirstAidWorker determines victim’s identity and communicates it to System.
+//3. System requests victim’s medical history information from all connected HospitalResourceSystems.
+//FirstAidWorker administers first aid procedures to victim.
+//4. System instructs FirstAidWorker to bring the victim to the most appropriate hospital.
+//5. FirstAidWorker notifies System that he is leaving the crisis site.
+//6. FirstAidWorker notifies System that he has dropped off the victim at the hospital.
+//7. FirstAidWorker informs System that he has completed his mission.
+//Use case ends in success.
+//Perso : probablement ajouter pkys de setNewCrisisInformation
+//Perso : verfier les types... ca ne doit pas bien aller
 
-
-
+//Distinguer IHM et Service????
 orchestration workerSystem::executeMission {
   variables {
     m as mission;
     mission* as mission;
-    cL as checkList;
+    hospital as string;
     q as question;
     ci as crisisInformation;
     info as information;
     b as boolean;
+    medicalHistory as information;
   }
   activities {	
     a0. m := receive();
@@ -312,17 +351,16 @@ orchestration workerSystem::executeMission {
     a1b. cms::setNewCrisisInformation(ci);
     //2. FirstAidWorker determines victim’s identity and communicates it to System. 
     a2a.  (b,info) := workerSystem::getVictimInformation();
-    a2b. cms::setNewVictimInformation(b);
-    //
-    x. cms::getHospitalFor(ci);
-
-    // end set
-    //System suggests crisis-speciﬁc missions to SuperObserver
-    a3. mission* := cms::missionsToDo();
-   //SuperObserver notiﬁes System of the type of mission he wants to create...step 4 to 8
-    a4. superObserver::dealWithMissions(mission*);
-   //SuperObserver judges that his presence is no longer needed at the crisis location. 
-    a9. ressourceManager::setExcutionEnd(m);
+    a2b. cms::setNewVictimInformation(info);
+    //3. System requests victim’s medical history information from all connected HospitalResourceSystems.
+    a3. medicalHistory := cms::getMedicalHistoryInformation(info);
+    a4. hospital :=  cms::hospitalToGo(ci);
+    a4a. workerSystem::setHospitalToGo(hospital);
+    a5. workerSystem::confirmLeaving();
+    a6. workerSystem::confirmDropping();
+    a7. workerSystem::confirmMissionCompleted();
+    a8. reply();
   } 
-  relations { a0 < a1a; a1a < a1b; a0<a2a; a2a<a2b ;a2b<x;a1b<a3;a3<a4;a4<a9; } 
+  relations { a0 < a1a; a1a < a1b; a0<a2a; a2a<a2b when b ;a2b<a3;
+    a1b<a4;a4<a4a;a4a<a5; a5< a6; a6 < a7; a7<a8; } 
 }

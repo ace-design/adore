@@ -3,10 +3,10 @@ require 'fragments.adore'
 //
 //To build the initial scenario
 //1)
-composition  cms::resolve  { 
-  toSet => selectedMission;
-  toSet => internalRessource;
-  toSet => externalRessource;
+composition    { 
+  toSet => cms::resolve::selectedMission;
+  toSet => cms::dealWithOneMission::internalRessource;
+  toSet => cms::dealWithOneMission::externalRessource;
 }
 
 
@@ -26,7 +26,7 @@ composition  cms::setNewCrisisInformation  {
 
 composition   { 
 apply cession (infoDoesNotMatch) => cms::witnessReportCapture.a2a3;
-apply stop (infoDoesNotMatch) => cms::resolve.a2a3;
+apply stop (infoDoesNotMatch) => cms::resolve.a1;
 }
 
 //from 4.2.2
@@ -70,7 +70,7 @@ composition cms::resolve {
 
 //4a. Internal resource is not available after step 4. 
 //4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5). 
-composition cms::resolve { 
+composition cms::dealWithOneMission { 
  apply ressourceAvailability (ressource : internalRessource , mission : selectedMission ) => a4a2;
 
 
@@ -78,7 +78,7 @@ composition cms::resolve {
 
 //5a. External resource is not available after step 5. 
 //5a.1 Use case continues in parallel with step 2. 
-composition cms::resolve { 
+composition cms::dealWithOneMission { 
  apply ressourceAvailabilityDegrated (ressource : externalRessource) =>  a5a2;
  }
 
@@ -121,3 +121,56 @@ composition superObserver::executeMission {
  apply notify (observer : superObserver, what : 'MissionCreated', who : mission) => a7;
  apply notify (observer : superObserver, what : 'endMission', who : mission) => a8;
  }
+
+
+//From 4.2.1
+//9. In parallel to steps 6-8, Coordinator receives updates on the mission status from System.
+composition cms::manageRessource {  
+ apply notify (observer : coordinatorSystem, what : 'Ressource arrived', 
+who : r) => a2;
+ apply notify (observer : coordinatorSystem, what : 'Ressource is finished', 
+who : r) => a11;
+ }
+
+//From 4.2.1
+//12. In parallel to steps 4-8, Coordinator receives new information about the crisis from System.
+
+composition cms::setNewCrisisInformation {  
+ apply notify (observer : coordinatorSystem, what : 'newInfo', 
+who : i) => a0;
+ }
+
+
+
+//For dealing with ressources
+
+composition workerSystem::executeMission {  
+ apply notify (observer : ressourceManager, what : 'leaving', 
+who : workerSystem) => a5;
+ apply notify (observer : ressourceManager, what : 'dropping', 
+who : workerSystem) => a6;
+ apply notify (observer : ressourceManager, what : 'finish', 
+who : workerSystem) => a7;
+ }
+
+
+//from 4.2.7
+//4a. HospitalResourceSystem transmits victim’s medical history information to System.
+//4a.1 System notifies FirstAidWorker of medical history of the victim relevant to his injury.
+//4a.2 Use case continues at step 4.
+//Perso : I don't introduce waiting before to choose the hospital because it's not asked.
+
+
+composition workerSystem::executeMission {  
+ apply medicalHistoryAvailable => a3;
+ }
+
+
+
+
+//6a. System determines that the crisis location is unreachable by standard transportation means, but reachable by helicopter.
+//6a.1 System informs the Coordinator about the problem.
+//6a.2 Coordinator instructs System to execute a helicopter transport mission (UC 09).
+composition  cms::setNewCrisisInformation {  
+ apply reachableByHelicopter => a0;
+ } 

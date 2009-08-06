@@ -75,19 +75,27 @@ fragment log <authenticationService,logger>{
 //5a.1 Use case continues in parallel with step 2. 
 //bizarre elle est la meme que la 4a mais en reduction
 //Il faudrait un delegate qui prenne nop
+//Je ne retourne pas au step 2 .... 
+//c'est au cms de decider en fonction de l'info obtenu
+//Comment faire???
+//Je rajouterai bien un signalement de pbme...
 fragment ressourceAvailabilityDegrated <ressource>{ 
   variables  {
               b as boolean;
- 	      r as ressource ; }
+ 	      r as ressource ;
+              i as crisisInformation }
   activities {
     availabilityTest. b :=  ressourceManager::isAvailable(ressource);
     h.  hook() ; 
-    cont. nop;
+    conta. i := new(CrisisInformation, 'ressourceUnavailable',r);
+    contb. cms::setNewCrisisInformation(i);
   }
   relations  { ^ < availabilityTest; availabilityTest<h when b ; h < $; 
-              availabilityTest < nop when !b; nop<$;
+    availabilityTest < conta when !b; conta<contb;
   }
 }
+
+
 
 
 //------------------
@@ -167,23 +175,27 @@ fragment unavailable <employee> {
 
 //------------------
 
-
-fragment reachByHelicopter { 
-  variables  {s as service;
+//6a. System determines that the crisis location is unreachable by standard transportation means, but reachable by helicopter.
+//6a.1 System informs the Coordinator about the problem.
+//6a.2 Coordinator instructs System to execute a helicopter transport mission (UC 09).
+fragment reachableByHelicopter { 
+  variables  {i as crisisInformation;
               m as mission ;
-              b as boolean;
- 	      r as ressource ; }
+              unreachable as boolean;
+ 	      r as ressource ;
+	      reachableByHelicopter as boolean;}
   activities {
-    a0a. catch unreachable; //on hook catch unreachable 
-    a0b. hook;
-    a1. coordinatorSystem::notify('locationUnreachable', r, m);
-    a2. m := cms::createHelicopterTransportMission(m);
-    a3. call; //pour le distinguer du call...
-    a4. r := getRessource(m);
+    h. i := hook;
+    u. unreachable := cms::locationUnreachable(i);
+    helicop. reachableByHelicopter := cms::reachableByHelicopter(i);
+    a1. coordinatorSystem::notify('locationReachableByHelicopter', i);
+    a2. m := cms::createHelicopterTransportMission(i);
+    a4. ir := getRessource(m);
     a5. cms::manageRessource(ir,m);
   }
-  relations  { ^ < a0a; ^ < a0b; h<<$;a5<<$;
-  	      a0a< a1; a1< a2 ; a2< a3; a3 < a4; a4 <a5; } 
+  relations  { ^ < h; h<$; h<u; u< helicop when unrechable ; 
+    helicop < a1 when reachableByHelicopter;
+    a1< a2 ; a2< a4;  a4 <a5; } 
 }
 
 
@@ -208,6 +220,8 @@ fragment cession <error> {
 //que se passe-til si j'ai recu l'alerte et est lancé un helicopter
 //avant de recevoir l'avsi
 //je n'ai pas defini le secnario du worker etc...
+//Il me manque des evenements pour la gerer... 
+//J'ai vraiment des pbmes entre un enonces par evenement et une programmation synchrone....
 
 //6c  du  4.2.1 non faite...
 //bizarre c'est peut etre la mienne en fait comme je ne savais pas
@@ -219,20 +233,20 @@ fragment cession <error> {
 //je pense en local 
 //7a. One or more further missions are required in step 6. 
 //7a.1 Use case continues in parallel with step 2. 
-fragment otherMissionRequired { 
-  variables  {s as service;
-              m as mission ;
-              b as boolean;
- 	      r as ressource ; }
-  activities {
-    test. b := cms::otherMissionRequired();
-    a0. hook;
-    a1. m :=  cms::missionToDo();
-    a2. cms::manageRessource(m);
-  }
-  relations  { ^ < test; ^ < a0;a0<$;
-  	      a1< a2 ; } 
-}
+/* fragment otherMissionRequired {  */
+/*   variables  {s as service; */
+/*               m as mission ; */
+/*               b as boolean; */
+/*  	      r as ressource ; } */
+/*   activities { */
+/*     test. b := cms::otherMissionRequired(); */
+/*     a0. hook; */
+/*     a1. m :=  cms::missionToDo(); */
+/*     a2. cms::manageRessource(m); */
+/*   } */
+/*   relations  { ^ < test; ^ < a0;a0<$; */
+/*   	      a1< a2 ; }  */
+/* } */
 
 
 
@@ -290,6 +304,30 @@ fragment CMSEmployeeUnresponsive {
   }
   relations  { ^ < h; h < a1; a1< $ when ok;  } 
 }
+
+
+
+
+//from 4.2.7
+//4a. HospitalResourceSystem transmits victim’s medical history information to System.
+//4a.1 System notifies FirstAidWorker of medical history of the victim relevant to his injury.
+//4a.2 Use case continues at step 4.
+
+fragment medicalHistoryAvailable { 
+  variables  {
+mh as information;
+relevantInformation as information;}
+  activities {
+    h. mh := hook;
+    a1. relevantInformation :=  cms::filterInformation(mh);
+    a2. workerSystem::setMedicalHistory(relevantInformation); 
+  }
+  relations  { ^ < h; h < a1; a1<a2; a2< $;   } 
+}
+
+
+
+
 
 
 //besoin d'en mettre sur plusieurs... elles sont liées entre elles... 
