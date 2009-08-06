@@ -41,7 +41,7 @@ orchestration peanoMachine::mult {
     a1. c := peanoMachine::isZero(b);
     a2. reply('0' as integer);
     a3. b := peanoMachine::pred(b);
-    a4. tmp := peanMachine::mult(a,b);
+    a4. tmp := peanoMachine::mult(a,b);
     a5. r := peanoMachine::add(a,tmp);
     a6. reply(result: r);
   }

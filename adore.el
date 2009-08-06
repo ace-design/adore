@@ -79,8 +79,8 @@
     (setq adore-process (get-buffer-process b))
     (adore-init-display b)
     (setq mode-name "ADORE Engine"
-	  comint-prompt-regexp "^| [ ?][- ] *")
-    (use-local-map adore-mode-map)))
+	  comint-prompt-regexp "^| [ ?][- ] *")))
+    ;;(use-local-map adore-mode-map)
   
  ;; high level function for the UI
 (defun adore-run   () (interactive) (adore-run-engine))
