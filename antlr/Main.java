@@ -26,15 +26,19 @@ import java.util.ArrayList;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-	String filePath = args[0];
-	fr.unice.i3s.modalis.adore.language.Compiler compiler = 
-	    new fr.unice.i3s.modalis.adore.language.Compiler();
-	if (args.length == 2 && args[1].equals("AST"))
-	    compiler.debug();
-	ArrayList<String> facts = compiler.run(filePath);
-	String pl = toProlog(facts);
-	System.out.println(pl);
+    public static void main(String[] args) {
+	try {
+	    String filePath = args[0];
+	    fr.unice.i3s.modalis.adore.language.Compiler compiler = 
+		new fr.unice.i3s.modalis.adore.language.Compiler();
+	    if (args.length == 2 && args[1].equals("AST"))
+		compiler.debug();
+	    ArrayList<String> facts = compiler.run(filePath);
+	    String pl = toProlog(facts);
+	    System.out.println(pl);
+	} catch (Exception e) {
+	    System.exit(1);
+	}
     }
 
     public static String toProlog(ArrayList<String> facts) {

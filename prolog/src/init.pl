@@ -20,11 +20,20 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+:- dynamic adore_silent/1.
+adore_silent(false).
+adore_silence(B) :- 
+	retractall(adore_silent(_)), assert(adore_silent(B)).
+%% aw means "adore write"
+aw(_) :- adore_silent(true), !.
+aw(M) :- adore_silent(false), write(M).
+
+
 loadFiles :- 
-	write('%% Loading ADORE kernel'),
+	aw('%% Loading ADORE kernel'),
 	[debug], [trace], [config],  [metamodel], [actions], [functions], 
 	[conflicts], [helpers], [dependencies],
-	write('%% Loading Transformations'),
+	aw('%% Loading Transformations'),
 	loadTransfo('adore2dot'), loadTransfo('adore2png'), 
 	loadTransfo('adore2dgraph').
 
@@ -33,17 +42,17 @@ loadTransfo(Name) :-
 	string_concat('../transformations/',Name,File),	[File].
 
 header :- 
-	write('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
-        write('%%            ADORE Copyright (C) 2008 - ...           %%'), nl,
-        write('%%  Activity moDel supOrting oRchestration Evolution   %%'), nl,
-        write('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
-        write('%% Authors: Sebastien Mosser & Mireille Blay-Fornarino %%'), nl,
-        write('%% Main contact: mosser@polytech.unice.fr              %%'), nl,
-        write('%% Website:      http://www.adore-design.org           %%'), nl,
-        write('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
-        write('%%  This program comes with ABSOLUTELY NO WARRANTY.    %%'), nl,
-        write('%%  This is free software, and you are welcome to      %%'), nl,
-        write('%%  redistribute it under certain conditions.          %%'), nl,
-        write('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl.
+	aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
+        aw('%%            ADORE Copyright (C) 2008 - ...           %%'), nl,
+        aw('%%  Activity moDel supOrting oRchestration Evolution   %%'), nl,
+        aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
+        aw('%% Authors: Sebastien Mosser & Mireille Blay-Fornarino %%'), nl,
+        aw('%% Main contact: mosser@polytech.unice.fr              %%'), nl,
+        aw('%% Website:      http://www.adore-design.org           %%'), nl,
+        aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
+        aw('%%  This program comes with ABSOLUTELY NO WARRANTY.    %%'), nl,
+        aw('%%  This is free software, and you are welcome to      %%'), nl,
+        aw('%%  redistribute it under certain conditions.          %%'), nl,
+        aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl.
 
 :-  header, loadFiles, performDebugSubscription.

@@ -57,8 +57,9 @@ debugLevel(failure,'FAIL').
 debugLevel(info,'INFO').
 debugLevel(warning,'WARN').
 
+dlog(_,_,_,_) :- adore_silent(true), true, !.
 dlog(_,L,_,_) :- \+ debugLevel(L,_), true, !.
-dlog(C,_,_,_) :- \+ debugSubscription(C), !.
+dlog(C,_,_,_) :- \+ debugSubscription(C), true, !.
 dlog(Chan, Lvl, Msg, Args) :- 
 	debugLevel(Lvl, LvlMsg), 
 	string_concat(LvlMsg,': ',Tmp),

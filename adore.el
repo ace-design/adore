@@ -32,28 +32,41 @@
 ;;;;
 ;; ADORE functions
 ;;;;
-
+(defvar adore-verbosity "true")
+(defun adore-silent () (setq adore-verbosity "false") (verbosity-status))
+(defun adore-verbose () (setq adore-verbosity "true") (verbosity-status))
+(defun verbosity-status () 
+  (if (string= adore-verbosity "false")
+      (message "Adore is in SILENT mode")
+    (message "Adore is in VERBOSE mode")))
+			       
 (defun adore-run-genfacts ()
   (let ((f (buffer-file-name)) (current (selected-frame)) 
 	(frame (make-frame))   (buffer (generate-new-buffer "ADORE facts")))
     (select-frame frame)
     (switch-to-buffer buffer)
-    (prolog-mode)
     (call-process-shell-command "adore2facts.sh" nil buffer t f)
     (select-frame current)))
 
-(defun adore-run-to-png ()
-  (let ((i (read-from-minibuffer "Process Id: ")) (f (buffer-file-name)) 
-	(current (selected-frame)) (frame (make-frame))
-	(buffer (generate-new-buffer "ADORE picture")))
+;; Handling the ADORE engine
+
+(defun adore-exec-synchronous (g buffer-name shouldKill)
+  (let ((f (buffer-file-name)) (current (selected-frame)) 
+	(frame (make-frame)) (buffer (generate-new-buffer buffer-name))
+	(opt-g (concat "'" g "'")))
     (select-frame frame)
     (switch-to-buffer buffer)
-    (prolog-mode)
-    (call-process-shell-command "adore2png.sh" nil buffer t f i)
-    (select-frame current)))
+    (message (concat "Adore: adore-wrapper.sh -f " 
+		     f " -g " opt-g " -v " adore-verbosity))
+    (let ((code (call-process-shell-command "adore-wrapper.sh" 
+					    nil buffer t "-f" f 
+					    "-g" opt-g
+					    "-v" adore-verbosity)))
+      (message (concat "Adore : adore-wrapper.sh ends with exit code " 
+		       (number-to-string code)))
+      (if (and shouldKill (= code 0)) (delete-frame frame))
+      code)))
 
-
-;; Handling the ADORE engine
 (defvar adore-frame nil "The frame wich contains the ADORE buffer")
 (defvar adore-process nil "The ADORE underlying process")
 
@@ -75,7 +88,8 @@
   (adore-kill-engine)
   (require 'comint)
   (let* ((f  (buffer-file-name))
-	(b (make-comint "adore" "adore.sh" nil f)))
+	(b (make-comint "adore" "adore-wrapper.sh" nil "-f" f
+			"-v" adore-verbosity)))
     (setq adore-process (get-buffer-process b))
     (adore-init-display b)
     (setq mode-name "ADORE Engine"
@@ -86,7 +100,25 @@
 (defun adore-run   () (interactive) (adore-run-engine))
 (defun adore-kill  () (interactive) (adore-kill-engine))
 (defun adore-facts () (interactive) (adore-run-genfacts))
-(defun adore-pict  () (interactive) (adore-run-to-png))
+
+(defun adore-pict  () (interactive) 
+  (let ((i (read-from-minibuffer "Process Id: ")))
+    (adore-exec-synchronous (concat "display(" i ",_),sleep(1)") 
+			    "Adore Picture" t)))
+
+(defun adore-goal  () (interactive)
+  (let ((g (read-from-minibuffer "Goal: ")))
+    (adore-exec-synchronous g "Adore Goal Execution" nil)))
+
+(defun adore-dgraph  () (interactive)
+  (let ((p (read-from-minibuffer "Process Id: ")))
+    (adore-exec-synchronous (concat "adore2dgraph(" p "),sleep(1)")
+			    "Adore Dependecies Graph" t)))
+
+(defun adore-complete-dgraph () (interactive)
+  (adore-exec-synchronous "adore2dgraph,sleep(1)" 
+			  "Adore Dependencies Execution" t))
+
 
 ;;;;
 ;; ADORE Keymap
@@ -98,14 +130,24 @@
   (define-key adore-mode-map (kbd "C-c C-f") 'adore-facts)
   (define-key adore-mode-map (kbd "C-c C-k") 'adore-kill)
   (define-key adore-mode-map (kbd "C-c C-p") 'adore-pict)
+  (define-key adore-mode-map (kbd "C-c C-g") 'adore-goal)
   
   (define-key adore-mode-map [remap comment-dwim] 'adore-comment-dwim)
   (define-key adore-mode-map [menu-bar] (make-sparse-keymap))
   (let ((menuMap (make-sparse-keymap "Adore"))) 
     (define-key adore-mode-map [menu-bar adore] (cons "Adore" menuMap)) 
+    (define-key menuMap [goal] '("Execute goal" . adore-goal))
+    (define-key menuMap [s3] '("--"))
+    (define-key menuMap [dgraph] '("Generate Dep. Graph" . adore-dgraph))
+    (define-key menuMap [complete-dgraph] 
+      '("Generate Complete Dep. Graph" . adore-complete-dgraph))
+    (define-key menuMap [s2] '("--"))
+    (define-key menuMap [silent] '("Toggle silence" . adore-silent))
+    (define-key menuMap [verbose] '("Toggle verbosity" . adore-verbose))
+    (define-key menuMap [s1] '("--"))
     (define-key menuMap [facts] '("Generate facts" . adore-facts))
     (define-key menuMap [pict] '("Generate picture" . adore-pict))
-    (define-key menuMap [s1] '("--"))
+    (define-key menuMap [s0] '("--"))
     (define-key menuMap [kill] '("Kill the Adore engine" . adore-kill))
     (define-key menuMap [run] '("Run the Adore engine" . adore-run))))
 
