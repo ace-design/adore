@@ -5,41 +5,46 @@ fragment notify <observer, what, who> {
   activities {
     h.  hook() ;
     notify. observer::notify(what,who);
+ }
   relations  { ^ < h;  h < $; h<notify;  }
 }
 
 
 //--------------
+//a priori pbme de syntaxe avec throw...
+//a priori pbme de syntaxe avec error que je veux comme une variable...
 fragment cession <error> { 
   variables  {s as service;
               m as mission ;
               b as boolean;
  	      r as ressource ; }
   activities {
-    h. b := hook;
-    t. throw error;
+    h. b := hook();
+    t. throw(error);
   }
   relations  { ^ < h; h<$ when b ;h < t when !b; } 
 }
 
 //----------------
+//a priori pbme de syntaxe avec error que je veux comme une variable...
 fragment stop <error> { 
   variables  { }
   activities {
-    h. hook;
+    h. hook();
     o. reply();
   }
-  relations  { ^ < h;  h<$ ; fail(h,error) < o ; } 
+  relations  { ^ < h;  h<$ ; fail(h,'error') < o ; } 
 }
 
 //------------------
+//a priori pbme de syntaxe avec error que je veux comme une variable...
 //Bizarre
 fragment continue <error> { 
   variables  { }
   activities {
-    h) hook;
+    h. hook();
   }
- relations  { ^ < h; h<$;  fail(h,error)<$ ; } 
+ relations  { ^ < h; h<$;  fail(h,'error')<$ ; } 
 }
 
 //------------------
@@ -47,19 +52,19 @@ fragment continue <error> {
 //1a. Coordinator is not logged in. 
 //1a.1 Coordinator authenticates with System (UC 10). 
 //1a.2 Use case continues with step 1.
-
+//a priori pbme de syntaxe avec throw...
 //Perso : ?? verifier cette écriture
 
 fragment log <authenticationService,logger>{
   variables  {
               isLogged as boolean ;
-              a as boolean }
+              a as boolean; }
   activities {
     logTest. isLogged := authenticationService::isLogged(logger);
     h.  hook() ;
     authent. a := authenticationService::authenticates(logger); //Uc 10???
-    h1. hook() 
-    e. throw accessDenied;}
+    h1. hook() ;
+    e. throw('accessDenied' as string);}
   relations  { ^ < logTest; logTest<h when isLogged ; h < $; 
               logTest < authent when !isLogged; 
               authent<h1 when a;  h1<$;
@@ -83,11 +88,11 @@ fragment ressourceAvailabilityDegrated <ressource>{
   variables  {
               b as boolean;
  	      r as ressource ;
-              i as crisisInformation }
+              i as crisisInformation; }
   activities {
     availabilityTest. b :=  ressourceManager::isAvailable(ressource);
     h.  hook() ; 
-    conta. i := new(CrisisInformation, 'ressourceUnavailable',r);
+    conta. i := new(crisisInformation, 'ressourceUnavailable' as string,r);
     contb. cms::setNewCrisisInformation(i);
   }
   relations  { ^ < availabilityTest; availabilityTest<h when b ; h < $; 
@@ -107,7 +112,7 @@ fragment ressourceAvailability <ressource,mission> {
               b as boolean;
  	      r as ressource ; }
   activities {
-    availabilityTest) b :=  ressourceManager::isAvailable(ressource);
+    availabilityTest. b :=  ressourceManager::isAvailable(ressource);
     h.  hook() ; 
     ask. r := ressourceManager::getCorrespondingExternalRessource(ressource);
     ass. cms::assignExternalRessources(r,mission);
@@ -122,17 +127,19 @@ fragment ressourceAvailability <ressource,mission> {
 //------------------
 //une constante de temps?
 //pbme dans un lien faible... je rajoute l'ordre.. l'aurions nous bien detecté?
+
+//a priori un pbme de constante avec l'affecation
+
 fragment unreachable <deadline> { 
   variables  {timeout as integer;
-             
               b as boolean;
  	       }
   activities {
     a0. timeout := '0' as integer;
-    timestart. timeout := Timer::timeout(deadline);
+    timestart. timeout := timer::timeout(deadline);
     h.  hook() ; 
     test. b := diff(timeout,'0' as integer);
-    e. throw unreachable;
+    e. throw('unreachable' as string);
   }
   relations  { ^ < a0; a0< timestart; ^< h ;  h<< test; timestart<< test; a0 < test;
                test < $ when !b;
@@ -178,6 +185,7 @@ fragment unavailable <employee> {
 //6a. System determines that the crisis location is unreachable by standard transportation means, but reachable by helicopter.
 //6a.1 System informs the Coordinator about the problem.
 //6a.2 Coordinator instructs System to execute a helicopter transport mission (UC 09).
+//apriori un pbme ....
 fragment reachableByHelicopter { 
   variables  {i as crisisInformation;
               m as mission ;
@@ -185,10 +193,10 @@ fragment reachableByHelicopter {
  	      r as ressource ;
 	      reachableByHelicopter as boolean;}
   activities {
-    h. i := hook;
+    h. i := hook();
     u. unreachable := cms::locationUnreachable(i);
     helicop. reachableByHelicopter := cms::reachableByHelicopter(i);
-    a1. coordinatorSystem::notify('locationReachableByHelicopter', i);
+    a1. coordinatorSystem::notify('locationReachableByHelicopter' as string,i);
     a2. m := cms::createHelicopterTransportMission(i);
     a4. ir := getRessource(m);
     a5. cms::manageRessource(ir,m);
@@ -205,8 +213,8 @@ fragment cession <error> {
               b as boolean;
  	      r as ressource ; }
   activities {
-    h. b := hook;
-    t. throw error;
+    h. b := hook();
+    t. throw(error);
   }
   relations  { ^ < h; h<$ when b ;h < t when !b; } 
 }
@@ -262,12 +270,12 @@ fragment cession <error> {
 fragment requestVideoSurveillance { 
   variables  {}
   activities {
-    h. hook;
-    a1. feeder := SurveillanceSystem::getVideo();
+    h. hook();
+    a1. feeder := surveillanceSystem::getVideo();
     a2. coordinatorSystem::setVideo(feeder);
   }
   relations  { ^ < h; h < $; 
-               h<a1 on failure unreachable;
+    fail(h, 'unreachable') <a1  ;
                a2<<$;
   	       a1< a2 ;  } 
 }
@@ -283,8 +291,8 @@ fragment onRequestVideoSurveillanceCheckForFakeCrisis {
 //require requestVideoSurveillance to make sense
   variables  {}
   activities {
-    h. hook;
-    a1. ok :=  coordinatorSystem::isFakeCrisis() 
+    h. hook();
+    a1. ok :=  coordinatorSystem::isFakeCrisis() ;
   }
   relations  { ^ < h; h < a1; a1< $ when ok;  } 
 }
@@ -295,12 +303,12 @@ fragment onRequestVideoSurveillanceCheckForFakeCrisis {
 //1b.2 Use case continues at step 1.
 //1b.1a No other CMSEmployee is available. Use case ends in failure.
 
-fragment CMSEmployeeUnresponsive { 
+fragment cmsEmployeeUnresponsive { 
 //require requestVideoSurveillance to make sense
   variables  {}
   activities {
-    h. hook;
-    a1. ok :=  coordinatorSystem::isFakeCrisis() 
+    h. hook();
+    a1. ok :=  coordinatorSystem::isFakeCrisis() ;
   }
   relations  { ^ < h; h < a1; a1< $ when ok;  } 
 }
@@ -318,7 +326,7 @@ fragment medicalHistoryAvailable {
 mh as information;
 relevantInformation as information;}
   activities {
-    h. mh := hook;
+    h. mh := hook();
     a1. relevantInformation :=  cms::filterInformation(mh);
     a2. workerSystem::setMedicalHistory(relevantInformation); 
   }
@@ -330,28 +338,4 @@ relevantInformation as information;}
 
 
 
-//besoin d'en mettre sur plusieurs... elles sont liées entre elles... 
-// comment capturer l'info????
-
-merge cms::resolve { 
- //apply log => a1;
- //apply ressourceAvailability => a4a2;
- //apply ressourceAvailabilityDegrated => a5a2;
- apply reachByHelicopter => a4a3;
- apply reachByHelicopter => a5a3;
-
-}
-
-merge cms::manageRessource  { 
- apply unreachable => a1;
- apply otherMissionRequired => a1;
-}
-
-
-
-
-
-merge cms::witnessReportCapture  { 
- apply unreachable => a1;a2;
-}
 
