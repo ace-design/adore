@@ -26,7 +26,7 @@ composition  cms::setNewCrisisInformation  {
 //5a.1 The base use case is terminated. 
 
 composition   { 
-apply cession (infoDoesNotMatch) => cms::witnessReportCapture.a2a3;
+apply cession ('infoDoesNotMatch' as string) => cms::witnessReportCapture.a2a3;
 apply stop ('infoDoesNotMatch'as string) => cms::resolve.a1;
 }
 

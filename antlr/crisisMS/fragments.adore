@@ -14,10 +14,8 @@ fragment notify <observer, what, who> {
 //a priori pbme de syntaxe avec throw...
 //a priori pbme de syntaxe avec error que je veux comme une variable...
 fragment cession <error> { 
-  variables  {s as service;
-              m as mission ;
-              b as boolean;
- 	      r as ressource ; }
+  variables  {
+              b as boolean; }
   activities {
     h. b := hook();
     t. throw(error);
@@ -268,7 +266,8 @@ fragment cession <error> {
 //3a.3 System starts displaying video feed for Coordinator. 
 
 fragment requestVideoSurveillance { 
-  variables  {}
+  variables  {
+   feeder as feederSystem;}
   activities {
     h. hook();
     a1. feeder := surveillanceSystem::getVideo();
@@ -289,7 +288,9 @@ fragment requestVideoSurveillance {
 
 fragment onRequestVideoSurveillanceCheckForFakeCrisis { 
 //require requestVideoSurveillance to make sense
-  variables  {}
+  variables  {
+    ok as boolean;
+}
   activities {
     h. hook();
     a1. ok :=  coordinatorSystem::isFakeCrisis() ;
