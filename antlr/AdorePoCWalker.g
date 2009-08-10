@@ -108,7 +108,8 @@ definition returns [ArrayList<String> facts]
 						  safeAdd($facts, $param.facts); 
 						}
 						
-	| ^(DEF merge) { safeAdd($facts,$merge.facts); }	
+	| ^(DEF merge) 				{ safeAdd($facts,$merge.facts); }	
+	| ^(DEF ^(RAW p=DISENGAGE))		{ $facts.add($p.text);      }
 	;
 
 param [String cxt]

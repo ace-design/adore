@@ -260,7 +260,7 @@
   (use-local-map adore-mode-map)
 
   (defvar adore-keywords 
-    '("require" "orchestration" "fragment" "composition" ))
+    '("require" "orchestration" "fragment" "composition" "DISENGAGE" "ENGAGE"))
   (defvar adore-keywords-regexp (regexp-opt adore-keywords 'words))
 
   (defvar adore-activities

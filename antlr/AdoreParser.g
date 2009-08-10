@@ -63,6 +63,7 @@ tokens {
 	OUTPUT;
 	SETIFY;
 	ON_FAIL;
+	RAW;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
@@ -75,7 +76,9 @@ definition
 	|	ORCH s=ID DBL_COL o=ID core 		-> ^(DEF ^(ORCHESTRATION $s $o) core)
 	|	FRAG n=ID params? core 			-> ^(DEF ^(FRAGMENT $n ^(PARAMS params?)) core)
 	|	composition				-> ^(DEF composition)
+	|	DISENGAGE				-> ^(DEF ^(RAW DISENGAGE))
 	;
+
 
 composition
 	:	COMPOSITION (s=ID (DBL_COL o=ID)?)? (AS out=ID)? merge_core	

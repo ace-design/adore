@@ -45,6 +45,7 @@ APPLY:		'apply';
 TOSET:		'toSet';
 FAILURE	:	'fail';
 
+
 /** PUNCTUATION**/
 STAR:		'*';
 NOT:		'!';
@@ -67,8 +68,9 @@ DOT:		'.';
 /** Expected tokens **/
 ID:		('a'..'z') ('A'..'Z'|'0'..'9'|'a'..'z')* ;
 
-STR:	'\'' ~'\''* '\'';
-	
+STR:		'\'' ~'\''* '\'';
+DISENGAGE
+	:	'%%% DISENGAGE %%%' .* '%%% ENGAGE %%%' ;
 /** IGNORED **/
 INLN_COM: 	'//' ~('\r' | '\n')* NL 	{ skip(); };
 COMMENT	:	'/*' .* '*/'			{ skip(); };

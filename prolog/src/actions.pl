@@ -25,8 +25,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-%dlog(def,failure,'defActivity/1 cannot re-create activity ~w',X), fail.
-
 %%%%
 %% Business Processes
 %%%%
@@ -190,8 +188,8 @@ flagAsSet(V) :-
 
 %% addAsInput/2: addAsInput(V,A)
 addAsInput(V,_) :- %% \not \exists v \in Variable* => fail
-	getVariable(V,Rv), \+ variable(Rv), !, 
-	dfail(set,'addAsInput/2: Unknown variable \'~w\'!',Rv).
+	\+ getVariable(V,_), !, 
+	dfail(set,'addAsInput/2: Unknown variable \'~w\'!',V).
 addAsInput(_,A) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(set,'addAsInput/2: Unknown activity \'~w\'!',A).
@@ -390,3 +388,24 @@ defSetify(C,V) :-
 defSetify(C,V) :- 
 	getAbsoluteName(C,V,Name),
 	dinfo(def,'ToSet directive stored for variable \'~w\'.',[Name]).
+
+%%%%
+%% Policies
+%%%%
+
+defPolicy(I,_) :- 
+	policy(I,_), !, 
+	dfail(def,'defPolicy/2: Id \'~w\' still exist!',I).
+defPolicy(I,F) :- 
+	assert(policy(I,F)),
+	dinfo(def,'Policy \'~w\' created with formula [~w].',[I,F]).
+
+setIteration(A,_) :- 
+	\+ activity(A), !, 
+	dfail(set,'setIteration/2: Unknown activity \'~w\'!',A).
+setIteration(_,P) :- 
+	\+ policy(P,_), !, 
+	dfail(set,'setIteration/2: Unknown policy \'~w\'!',P).
+setIteration(A,P) :- 
+	assert(iteratesOver(A,P)),
+	dinfo(set,'Activity \'~w\' iterates over \'~w\'.',[A,P]).

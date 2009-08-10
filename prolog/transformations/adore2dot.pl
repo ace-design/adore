@@ -173,7 +173,7 @@ adore2dot_genOrders(P,C) :-
 	concatenate(List,C).
 adore2dot_genOrder(P,C) :- 
 	isContainedBy(Left,P), isContainedBy(Rght,P), 
-	\+ Left == Rght, %path(Left,Rght), 
+	\+ Left == Rght, 
 	adore2dot_drawOrder(Left,Rght,C).
 
 adore2dot_drawOrder(L,R,C) :- 

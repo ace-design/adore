@@ -28,6 +28,11 @@ orchestration peanoMachine::add {
   }
 }
 
+%%% DISENGAGE %%%
+  defPolicy(p1,forall(a)),
+  setIteration(peanoMachine_add_a3,p1),
+%%% ENGAGE %%%
+
 orchestration peanoMachine::mult {
   
   variables {
