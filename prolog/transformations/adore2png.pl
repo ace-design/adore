@@ -28,8 +28,8 @@ adore2png(P,F) :-
 	swritef(Cmd,'%w -Tpng %w > %w',[E,Tmp,F]), shell(Cmd).
 
 %% display/2: display(+P,-F)
-display(P,Tmp) :- 
-	tmp_file('adore2png',Tmp), adore2png(P,Tmp), 
-	adore2png_param(viewer,E), swritef(Cmd,'%w %w',[E,Tmp]), shell(Cmd).
+%% display(P,Tmp) :- %% OBSOLETE, SHOULD NOT BE USED
+%% 	tmp_file('adore2png',Tmp), adore2png(P,Tmp), 
+%% 	adore2png_param(viewer,E), swritef(Cmd,'%w %w',[E,Tmp]), shell(Cmd).
 	
 	

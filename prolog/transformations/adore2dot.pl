@@ -21,22 +21,43 @@
 %%%%
 
 %%%%
-%% Main Process
+%% Main interface with the transformation
 %%%%
 
-adore2dot(P,R) :- 
-	process(P), 
-	adore2dot_genCore(P,Core),
+%% adore2dot(+Process, -Code): generate DOT Code associated with Process
+adore2dot(P,R) :-
+	process(P), adore2dot_genCore(P,Core),
 	swritef(R,'digraph %w {\n  fontname=Courier;\n  node [shape=record];\n  edge [fontname=Courier];\n%w } \n',[P,Core]),!.
+
+
+%%%%
+%% Graph Label (pretty name printed as graph legend)
+%%%%
 
 adore2dot_genGraphLabel(P,R) :- 
 	isFragment(P), 
-	swritef(R,'label="Fragment %w"',[P]).
+	adore2dot_genFragLabel(P,Label),
+	swritef(R,'label="Fragment %w"',[Label]).
 adore2dot_genGraphLabel(P,R) :- 
 	hasForSrvName(P,S),
 	hasForOpName(P,O),
 	swritef(R,'label="Orchestration %w::%w"',[S,O]).
 
+adore2dot_genFragLabel(P,P) :- findall(X,hasForParameter(P,X),[]).
+adore2dot_genFragLabel(P,R) :- 
+	findall(X,hasForParameter(P,X),L),
+	adore2dot_genFragParamList(L,Params),
+	swritef(R,"%w<%w>",[P,Params]).
+
+adore2dot_genFragParamList([],'').
+adore2dot_genFragParamList([H],R) :- swritef(R,'%w',[H]), !. 
+adore2dot_genFragParamList([H|T],R) :- 
+	adore2dot_genFragParamList(T,Others),
+	swritef(R,'%w, %w',[H,Others]).
+
+%%%%
+%% Graph Core (aka label, nodes and edges)
+%%%%
 adore2dot_genCore(P,R) :- 
 	adore2dot_genGraphLabel(P,L),
 	adore2dot_genActivities(P,Acts),
@@ -135,6 +156,7 @@ adore2dot_showAsPoint([H|T],R) :-
 	adore2dot_showAsPoint(T,O),
 	swritef(R,".%w%w",[H,O]).
 
+%% transform a "_star" suffix into a '*' label
 adore2dot_suffixToStar(V,R) :- 
 	\+ is_list(V), string_to_list(V,L), adore2dot_suffixToStar(L,R).
 adore2dot_suffixToStar([],'') :- !.
@@ -150,25 +172,22 @@ adore2dot_genOrders(P,C) :-
 	findall(X,adore2dot_genOrder(P,X), List),
 	concatenate(List,C).
 adore2dot_genOrder(P,C) :- 
-	isContainedBy(Left,P), activity(Left),
-	isContainedBy(Rght,P), activity(Rght), 
-	path(Left,Rght), adore2dot_drawOrder(Left,Rght,C).
+	isContainedBy(Left,P), isContainedBy(Rght,P), 
+	\+ Left == Rght, path(Left,Rght), 
+	adore2dot_drawOrder(Left,Rght,C).
 
 adore2dot_drawOrder(L,R,C) :- 
-	waitFor(R,L), 
+	waitFor(R,L),
 	swritef(C,'  %w -> %w ;',[L,R]).
 adore2dot_drawOrder(L,R,C) :- 
-	weakWait(R,L), 
+	weakWait(R,L),
 	swritef(C,'  %w -> %w [style=dashed,arrowhead=odot];',[L,R]).
 adore2dot_drawOrder(L,R,C) :- 
 	isGuardedBy(R,L,V,true), getPreviousName(V,Label),
 	swritef(C,'  %w -> %w [label="%w"];',[L,R,Label]).
 adore2dot_drawOrder(L,R,C) :- 
-	isGuardedBy(R,L,V,false), getPreviousName(V,Label), 
+	isGuardedBy(R,L,V,false), getPreviousName(V,Label),
 	swritef(C,'  %w -> %w [label="!%w"];',[L,R,Label]).
-adore2dot_drawOrder(L,R,C) :- 
-	onFailure(R,L,'*'),!,
-	swritef(C,'  %w -> %w [color="red"];',[L,R]).
 adore2dot_drawOrder(L,R,C) :- 
 	onFailure(R,L,E),
 	swritef(C,'  %w -> %w [color="red",label="%w"];',[L,R,E]).

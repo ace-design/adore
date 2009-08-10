@@ -42,3 +42,6 @@ existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).
 %% getVariable/2: getVariable(+V,-R): retrieve the variable associated to V
 getVariable(F,V) :- fieldAccess(F,V,_). %% as it can be a field access
 getVariable(V,V) :- variable(V).        %% or simply the variable.
+
+
+
