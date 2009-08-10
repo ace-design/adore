@@ -50,6 +50,36 @@ orchestration cms::resolveStop {
   relations { a0 < a1; a1 < a2; a2<a3; a3<a45 ; a45<a13; a13<a6;fail(a1,'infoDoesNotMatch') < o;}
 }
 
+orchestration cms::resolveStopLog {
+  variables {
+    
+    mission* as mission;
+    selectedMission as mission;
+    internalRessource as ressource;
+    externalRessource as ressource;
+    isLogged as boolean ;
+    a as boolean;
+  }
+  activities {
+    a0. receive();
+    a1. cms::witnessReportCapture();
+    a2. mission* := cms::missionsToDo();
+    a3. selectedMission := coordinatorSystem::select(mission*);
+    a45. cms::dealWithOneMission(selectedMission);
+    a13. coordinatorSystem::close();
+    a6.reply();
+    o. reply();
+    logTest. isLogged := authentification100::isLogged(coordinatorSystem);
+    authent. a := authentification100::authenticates(coordinatorSystem); //Uc 10???
+    e. throw('accessDenied' as string);
+  }
+  relations { a0 < a1; a1 < a2; a2<a3; a3<a45 ; a45<a13; a13<a6;fail(a1,'infoDoesNotMatch') < o;
+              a0 < logTest; logTest<a1 when isLogged ; 
+              logTest < authent when !isLogged; 
+              authent<a1 when a;
+	      authent<e when !a; }
+}
+
 orchestration cms::dealWithOneMission {
   variables {
     
@@ -159,6 +189,8 @@ orchestration cms::witnessReportCaptureCession {
               a2a3 < t when !exact;} 
 }
 
+
+
 orchestration cms::witnessReportCaptureCessionVideoSurveillance {
   variables {
     wi as witnessInformation;
@@ -229,6 +261,53 @@ orchestration cms::witnessReportCaptureCessionVideoSurveillanceOnRequest {
   	       a1rq< a2rq ;
                a2 < a1orq; a1orq<a2a3  when ok;  a1orq<a4 when ok; a1orq<a2a3  when ok;    } 
 }
+
+orchestration cms::witnessReportCaptureCessionVideoSurveillanceOnRequestContinue {
+  variables {
+    wi as witnessInformation;
+    li as locationInformation;
+    adress as adressInformation;
+    exact as boolean;
+    ci as crisisInformation;
+    cl as checkList;
+    cms as crisisManager;
+    ok as boolean;
+    feeder as feederSystem;
+  }
+  activities {	
+    a0. receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation();
+    a2. li := coordinatorSystem::provideLocationInformation();
+    a2a12. adress := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(adress,wi);
+    a3. cl := cms::computeCheckList();
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
+    a5. setCurrentCrisisActive(cms,ci);
+    a6. reply();
+    t. throw('infoDoesNotMatch' as string);
+    a1rq. feeder := surveillanceSystem::getVideo();
+    a2rq. coordinatorSystem::setVideo(feeder);
+    a1orq. ok :=  coordinatorSystem::isFakeCrisis() ;
+  }   
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; 
+              a5<a6;a2a3<a6  when exact; 
+              a2a3 < t when !exact; 
+              fail(a1, 'unreachable') <a1rq  ;  
+              fail(a2, 'unreachable') <a1rq  ;
+               a2rq<<a4;a2rq<<a2a3;
+  	       a1rq< a2rq ;
+               a2 < a1orq; a1orq<a2a3  when ok;  a1orq<a4 when ok; a1orq<a2a3  when ok;  
+               fail(a1,'unreachable')<a6; 
+fail(a2,'unreachable')<a6; 
+fail(a3,'unreachable')<a6; 
+fail(a4,'unreachable')<a6; 
+fail(a5,'unreachable')<a6; 
+fail(a2a12,'unreachable')<a6; 
+fail(a2a3,'unreachable')<a6; 
+ } 
+}
+
+
 
 // 4.2.2
 //Main Success Scenario: 
