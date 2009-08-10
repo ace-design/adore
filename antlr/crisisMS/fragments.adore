@@ -13,7 +13,7 @@ fragment notify <observer, what, who> {
 //--------------
 //a priori pbme de syntaxe avec throw...
 //a priori pbme de syntaxe avec error que je veux comme une variable...
-fragment cession <error> { 
+fragment halt <error> { 
   variables  {
               b as boolean; }
   activities {
@@ -43,6 +43,17 @@ fragment continue <error> {
     h. hook();
   }
  relations  { ^ < h; h<$;  fail(h,'error')<$ ; } 
+}
+
+//warning : verifier les types
+fragment continueWithNull <error> { 
+  variables  {
+  res as info; }
+  activities {
+    h. res := hook();
+    o. res := setNull();
+  }
+  relations  { ^ < h; h<$;  fail(h,'error')<o; o< $ ; } 
 }
 
 //------------------
@@ -129,20 +140,44 @@ fragment ressourceAvailability <ressource,mission> {
 //a priori un pbme de constante avec l'affecation
 
 fragment unreachable <deadline> { 
-  variables  {timeout as integer;
-              b as boolean;
- 	       }
+  variables  {
+  delay := '0' as integer;
+    b as boolean;
+  }
   activities {
-    a0. timeout := '0' as integer;
-    timestart. timeout := timer::timeout(deadline);
+    //a0. timeout := '0' as integer;
+    timestart. delay := timer::timeout(deadline);
     h.  hook() ; 
-    test. b := diff(timeout,'0' as integer);
+    test. b := diff(delay,'0' as integer);
     e. throw('unreachable' as string);
   }
-  relations  { ^ < a0; a0< timestart; ^< h ;  h<< test; timestart<< test; a0 < test;
+  relations  { ^ < timestart; ^< h ;  h<< test; timestart<< test;
                test < $ when !b;
                test < e when b; }
 }
+
+
+fragment unreachableButContinue <deadline> { 
+  variables  {
+    delay := '0' as integer;
+    b as boolean;
+    res as info;
+  }
+  activities {
+    //a0. timeout := '0' as integer;
+    timestart. delay := timer::timeout(deadline);
+    h.  res := hook();
+    test. b := diff(delay,'0' as integer);
+    o. res := setNull();
+    
+  }
+  relations  { ^ < timestart; ^< h ;  h<< test; timestart<< test;
+               test < $ when !b;
+               test < o when b; 
+               o < $; }
+}
+
+
 
 //------------------
 //From 4.2.3 Assign Internal Resource
@@ -199,23 +234,23 @@ fragment reachableByHelicopter {
     a4. ir := getRessource(m);
     a5. cms::manageRessource(ir,m);
   }
-  relations  { ^ < h; h<$; h<u; u< helicop when unrechable ; 
+  relations  { ^ < h; h<$; h<u; u< helicop when unreachable ; 
     helicop < a1 when reachableByHelicopter;
     a1< a2 ; a2< a4;  a4 <a5; } 
 }
 
 
-fragment cession <error> { 
-  variables  {s as service;
-              m as mission ;
-              b as boolean;
- 	      r as ressource ; }
-  activities {
-    h. b := hook();
-    t. throw(error);
-  }
-  relations  { ^ < h; h<$ when b ;h < t when !b; } 
-}
+/* fragment cession <error> {  */
+/*   variables  {s as service; */
+/*               m as mission ; */
+/*               b as boolean; */
+/*  	      r as ressource ; } */
+/*   activities { */
+/*     h. b := hook(); */
+/*     t. throw(error); */
+/*   } */
+/*   relations  { ^ < h; h<$ when b ;h < t when !b; }  */
+/* } */
 
 
 
@@ -258,8 +293,7 @@ fragment cession <error> {
 
 
 
-
-//1a,2a. The call is disconnected. The base use case terminates. 
+//From 4.2.2
 //In parallel to steps 3-4, if the crisis location is covered by camera surveillance: 
 //3a.1 System requests video feed from SurveillanceSystem. 
 //3a.2 SurveillanceSystem starts sending video feed to System. 
@@ -267,23 +301,40 @@ fragment cession <error> {
 
 fragment requestVideoSurveillance { 
   variables  {
-   feeder as feederSystem;}
+   feeder as feederSystem;
+   li as locationInformation;
+   isCovered as boolean; }
   activities {
-    h. hook();
-    a1. feeder := surveillanceSystem::getVideo();
-    a2. coordinatorSystem::setVideo(feeder);
+    h. li := hook();
+    covered. isCovered := surveillanceSystem::isCovered(li);
+    getFeeder. feeder := surveillanceSystem::getVideo();
+    feed. coordinatorSystem::setVideo(feeder);
   }
-  relations  { ^ < h; h < $; 
-    fail(h, 'unreachable') <a1  ;
-               a2<<$;
-  	       a1< a2 ;  } 
+  relations  { ^ < h; h < $;
+    h<covered; covered <getFeeder when isCovered  ;
+              getFeeder<feed ;  } 
 }
 
+//From 4.2.2
+//5a. PhoneCompany information does not match information received from Witness.
+//5a.1 The base use case is terminated. 
 
+fragment phoneCompanyInfoDoesntmatch { 
+  variables  {
+   address as adressInformation;
+   wi as witnessInformation;
+   match as boolean; }
+  activities {
+    h. address := hook(wi);
+    m. match := cms::match(address,wi); 
+    e. throw('infoDoesNotMatch' as string);
+  }
+  relations  { ^ < h; h < m; 
+    m < $ when match; m < e when !match; 
+  } 
+}
 //5b. Camera vision of the location is perfect, but Coordinator cannot conﬁrm the situation that the witness describes or the Coordinator determines that the witness is calling in a fake crisis. 
 //5b.1 The base use case is terminated. 
-
-//Perso: Definition liée à une autre evolution....
 
 
 fragment onRequestVideoSurveillanceCheckForFakeCrisis { 
@@ -292,10 +343,12 @@ fragment onRequestVideoSurveillanceCheckForFakeCrisis {
     ok as boolean;
 }
   activities {
+    test. ok :=  coordinatorSystem::isFakeCrisis() ;
     h. hook();
-    a1. ok :=  coordinatorSystem::isFakeCrisis() ;
+    e. throw('fakeCrisis' as string);
+   
   }
-  relations  { ^ < h; h < a1; a1< $ when ok;  } 
+  relations  { ^ < h; h<$; test< h when ok; test< e when !ok;  } 
 }
 
 //From 4.2.3 Assign Internal Resource

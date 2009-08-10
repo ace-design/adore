@@ -162,7 +162,23 @@ orchestration cms::setNewCrisisInformation{
 //5. System assigns an initial emergency level to the crisis and sets the crisis status to active. 
 //Use case ends in success. 
 
-orchestration cms::witnessReportCaptureCession {
+
+// 4.2.2
+//Capture Witness Report 
+//Use Case 2: Capture Witness Report 
+//Scope: Car Crash Crisis Management System 
+//1. Coordinator provides witness information1 to System as reported by the witness. 
+//2. Coordinator informs System of location and type of crisis as reported by the witness. 
+//In parallel to steps 2-4: 
+//2a.1 System contacts PhoneCompany to verify witness information. 
+//2a.2 PhoneCompany sends address/phone information to System. 
+//2a.3 System validates information received from the PhoneCompany. 
+//3. System provides Coordinator with a crisis-focused checklist. 
+//4. Coordinator provides crisis information2 to System as reported by the witness. 
+//5. System assigns an initial emergency level to the crisis and sets the crisis status to active. 
+//Use case ends in success. 
+
+orchestration cms::witnessReportCapture {
   variables {
     wi as witnessInformation;
     li as locationInformation;
@@ -182,14 +198,383 @@ orchestration cms::witnessReportCaptureCession {
     a4. ci := coordinatorSystem::provideCrisisInformation(cl);
     a5. setCurrentCrisisActive(cms,ci);
     a6. reply();
-    t. throw('infoDoesNotMatch' as string);
 
   } 
-  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a6  when exact; 
-              a2a3 < t when !exact;} 
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;} 
 }
 
 
+//from 4.2.2
+//1a,2a. The call is disconnected. The base use case terminates. 
+//composition  cms::witnessReportCapture { 
+//  apply unreachable(deadline : '10') =>  a1;
+
+//}
+
+orchestration cms::witnessReportCaptureExt1a {
+  variables {
+    wi as witnessInformation;
+    li as locationInformation;
+    adress as adressInformation;
+    exact as boolean;
+    ci as crisisInformation;
+    cl as checkList;
+    cms as crisisManager;
+   delay := '0' as integer;
+    b as boolean;
+  }
+  activities {	
+    a0. receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation();
+    a2. li := coordinatorSystem::provideLocationInformation();
+    a2a12. adress := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(adress,wi);
+    a3. cl := cms::computeCheckList();
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
+    a5. setCurrentCrisisActive(cms,ci);
+    a6. reply();
+    timestart. delay := timer::timeout(deadline);
+    test. b := diff(delay,'0' as integer);
+    e. throw('unreachable' as string);
+  } 
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;
+a0 < timestart ;  a1<< test; timestart<< test;
+               test < a2 when !b;
+               test < a2a12 when !b;
+               test < a3 when !b;
+               test < e when b;
+}
+}
+//  apply unreachable(deadline : '10') => a2;
+orchestration cms::witnessReportCaptureExt1a2a {
+  variables {
+    wi as witnessInformation;
+    li as locationInformation;
+    adress as adressInformation;
+    exact as boolean;
+    ci as crisisInformation;
+    cl as checkList;
+    cms as crisisManager;
+    delay1 := '0' as integer;
+    b1 as boolean;
+    delay2 := '0' as integer;
+    b2 as boolean;
+  }
+  activities {	
+    a0. receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation();
+    a2. li := coordinatorSystem::provideLocationInformation();
+    a2a12. adress := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(adress,wi);
+    a3. cl := cms::computeCheckList();
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
+    a5. setCurrentCrisisActive(cms,ci);
+    a6. reply();
+    timestart1. delay1 := timer::timeout('10' as integer);
+    test1. b1 := diff(delay1,'0' as integer);
+    e1. throw('unreachable' as string);
+    timestart2. delay2 := timer::timeout('10'  as integer);
+    test2. b2 := diff(delay2,'0' as integer);
+    e2. throw('unreachable' as string);
+  } 
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;
+a0 < timestart1 ;  a1<< test1; timestart1<< test1;
+               test1 < a2 when !b1;
+               test1 < a2a12 when !b1;
+               test1 < a3 when !b1;
+               test1 < e1 when b1;
+
+ a1 < timestart2;  a2<< test2; timestart2<< test2;
+               test2 < a2a3 when !b2;
+               test2 < a4 when !b2;
+               test2 < e2 when b2;
+}
+}
+
+
+//   apply requestVideoSurveillance =>  a2;
+orchestration cms::witnessReportCaptureExt1a2a3 {
+  variables {
+    wi as witnessInformation;
+    li as locationInformation;
+    adress as adressInformation;
+    exact as boolean;
+    ci as crisisInformation;
+    cl as checkList;
+    cms as crisisManager;
+    delay1 := '0' as integer;
+    b1 as boolean;
+    delay2 := '0' as integer;
+    b2 as boolean;
+   feeder as feederSystem;
+   isCovered as boolean;
+  }
+  activities {	
+    covered. isCovered := surveillanceSystem::isCovered(li);
+    getFeeder. feeder := surveillanceSystem::getVideo();
+    feed. coordinatorSystem::setVideo(feeder);
+ 
+    a0. receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation();
+    a2. li := coordinatorSystem::provideLocationInformation();
+    a2a12. adress := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(adress,wi);
+    a3. cl := cms::computeCheckList();
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
+    a5. setCurrentCrisisActive(cms,ci);
+    a6. reply();
+    timestart1. delay1 := timer::timeout('10' as integer);
+    test1. b1 := diff(delay1,'0' as integer);
+    e1. throw('unreachable' as string);
+    timestart2. delay2 := timer::timeout('10'  as integer);
+    test2. b2 := diff(delay2,'0' as integer);
+    e2. throw('unreachable' as string);
+  } 
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;
+a0 < timestart1 ;  a1<< test1; timestart1<< test1;
+               test1 < a2 when !b1;
+               test1 < a2a12 when !b1;
+               test1 < a3 when !b1;
+               test1 < e1 when b1;
+
+ a1 < timestart2;  a2<< test2; timestart2<< test2;
+               test2 < a2a3 when !b2;
+               test2 < a4 when !b2;
+               test2 < e2 when b2;
+	       a2<covered;
+             covered <getFeeder when isCovered  ;
+              getFeeder<feed ;  
+
+   }
+}
+
+
+//apply unreachableButContinue(deadline : '10') => a4;
+orchestration cms::witnessReportCaptureExt1a2a34a {
+  variables {
+    wi as witnessInformation;
+    li as locationInformation;
+    adress as adressInformation;
+    exact as boolean;
+    ci as crisisInformation;
+    cl as checkList;
+    cms as crisisManager;
+    delay1 := '0' as integer;
+    b1 as boolean;
+    delay2 := '0' as integer;
+    b2 as boolean;
+   feeder as feederSystem;
+   isCovered as boolean;
+delay3 := '0' as integer;
+    b3 as boolean;
+  }
+  activities {	
+    covered. isCovered := surveillanceSystem::isCovered(li);
+    getFeeder. feeder := surveillanceSystem::getVideo();
+    feed. coordinatorSystem::setVideo(feeder);
+ 
+    a0. receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation();
+    a2. li := coordinatorSystem::provideLocationInformation();
+    a2a12. adress := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(adress,wi);
+    a3. cl := cms::computeCheckList();
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
+    a5. setCurrentCrisisActive(cms,ci);
+    a6. reply();
+    timestart1. delay1 := timer::timeout('10' as integer);
+    test1. b1 := diff(delay1,'0' as integer);
+    e1. throw('unreachable' as string);
+    timestart2. delay2 := timer::timeout('10'  as integer);
+    test2. b2 := diff(delay2,'0' as integer);
+    e2. throw('unreachable' as string);
+    
+    timestart3. delay3 := timer::timeout('10' as integer);
+    test3. b3 := diff(delay3,'0' as integer);
+    o. ci := setNull();
+  } 
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;
+a0 < timestart1 ;  a1<< test1; timestart1<< test1;
+               test1 < a2 when !b1;
+               test1 < a2a12 when !b1;
+               test1 < a3 when !b1;
+               test1 < e1 when b1;
+
+ a1 < timestart2;  a2<< test2; timestart2<< test2;
+               test2 < a2a3 when !b2;
+               test2 < a4 when !b2;
+               test2 < e2 when b2;
+	       
+  a2<covered;
+             covered <getFeeder when isCovered  ;
+              getFeeder<feed ;  
+ 
+	      a2<timestart3; a3<timestart3;  a4<< test3; timestart3<< test3;
+               test3 < a5 when !b3;
+               test3 < o when b3;
+
+               o< a5 ;
+   }
+}
+
+
+//  apply phoneCompanyInfoDoesntmatch => a2a12;
+orchestration cms::witnessReportCaptureExt1a2a34a5a {
+  variables {
+    wi as witnessInformation;
+    li as locationInformation;
+    address as adressInformation;
+    exact as boolean;
+    ci as crisisInformation;
+    cl as checkList;
+    cms as crisisManager;
+    delay1 := '0' as integer;
+    b1 as boolean;
+    delay2 := '0' as integer;
+    b2 as boolean;
+   feeder as feederSystem;
+   isCovered as boolean;
+delay3 := '0' as integer;
+    b3 as boolean;
+    match as boolean;
+  }
+  activities {	
+    covered. isCovered := surveillanceSystem::isCovered(li);
+    getFeeder. feeder := surveillanceSystem::getVideo();
+    feed. coordinatorSystem::setVideo(feeder);
+ 
+    a0. receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation();
+    a2. li := coordinatorSystem::provideLocationInformation();
+    a2a12. address := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(adress,wi);
+    a3. cl := cms::computeCheckList();
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
+    a5. setCurrentCrisisActive(cms,ci);
+    a6. reply();
+    timestart1. delay1 := timer::timeout('10' as integer);
+    test1. b1 := diff(delay1,'0' as integer);
+    e1. throw('unreachable' as string);
+    timestart2. delay2 := timer::timeout('10'  as integer);
+    test2. b2 := diff(delay2,'0' as integer);
+    e2. throw('unreachable' as string);
+    
+    timestart3. delay3 := timer::timeout('10' as integer);
+    test3. b3 := diff(delay3,'0' as integer);
+    o. ci := setNull();
+
+    m. match := cms::match(address,wi); 
+    e3. throw('infoDoesNotMatch' as string);
+  } 
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;
+a0 < timestart1 ;  a1<< test1; timestart1<< test1;
+               test1 < a2 when !b1;
+               test1 < a2a12 when !b1;
+               test1 < a3 when !b1;
+               test1 < e1 when b1;
+
+ a1 < timestart2;  a2<< test2; timestart2<< test2;
+               test2 < a2a3 when !b2;
+               test2 < a4 when !b2;
+               test2 < e2 when b2;
+	       
+  a2<covered;
+             covered <getFeeder when isCovered  ;
+              getFeeder<feed ;  
+ 
+	      a2<timestart3; a3<timestart3;  a4<< test3; timestart3<< test3;
+               test3 < a5 when !b3;
+               test3 < o when b3;
+
+               o< a5 ;
+
+   a2a12  < m; 
+    m < e3 when !match; 
+   }
+}
+
+
+//  apply onRequestVideoSurveillanceCheckForFakeCrisis =>  a5;
+orchestration cms::witnessReportCaptureExt1a2a34a5a5b {
+  variables {
+    wi as witnessInformation;
+    li as locationInformation;
+    address as adressInformation;
+    exact as boolean;
+    ci as crisisInformation;
+    cl as checkList;
+    cms as crisisManager;
+    delay1 := '0' as integer;
+    b1 as boolean;
+    delay2 := '0' as integer;
+    b2 as boolean;
+   feeder as feederSystem;
+   isCovered as boolean;
+delay3 := '0' as integer;
+    b3 as boolean;
+    match as boolean;
+
+    ok as boolean;
+  }
+  activities {	
+    covered. isCovered := surveillanceSystem::isCovered(li);
+    getFeeder. feeder := surveillanceSystem::getVideo();
+    feed. coordinatorSystem::setVideo(feeder);
+ 
+    a0. receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation();
+    a2. li := coordinatorSystem::provideLocationInformation();
+    a2a12. address := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(adress,wi);
+    a3. cl := cms::computeCheckList();
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
+    a5. setCurrentCrisisActive(cms,ci);
+    a6. reply();
+    timestart1. delay1 := timer::timeout('10' as integer);
+    test1. b1 := diff(delay1,'0' as integer);
+    e1. throw('unreachable' as string);
+    timestart2. delay2 := timer::timeout('10'  as integer);
+    test2. b2 := diff(delay2,'0' as integer);
+    e2. throw('unreachable' as string);
+    
+    timestart3. delay3 := timer::timeout('10' as integer);
+    test3. b3 := diff(delay3,'0' as integer);
+    o. ci := setNull();
+
+    m. match := cms::match(address,wi); 
+    e3. throw('infoDoesNotMatch' as string);
+
+    test4. ok :=  coordinatorSystem::isFakeCrisis() ;
+    e4. throw('fakeCrisis' as string);
+  } 
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;
+a0 < timestart1 ;  a1<< test1; timestart1<< test1;
+               test1 < a2 when !b1;
+               test1 < a2a12 when !b1;
+               test1 < a3 when !b1;
+               test1 < e1 when b1;
+
+ a1 < timestart2;  a2<< test2; timestart2<< test2;
+               test2 < a2a3 when !b2;
+               test2 < a4 when !b2;
+               test2 < e2 when b2;
+	       
+  a2<covered;
+             covered <getFeeder when isCovered  ;
+              getFeeder<feed ;  
+ 
+	      a2<timestart3; a3<timestart3;  a4<< test3; timestart3<< test3;
+               test3 < a5 when !b3;
+               test3 < o when b3;
+
+               o< a5 ;
+
+   a2a12  < m; 
+    m < e3 when !match; 
+
+    test4 < a5 when ok; test4 < e4 when !ok; 
+   }
+}
 
 orchestration cms::witnessReportCaptureCessionVideoSurveillance {
   variables {

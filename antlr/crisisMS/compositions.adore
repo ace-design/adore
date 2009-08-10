@@ -20,18 +20,24 @@ composition  cms::setNewCrisisInformation  {
 
 
 
-
+//???? : je n'ai pas fait ca.....
 //from 4.2.2
 //5a. PhoneCompany information does not match information received from Witness.
 //5a.1 The base use case is terminated. 
 
 composition   { 
-apply cession ('infoDoesNotMatch' as string) => cms::witnessReportCapture.a2a3;
-apply stop ('infoDoesNotMatch'as string) => cms::resolve.a1;
+  apply halt (error : 'infoDoesNotMatch') => cms::witnessReportCapture::a2a3;
+  apply stop (error : 'infoDoesNotMatch') => cms::resolve::a1;
 }
 
 //from 4.2.2
 //1a,2a. The call is disconnected. The base use case terminates. 
+composition  cms::witnessReportCapture { 
+  apply unreachable(deadline : '10') =>  a1;
+  apply unreachable(deadline : '10') => a2;
+}
+
+
 //In parallel to steps 3-4, if the crisis location is covered by camera surveillance: 
 //3a.1 System requests video feed from SurveillanceSystem. 
 //3a.2 SurveillanceSystem starts sending video feed to System. 
@@ -44,10 +50,12 @@ apply stop ('infoDoesNotMatch'as string) => cms::resolve.a1;
 //5b. Camera vision of the location is perfect, but Coordinator cannot conﬁrm the situation that the witness describes or the Coordinator determines that the witness is calling in a fake crisis. 
 //5b.1 The base use case is terminated. 
 //WARNING: approche basique... que se passe-t-il en composant tout ca....
-composition   { 
-  apply requestVideoSurveillance =>  cms::witnessReportCapture.{a1,a2};
-apply onRequestVideoSurveillanceCheckForFakeCrisis 
-  =>  cms::witnessReportCapture.{a1,a2};
+//Warning : pensez a ajouter la relation sur receive.
+//Warning traiter l'erreur au niveau de resolve?
+composition  cms::witnessReportCapture { 
+  apply requestVideoSurveillance =>  a2;
+  apply onRequestVideoSurveillanceCheckForFakeCrisis 
+  =>  a5;
 }
 
 //from 4.2.2
@@ -56,8 +64,16 @@ apply onRequestVideoSurveillanceCheckForFakeCrisis
 //WARNING : visualiser comment tout cela s'imbrique
 //BIZARRE.... pas tres coherent....
 //Solution: detecter des conflits et faciliter l'ecriture de la solution...
-composition   { 
-apply continue (unreachable) =>  cms::witnessReportCapture. {a1,a2,a3,a4,a5, a2a12, a2a3};
+composition  cms::witnessReportCapture { 
+  apply unreachableButContinue(deadline : '10') => a4;
+}
+
+//From 4.2.2
+//5a. PhoneCompany information does not match information received from Witness.
+//5a.1 The base use case is terminated. 
+
+composition  cms::witnessReportCapture { 
+  apply phoneCompanyInfoDoesntmatch => a2a12;
 }
 
 //from 4.2.1
@@ -65,14 +81,14 @@ apply continue (unreachable) =>  cms::witnessReportCapture. {a1,a2,a3,a4,a5, a2a
 //1a.1 Coordinator authenticates with System (UC 10). 
 //1a.2 Use case continues with step 1. 
 composition cms::resolve { 
- apply log (authenticationService : authentification100, logger : coordinatorSystem) => a1;
+ apply log (authenticationService : 'authentification100', logger : 'coordinatorSystem') => a1;
 
  }
 
 //4a. Internal resource is not available after step 4. 
 //4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5). 
 composition cms::dealWithOneMission { 
- apply ressourceAvailability (ressource : internalRessource , mission : selectedMission ) => a4a2;
+ apply ressourceAvailability (ressource : 'internalRessource' , mission :'selectedMission' ) => a4a2;
 
 
  }
@@ -80,7 +96,7 @@ composition cms::dealWithOneMission {
 //5a. External resource is not available after step 5. 
 //5a.1 Use case continues in parallel with step 2. 
 composition cms::dealWithOneMission { 
- apply ressourceAvailabilityDegrated (ressource : externalRessource) =>  a5a2;
+ apply ressourceAvailabilityDegrated (ressource : 'externalRessource') =>  a5a2;
  }
 
 
@@ -96,7 +112,7 @@ composition cms::dealWithOneMission {
 //1a.2 CMSEmployee authenticates with System (UC 10). 
 //1a.3 Use case continues at step 1. 
 composition cms::assignInternalResource { 
- apply log (authenticationService : authentification100,logger : cmsEmployee) => a2;
+ apply log (authenticationService : 'authentification100',logger : 'cmsEmployee') => a2;
  }
 
 
@@ -113,32 +129,32 @@ composition cms::assignInternalResource {
 
 composition cms::assignInternalResource { 
  apply unreachable => a2; 
- apply unavailable(employee : cmsEmployee) => a2;
+ apply unavailable(employee : 'cmsEmployee') => a2;
  }
 
 //From 4.2.6
-composition superObserver::executeMission { 
- toset => mission; 
- apply notify (observer : superObserver, what : 'MissionCreated', who : mission) => a7;
- apply notify (observer : superObserver, what : 'endMission', who : mission) => a8;
- }
+//composition superObserver::executeMission { 
+  // toset  mission; 
+  //apply notify (observer : 'superObserver', what : 'MissionCreated', who : 'mission') => a7;
+  //apply notify (observer : 'superObserver', what : 'endMission', who : 'mission') => a8;
+// }
 
 
 //From 4.2.1
 //9. In parallel to steps 6-8, Coordinator receives updates on the mission status from System.
 composition cms::manageRessource {  
- apply notify (observer : coordinatorSystem, what : 'Ressource arrived', 
-who : r) => a2;
- apply notify (observer : coordinatorSystem, what : 'Ressource is finished', 
-who : r) => a11;
+ apply notify (observer : 'coordinatorSystem', what : 'Ressource arrived', 
+who : 'r') => a2;
+ apply notify (observer : 'coordinatorSystem', what : 'Ressource is finished', 
+who : 'r') => a11;
  }
 
 //From 4.2.1
 //12. In parallel to steps 4-8, Coordinator receives new information about the crisis from System.
 
 composition cms::setNewCrisisInformation {  
- apply notify (observer : coordinatorSystem, what : 'newInfo', 
-who : i) => a0;
+ apply notify (observer : 'coordinatorSystem', what : 'newInfo', 
+who : 'i') => a0;
  }
 
 
@@ -146,12 +162,12 @@ who : i) => a0;
 //For dealing with ressources
 
 composition workerSystem::executeMission {  
- apply notify (observer : ressourceManager, what : 'leaving', 
-who : workerSystem) => a5;
- apply notify (observer : ressourceManager, what : 'dropping', 
-who : workerSystem) => a6;
- apply notify (observer : ressourceManager, what : 'finish', 
-who : workerSystem) => a7;
+ apply notify (observer : 'ressourceManager', what : 'leaving', 
+who : 'workerSystem') => a5;
+ apply notify (observer : 'ressourceManager', what : 'dropping', 
+who : 'workerSystem') => a6;
+ apply notify (observer : 'ressourceManager', what : 'finish', 
+who : 'workerSystem') => a7;
  }
 
 
