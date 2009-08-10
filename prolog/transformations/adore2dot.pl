@@ -166,4 +166,12 @@ adore2dot_drawOrder(L,R,C) :-
 adore2dot_drawOrder(L,R,C) :- 
 	isGuardedBy(R,L,V,false), getPreviousName(V,Label), 
 	swritef(C,'  %w -> %w [label="!%w"];',[L,R,Label]).
+adore2dot_drawOrder(L,R,C) :- 
+	onFailure(R,L,'*'),!,
+	swritef(C,'  %w -> %w [color="red"];',[L,R]).
+adore2dot_drawOrder(L,R,C) :- 
+	onFailure(R,L,E),
+	swritef(C,'  %w -> %w [color="red",label="%w"];',[L,R,E]).
+
+
 

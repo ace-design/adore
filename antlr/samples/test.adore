@@ -1,4 +1,3 @@
-
 fragment e1 <x,y> {
   variables  {}
   activities { h. hook() ; }
@@ -23,8 +22,9 @@ orchestration helloWorld::sayHello {
     a1. name := receive();
     a2. name.toto* := stringConcat(prefix, name.length*);
     a3. reply(name);
+    a4. nop();
   }
-  relations { a1 < a2; fail(a2,'foo') < a3; fail(a2) < a3; }
+  relations { a1 < a2; fail(a2,'foo bar') < a3; fail(a2) < a3; }
 }
 
 
