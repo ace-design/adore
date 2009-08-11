@@ -29,6 +29,7 @@
    //12. In parallel to steps 4-8, Coordinator receives new information about the crisis from System. 
 //13. Coordinator closes the ﬁle for the crisis resolution. 
 //Use case ends in success. 
+
 orchestration cms::resolve {
   variables {
     
@@ -36,18 +37,21 @@ orchestration cms::resolve {
     selectedMission as mission;
     internalRessource as ressource;
     externalRessource as ressource;
+    user as cmsEmployee;
+    crisisIdentifier as string ;
   }
   activities {
-    a0. receive();
-    a1. cms::witnessReportCapture();
-    a2. mission* := cms::missionsToDo();
-    a3. selectedMission := coordinatorSystem::select(mission*);
-    a45. cms::dealWithOneMission(selectedMission);
-    a13. coordinatorSystem::close();
+    a0. (user,crisisIdentifier) := receive();
+    a1. cms::witnessReportCapture(user,crisisIdentifier);
+    a2. mission* := cms::missionsToDo(crisisIdentifier);
+    a3. selectedMission := coordinatorSystem::select(mission*,user);
+    a45. cms::dealWithOneMission(selectedMission,user,crisisIdentifier);
+    a13. coordinatorSystem::close(user,crisisIdentifier);
     a6.reply();
   }
   relations { a0 < a1; a1 < a2; a2<a3; a3<a45 ; a45<a13; a13<a6;}
 }
+
 
 orchestration cms::dealWithOneMission {
   variables {
@@ -140,16 +144,18 @@ orchestration cms::witnessReportCapture {
     ci as crisisInformation;
     cl as checkList;
     cms as crisisManager;
+    user as cmsEmployee;
+    crisisIdentifier as string ;
   }
   activities {	
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
+    a0.  (user,crisisIdentifier) := receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation(user,crisisIdentifier);
+    a2. li := coordinatorSystem::provideLocationInformation(user,crisisIdentifier);
     a2a12. address := phoneCompany::getClientInformation(wi);
     a2a3. exact := cms::validateInformation(address,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
+    a3. cl := cms::computeCheckList(crisisIdentifier);
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl,user,crisisIdentifier);
+    a5. cms::setCurrentCrisisActive(ci,user,crisisIdentifier);
     a6. reply();
 
   } 

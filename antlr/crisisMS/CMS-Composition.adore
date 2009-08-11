@@ -29,56 +29,77 @@
    //12. In parallel to steps 4-8, Coordinator receives new information about the crisis from System. 
 //13. Coordinator closes the ﬁle for the crisis resolution. 
 //Use case ends in success. 
-orchestration cms::resolveStop {
+
+
+orchestration cms::resolve {
   variables {
     
     mission* as mission;
     selectedMission as mission;
     internalRessource as ressource;
     externalRessource as ressource;
+    user as cmsEmployee;
+    crisisIdentifier as string ;
   }
   activities {
-    a0. receive();
-    a1. cms::witnessReportCapture();
-    a2. mission* := cms::missionsToDo();
-    a3. selectedMission := coordinatorSystem::select(mission*);
-    a45. cms::dealWithOneMission(selectedMission);
-    a13. coordinatorSystem::close();
+    a0. (user,crisisIdentifier) := receive();
+    a1. cms::witnessReportCapture(user,crisisIdentifier);
+    a2. mission* := cms::missionsToDo(crisisIdentifier);
+    a3. selectedMission := coordinatorSystem::select(mission*,user);
+    a45. cms::dealWithOneMission(selectedMission,user,crisisIdentifier);
+    a13. coordinatorSystem::close(user,crisisIdentifier);
     a6.reply();
-    o. reply();
   }
-  relations { a0 < a1; a1 < a2; a2<a3; a3<a45 ; a45<a13; a13<a6;fail(a1,'infoDoesNotMatch') < o;}
+  relations { a0 < a1; a1 < a2; a2<a3; a3<a45 ; a45<a13; a13<a6;}
 }
 
-orchestration cms::resolveStopLog {
-  variables {
+
+// apply log => a1;
+// }
+
+orchestration cms::resolveExt1 {
+   variables {
     
     mission* as mission;
     selectedMission as mission;
     internalRessource as ressource;
     externalRessource as ressource;
-    isLogged as boolean ;
-    a as boolean;
+    user as cmsEmployee;
+    crisisIdentifier as string ;
+    logged as boolean;
+    auth as boolean;
   }
   activities {
-    a0. receive();
-    a1. cms::witnessReportCapture();
-    a2. mission* := cms::missionsToDo();
-    a3. selectedMission := coordinatorSystem::select(mission*);
-    a45. cms::dealWithOneMission(selectedMission);
-    a13. coordinatorSystem::close();
+    a0. (user,crisisIdentifier) := receive();
+    a1. cms::witnessReportCapture(user,crisisIdentifier);
+    a2. mission* := cms::missionsToDo(crisisIdentifier);
+    a3. selectedMission := coordinatorSystem::select(mission*,user);
+    a45. cms::dealWithOneMission(selectedMission,user,crisisIdentifier);
+    a13. coordinatorSystem::close(user,crisisIdentifier);
     a6.reply();
-    o. reply();
-    logTest. isLogged := authentification100::isLogged(coordinatorSystem);
-    authent. a := authentification100::authenticates(coordinatorSystem); //Uc 10???
-    e. throw('accessDenied' as string);
+
+    logTest. logged := cms::isLogged(user) ;
+    authTest. auth := cms::authenticates(user) ;
+    error. throw('UnauthorizedAccess' as string) ;
+    nop1. nop();
+    nop2. nop();
   }
-  relations { a0 < a1; a1 < a2; a2<a3; a3<a45 ; a45<a13; a13<a6;fail(a1,'infoDoesNotMatch') < o;
-              a0 < logTest; logTest<a1 when isLogged ; 
-              logTest < authent when !isLogged; 
-              authent<a1 when a;
-	      authent<e when !a; }
+  relations { 
+    //a0 < a1; 
+    a1 < a2; a2<a3; a3<a45 ; a45<a13; a13<a6;
+
+    a0 < logTest ;
+    logTest < nop1 when logged ;
+    logTest < authTest when !logged ;
+    authTest < nop2 when auth ;
+    authTest < error when ! auth;
+    nop1 << a1; nop2 << a1;
+    a1 < a2;
+
 }
+}
+
+
 
 orchestration cms::dealWithOneMission {
   variables {
@@ -94,7 +115,7 @@ orchestration cms::dealWithOneMission {
        a4a2. cms::assignInternalRessources(internalRessource,m);
        a4a3. cms::manageRessource(internalRessource,m);
       //System requests external Ressources    
-       a5a. externalRessource := getExternallRessources(m);
+       a5a. externalRessource := getExternalRessources(m);
        a5a2. cms::assignExternalRessources(externalRessource,m);
        a5a3. cms::manageRessource(externalRessource,m);  
     a6.reply();
@@ -102,50 +123,82 @@ orchestration cms::dealWithOneMission {
   relations { a0 <a4a ; a4a<a4a2; a4a2<a4a3; a4a3<a6; a0<a5a;a5a<a5a2;a5a2<a5a3;a5a3<a6;}
 }
 
+//
+//To build the initial scenario
+//1)
+//composition    { 
+//  toSet cms::resolve::selectedMission;
+//  toSet  cms::dealWithOneMission::internalRessource;
+//  toSet  cms::dealWithOneMission::externalRessource;
+//}
 
 
-//From 4.2.1
-//Resource notifies System of arrival at mission location.
-//Resource notifies System of departure from mission location.
-//Resource submits the final mission report to System.
+/* //4a. Internal resource is not available after step 4.  */
+/* //4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5).  */
+/* composition cms::dealWithOneMission {  */
+/*  apply ressourceAvailability (ressource : 'internalRessource' , mission :'selectedMission' ) => { a4a2; a4a3} */
 
-orchestration cms::manageRessource{
+
+/*  } */
+
+/* //5a. External resource is not available after step 5.  */
+/* //5a.1 Use case continues in parallel with step 2.  */
+/* composition cms::dealWithOneMission {  */
+/*  apply ressourceAvailabilityDegrated (ressource : 'externalRessource') => { a5a2;a5a3 }*/
+/*  } */
+
+//TODO? : Faut ajouter le reply de maniere automatique non?
+
+orchestration cms::dealWithOneMissionExt4a5b {
   variables {
-    r as ressource;
+    
     m as mission;
+    internalRessource as ressource;
+    externalRessource as ressource;
+    b2 as boolean;
+    i2 as crisisInformation;
+   b1 as boolean;
+   r1 as ressource ;
   }
   activities {
-    a0. (r,m) := receive();
-    a1. ressourceManager::askForArrival(r,m);
-    //a1a.coordinatorSystem::notify('arrived' as string,r);
-    a2. ressourceManager::askForExecutionEnd(r,m);
-    //a2a.coordinatorSystem::notify('endExecution'  as string,r,m);
-    a11.ressourceManager::askForfinalMissionReport(r,m);
-    a3. reply('true' as boolean);
+    a0. m := receive();
+     //System assigns internal Ressource(s)
+       a4a. internalRessource := getInternalRessources(m);
+       a4a2. cms::assignInternalRessources(internalRessource,m);
+       a4a3. cms::manageRessource(internalRessource,m);
+      //System requests external Ressources    
+       a5a. externalRessource := getExternalRessources(m);
+       a5a2. cms::assignExternalRessources(externalRessource,m);
+       a5a3. cms::manageRessource(externalRessource,m);  
+       a6.reply();
+
+    availabilityTest2. b2 :=  ressourceManager::isAvailable(externalRessource);
+    conta2. i2 := new('crisisInformation' as string, 'ressourceUnavailable' as string,externalRessource);
+    contb2. cms::setNewCrisisInformation(i2,m);
+    xor2. nop();
+
+    availabilityTest1. b1 :=  ressourceManager::isAvailable(internalRessource);
+    ask1. r1 := ressourceManager::getCorrespondingExternalRessource(internalRessource);
+    ass1. cms::assignExternalRessources(r1,m);
+    xor1. nop();
+
   }
-  relations { a0 < a1;  a1 < a2;a2<a11; a11<a3;}
+  relations { a0 <a4a ; a4a<a4a2; a4a2<a4a3; a4a3<<xor1; a0<a5a;a5a<a5a2;a5a2<a5a3;a5a3<<xor2;
+
+ a5a < availabilityTest2; availabilityTest2<a5a2 when b2 ;  
+ availabilityTest2 < conta2 when !b2; conta2<contb2;contb2<<xor2; xor2<a6;
+
+a4a < availabilityTest1; availabilityTest1<a4a2 when b1 ;
+ availabilityTest1 < ask1 when !b1; ask1<ass1 ;  ass1<<xor1; xor1<a6;
+  }
 }
 
 
 
 
-//From 4.2.1
-//10.  System informs Resource of relevant changes to mission / crisis information.
-orchestration cms::setNewCrisisInformation{
-  variables {
-    i as crisisInformation;
-    relevant as boolean;
-  }
-  activities {
-    a0. (i) := receive();
-    //a12. coordinatorSystem::notify('newInfo'  as string,i);
-    a1. relevant := cms::isRelevantInformation(i);
-    a10. ressourceManager::notify(i);
-    r. reply();
-  }
-  relations { a0 < a1; a1 < a10 when relevant; a1 < r ;}
-}
-
+//========================================
+//========================================
+//========================================
 
 // 4.2.2
 //Capture Witness Report 
@@ -162,41 +215,28 @@ orchestration cms::setNewCrisisInformation{
 //5. System assigns an initial emergency level to the crisis and sets the crisis status to active. 
 //Use case ends in success. 
 
-
-// 4.2.2
-//Capture Witness Report 
-//Use Case 2: Capture Witness Report 
-//Scope: Car Crash Crisis Management System 
-//1. Coordinator provides witness information1 to System as reported by the witness. 
-//2. Coordinator informs System of location and type of crisis as reported by the witness. 
-//In parallel to steps 2-4: 
-//2a.1 System contacts PhoneCompany to verify witness information. 
-//2a.2 PhoneCompany sends address/phone information to System. 
-//2a.3 System validates information received from the PhoneCompany. 
-//3. System provides Coordinator with a crisis-focused checklist. 
-//4. Coordinator provides crisis information2 to System as reported by the witness. 
-//5. System assigns an initial emergency level to the crisis and sets the crisis status to active. 
-//Use case ends in success. 
 
 orchestration cms::witnessReportCapture {
   variables {
     wi as witnessInformation;
     li as locationInformation;
-    adress as adressInformation;
+    address as adressInformation;
     exact as boolean;
     ci as crisisInformation;
     cl as checkList;
     cms as crisisManager;
+    user as cmsEmployee;
+    crisisIdentifier as string ;
   }
   activities {	
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
-    a2a12. adress := phoneCompany::getClientInformation(wi);
-    a2a3. exact := cms::validateInformation(adress,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
+    a0.  (user,crisisIdentifier) := receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation(user,crisisIdentifier);
+    a2. li := coordinatorSystem::provideLocationInformation(user,crisisIdentifier);
+    a2a12. address := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(address,wi);
+    a3. cl := cms::computeCheckList(crisisIdentifier);
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl,user,crisisIdentifier);
+    a5. cms::setCurrentCrisisActive(ci,user,crisisIdentifier);
     a6. reply();
 
   } 
@@ -215,25 +255,28 @@ orchestration cms::witnessReportCaptureExt1a {
   variables {
     wi as witnessInformation;
     li as locationInformation;
-    adress as adressInformation;
+    address as adressInformation;
     exact as boolean;
     ci as crisisInformation;
     cl as checkList;
     cms as crisisManager;
+    user as cmsEmployee;
+    crisisIdentifier as string ;
+
    delay := '0' as integer;
     b as boolean;
   }
   activities {	
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
-    a2a12. adress := phoneCompany::getClientInformation(wi);
-    a2a3. exact := cms::validateInformation(adress,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
+    a0.  (user,crisisIdentifier) := receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation(user,crisisIdentifier);
+    a2. li := coordinatorSystem::provideLocationInformation(user,crisisIdentifier);
+    a2a12. address := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(address,wi);
+    a3. cl := cms::computeCheckList(crisisIdentifier);
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl,user,crisisIdentifier);
+    a5. cms::setCurrentCrisisActive(ci,user,crisisIdentifier);
     a6. reply();
-    timestart. delay := timer::timeout(deadline);
+    timestart. delay := timer::timeout('10' as integer);
     test. b := diff(delay,'0' as integer);
     e. throw('unreachable' as string);
   } 
@@ -250,25 +293,28 @@ orchestration cms::witnessReportCaptureExt1a2a {
   variables {
     wi as witnessInformation;
     li as locationInformation;
-    adress as adressInformation;
+    address as adressInformation;
     exact as boolean;
     ci as crisisInformation;
     cl as checkList;
     cms as crisisManager;
+    user as cmsEmployee;
+    crisisIdentifier as string ;
+
     delay1 := '0' as integer;
     b1 as boolean;
     delay2 := '0' as integer;
     b2 as boolean;
   }
   activities {	
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
-    a2a12. adress := phoneCompany::getClientInformation(wi);
-    a2a3. exact := cms::validateInformation(adress,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
+    a0.  (user,crisisIdentifier) := receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation(user,crisisIdentifier);
+    a2. li := coordinatorSystem::provideLocationInformation(user,crisisIdentifier);
+    a2a12. address := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(address,wi);
+    a3. cl := cms::computeCheckList(crisisIdentifier);
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl,user,crisisIdentifier);
+    a5. cms::setCurrentCrisisActive(ci,user,crisisIdentifier);
     a6. reply();
     timestart1. delay1 := timer::timeout('10' as integer);
     test1. b1 := diff(delay1,'0' as integer);
@@ -297,11 +343,14 @@ orchestration cms::witnessReportCaptureExt1a2a3 {
   variables {
     wi as witnessInformation;
     li as locationInformation;
-    adress as adressInformation;
+    address as adressInformation;
     exact as boolean;
     ci as crisisInformation;
     cl as checkList;
     cms as crisisManager;
+user as cmsEmployee;
+    crisisIdentifier as string ;
+
     delay1 := '0' as integer;
     b1 as boolean;
     delay2 := '0' as integer;
@@ -310,18 +359,18 @@ orchestration cms::witnessReportCaptureExt1a2a3 {
    isCovered as boolean;
   }
   activities {	
-    covered. isCovered := surveillanceSystem::isCovered(li);
+    covered. isCovered := surveillanceSystem::covers(li);
     getFeeder. feeder := surveillanceSystem::getVideo();
     feed. coordinatorSystem::setVideo(feeder);
  
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
-    a2a12. adress := phoneCompany::getClientInformation(wi);
-    a2a3. exact := cms::validateInformation(adress,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
+    a0.  (user,crisisIdentifier) := receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation(user,crisisIdentifier);
+    a2. li := coordinatorSystem::provideLocationInformation(user,crisisIdentifier);
+    a2a12. address := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(address,wi);
+    a3. cl := cms::computeCheckList(crisisIdentifier);
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl,user,crisisIdentifier);
+    a5. cms::setCurrentCrisisActive(ci,user,crisisIdentifier);
     a6. reply();
     timestart1. delay1 := timer::timeout('10' as integer);
     test1. b1 := diff(delay1,'0' as integer);
@@ -349,16 +398,78 @@ a0 < timestart1 ;  a1<< test1; timestart1<< test1;
 }
 
 
+orchestration cms::witnessReportCaptureExt1a2a3WK {
+  variables {
+    wi as witnessInformation;
+    li as locationInformation;
+    address as adressInformation;
+    exact as boolean;
+    ci as crisisInformation;
+    cl as checkList;
+    cms as crisisManager;
+user as cmsEmployee;
+    crisisIdentifier as string ;
+
+    delay1 := '0' as integer;
+    b1 as boolean;
+    delay2 := '0' as integer;
+    b2 as boolean;
+   feeder as feederSystem;
+   isCovered as boolean;
+  }
+  activities {	
+    covered. isCovered := surveillanceSystem::covers(li);
+    getFeeder. feeder := surveillanceSystem::getVideo();
+    feed. coordinatorSystem::setVideo(feeder);
+ 
+    a0.  (user,crisisIdentifier) := receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation(user,crisisIdentifier);
+    a2. li := coordinatorSystem::provideLocationInformation(user,crisisIdentifier);
+    a2a12. address := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(address,wi);
+    a3. cl := cms::computeCheckList(crisisIdentifier);
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl,user,crisisIdentifier);
+    a5. cms::setCurrentCrisisActive(ci,user,crisisIdentifier);
+    a6. reply();
+    timestart1. delay1 := timer::timeout('10' as integer);
+    test1. b1 := diff(delay1,'0' as integer);
+    e1. throw('unreachable' as string);
+    timestart2. delay2 := timer::timeout('10'  as integer);
+    test2. b2 := diff(delay2,'0' as integer);
+    e2. throw('unreachable' as string);
+  } 
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;
+a0 < timestart1 ;  a1<< test1; timestart1<< test1;
+               test1 < a2 when !b1;
+               test1 < a2a12 when !b1;
+               test1 < a3 when !b1;
+               test1 < e1 when b1;
+
+ test1 < timestart2 when !b1;  a2<< test2; timestart2<< test2;
+               test2 < a2a3 when !b2;
+               test2 < a4 when !b2;
+               test2 < e2 when b2;
+	       a2<covered;
+             covered <getFeeder when isCovered  ;
+              getFeeder<feed ;  
+
+   }
+}
+
+
 //apply unreachableButContinue(deadline : '10') => a4;
 orchestration cms::witnessReportCaptureExt1a2a34a {
   variables {
     wi as witnessInformation;
     li as locationInformation;
-    adress as adressInformation;
+    address as adressInformation;
     exact as boolean;
     ci as crisisInformation;
     cl as checkList;
     cms as crisisManager;
+user as cmsEmployee;
+    crisisIdentifier as string ;
+
     delay1 := '0' as integer;
     b1 as boolean;
     delay2 := '0' as integer;
@@ -373,14 +484,14 @@ delay3 := '0' as integer;
     getFeeder. feeder := surveillanceSystem::getVideo();
     feed. coordinatorSystem::setVideo(feeder);
  
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
-    a2a12. adress := phoneCompany::getClientInformation(wi);
-    a2a3. exact := cms::validateInformation(adress,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
+     a0.  (user,crisisIdentifier) := receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation(user,crisisIdentifier);
+    a2. li := coordinatorSystem::provideLocationInformation(user,crisisIdentifier);
+    a2a12. address := phoneCompany::getClientInformation(wi);
+    a2a3. exact := cms::validateInformation(address,wi);
+    a3. cl := cms::computeCheckList(crisisIdentifier);
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl,user,crisisIdentifier);
+    a5. cms::setCurrentCrisisActive(ci,user,crisisIdentifier);
     a6. reply();
     timestart1. delay1 := timer::timeout('10' as integer);
     test1. b1 := diff(delay1,'0' as integer);
@@ -400,7 +511,7 @@ a0 < timestart1 ;  a1<< test1; timestart1<< test1;
                test1 < a3 when !b1;
                test1 < e1 when b1;
 
- a1 < timestart2;  a2<< test2; timestart2<< test2;
+  test1 < timestart2 when !b1;  a2<< test2; timestart2<< test2;
                test2 < a2a3 when !b2;
                test2 < a4 when !b2;
                test2 < e2 when b2;
@@ -428,6 +539,9 @@ orchestration cms::witnessReportCaptureExt1a2a34a5a {
     ci as crisisInformation;
     cl as checkList;
     cms as crisisManager;
+user as cmsEmployee;
+    crisisIdentifier as string ;
+
     delay1 := '0' as integer;
     b1 as boolean;
     delay2 := '0' as integer;
@@ -443,14 +557,14 @@ delay3 := '0' as integer;
     getFeeder. feeder := surveillanceSystem::getVideo();
     feed. coordinatorSystem::setVideo(feeder);
  
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
+ a0.  (user,crisisIdentifier) := receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation(user,crisisIdentifier);
+    a2. li := coordinatorSystem::provideLocationInformation(user,crisisIdentifier);
     a2a12. address := phoneCompany::getClientInformation(wi);
-    a2a3. exact := cms::validateInformation(adress,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
+    a2a3. exact := cms::validateInformation(address,wi);
+    a3. cl := cms::computeCheckList(crisisIdentifier);
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl,user,crisisIdentifier);
+    a5. cms::setCurrentCrisisActive(ci,user,crisisIdentifier);
     a6. reply();
     timestart1. delay1 := timer::timeout('10' as integer);
     test1. b1 := diff(delay1,'0' as integer);
@@ -473,7 +587,7 @@ a0 < timestart1 ;  a1<< test1; timestart1<< test1;
                test1 < a3 when !b1;
                test1 < e1 when b1;
 
- a1 < timestart2;  a2<< test2; timestart2<< test2;
+  test1 < timestart2 when !b1;  a2<< test2; timestart2<< test2;
                test2 < a2a3 when !b2;
                test2 < a4 when !b2;
                test2 < e2 when b2;
@@ -504,6 +618,9 @@ orchestration cms::witnessReportCaptureExt1a2a34a5a5b {
     ci as crisisInformation;
     cl as checkList;
     cms as crisisManager;
+    user as cmsEmployee;
+    crisisIdentifier as string ;
+
     delay1 := '0' as integer;
     b1 as boolean;
     delay2 := '0' as integer;
@@ -521,15 +638,16 @@ delay3 := '0' as integer;
     getFeeder. feeder := surveillanceSystem::getVideo();
     feed. coordinatorSystem::setVideo(feeder);
  
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
+    a0.  (user,crisisIdentifier) := receive();
+    a1. wi := coordinatorSystem::provideWitnessInformation(user,crisisIdentifier);
+    a2. li := coordinatorSystem::provideLocationInformation(user,crisisIdentifier);
     a2a12. address := phoneCompany::getClientInformation(wi);
-    a2a3. exact := cms::validateInformation(adress,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
+    a2a3. exact := cms::validateInformation(address,wi);
+    a3. cl := cms::computeCheckList(crisisIdentifier);
+    a4. ci := coordinatorSystem::provideCrisisInformation(cl,user,crisisIdentifier);
+    a5. cms::setCurrentCrisisActive(ci,user,crisisIdentifier);
     a6. reply();
+
     timestart1. delay1 := timer::timeout('10' as integer);
     test1. b1 := diff(delay1,'0' as integer);
     e1. throw('unreachable' as string);
@@ -554,7 +672,7 @@ a0 < timestart1 ;  a1<< test1; timestart1<< test1;
                test1 < a3 when !b1;
                test1 < e1 when b1;
 
- a1 < timestart2;  a2<< test2; timestart2<< test2;
+ test1 < timestart2 when !b1;  a2<< test2; timestart2<< test2;
                test2 < a2a3 when !b2;
                test2 < a4 when !b2;
                test2 < e2 when b2;
@@ -574,122 +692,6 @@ a0 < timestart1 ;  a1<< test1; timestart1<< test1;
 
     test4 < a5 when ok; test4 < e4 when !ok; 
    }
-}
-
-orchestration cms::witnessReportCaptureCessionVideoSurveillance {
-  variables {
-    wi as witnessInformation;
-    li as locationInformation;
-    adress as adressInformation;
-    exact as boolean;
-    ci as crisisInformation;
-    cl as checkList;
-    cms as crisisManager;
-    feeder as feederSystem;
-  }
-  activities {	
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
-    a2a12. adress := phoneCompany::getClientInformation(wi);
-    a2a3. exact := cms::validateInformation(adress,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
-    a6. reply();
-    t. throw('infoDoesNotMatch' as string);
-    a1rq. feeder := surveillanceSystem::getVideo();
-    a2rq. coordinatorSystem::setVideo(feeder);
-  }   
-  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; 
-              a5<a6;a2a3<a6  when exact; 
-              a2a3 < t when !exact; 
-              fail(a1, 'unreachable') <a1rq  ;  
-              fail(a2, 'unreachable') <a1rq  ;
-               a2rq<<a4;a2rq<<a2a3;
-  	       a1rq< a2rq ;} 
-}
-
-orchestration cms::witnessReportCaptureCessionVideoSurveillanceOnRequest {
-  variables {
-    wi as witnessInformation;
-    li as locationInformation;
-    adress as adressInformation;
-    exact as boolean;
-    ci as crisisInformation;
-    cl as checkList;
-    cms as crisisManager;
-    ok as boolean;
-    feeder as feederSystem;
-  }
-  activities {	
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
-    a2a12. adress := phoneCompany::getClientInformation(wi);
-    a2a3. exact := cms::validateInformation(adress,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
-    a6. reply();
-    t. throw('infoDoesNotMatch' as string);
-    a1rq. feeder := surveillanceSystem::getVideo();
-    a2rq. coordinatorSystem::setVideo(feeder);
-    a1orq. ok :=  coordinatorSystem::isFakeCrisis() ;
-  }   
-  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; 
-              a5<a6;a2a3<a6  when exact; 
-              a2a3 < t when !exact; 
-              fail(a1, 'unreachable') <a1rq  ;  
-              fail(a2, 'unreachable') <a1rq  ;
-               a2rq<<a4;a2rq<<a2a3;
-  	       a1rq< a2rq ;
-               a2 < a1orq; a1orq<a2a3  when ok;  a1orq<a4 when ok; a1orq<a2a3  when ok;    } 
-}
-
-orchestration cms::witnessReportCaptureCessionVideoSurveillanceOnRequestContinue {
-  variables {
-    wi as witnessInformation;
-    li as locationInformation;
-    adress as adressInformation;
-    exact as boolean;
-    ci as crisisInformation;
-    cl as checkList;
-    cms as crisisManager;
-    ok as boolean;
-    feeder as feederSystem;
-  }
-  activities {	
-    a0. receive();
-    a1. wi := coordinatorSystem::provideWitnessInformation();
-    a2. li := coordinatorSystem::provideLocationInformation();
-    a2a12. adress := phoneCompany::getClientInformation(wi);
-    a2a3. exact := cms::validateInformation(adress,wi);
-    a3. cl := cms::computeCheckList();
-    a4. ci := coordinatorSystem::provideCrisisInformation(cl);
-    a5. setCurrentCrisisActive(cms,ci);
-    a6. reply();
-    t. throw('infoDoesNotMatch' as string);
-    a1rq. feeder := surveillanceSystem::getVideo();
-    a2rq. coordinatorSystem::setVideo(feeder);
-    a1orq. ok :=  coordinatorSystem::isFakeCrisis() ;
-  }   
-  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; 
-              a5<a6;a2a3<a6  when exact; 
-              a2a3 < t when !exact; 
-              fail(a1, 'unreachable') <a1rq  ;  
-              fail(a2, 'unreachable') <a1rq  ;
-               a2rq<<a4;a2rq<<a2a3;
-  	       a1rq< a2rq ;
-               a2 < a1orq; a1orq<a2a3  when ok;  a1orq<a4 when ok; a1orq<a2a3  when ok;  
-               fail(a1,'unreachable')<a6; 
-fail(a2,'unreachable')<a6; 
-fail(a3,'unreachable')<a6; 
-fail(a4,'unreachable')<a6; 
-fail(a5,'unreachable')<a6; 
-fail(a2a12,'unreachable')<a6; 
-fail(a2a3,'unreachable')<a6; 
- } 
 }
 
 

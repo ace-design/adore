@@ -4,7 +4,7 @@ fragment notify <observer, what, who> {
   variables  {}
   activities {
     h.  hook() ;
-    notify. observer::notify(what,who);
+    notify. observer::notify('what' as string,'who'as string);
  }
   relations  { ^ < h;  h < $; h<notify;  }
 }
@@ -18,7 +18,7 @@ fragment halt <error> {
               b as boolean; }
   activities {
     h. b := hook();
-    t. throw(error);
+    t. throw('error' as string);
   }
   relations  { ^ < h; h<$ when b ;h < t when !b; } 
 }
@@ -64,20 +64,56 @@ fragment continueWithNull <error> {
 //a priori pbme de syntaxe avec throw...
 //Perso : ?? verifier cette écriture
 
-fragment log <authenticationService,logger>{
-  variables  {
-              isLogged as boolean ;
-              a as boolean; }
+/* fragment log <authenticationService,logger>{ */
+/*   variables  { */
+/*               isLogged as boolean ; */
+/*               a as boolean; } */
+/*   activities { */
+/*     logTest. isLogged := authenticationService::isLogged('logger' as string); */
+/*     h.  hook() ; */
+/*     authent. a := authenticationService::authenticates('logger' as string); //Uc 10??? */
+/*     h1. hook() ; */
+/*     e. throw('accessDenied' as string);} */
+/*   relations  { ^ < logTest; logTest<h when isLogged ; h << $;  */
+/*               logTest < authent when !isLogged;  */
+/*               authent<h1 when a;  h1<<$; */
+/* 	      authent<e when !a;  } */
+/* } */
+
+/* 4.2.10 AuthenticateUser */
+/* Use Case 10: AuthenticateUser */
+/* Scope: Car Crash Crisis Management System */
+/* Primary Actor: None */
+/* Secondary Actor: CMSEmployee */
+/* Intention: The intention of the System is to authenticate the CMSEmployee to allow access. */
+/* Main Success Scenario: */
+/* 1. System prompts CMSEmployee for login id and password. */
+/* 2. CMSEmployee enters login id and password into System. */
+/* 3. System validates the login information. */
+/* Use case ends in success. */
+fragment log  {
+  variables {
+    logged as boolean;
+    auth as boolean;
+    user as cmsEmployee;
+  }
   activities {
-    logTest. isLogged := authenticationService::isLogged(logger);
-    h.  hook() ;
-    authent. a := authenticationService::authenticates(logger); //Uc 10???
-    h1. hook() ;
-    e. throw('accessDenied' as string);}
-  relations  { ^ < logTest; logTest<h when isLogged ; h < $; 
-              logTest < authent when !isLogged; 
-              authent<h1 when a;  h1<$;
-	      authent<e when !a;  }
+    logTest. logged := cms::isLogged(user) ;
+    authTest. auth := cms::authenticates(user) ;
+    h. hook(user) ;
+    error. throw('UnauthorizedAccess' as string) ;
+    nop1. nop();
+    nop2. nop();
+  }
+  relations {
+    ^ < logTest ;
+    logTest < nop1 when logged ;
+    logTest < authTest when ! logged ;
+    authTest < nop2 when auth ;
+    authTest < error when ! auth;
+    nop1 << h; nop2 << h;
+    h < $;
+  }
 }
 
 
@@ -93,19 +129,22 @@ fragment log <authenticationService,logger>{
 //c'est au cms de decider en fonction de l'info obtenu
 //Comment faire???
 //Je rajouterai bien un signalement de pbme...
-fragment ressourceAvailabilityDegrated <ressource>{ 
+//les nop devraient etre generes
+fragment ressourceAvailabilityDegrated { 
   variables  {
               b as boolean;
- 	      r as ressource ;
-              i as crisisInformation; }
+              i as crisisInformation;
+              affectedRessource as ressource;
+              m as mission; }
   activities {
-    availabilityTest. b :=  ressourceManager::isAvailable(ressource);
-    h.  hook() ; 
-    conta. i := new(crisisInformation, 'ressourceUnavailable' as string,r);
-    contb. cms::setNewCrisisInformation(i);
+    availabilityTest. b :=  ressourceManager::isAvailable(affectedRessource);
+    h.  hook(affectedRessource,m) ; 
+    conta. i := new('crisisInformation' as string, 'ressourceUnavailable' as string,affectedRessource);
+    contb. cms::setNewCrisisInformation(i,m);
+    xor. nop();
   }
-  relations  { ^ < availabilityTest; availabilityTest<h when b ; h < $; 
-    availabilityTest < conta when !b; conta<contb;
+  relations  { ^ < availabilityTest; availabilityTest<h when b ; h << xor; xor< $; 
+    availabilityTest < conta when !b; conta<contb; contb<<xor;
   }
 }
 
@@ -116,18 +155,21 @@ fragment ressourceAvailabilityDegrated <ressource>{
 //4a. Internal resource is not available after step 4. 
 //4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5).
 //Il faudrait un delegate qui prenne : ask et ass
-fragment ressourceAvailability <ressource,mission> { 
+fragment ressourceAvailability { 
   variables  {
               b as boolean;
- 	      r as ressource ; }
+ 	      r as ressource ;
+              affectedRessource as ressource;
+              m as mission;}
   activities {
-    availabilityTest. b :=  ressourceManager::isAvailable(ressource);
-    h.  hook() ; 
-    ask. r := ressourceManager::getCorrespondingExternalRessource(ressource);
-    ass. cms::assignExternalRessources(r,mission);
+    availabilityTest. b :=  ressourceManager::isAvailable(affectedRessource);
+    h.  hook(affectedRessource,m) ; 
+    ask. r := ressourceManager::getCorrespondingExternalRessource(affectedRessource);
+    ass. cms::assignExternalRessources(r,m);
+    xor. nop();
   }
-  relations  { ^ < availabilityTest; availabilityTest<h when b ; h < $; 
-              availabilityTest < ask when !b; ask<ass ;  ass<$;
+  relations  { ^ < availabilityTest; availabilityTest<h when b ; h << xor; xor <$; 
+              availabilityTest < ask when !b; ask<ass ;  ass<<xor;
   }
 }
 
@@ -146,7 +188,7 @@ fragment unreachable <deadline> {
   }
   activities {
     //a0. timeout := '0' as integer;
-    timestart. delay := timer::timeout(deadline);
+    timestart. delay := timer::timeout('deadline' as integer);
     h.  hook() ; 
     test. b := diff(delay,'0' as integer);
     e. throw('unreachable' as string);
@@ -156,7 +198,7 @@ fragment unreachable <deadline> {
                test < e when b; }
 }
 
-
+//Je voulais en faire un aspect sur aspect.. mais je n'ai pas su.
 fragment unreachableButContinue <deadline> { 
   variables  {
     delay := '0' as integer;
@@ -165,7 +207,7 @@ fragment unreachableButContinue <deadline> {
   }
   activities {
     //a0. timeout := '0' as integer;
-    timestart. delay := timer::timeout(deadline);
+    timestart. delay := timer::timeout('deadline' as integer);
     h.  res := hook();
     test. b := diff(delay,'0' as integer);
     o. res := setNull();
@@ -194,17 +236,17 @@ fragment unreachableButContinue <deadline> {
 //2a.2a No other CMSEmployee is available. Use case ends in failure.
 //Perso : The both extensions are designed together.
 
-fragment unavailable <employee> { 
+fragment unavailable <unavailableEmployee> { 
   variables  {cmsEmployee as employee;
               m as mission;
               b as boolean;
  	       }
   activities {
     h.  b := hook(m) ; 
-    a1. cms::unavailable4(m,employee); //To remember the unavailability
+    a1. cms::unavailable4(m,'unavailableEmployee' as employee); //To remember the unavailability
     a2. cmsEmployee := cms::assignInternalResource(m);
     a3. reply(cmsEmployee);
-    a1catch. cms::unavailable4(m,employee); //To remember the unavailability
+    a1catch. cms::unavailable4(m,'unavailableEmployee' as employee); //To remember the unavailability
     a2catch. cmsEmployee := cms::assignInternalResource(m);
     a3catch. reply(cmsEmployee);
   }
@@ -231,8 +273,8 @@ fragment reachableByHelicopter {
     helicop. reachableByHelicopter := cms::reachableByHelicopter(i);
     a1. coordinatorSystem::notify('locationReachableByHelicopter' as string,i);
     a2. m := cms::createHelicopterTransportMission(i);
-    a4. ir := getRessource(m);
-    a5. cms::manageRessource(ir,m);
+    a4. r := getRessource(m);
+    a5. cms::manageRessource(r,m);
   }
   relations  { ^ < h; h<$; h<u; u< helicop when unreachable ; 
     helicop < a1 when reachableByHelicopter;
@@ -303,12 +345,13 @@ fragment requestVideoSurveillance {
   variables  {
    feeder as feederSystem;
    li as locationInformation;
-   isCovered as boolean; }
+   isCovered as boolean;
+    user as cmsEmployee; }
   activities {
-    h. li := hook();
-    covered. isCovered := surveillanceSystem::isCovered(li);
+    h. li := hook(user);
+    covered. isCovered := surveillanceSystem::covers(li);
     getFeeder. feeder := surveillanceSystem::getVideo();
-    feed. coordinatorSystem::setVideo(feeder);
+    feed. coordinatorSystem::setVideo(feeder,user);
   }
   relations  { ^ < h; h < $;
     h<covered; covered <getFeeder when isCovered  ;
@@ -337,33 +380,7 @@ fragment phoneCompanyInfoDoesntmatch {
 //5b.1 The base use case is terminated. 
 
 
-fragment onRequestVideoSurveillanceCheckForFakeCrisis { 
-//require requestVideoSurveillance to make sense
-  variables  {
-    ok as boolean;
-}
-  activities {
-    test. ok :=  coordinatorSystem::isFakeCrisis() ;
-    h. hook();
-    e. throw('fakeCrisis' as string);
-   
-  }
-  relations  { ^ < h; h<$; test< h when ok; test< e when !ok;  } 
-}
-
-//From 4.2.3 Assign Internal Resource
-//1b. CMSEmployee is unavailable or unresponsive.
-//1b.1 System selects the next appropriate CMSEmployee.
-//1b.2 Use case continues at step 1.
-//1b.1a No other CMSEmployee is available. Use case ends in failure.
-
-fragment cmsEmployeeUnresponsive { 
-//require requestVideoSurveillance to make sense
-  variables  {}
-  activities {
-    h. hook();
-    a1. ok :=  coordinatorSystem::isFakeCrisis() ;
-  }
+fragment   }
   relations  { ^ < h; h < a1; a1< $ when ok;  } 
 }
 

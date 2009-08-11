@@ -81,7 +81,7 @@ composition  cms::witnessReportCapture {
 //1a.1 Coordinator authenticates with System (UC 10). 
 //1a.2 Use case continues with step 1. 
 composition cms::resolve { 
- apply log (authenticationService : 'authentification100', logger : 'coordinatorSystem') => a1;
+ apply log => a1;
 
  }
 
