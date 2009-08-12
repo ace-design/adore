@@ -60,9 +60,54 @@ adore2dot_genFragParamList([H|T],R) :-
 %%%%
 adore2dot_genCore(P,R) :- 
 	adore2dot_genGraphLabel(P,L),
+	adore2dot_genClusters(P,Clusters),
 	adore2dot_genActivities(P,Acts),
 	adore2dot_genOrders(P,Orders),
-	concatenate([L,Acts,Orders],R).
+	concatenate([L,Clusters,Acts,Orders],R).
+
+%%%%
+%% Clusters (aka iterations)
+%%%%
+
+adore2dot_identifyClusters(Process,Clusters) :- 
+	findall(C,adore2dot_isClusterOf(Process,C),List),
+	sort(List,Clusters).
+
+adore2dot_isClusterOf(P,C) :- 
+	activity(A), isContainedBy(A,P), iteratesOver(A,C).
+
+adore2dot_genClusters(Process,Code) :- 
+	adore2dot_identifyClusters(Process,Clusters),
+	map(adore2dot_genCluster,Clusters, List),
+	concatenate(List,Code).
+
+adore2dot_genCluster(ClusterId,Code) :- 
+	adore2dot_genClusterActivities(ClusterId,Acts),
+	adore2dot_genClusterLabel(ClusterId,Fin,Fout),
+	swritef(Legend, 'legend_%w [style=filled, fillcolor=lightgrey,label="{%w|%w}"] ;',[ClusterId,Fin,Fout]),
+	swritef(Code,'    subgraph cluster_%w {\n label=""; \n%w    %w\n}\n',[ClusterId, Acts, Legend]).
+
+adore2dot_genClusterActivities(ClusterId,Code) :- 
+	findall(X,adore2dot_genClusterActivity(ClusterId,X),List),
+	concatenate(List,Code).
+adore2dot_genClusterActivity(ClusterId,Code) :- 
+	activity(Act), iteratesOver(Act,ClusterId), 
+	adore2dot_drawActivity(Act,Code).
+
+adore2dot_genClusterLabel(ClusterId,LabelIn,LabelOut) :- 
+	policy(ClusterId,Fin,Fout),
+	adore2dot_genFormula(Fin,LabelIn),
+	adore2dot_genFormula(Fout,LabelOut).
+
+adore2dot_genFormula(forall(V,Vstar),Label) :- 
+	adore2dot_genVarLabel(V,Vlabel),
+	adore2dot_genVarLabel(Vstar,VstarLabel),
+	swritef(Label,  "forall %w in   %w", [Vlabel,VstarLabel]).
+
+adore2dot_genFormula(append(V,Vstar),Label) :- 
+	adore2dot_genVarLabel(V,Vlabel),
+	adore2dot_genVarLabel(Vstar,VstarLabel),
+	swritef(Label,  "append %w into %w", [Vlabel,VstarLabel]).
 
 %%%%
 %% Activities:
@@ -71,7 +116,7 @@ adore2dot_genActivities(P,C) :-
 	findall(X, adore2dot_genActivity(P,X), List),
 	concatenate(List,C).
 adore2dot_genActivity(P,C) :- 
-	isContainedBy(Act,P), activity(Act),
+	isContainedBy(Act,P), activity(Act), \+ iteratesOver(Act,_),
 	adore2dot_drawActivity(Act,C).
 
 adore2dot_drawActivity(A,C) :- 

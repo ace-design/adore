@@ -106,5 +106,5 @@
 %% Policies
 %%%%
 
-:- dynamic policy/2.           %% defPolicy(I,Formula)
+:- dynamic policy/3.           %% defPolicy(I,Formula,Formula)
 :- dynamic iteratesOver/2.     %% setIteration(A,Policy)

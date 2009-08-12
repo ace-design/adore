@@ -32,11 +32,12 @@ dataflow(V,Acts) :-
 	findall(A,variableUsageClosure(V,A),L), sort(L,Acts).
 
 %% variableUsageClosure(+V,-A): Activity A uses V as input, or a 'descendant'
-variableUsageClosure(V,A) :- isDfActivity(A), usesAsInput(A,V).
+variableUsageClosure(V,A) :- 
+	isDfActivity(A), usesElemAsInput(A,V).
 variableUsageClosure(V,A) :- 
 	isDfActivity(A), isDfActivity(APrime), \+ A == APrime, 
 	isContainedBy(APrime,P), isContainedBy(A,P), existsPath(APrime,A), 
-	usesAsInput(A,Vin), usesAsOutput(APrime,Vin), 
+	usesElemAsInput(A,Vin), usesElemAsOutput(APrime,Vin), 
 	variableUsageClosure(V,APrime).
 
 %% isDfActivity(+A): an activity inside a dataflow can't be of any kind.

@@ -32,7 +32,7 @@ aw(M) :- adore_silent(false), write(M).
 loadFiles :- 
 	aw('%% Loading ADORE kernel'),
 	[debug], [trace], [config],  [metamodel], [actions], [functions], 
-	[conflicts], [helpers], [dependencies], [dataflow],
+	[conflicts], [helpers], [dependencies], [dataflow], [weave],
 	aw('%% Loading Transformations'),
 	loadTransfo('adore2dot'), loadTransfo('adore2png'), 
 	loadTransfo('adore2dgraph').

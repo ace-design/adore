@@ -20,9 +20,9 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Actions available on the ADORE metamodel %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Actions publicly available on the ADORE metamodel %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%
@@ -393,18 +393,18 @@ defSetify(C,V) :-
 %% Policies
 %%%%
 
-defPolicy(I,_) :- 
-	policy(I,_), !, 
+defPolicy(I,_,_) :- 
+	policy(I,_,_), !, 
 	dfail(def,'defPolicy/2: Id \'~w\' still exist!',I).
-defPolicy(I,F) :- 
-	assert(policy(I,F)),
-	dinfo(def,'Policy \'~w\' created with formula [~w].',[I,F]).
+defPolicy(I,Fin,Fout) :- 
+	assert(policy(I,Fin,Fout)),
+	dinfo(def,'Policy \'~w\' created with formulas [~w,~w].',[I,Fin,Fout]).
 
 setIteration(A,_) :- 
 	\+ activity(A), !, 
 	dfail(set,'setIteration/2: Unknown activity \'~w\'!',A).
 setIteration(_,P) :- 
-	\+ policy(P,_), !, 
+	\+ policy(P,_,_), !, 
 	dfail(set,'setIteration/2: Unknown policy \'~w\'!',P).
 setIteration(A,P) :- 
 	assert(iteratesOver(A,P)),

@@ -14,19 +14,25 @@ fragment e2 {
 
 orchestration helloWorld::sayHello {
   variables { 
-    name as string; 
+    name as string;   name* as string;
+    result as string; result* as string;
     const prefix := 'Hello, ' as string;
-    v as struct;
   }
   activities {
-    a1. name := receive();
-    a2. name.toto* := stringConcat(prefix, name.length*);
-    a3. reply(name);
-    a4. nop();
+    a1. name* := receive();
+    a2. result := stringConcat(prefix, name);
+    test. nop(name);
+    a3. reply(result*);
   }
-  relations { a1 < a2; fail(a2,'foo bar') < a3; fail(a2) < a3; }
+  relations { a1 < a2; a2 < test; fail(a2,'foo bar') < a3; fail(a2) < a3; }
 }
 
+%%% DISENGAGE %%%
+  defPolicy(p0,forall(helloWorld_sayHello_name,helloWorld_sayHello_name_star),
+	    append(helloWorld_sayHello_result,helloWorld_sayHello_result_star)),
+  setIteration(helloWorld_sayHello_a2,p0),  
+  setIteration(helloWorld_sayHello_test,p0),  
+%%% ENGAGE %%%
 
 composition helloWorld::sayHello as foo { 
       apply e2 => e1::h;

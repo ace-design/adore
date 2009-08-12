@@ -43,16 +43,19 @@ existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).
 getVariable(F,V) :- fieldAccess(F,V,_). %% as it can be a field access
 getVariable(V,V) :- variable(V).        %% or simply the variable.
 
+%% usesElemAsInput(?A,?V): A uses V (or an associated field) as input
+usesElemAsInput(A,V) :- usesAsInput(A,V).
+usesElemAsInput(A,V) :- usesAsInput(A,F), fieldAccess(F,V,_).
 
-%usesVariable(A,V) :- usesAsInput(A,V).
-%usesVariable(A,V) :- usesAsOutput(A,V).
-
+%% usesElemAsOuutput(?A,?V): A uses V (or an associated field) as output
+usesElemAsOutput(A,V) :- usesAsOutput(A,V).
+usesElemAsOutput(A,V) :- usesAsOutput(A,F), fieldAccess(F,V,_).
 
 %%%%
 %% Block Handling
 %%%%
 
-% dataflow(peanoMachine_add_a,L), last(A,L).
+%% TODO: check validity of those rules, looks weird ... :'(
 lastElement(Block,A) :- 
 	activity(A),  member(A,Block), \+ path(A,_).
 lastElement(Block,A) :- 
