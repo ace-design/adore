@@ -84,7 +84,7 @@ createActivity(A) :-
 %% setActivityKind/2: setActivityKind(A,K)
 setActivityKind(A,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
-	dfail('setActivityKind/2: Unknown activity \'~w\'!',A).
+	dfail(set,'setActivityKind/2: Unknown activity \'~w\'!',A).
 setActivityKind(A,K) :- 
 	assert(hasForKind(A,K)),
 	dinfo(set,'Activity \'~w\' flagged with kind \'~w\'.',[A,K]).

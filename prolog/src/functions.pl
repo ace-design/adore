@@ -44,4 +44,23 @@ getVariable(F,V) :- fieldAccess(F,V,_). %% as it can be a field access
 getVariable(V,V) :- variable(V).        %% or simply the variable.
 
 
+%usesVariable(A,V) :- usesAsInput(A,V).
+%usesVariable(A,V) :- usesAsOutput(A,V).
 
+
+%%%%
+%% Block Handling
+%%%%
+
+% dataflow(peanoMachine_add_a,L), last(A,L).
+lastElement(Block,A) :- 
+	activity(A),  member(A,Block), \+ path(A,_).
+lastElement(Block,A) :- 
+	activity(A), member(A,Block),
+	activity(APrime), path(A,APrime), \+ member(APrime,Block).
+
+firstElement(Block,A) :- 
+	activity(A),  member(A,Block), \+ path(_,A).
+firstElement(Block,A) :- 
+	activity(A), member(A,Block),
+	activity(APrime), path(APrime,A), \+ member(APrime,Block).

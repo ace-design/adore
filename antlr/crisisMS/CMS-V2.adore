@@ -269,6 +269,7 @@ orchestration superObserver::executeMission {
     mission* as mission;
     cL as checkList;
     ci as crisisInformation;
+    superObserver as struct;
   }
   activities {	
     a0. m := receive();
@@ -300,6 +301,7 @@ orchestration superObserver::manageMissions {
     cL as checkList;
     ci as crisisInformation;
     again as boolean;
+    request as struct;
   }
   activities {	
     a0.  receive();

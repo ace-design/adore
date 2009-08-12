@@ -34,3 +34,27 @@ composition helloWorld::sayHello as foo {
       toSet name ;
 }
 
+fragment authBySeb {
+  variables {
+    logged as boolean;
+    auth as boolean;
+    user as struct;
+  }
+  activities {
+    logTest. logged := auth::isLogged(user) ;
+    authTest. auth := auth::authenticates(user) ;
+    h. hook(user) ;
+    error. throw('UnauthorizedAccess' as string) ;
+    nop1. nop();
+    nop2. nop();
+  }
+  relations {
+    ^ < logTest ;
+    logTest < nop1 when logged ;
+    logTest < authTest when ! logged ;
+    authTest < nop2 when auth ;
+    authTest < error when ! auth;
+    nop1 << h; nop2 << h;
+    h < $;
+  }
+}
