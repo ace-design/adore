@@ -27,7 +27,7 @@
 sameProcess(X,Y) :- isContainedBy(X,P), isContainedBy(Y,P).
 
 %% path/2: path(+A,+B) => a direct path exists between A and B
-path(A,A) :- fail.
+%path(X,X) :- fail.
 path(X,Y) :- sameProcess(X,Y), waitFor(Y,X).
 path(X,Y) :- sameProcess(X,Y), isGuardedBy(Y,X,_,_).
 path(X,Y) :- sameProcess(X,Y), weakWait(Y,X).
@@ -36,7 +36,6 @@ path(X,Y) :- sameProcess(X,Y), onFailure(Y,X,_).
 %% existsPath/2: existsPath(+A,+B) => transitive closure for path
 existsPath(X,Y) :- path(X,Y).
 existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).
-
 
 %%%%
 %% Access to variable
@@ -63,22 +62,20 @@ usesElem(A,V) :- usesElemAsOutput(A,V).
 
 getFirstActivitiesOfBlock(Block,Activities) :- 
 	findall(A,isFirstActivity(Block,A),Tmp), sort(Tmp,Activities).
-
 isFirstActivity(Block,Activity) :- 
-	member(Activity,Block), member(APrime,Block), 
-	\+ path(APrime,Activity).
+	member(Activity,Block), \+ path(_,Activity).
 isFirstActivity(Block,Activity) :- 
 	member(Activity,Block), path(APrime,Activity), \+ member(APrime,Block).
 
 getLastActivitiesOfBlock(Block,Activities) :- 
-	findall(A,isLastElement(Block,A),Tmp), sort(Tmp,Activities).
+	findall(A,isLastActivity(Block,A),Tmp), sort(Tmp,Activities).
 isLastActivity(Block,Activity) :- 
-	member(Activity,Block), member(APrime,Block), 
-	\+ path(Activity,APrime).
+	member(Activity,Block),	\+ path(Activity,_).
 isLastActivity(Block,Activity) :- 
 	member(Activity,Block), path(Activity,APrime), \+ member(APrime,Block). 
 	
 
+% isLastActivity([cms_dealWithOneMissionToSetExt4a5b_a4a2, cms_dealWithOneMissionToSetExt4a5b_a4a3, cms_dealWithOneMissionToSetExt4a5b_ask1, cms_dealWithOneMissionToSetExt4a5b_ass1, cms_dealWithOneMissionToSetExt4a5b_availabilityTest1],A).
 
 getBlockInputVariable(Block, Vars) :-
 	findall(V,isBlockInputVariable(Block,V),Tmp),
