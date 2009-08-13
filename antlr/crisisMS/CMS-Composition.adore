@@ -1,3 +1,4 @@
+/*
 // 
 
 //CMS => Crisis Management System 
@@ -132,7 +133,7 @@ orchestration cms::dealWithOneMission {
 //  toSet  cms::dealWithOneMission::externalRessource;
 //}
 
-
+*/
 /* //4a. Internal resource is not available after step 4.  */
 /* //4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5).  */
 /* composition cms::dealWithOneMission {  */
@@ -148,7 +149,7 @@ orchestration cms::dealWithOneMission {
 /*  } */
 
 //TODO? : Faut ajouter le reply de maniere automatique non?
-
+/*
 orchestration cms::dealWithOneMissionExt4a5b {
   variables {
     
@@ -194,8 +195,111 @@ a4a < availabilityTest1; availabilityTest1<a4a2 when b1 ;
 }
 
 
+orchestration cms::dealWithOneMissionToSet {
+  variables {
+    m as mission;
+    internalRessource as ressource; 
+    externalRessource as ressource; 
+
+    internalRessource* as ressource; 
+    externalRessource* as ressource;
+  }
+  activities {
+    a0. m := receive();
+    //System assigns internal Ressource(s)
+    a4a. internalRessource* := getInternalRessources(m);
+    a4a2. cms::assignInternalRessources(internalRessource,m);
+    a4a3. cms::manageRessource(internalRessource,m);
+    //System requests external Ressources    
+    a5a. externalRessource* := getExternallRessources(m);
+    a5a2. cms::assignExternalRessources(externalRessource,m);
+    a5a3. cms::manageRessource(externalRessource,m);  
+    a6.reply();
+  }
+  relations { a0 <a4a ; a4a<a4a2; a4a2<a4a3; a4a3<a6; a0<a5a;a5a<a5a2;a5a2<a5a3;a5a3<a6;}
+}
+
+%%% DISENGAGE %%%
+defPolicy(p0,forall(cms_dealWithOneMissionToSet_internalRessource,cms_dealWithOneMissionToSet_internalRessource_star),none),
+  defPolicy(p1,forall(cms_dealWithOneMissionToSet_externalRessource,cms_dealWithOneMissionToSet_externalRessource_star),none),
+setIteration(cms_dealWithOneMissionToSet_a4a2,p0),
+setIteration(cms_dealWithOneMissionToSet_a4a3,p0),
+setIteration(cms_dealWithOneMissionToSet_a5a2,p1),
+setIteration(cms_dealWithOneMissionToSet_a5a3,p1),
+%%% ENGAGE %%%
+
+*/
+
+orchestration cms::dealWithOneMissionToSetExt4a5b {
+  variables {
+    m as mission;
+    internalRessource as ressource; 
+    externalRessource as ressource; 
+
+    internalRessource* as ressource; 
+    externalRessource* as ressource;
+
+    b2 as boolean;
+    i2 as crisisInformation;
+    b1 as boolean;
+    r1 as ressource ;
+  }
+  activities {
+    a0. m := receive();
+    //System assigns internal Ressource(s)
+    a4a. internalRessource* := getInternalRessources(m);
+    a4a2. cms::assignInternalRessources(internalRessource,m);
+    a4a3. cms::manageRessource(internalRessource,m);
+    //System requests external Ressources    
+    a5a. externalRessource* := getExternallRessources(m);
+    a5a2. cms::assignExternalRessources(externalRessource,m);
+    a5a3. cms::manageRessource(externalRessource,m);  
+    a6.reply();
+
+    availabilityTest2. b2 :=  ressourceManager::isAvailable(externalRessource);
+    conta2. i2 := new('crisisInformation' as string, 'ressourceUnavailable' as string,externalRessource);
+    contb2. cms::setNewCrisisInformation(i2,m);
+    xor2. nop();
+
+    availabilityTest1. b1 :=  ressourceManager::isAvailable(internalRessource);
+    ask1. r1 := ressourceManager::getCorrespondingExternalRessource(internalRessource);
+    ass1. cms::assignExternalRessources(r1,m);
+    xor1. nop();
+
+  }
+  relations { 
+    a0 <a4a ; a4a<a4a2; a4a2<a4a3; a4a3<<xor1; a0<a5a;a5a<a5a2;a5a2<a5a3;a5a3<<xor2;
+    a5a < availabilityTest2; availabilityTest2<a5a2 when b2 ;  
+    availabilityTest2 < conta2 when !b2; conta2<contb2;contb2<<xor2; xor2<a6;
+    a4a < availabilityTest1; availabilityTest1<a4a2 when b1 ;
+    availabilityTest1 < ask1 when !b1; ask1<ass1 ;  ass1<<xor1; xor1<a6;
+  }
+}
+
+%%% DISENGAGE %%%
+    defPolicy(p2,forall(cms_dealWithOneMissionToSetExt4a5b_internalRessource,cms_dealWithOneMissionToSetExt4a5b_internalRessource_star),none),
+    defPolicy(p3,forall(cms_dealWithOneMissionToSetExt4a5b_externalRessource,cms_dealWithOneMissionToSetExt4a5b_externalRessource_star),none),
+    setIteration(cms_dealWithOneMissionToSetExt4a5b_a4a2,p2),
+    setIteration(cms_dealWithOneMissionToSetExt4a5b_a4a3,p2),
+    setIteration(cms_dealWithOneMissionToSetExt4a5b_availabilityTest1,p2),
+    setIteration(cms_dealWithOneMissionToSetExt4a5b_ask1,p2),
+    setIteration(cms_dealWithOneMissionToSetExt4a5b_ass1,p2),
+    
+    
+    setIteration(cms_dealWithOneMissionToSetExt4a5b_a5a2,p3),
+    setIteration(cms_dealWithOneMissionToSetExt4a5b_a5a3,p3),
+    setIteration(cms_dealWithOneMissionToSetExt4a5b_availabilityTest2,p3),
+    setIteration(cms_dealWithOneMissionToSetExt4a5b_conta2,p3),
+    setIteration(cms_dealWithOneMissionToSetExt4a5b_contb2,p3),
+    
+    %% cosmetic
+    
+    %setIteration(cms_dealWithOneMissionToSetExt4a5b_xor2,p3),
+    %setIteration(cms_dealWithOneMissionToSetExt4a5b_xor1,p2),
+%%% ENGAGE %%% 
 
 
+  
 //========================================
 //========================================
 //========================================
@@ -243,7 +347,7 @@ orchestration cms::witnessReportCapture {
   relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;} 
 }
 
-
+/*
 //from 4.2.2
 //1a,2a. The call is disconnected. The base use case terminates. 
 //composition  cms::witnessReportCapture { 
@@ -722,7 +826,7 @@ orchestration cms::assignInternalResource {
   relations { a0 < a1; a1 < a2; a2<a6 ; } 
 }
 
-
+  */
 // 4.2.2
 /* 4.2.4 Request External Resource */
 /* Use Case 4: Request External Resource */
@@ -738,6 +842,8 @@ orchestration cms::assignInternalResource {
 //Perso : Following extensions are managed by the return allocated ressource or an error
 //2a. ERS notifies System that it partially approves request for resources. Use case ends in degraded success.
 //2a. ERS notifies System that it partially approves request for resources. Use case ends in degraded success.
+
+/*
 orchestration cms::assignExternalResource {
   variables {
     m as mission;
@@ -768,7 +874,7 @@ orchestration cms::setNewVictimInformation {
   } 
   relations { a0 < a1; a1 < a2; } 
  } 
-
+*/
 
 
 //-----------------------------------------------
@@ -796,6 +902,7 @@ orchestration cms::setNewVictimInformation {
 /* 8. System informs SuperObserver that mission was completed successfully. */
 /* 9. SuperObserver judges that his presence is no longer needed at the crisis location. */
 /* Use case ends in success. */
+/*
 orchestration superObserver::executeMission {
   variables {
     m as mission;
@@ -903,3 +1010,4 @@ orchestration workerSystem::executeMission {
   relations { a0 < a1a; a1a < a1b; a0<a2a; a2a<a2b when b ;a2b<a3;
     a1b<a4;a4<a4a;a4a<a5; a5< a6; a6 < a7; a7<a8; } 
 }
+*/
