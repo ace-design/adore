@@ -51,5 +51,5 @@ getAbsoluteNames(Cxt,[H|T],[R|O]) :-
 
 %% writeList => display a List on the terminal
 writeList([]).
-writeList([[H]|T]) :- 
+writeList([H|T]) :- 
 	write(H), nl, writeList(T).

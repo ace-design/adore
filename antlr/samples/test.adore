@@ -26,14 +26,11 @@ orchestration helloWorld::sayHello {
   }
   relations { a1 < a2; a2 < test; fail(a2,'foo bar') < a3; fail(a2) < a3; }
 }
-/**
+
 %%% DISENGAGE %%%
-  defPolicy(p0,forall(helloWorld_sayHello_name,helloWorld_sayHello_name_star),
-	    append(helloWorld_sayHello_result,helloWorld_sayHello_result_star)),
-  setIteration(helloWorld_sayHello_a2,p0),  
-  setIteration(helloWorld_sayHello_test,p0),  
+doSetify(helloWorld_sayHello,helloWorld_sayHello_name),
 %%% ENGAGE %%%
-**/
+
 composition helloWorld::sayHello as foo { 
       apply e2 => e1::h;
       apply e1(x: 'X', y: 'bar') => {a1,a2} ; 

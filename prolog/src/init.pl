@@ -32,7 +32,8 @@ aw(M) :- adore_silent(false), write(M), nl.
 loadFiles :- 
 	aw('%%%% Loading Source Kernel'),
         [debug], [trace], [config],  [metamodel], [actions], [functions], 
-	[conflicts], [helpers], [dependencies], [dataflow], [weave],
+	[conflicts], [helpers], [dependencies], [dataflow], [weave], 
+	[substitution],
 	aw('%%%% Loading Algorithms'),
         loadAlgo('setify'),
 	aw('%%%% Loading Transformations'),

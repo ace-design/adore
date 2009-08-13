@@ -125,7 +125,7 @@ setInvokedOperation(A,I) :-
 %% setMessageBinding/3: setMessageBinding(A,I,V)
 setMessageBinding(A,_,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
-	dfail(set,'setMessageBinding/2: Unknown activity \'~w\'!',A).
+	dfail(set,'setMessageBinding/23 Unknown activity \'~w\'!',A).
 setMessageBinding(A,I,V) :-
 	assert(usesAsBinding(A,V,I)), 
 	dinfo(set,'Activity \'~w\' binds variable \'~w\' to part \'~w\'',[A,V,I]).

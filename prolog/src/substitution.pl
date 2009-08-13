@@ -29,18 +29,42 @@
 %%  => elementary actions to perform MUST BE unified as LAST argument.
 %%%%
 
+:- assert(isMacroAction(substituteVariable,4)).
+
+substituteVariable(Old,New,Act,Actions) :-
+	findall(Actions,variableSubstitutionAction(Old,New,Act,Actions),Tmp),
+	flatten(Tmp,Actions).
+
+variableSubstitutionAction(Old,New,Act,Actions) :- 
+	usesAsInput(Act,Old),
+	Actions = [retract(usesAsInput(Act,Old)), addAsInput(New,Act)].
+variableSubstitutionAction(Old,New,Act,Actions) :- 
+	usesAsOutput(Act,Old),
+	Actions = [retract(usesAsOutput(Act,Old)), addAsOutput(New,Act)].
+variableSubstitutionAction(Old,New,Act,Actions) :- 
+	usesAsBinding(Act,Old,Part),
+	Actions = [retract(usesAsBinding(Act,Old,Part)),
+	           setMessageBinding(Act,Part,New)].
+variableSubstitutionAction(Old,New,Act,Actions) :- 
+	usesElem(Act,Field), fieldAccess(Field,Old,Path),
+	Actions = [retract(fieldAccess(Field,Old,Path)), 
+	           setFieldAccess(Field,New,Path)].
+
+
+
+
 %% substituteVariable(+O,+N,+Acts,-Actions)
 %%  substitute variable Old with variable New when used by an activity in Acts
-substituteVariable(Old,New,Acts,Actions) :- 
-	member(A,Acts), activity(A), usesAsInput(A,Old), 
-	Actions = [retract(usesAsInput(A,Old)), addAsInput(New,A)].
-substituteVariable(Old,New,Acts,Actions) :- 
-	member(A,Acts), activity(A), fieldAccess(I,Old,Path), usesAsInput(A,I),
-	Actions = [retract(fieldAccess(I,Old,Path)), setFieldAcces(I,New,Path)].
-substituteVariable(Old,New,Acts,Actions) :- 
-	member(A,Acts), activity(A), usesAsOutput(A,Old), 
-	Actions = [retract(usesAsOutput(A,Old)), addAsOutput(New,A)].
-substituteVariable(Old,New,Acts,Actions) :- 
-	member(A,Acts), activity(A), fieldAccess(I,Old,Path), usesAsOutput(A,I),
-	Actions = [retract(fieldAccess(I,Old,Path)), setFieldAcces(I,New,Path)].
+%% substituteVariable(Old,New,Acts,Actions) :- 
+%% 	member(A,Acts), activity(A), usesAsInput(A,Old), 
+%% 	
+%% substituteVariable(Old,New,Acts,Actions) :- 
+%% 	member(A,Acts), activity(A), fieldAccess(I,Old,Path), usesAsInput(A,I),
+%% 	Actions = [retract(fieldAccess(I,Old,Path)), setFieldAcces(I,New,Path)].
+%% substituteVariable(Old,New,Acts,Actions) :- 
+%% 	member(A,Acts), activity(A), usesAsOutput(A,Old), 
+%% 	Actions = [retract(usesAsOutput(A,Old)), addAsOutput(New,A)].
+%% substituteVariable(Old,New,Acts,Actions) :- 
+%% 	member(A,Acts), activity(A), fieldAccess(I,Old,Path), usesAsOutput(A,I),
+%% 	Actions = [retract(fieldAccess(I,Old,Path)), setFieldAcces(I,New,Path)].
 

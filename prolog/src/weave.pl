@@ -24,12 +24,24 @@
 %% Adore Code Weaver %%
 %%%%%%%%%%%%%%%%%%%%%%%
 
-%% to do.
+executeActionSet(Set) :- 
+	elementarize(Set,Actions),
+	execute(Actions).
+
+
+:- dynamic isMacroAction/2.
+shouldBeElementarized(G) :- 
+	functor(G,F,A), Arity is A + 1, isMacroAction(F,Arity).
+
+elementarize([],[]).
+elementarize([H|T],R) :- 
+	shouldBeElementarized(H), !, call(H,A), 
+	elementarize(T,Tmp), append(A,Tmp,R).
+elementarize([H|T],[H|O]) :- elementarize(T,O).
+
+
+execute([]).
+execute([H|T]) :- H, execute(T).
 
 
 
-
-
-
-
-	

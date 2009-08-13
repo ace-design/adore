@@ -33,6 +33,9 @@
 traceRename(Kind, Old, New, Context) :-
 	assert(pebble(rename(Kind), Old, New, Context)).
 
+traceDerivation(Algo,Old,New) :- assert(pebble(derivation,Old,New,Algo)).
+
+%getPreviousName(New,New) :- pebble(derivation, Old, New,_),!.
 getPreviousName(New,Old) :- pebble(_,Old,New,_),!.
 getPreviousName(New,New). %% i.e. there is no pebble to lead us (no renaming).
 
