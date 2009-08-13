@@ -26,33 +26,43 @@ adore_silence(B) :-
 	retractall(adore_silent(_)), assert(adore_silent(B)).
 %% aw means "adore write"
 aw(_) :- adore_silent(true), !.
-aw(M) :- adore_silent(false), write(M).
+aw(M) :- adore_silent(false), write(M), nl.
 
 
 loadFiles :- 
-	aw('%% Loading ADORE kernel'),
-	[debug], [trace], [config],  [metamodel], [actions], [functions], 
+	aw('%%%% Loading Source Kernel'),
+        [debug], [trace], [config],  [metamodel], [actions], [functions], 
 	[conflicts], [helpers], [dependencies], [dataflow], [weave],
-	aw('%% Loading Transformations'),
-	loadTransfo('adore2dot'), loadTransfo('adore2png'), 
+	aw('%%%% Loading Algorithms'),
+        loadAlgo('setify'),
+	aw('%%%% Loading Transformations'),
+        loadTransfo('adore2dot'), loadTransfo('adore2png'), 
 	loadTransfo('adore2dgraph').
 
 
-loadTransfo(Name) :- 
+loadTransfo(Name) :-  
 	string_concat('../transformations/',Name,File),	[File].
 
-header :- 
-	aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
-        aw('%%            ADORE Copyright (C) 2008 - ...           %%'), nl,
-        aw('%%  Activity moDel supOrting oRchestration Evolution   %%'), nl,
-        aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
-        aw('%% Authors: Sebastien Mosser & Mireille Blay-Fornarino %%'), nl,
-        aw('%% Main contact: mosser@polytech.unice.fr              %%'), nl,
-        aw('%% Website:      http://www.adore-design.org           %%'), nl,
-        aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
-        aw('%%  This program comes with ABSOLUTELY NO WARRANTY.    %%'), nl,
-        aw('%%  This is free software, and you are welcome to      %%'), nl,
-        aw('%%  redistribute it under certain conditions.          %%'), nl,
-        aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl.
+loadAlgo(Name) :-  
+	string_concat('../algorithms/',Name,File), [File].
 
-:-  header, loadFiles, performDebugSubscription, make.
+header :- 
+	aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'),
+        aw('%%            ADORE Copyright (C) 2008 - ...           %%'),
+        aw('%%  Activity moDel supOrting oRchestration Evolution   %%'),
+        aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'),
+        aw('%% Authors: Sebastien Mosser & Mireille Blay-Fornarino %%'),
+        aw('%% Main contact: mosser@polytech.unice.fr              %%'),
+        aw('%% Website:      http://www.adore-design.org           %%'),
+        aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'),
+        aw('%%  This program comes with ABSOLUTELY NO WARRANTY.    %%'),
+        aw('%%  This is free software, and you are welcome to      %%'),
+        aw('%%  redistribute it under certain conditions.          %%'),
+        aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%').
+
+:-  header, 
+	aw('%%%%%%%% Loading the ADORE engine ...'),
+	loadFiles, 
+	aw('%%%% Debug Channels Activation'), performDebugSubscription, 
+	aw('%%%% Checking ADORE consistency'), make,
+        aw('%%%%%%%% ADORE engine loaded !').

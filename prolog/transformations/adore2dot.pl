@@ -109,6 +109,8 @@ adore2dot_genFormula(append(V,Vstar),Label) :-
 	adore2dot_genVarLabel(Vstar,VstarLabel),
 	swritef(Label,  "append %w into %w", [Vlabel,VstarLabel]).
 
+adore2dot_genFormula(none,'--').
+
 %%%%
 %% Activities:
 %%%%

@@ -24,11 +24,14 @@
 %% Relations between activities
 %%%%
 
+sameProcess(X,Y) :- isContainedBy(X,P), isContainedBy(Y,P).
+
 %% path/2: path(+A,+B) => a direct path exists between A and B
-path(X,Y) :- waitFor(Y,X).
-path(X,Y) :- isGuardedBy(Y,X,_,_).
-path(X,Y) :- weakWait(Y,X).
-path(X,Y) :- onFailure(Y,X,_).
+path(A,A) :- fail.
+path(X,Y) :- sameProcess(X,Y), waitFor(Y,X).
+path(X,Y) :- sameProcess(X,Y), isGuardedBy(Y,X,_,_).
+path(X,Y) :- sameProcess(X,Y), weakWait(Y,X).
+path(X,Y) :- sameProcess(X,Y), onFailure(Y,X,_).
 
 %% existsPath/2: existsPath(+A,+B) => transitive closure for path
 existsPath(X,Y) :- path(X,Y).
@@ -51,19 +54,41 @@ usesElemAsInput(A,V) :- usesAsInput(A,F), fieldAccess(F,V,_).
 usesElemAsOutput(A,V) :- usesAsOutput(A,V).
 usesElemAsOutput(A,V) :- usesAsOutput(A,F), fieldAccess(F,V,_).
 
+usesElem(A,V) :- usesElemAsInput(A,V).
+usesElem(A,V) :- usesElemAsOutput(A,V).
+
 %%%%
 %% Block Handling
 %%%%
 
-%% TODO: check validity of those rules, looks weird ... :'(
-lastElement(Block,A) :- 
-	activity(A),  member(A,Block), \+ path(A,_).
-lastElement(Block,A) :- 
-	activity(A), member(A,Block),
-	activity(APrime), path(A,APrime), \+ member(APrime,Block).
+getFirstActivitiesOfBlock(Block,Activities) :- 
+	findall(A,isFirstActivity(Block,A),Tmp), sort(Tmp,Activities).
 
-firstElement(Block,A) :- 
-	activity(A),  member(A,Block), \+ path(_,A).
-firstElement(Block,A) :- 
-	activity(A), member(A,Block),
-	activity(APrime), path(APrime,A), \+ member(APrime,Block).
+isFirstActivity(Block,Activity) :- 
+	member(Activity,Block), member(APrime,Block), 
+	\+ path(APrime,Activity).
+isFirstActivity(Block,Activity) :- 
+	member(Activity,Block), path(APrime,Activity), \+ member(APrime,Block).
+
+getLastActivitiesOfBlock(Block,Activities) :- 
+	findall(A,isLastElement(Block,A),Tmp), sort(Tmp,Activities).
+isLastActivity(Block,Activity) :- 
+	member(Activity,Block), member(APrime,Block), 
+	\+ path(Activity,APrime).
+isLastActivity(Block,Activity) :- 
+	member(Activity,Block), path(Activity,APrime), \+ member(APrime,Block). 
+	
+
+
+getBlockInputVariable(Block, Vars) :-
+	findall(V,isBlockInputVariable(Block,V),Tmp),
+	sort(Tmp,Vars).
+isBlockInputVariable(Block,V) :- 
+	isFirstActivity(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
+
+
+getBlockOutputVariable(Block, Vars) :-
+	findall(V,isBlockOutputVariable(Block,V),Tmp),
+	sort(Tmp,Vars).
+isBlockOutputVariable(Block,V) :- 
+	isLastActivity(Block,A), usesElemAsOutput(A,V).
