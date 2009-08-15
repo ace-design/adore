@@ -5,21 +5,41 @@
 orchestration abstractSource::getInfos {
 
   variables {
-    const emptyList* := '' as info;
+    const sourceName := 'abstractSource' as string;
+    const emptyList* := '[]' as info;
     id as string;    
     shouldCall as boolean;
+    space as parameterSpace;
+    param1 as string; param2 as string;
+    raw as struct; info as information;
   }
 
   activities {
     a0. (identifier: id) := receive();
     a1. shouldCall := sourceManager::shouldCall(device: id, 
-         	      				source: 'abstractSource' as string);
+         	      				source: sourceName);
     a2. reply(result: emptyList*);
+    a3. space := sourceManager::getParamSpace(device: id, 
+					      source: sourceName);
+    a41. param1 := extract(space,'param1' as string);
+    a42. param2 := extract(space,'param2' as string);
+    a5. raw := abstractSource::invoke(param1,param2);
+    a6. info := toInfo(raw);
+    a7. reply(info);
   }
 
   relations {
-    a0 << a1;
-    a0 << a1;
+    a0 < a1; 
+    a1 < a2 when ! shouldCall;
+    a1 < a3 when shouldCall;
+    a3 < a41;     a3 < a42;
+    a41 < a5; a42 < a5;
+    a5 < a6;
+    a6 < a7; 
   }
-
 }
+
+%%% DISENGAGE %%%
+doSetify(abstractSource_getInfos,abstractSource_getInfos_raw).
+%doSetify(abstractSource_getInfos,abstractSource_getInfos_space).
+%%% ENGAGE %%%

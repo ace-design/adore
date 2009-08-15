@@ -20,7 +20,7 @@ orchestration helloWorld::sayHello {
   }
   activities {
     a1. name := receive();
-    a2. result := stringConcat(prefix, name);
+    a2. result := stringConcat(prefix, name.foo.bar);
     test. nop(name);
     a3. reply(result);
   }
