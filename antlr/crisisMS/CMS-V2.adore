@@ -57,19 +57,21 @@ orchestration cms::dealWithOneMission {
   variables {
     
     m as mission;
+    user as cmsEmployee;
+    crisisIdentifier as string;
     internalRessource as ressource;
     externalRessource as ressource;
   }
   activities {
-    a0. m := receive();
+    a0. (m,user,crisisIdentifier) := receive();
      //System assigns internal Ressource(s)
-       a4a. internalRessource := getInternalRessources(m);
-       a4a2. cms::assignInternalRessources(internalRessource,m);
-       a4a3. cms::manageRessource(internalRessource,m);
+    a4a. internalRessource := ressourceManager::getInternalRessources(m, user,crisisIdentifier);
+    a4a2. cms::assignInternalRessources(internalRessource,m,user, crisisIdentifier);
+    a4a3. cms::manageRessource(internalRessource,m,user, crisisIdentifier);
       //System requests external Ressources    
-       a5a. externalRessource := getExternallRessources(m);
-       a5a2. cms::assignExternalRessources(externalRessource,m);
-       a5a3. cms::manageRessource(externalRessource,m);  
+    a5a. externalRessource := ressourceManager::getExternallRessources(m,user, crisisIdentifier);
+       a5a2. cms::assignExternalRessources(externalRessource,m,user, crisisIdentifier);
+       a5a3. cms::manageRessource(externalRessource,m,user, crisisIdentifier);  
     a6.reply();
   }
   relations { a0 <a4a ; a4a<a4a2; a4a2<a4a3; a4a3<a6; a0<a5a;a5a<a5a2;a5a2<a5a3;a5a3<a6;}
@@ -159,7 +161,7 @@ orchestration cms::witnessReportCapture {
     a6. reply();
 
   } 
-  relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;} 
+  relations { a0 < a1; a1 < a2; a1<a2a12; a2a12<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;} 
 }
 
 

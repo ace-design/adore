@@ -130,16 +130,19 @@ fragment log  {
 //Comment faire???
 //Je rajouterai bien un signalement de pbme...
 //les nop devraient etre generes
-fragment ressourceAvailabilityDegrated { 
+
+//Perso : Attention je n'ai pas pris tous les arguments dans le hook apriori je n'ai gardé que ceux qui me semblaient utiles... 
+fragment resourceAvailabilityDegrated { 
   variables  {
               b as boolean;
               i as crisisInformation;
-              affectedRessource as ressource;
+              affectedResource as resource;
+               crisisIdentifier as string;
               m as mission; }
   activities {
-    availabilityTest. b :=  ressourceManager::isAvailable(affectedRessource);
-    h.  hook(affectedRessource,m) ; 
-    conta. i := new('crisisInformation' as string, 'ressourceUnavailable' as string,affectedRessource);
+    availabilityTest. b :=  resourceManager::isAvailable(affectedResource);
+    h.  hook(affectedResource,m,crisisIdentifier) ; 
+    conta. i := new('crisisInformation' as string, 'resource unavailable' as string,affectedResource);
     contb. cms::setNewCrisisInformation(i,m);
     xor. nop();
   }
@@ -155,17 +158,19 @@ fragment ressourceAvailabilityDegrated {
 //4a. Internal resource is not available after step 4. 
 //4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5).
 //Il faudrait un delegate qui prenne : ask et ass
-fragment ressourceAvailability { 
+fragment resourceAvailability { 
   variables  {
               b as boolean;
- 	      r as ressource ;
-              affectedRessource as ressource;
+ 	      r as resource ;
+              affectedResource as resource;
+              user as cmsEmployee;
+ crisisIdentifier as string;
               m as mission;}
   activities {
-    availabilityTest. b :=  ressourceManager::isAvailable(affectedRessource);
-    h.  hook(affectedRessource,m) ; 
-    ask. r := ressourceManager::getCorrespondingExternalRessource(affectedRessource);
-    ass. cms::assignExternalRessources(r,m);
+    availabilityTest. b :=  resourceManager::isAvailable(affectedResource);
+    h.  hook(affectedResource,m,user,crisisIdentifier) ; 
+    ask. r := resourceManager::getCorrespondingExternalResource(affectedResource,m,user,crisisIdentifier);
+    ass. cms::assignExternalResources(r,m,user, crisisIdentifier);
     xor. nop();
   }
   relations  { ^ < availabilityTest; availabilityTest<h when b ; h << xor; xor <$; 
@@ -265,7 +270,7 @@ fragment reachableByHelicopter {
   variables  {i as crisisInformation;
               m as mission ;
               unreachable as boolean;
- 	      r as ressource ;
+ 	      r as resource ;
 	      reachableByHelicopter as boolean;}
   activities {
     h. i := hook();
@@ -286,7 +291,7 @@ fragment reachableByHelicopter {
 /*   variables  {s as service; */
 /*               m as mission ; */
 /*               b as boolean; */
-/*  	      r as ressource ; } */
+/*  	      r as resource ; } */
 /*   activities { */
 /*     h. b := hook(); */
 /*     t. throw(error); */
@@ -320,7 +325,7 @@ fragment reachableByHelicopter {
 /*   variables  {s as service; */
 /*               m as mission ; */
 /*               b as boolean; */
-/*  	      r as ressource ; } */
+/*  	      r as resource ; } */
 /*   activities { */
 /*     test. b := cms::otherMissionRequired(); */
 /*     a0. hook; */
@@ -330,6 +335,7 @@ fragment reachableByHelicopter {
 /*   relations  { ^ < test; ^ < a0;a0<$; */
 /*   	      a1< a2 ; }  */
 /* } */
+
 
 
 

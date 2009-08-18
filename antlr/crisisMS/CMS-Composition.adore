@@ -54,6 +54,13 @@ orchestration cms::resolve {
   relations { a0 < a1; a1 < a2; a2<a3; a3<a45 ; a45<a13; a13<a6;}
 }
 
+*/
+/*
+success.
+Extensions:
+1a. Coordinator is not logged in.
+1a.1 Coordinator authenticates with System (UC 10).
+1a.2 Use case continues with step 1.
 
 // apply log => a1;
 // }
@@ -99,9 +106,9 @@ orchestration cms::resolveExt1 {
 
 }
 }
+*/
 
-
-
+/*
 orchestration cms::dealWithOneMission {
   variables {
     
@@ -123,6 +130,7 @@ orchestration cms::dealWithOneMission {
   }
   relations { a0 <a4a ; a4a<a4a2; a4a2<a4a3; a4a3<a6; a0<a5a;a5a<a5a2;a5a2<a5a3;a5a3<a6;}
 }
+*/
 
 //
 //To build the initial scenario
@@ -194,7 +202,7 @@ a4a < availabilityTest1; availabilityTest1<a4a2 when b1 ;
   }
 }
 
-
+*/
 orchestration cms::dealWithOneMissionToSet {
   variables {
     m as mission;
@@ -230,6 +238,7 @@ setIteration(cms_dealWithOneMissionToSet_a5a3,p1),
 
 */
 
+/*
 orchestration cms::dealWithOneMissionToSetExt4a5b {
   variables {
     m as mission;
@@ -299,7 +308,7 @@ orchestration cms::dealWithOneMissionToSetExt4a5b {
 %%% ENGAGE %%% 
 
 
-  
+*/  
 //========================================
 //========================================
 //========================================
@@ -319,7 +328,7 @@ orchestration cms::dealWithOneMissionToSetExt4a5b {
 //5. System assigns an initial emergency level to the crisis and sets the crisis status to active. 
 //Use case ends in success. 
 
-
+/*
 orchestration cms::witnessReportCapture {
   variables {
     wi as witnessInformation;
@@ -347,6 +356,7 @@ orchestration cms::witnessReportCapture {
   relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;} 
 }
 
+*/
 /*
 //from 4.2.2
 //1a,2a. The call is disconnected. The base use case terminates. 
