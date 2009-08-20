@@ -20,23 +20,16 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%% We leave 'pebbles' after us (cf 'Le petit poucet' and his 'petits cailloux').
-:- dynamic pebble/4.
+%%%%%%
+%% Related publication: 
+%%  Sébastien Mosser, Mireille Blay-Fornarino, Michel Riveill. 
+%%  "Web Services Orchestration Evolution : 
+%%   A Merge Process For Behavioral Evolution" (long paper ) 
+%%  in Proceedings of the 2nd European Conference on 
+%%     Software Architecture (ECSA'08), Acceptation Rate: 14 %, 
+%%  Springer LNCS, Paphos, Cyprus, 29 sep - 1 oct 2008
+%%  http://rainbow.polytech.unice.fr/publis/mosser-blay-fornarino-etal:2008b.pdf
+%%%%%%
 
-
-%%%%%% traceRename/4: traceRename(K,O,N,C)
-%%  -> K: pick one from  activity|variable|constant
-%%  -> O: old name
-%%  -> N: new name
-%%  -> C: context of renaming (compile, duplication, merge).
-
-traceRename(Kind, Old, New, Context) :-
-	assert(pebble(rename(Kind), Old, New, Context)).
-
-traceDerivation(Algo,Old,New) :- assert(pebble(derivation,Old,New,Algo)).
-
-
-%getPreviousName(New,New) :- pebble(derivation, Old, New,_),!.
-getPreviousName(New,Old) :- pebble(_,Old,New,_),!.
-getPreviousName(New,New). %% i.e. there is no pebble to lead us (no renaming).
+%% to do: port old algorithm into the new formalism
 

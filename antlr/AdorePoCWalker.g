@@ -39,6 +39,13 @@ import java.io.*;
     if(null != source)
       target.addAll(source);
   }
+  
+  private ArrayList<String> compiled = new ArrayList<String>();
+  public void setCompiled(ArrayList<String> l) {this.compiled = l; }
+  public ArrayList<String> getCompiled() { return this.compiled; }
+  private boolean stillCompiled(String file) {
+    return this.compiled.indexOf(file) != -1;
+  }
 
   private void trace(ArrayList<String> facts,String o, String n, String kind, String cxt) {
   	String f = "traceRename(" + kind + "," + o + "," + n + ",compile("+cxt+"))";
@@ -79,19 +86,22 @@ import java.io.*;
   
 definitions returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	:	^(DEFINITIONS 	( definition 		{ $facts.addAll($definition.facts); })+
-		)
-				
+	:	^(DEFINITIONS 	( definition	{ $facts.addAll($definition.facts); })+
+		)		
 	;
 
 definition returns [ArrayList<String> facts]
 	@init{ $facts = new ArrayList<String>(); }
-	: ^(DEF ^(REQUIRE f=STR)) 		{ Compiler c = new Compiler();
-						  try {
-		 				    safeAdd($facts,c.run($f.text.substring(1,$f.text.length()-1)));
-		 				  } catch(Exception e) {
-		 				    System.err.println("\%\% " + e);
-		 				  }
+	: ^(DEF ^(REQUIRE f=STR)) 		{ //System.err.println($f +" " + compiled);
+						  
+						  if (stillCompiled($f.text))
+						    return $facts;
+						  Compiler c = new Compiler(); c.setCompiled(compiled);
+						   try {
+		 				     safeAdd($facts,c.run($f.text.substring(1,$f.text.length()-1)));
+		 				   } catch(Exception e) {
+		 				     System.err.println("\%\% " + e);
+		 				   }
 						} 
 	| ^(DEF ^(ORCHESTRATION s=ID o=ID) core[$s+"_"+$o])	
 						{ String name = $s.text + "_" + $o.text;

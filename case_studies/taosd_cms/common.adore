@@ -1,0 +1,14 @@
+
+fragment mustAuthenticate {
+  variables { u as cmsEmployee; still as boolean; auth as boolean; }
+  activities {
+    a1. still :=  cms::isAuthentified(u);
+    h. hook(u);
+    a2. auth := cms::authUser(u);
+    t. throw('BadAuthentification' as string);
+  }
+  relations {
+    ^ < a1; a1 < h when still; h < $; a1 < a2 when ! still; 
+    a2 < h when auth; a2 < t when ! auth;
+  }
+}

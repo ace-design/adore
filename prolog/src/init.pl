@@ -32,10 +32,10 @@ aw(M) :- adore_silent(false), write(M), nl.
 loadFiles :- 
 	aw('%%%% Loading Source Kernel'),
         [debug], [trace], [config],  [metamodel], [actions], [functions], 
-	[conflicts], [helpers], [dependencies], [dataflow], [weave], 
+	[conflicts], [helpers], [dependencies], [dataflow], [engine], 
 	[substitution],
 	aw('%%%% Loading Algorithms'),
-        loadAlgo('setify'),
+        loadAlgo('setify'), loadAlgo('weave'),
 	aw('%%%% Loading Transformations'),
         loadTransfo('adore2dot'), loadTransfo('adore2png'), 
 	loadTransfo('adore2dgraph').

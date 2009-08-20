@@ -1,0 +1,84 @@
+orchestration cms::handleAMission {
+  variables {
+    crisis as crisisIdentifier;
+    m as mission;      coord as cmsEmployee;
+    ir as resource; er as resource;
+    iw as cmsEmployee; ew as externalWorker;
+    irep as report; erep as report;
+  }
+  activities {
+    rcv. (crisis, m) := receive();
+    a90. coord := cms::getCoord(crisis);
+    a91. ui::actListener('status' as string,coord,m); 
+    a40. ir := get(m,'intResource' as string);
+    a41. iw := cms::assignIntRes(ir,crisis,m);
+    a4x. irep := cms::handleAWorker(crisis,iw, m);
+    a50. er := get(m,'extResource' as string);
+    a51. ew := cms::requestExtRes(er,crisis,m);
+    a5x. erep := cms::handleAWorker(crisis, ew, m);
+    rpl. reply();
+    a90bis. ui::stopListener('status' as string,coord,m); 
+  }
+  relations { 
+    rcv < a40; rcv < a50;
+    a40 < a41; a41 < a4x;
+    a50 < a51; a51 < a5x;
+    a4x < rpl; a5x < rpl;
+    rcv < a90; a90 < a91; a91 < rpl; rpl < a90bis;
+  }
+}
+
+fragment unavailableIntResource {
+  variables {
+    c as boolean;
+    res as resource; worker as worker;
+    crisis as crisisIdentifier; m as mission;
+  }
+  activities {
+    h. worker := hook(res,crisis,m);
+    a1. msgBus::send('unavailable' as string, worker,crisis);
+    a2. worker := cms::requestExtRes(res,crisis,m);
+  }
+  relations {
+    ^ < h; h < $; fail(h,'unavailable') < a1; a1 < a2; a2 < $;
+  }
+}
+
+fragment unavailableExtResource {
+  variables {
+    c as boolean;
+    res as resource; worker as worker;
+    crisis as crisisIdentifier; m as mission;
+  }
+  activities {
+    h. worker := hook(res,crisis,m);
+    a1. msgBus::send('unavailable' as string, worker,crisis);
+    a2. cms::handleCrisis(crisis);
+    a3. reply();
+  }
+  relations {
+    ^ < h; h < $; fail(h,'unavailable') < a1; a1 < a2; a2 < a3;
+  }
+}
+
+fragment missionChangeRequired<crisis> {
+  variables {
+    m as mission; 
+    crisis as crisisIdentifier;
+  }
+  activities {
+    h. hook(m);
+    a1. msgBus::wait4msg('change' as string,m,crisis);
+    a2. cms::handleACrisis(crisis);
+  }
+  relations {
+    ^ < h; h < $; h < a1; a1 < a2; 
+  }
+}
+
+composition cms::handleAMission {
+  toSet ir; toSet er;                  // Main success scenario
+  apply unavailableIntResource                  => a41; // Ext 4a.
+  apply unavailableExtResource                  => a51; // Ext 5a.
+  apply missionChangeRequired(crisis: 'crisis') => a91; // Ext 9a.
+}

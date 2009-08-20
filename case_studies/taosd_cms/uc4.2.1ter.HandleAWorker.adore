@@ -1,0 +1,124 @@
+orchestration cms::handleAWorker {
+  variables {
+    crisis as crisisIdentifier;
+    w as worker; r as report; m as mission;
+  }
+  activities {
+    rcv. (crisis,w,m) := receive();
+    a6. msgBus::wait4Msg('arrived' as string, w, crisis);
+    a7. cms::executeMission(m,w);
+    a8. msgBus::wait4Msg('leaving' as string, w);
+    a100. ui::actListener('info' as string, w, crisis);
+    a101. ui::actListener('mission' as string, w, crisis);
+    a11. r := ui::askForReport(w);
+    rpl. reply(r);
+    a100bis. ui::stopListener('info' as string, w, crisis);
+    a101bis. ui::stopListener('mission' as string, w, crisis);
+  }
+  relations {
+    rcv < a6; a6 < a7; a7 < a8; a8 < a11; 
+    rcv < a100; a100 < a101; a101 < a11;
+    a11 < rpl; a11 < a100bis; a100bis < a101bis; 
+  }
+}
+
+fragment useHelicopter<m> {
+  variables {
+    w as worker;   c as crisisIdentifier;
+    r as boolean;   m as mission;
+  }
+  activities {
+    a1. r := cms::helicopterRequired(m);
+    h. hook(w,c);
+    a2. cms::transportByHelicopter(w,c);
+  }
+  relations {
+    ^ < a1; a1 < h when r;  a1 < a2 when !r;
+    a2 < h; h < $;
+  }
+}
+
+fragment lostContact<action> {
+  variables {
+    c as crisisIdentifier; w as worker;
+    super as cmsEmployee;
+  }
+  activities {
+    a1. msg::wait4Msg('lost' as string, w,c);
+    a2. super := cms::getSuperObserver(c);
+    a3. ui::action(super,w);
+    h. hook(w,c);
+  }
+  relations { ^ < a1; ^ < h; h << $; a1 < a2; a2 < a3; a3 << $; }
+}
+
+fragment timeout<delay,action> {
+  variables {
+    w as worker; delay as integer;
+    const true := 'true' as boolean;
+    const false := 'false' as boolean;    
+    c as boolean; expired as boolean;
+    r as report;
+  }
+  activities {
+    a0. expired := false;
+    h. hook(w);
+    a1. stopwatch::sleep(delay);
+    a2. expired := true;
+    a3. c := isTrue(expired);
+    a4. ui::action(w);
+    a5. r := self::self();
+    a6. reply(r);
+  }
+  relations {
+    ^ < a0; a0 < h; a0 < a1; a1 < a2; h << a3; a2 << a3;
+    a3 < a4 when c; a4 < a5; a5 < a6; a3 < $ when !c;
+  }
+}
+
+fragment extraMissionsRequired<crisis> {
+  variables {
+    m as mission; crisis as crisisIdentifier;
+  }
+  activities {
+    h. hook(m);
+    a1. msgBus::wait4msg('extra' as string, m,crisis);
+    a2. cms::handleCrisis(crisis);
+  }
+  relations {
+    ^ < h; ^ < a1; h < $; a1 < a2; 
+  }
+}
+
+fragment missionFailed<crisis> {
+  variables {
+    m as mission; crisis as crisisIdentifier;
+  }
+  activities { 
+    h. hook(m);
+    a1. msgBus::send('failed' as string, m, crisis);
+    a2. cms::handleCrisis(crisis);
+    a3. reply();
+  }
+  relations { ^ < h; h < $; fail(h,'failed') < a1; a1 < a2; a2 < a3; }
+}
+
+fragment missingReport {
+  variables { r as report; w as worker; }
+  activities {
+    h. r := hook(w);
+    a1. r := id('null' as report);
+  }
+  relations { ^ < h; fail(h) < a1; h << $; a1 << $; }
+}
+
+composition cms::handleAWorker {
+  apply useHelicopter(m: 'm')                               => a6; // Ext 6a.
+  apply lostContact(action: 'requestForArrival')            => a6; // Ext 6b.
+  apply timeout(delay: 'm.delay',action: 'updateLocation')  => a6; // Ext 6c.
+  apply extraMissionsRequired(crisis: 'crisis')             => a7; // Ext 7a.
+  apply missionFailed(crisis: 'crisis')                     => a7; // Ext 7b.
+  apply lostContact(action: 'requestForDeparture')          => a8; // Ext 8a.
+  // Ext 8b. can't be performed without a huge set of change in the wf
+  apply missingReport                                       => a11; // Ext 11a. 
+}

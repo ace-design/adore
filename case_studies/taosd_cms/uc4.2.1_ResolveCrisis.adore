@@ -1,0 +1,45 @@
+require 'uc4.2.1bis.HandleAMission.adore' ;
+require 'uc4.2.1ter.HandleAWorker.adore' ;
+require 'uc4.2.1quater.HandleACrisis.adore';
+require 'common.adore';
+
+orchestration cms::resolveCrisis {
+  variables {
+    id as crisisIdentifier; coord as cmsEmployee;
+    m* as mission; choosen as mission;
+  }
+  activities {
+    rcv. (coord, id) := receive();
+    a1. ui::captureWitnessReport(coord,id);
+    a12. ui::actListener('info' as string,coord,id);
+    aX. cms::handleACrisis(id);
+    a13. ui::validateClose(coord,id);
+    rpl. reply();
+    a12bis. ui::stopListener('info' as string,coord,id);
+  }
+  relations { 
+    rcv < a1; rcv < a12;
+    a1 < aX; aX < a13; a12 < a13;
+    a13 < rpl; a13 < a12bis;
+  }
+}
+
+fragment crisisChange<crisis> {
+  variables {
+    crisis as crisisIdentifier;
+    coord as cmsEmployee;
+  }
+  activities {
+    h. hook(coord);
+    a1. msgBus::wait4msg('change' as string,coord,crisis);
+    a2. cms::handleACrisis(crisis);
+  }
+  relations {
+    ^ < h; h < $; h < a1; a1 < a2; 
+  }
+}
+
+composition cms::resolveCrisis {
+  apply mustAuthenticate => a1  ; // Ext 1a;
+  apply crisisChange     => a12 ; // Ext 12a.
+}

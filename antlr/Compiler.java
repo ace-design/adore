@@ -30,22 +30,31 @@ import java.util.ArrayList;
 
 public class Compiler {
 
-    private boolean debug = false;
-
     public ArrayList<String> run(File f) throws Exception {	
 	return this.run(f.getAbsolutePath());
     }
 
     public ArrayList<String> run(String path) throws Exception {	
+	return this.run(path,new ArrayList<String>());
+    }
+
+    public ArrayList<String> run(String path, ArrayList<String> done) 
+	throws Exception {	
 	CommonTree ast = getAST(new FileReader(path));
+	compiled.addAll(done); compiled.add("'"+path+"'");
 	if(debug)
 	    System.err.println(ast.toStringTree());
 	return processAST(ast);
     }
 
+    /** Debug purpose **/
+    private boolean debug = false;
     public void debug() { this.debug = true; }
-    
 
+    /** require once (do not compiled something still compiled ...) **/
+    private ArrayList<String> compiled = new ArrayList<String>();
+    public void setCompiled(ArrayList<String> l) { compiled = l; }
+    
     /************************************************
      * Private Lexer , Parser & Walker manipulation *
      * You really do not want to know ...           *
@@ -65,7 +74,10 @@ public class Compiler {
 
     private ArrayList<String> processAST(CommonTree ast) throws Exception {
         AdorePoCWalker w = new AdorePoCWalker(new CommonTreeNodeStream(ast));
-        return w.definitions(); 
+	w.setCompiled(this.compiled);
+	ArrayList<String> result = w.definitions(); 
+	this.compiled = w.getCompiled();
+        return result;
     }
 
 }

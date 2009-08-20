@@ -20,6 +20,17 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+%%%%%%
+%% Related publication: 
+%%  Sébastien Mosser, Mireille Blay-Fornarino, Johan Montagnat. 
+%%  "Orchestration Evolution Following Dataflow Concepts: 
+%%   Introducing Unanticipated Loops Inside a Legacy Workflow" (long paper) 
+%%  in Proceedings of the International Conference on Internet 
+%%     and Web Applications and Services (ICIW), Acceptation Rate: 28 %,
+%%  IEEE Computer Society, Venice, Italy, 24-18 may 2009
+%%  http://rainbow.polytech.unice.fr/publis/mosser-blay-fornarino-etal:2009.pdf
+%%%%%%
+
 %%% 'setification' algorithm
 
 doSetify(P,V) :-

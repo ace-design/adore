@@ -53,8 +53,12 @@ usesElemAsInput(A,V) :- usesAsInput(A,F), fieldAccess(F,V,_).
 usesElemAsOutput(A,V) :- usesAsOutput(A,V).
 usesElemAsOutput(A,V) :- usesAsOutput(A,F), fieldAccess(F,V,_).
 
+%% usesElem(?A,?V): A uses V as input or output
 usesElem(A,V) :- usesElemAsInput(A,V).
 usesElem(A,V) :- usesElemAsOutput(A,V).
+
+usedByProcess(P,V) :- 
+	isContainedBy(A,P), activity(A), usesElem(A,V).
 
 %%%%
 %% Block Handling
@@ -73,16 +77,12 @@ isLastActivity(Block,Activity) :-
 	member(Activity,Block),	\+ path(Activity,_).
 isLastActivity(Block,Activity) :- 
 	member(Activity,Block), path(Activity,APrime), \+ member(APrime,Block). 
-	
-
-% isLastActivity([cms_dealWithOneMissionToSetExt4a5b_a4a2, cms_dealWithOneMissionToSetExt4a5b_a4a3, cms_dealWithOneMissionToSetExt4a5b_ask1, cms_dealWithOneMissionToSetExt4a5b_ass1, cms_dealWithOneMissionToSetExt4a5b_availabilityTest1],A).
 
 getBlockInputVariable(Block, Vars) :-
 	findall(V,isBlockInputVariable(Block,V),Tmp),
 	sort(Tmp,Vars).
 isBlockInputVariable(Block,V) :- 
 	isFirstActivity(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
-
 
 getBlockOutputVariable(Block, Vars) :-
 	findall(V,isBlockOutputVariable(Block,V),Tmp),

@@ -20,23 +20,30 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%% We leave 'pebbles' after us (cf 'Le petit poucet' and his 'petits cailloux').
-:- dynamic pebble/4.
+%% Weave Algorithm
 
 
-%%%%%% traceRename/4: traceRename(K,O,N,C)
-%%  -> K: pick one from  activity|variable|constant
-%%  -> O: old name
-%%  -> N: new name
-%%  -> C: context of renaming (compile, duplication, merge).
-
-traceRename(Kind, Old, New, Context) :-
-	assert(pebble(rename(Kind), Old, New, Context)).
-
-traceDerivation(Algo,Old,New) :- assert(pebble(derivation,Old,New,Algo)).
+%doWeave(P,V,B) :- 
+%	weave(P,V,B,Actions),
+%	executeActionSet(Actions).
 
 
-%getPreviousName(New,New) :- pebble(derivation, Old, New,_),!.
-getPreviousName(New,Old) :- pebble(_,Old,New,_),!.
-getPreviousName(New,New). %% i.e. there is no pebble to lead us (no renaming).
+%%%%
+%% Weave Algorithm
+%%%%
+
+%% weave(Fragment, Process, Binding, Actions) :- 
+%% 	process(Process), isFragment(Fragment), 
+%% 	flatten([],Actions).
+
+
+%% addVariables(F,Actions) :- 
+%% 	usedByProcess(F,V),
+%% 	gensym(v,Name),
+	
+
+
+
+
+
 
