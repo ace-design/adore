@@ -1,0 +1,93 @@
+orchestration cms::captureWitnessReport {
+  variables {
+    id as crisisIdentifier; coord as cmsEmployee;
+    wi as witness; i as preliminaryInformation;
+    ccl as crisisCheckList; ci as crisisInformation;
+    pi as phoneInformation;
+  }
+  activities {
+    rcv. (coord, id) := receive();
+    a10. wi := ui::promptWitnessInfo(coord);
+    a11. cms::setWitness(wi,id);
+    a2. i := ui::promptPrelimInfo(coord);
+    a2a12. pi := phoneCie::getInfo(wi.id);
+    a2a3. cms::validateWitnessInfo(wi,pi);
+    a3. ccl := cms::buildCheckList(i);
+    a4. ci := ui::promptCrisisInfo(coord,ccl);
+    a50. cms::assignEmergencyLvl(id,ci);
+    a51. msgBus::sendMsg('active' as string,coord,id);
+    rpl. reply();
+  }
+  relations {
+    rcv < a10; a10 < a11; a10 < a2; a2 < a3; a3 < a4; a4 < a50; 
+    a50 < rpl; a10 < a2a12; a2a12 < a2a3; a2a3 < a50; a50 < a51;
+  }
+}
+
+fragment callDisconected {
+  variables {}
+  activities { h. hook(); thr. throw('lostWitnessContact' as string); }
+  relations { ^ < h; h < $; fail(h,'disconnected') < thr; }
+}
+
+fragment ignoreDisconnection {
+  variables {}
+  activities { h. hook(); }
+  relations { ^ < h; h < $; fail(h,'disconnected') < $; }
+}
+
+fragment requestVideo<user> {
+  variables {
+    c as boolean; info as preliminaryInformation;
+    user as cmsEmployee; feedId as videoFeedIdentifier;
+  }
+  activities {
+    t. c := survSys::canCover(info.loc);
+    h. hook(info);
+    a12. feedId := survSys::activateVideo(info.loc);
+    a30. ui::displayVideoFeed(user, feedId); 
+    a31. ui::shutdownVideoFeed(user, feedId);
+  }
+  relations {
+    ^ < t; t < h when ! c; t < a12 when c; a12 < a30 ; a30 < h; h < $; h < a31;
+  }
+}
+
+fragment fakeWitnessInfo {
+  variables {
+    witInfo as witness; phInfo as phoneInformation;
+    isValid as boolean;
+  }
+  activities {
+    h. isValid := hook(witInfo,phInfo); 
+    thr. throw('fakeWitnessInformation' as string);
+  }
+  relations {
+    ^ < h; h < $ when isValid; h < thr when ! isValid;
+  }
+}
+
+fragment fakeCrisisDetected {
+  variables {
+    user as cmsEmployee; isReal as boolean;
+  }
+  activities {
+    h. hook(user);
+    t. isReal := ui::prompt4RealCrisis(user);
+    thr. throw('fakeCrisis' as string);
+  }
+  relations {
+    ^ < h; h < t; t < $ when isReal; t < thr when ! isReal; 
+  }
+}
+
+
+composition cms::captureWitnessReport{
+  apply callDisconnected            => a10;     // Ext 1a.
+  apply callDisconnected            => a2;      // Ext 2a. 
+  apply requestVideo(user: 'coord') => {a3,a4}; // Ext 3a.
+  apply ignoreDisconnection         => a4;      // Ext 4a.
+  apply fakeWitnessInfo             => a2a3;    // Ext 5a. (Rq: too weird on a5 :S )
+  apply fakeCrisisDetected          => a4;      // Ext 5b. (Rq: too weird on a5 :S )
+  apply fakeCrisisDetected          => requestVideo::a30; // Ext 5b. impacts Ext 3a.
+}

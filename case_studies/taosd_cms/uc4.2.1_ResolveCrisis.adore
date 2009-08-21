@@ -10,7 +10,7 @@ orchestration cms::resolveCrisis {
   }
   activities {
     rcv. (coord, id) := receive();
-    a1. ui::captureWitnessReport(coord,id);
+    a1. cms::captureWitnessReport(coord,id);
     a12. ui::actListener('info' as string,coord,id);
     aX. cms::handleACrisis(id);
     a13. ui::validateClose(coord,id);

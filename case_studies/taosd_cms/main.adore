@@ -1,10 +1,9 @@
 // TAOSD main file
 
 require 'common.adore';
+
 require 'uc4.2.1_ResolveCrisis.adore';
-require 'uc4.2.1bis.HandleAMission.adore';
-require 'uc4.2.1ter.HandleAWorker.adore';
-require 'uc4.2.1quater.HandleACrisis.adore';
+require 'uc4.2.2_CaptureWitnessReport.adore';
 require 'uc4.2.10_AuthenticateUser.adore';
 
 
