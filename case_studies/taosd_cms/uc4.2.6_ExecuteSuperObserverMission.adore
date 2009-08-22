@@ -1,0 +1,91 @@
+orchestration cms::execSupObsMission {
+  variables {
+    so as cmsEmployee; crisis as crisisIdentifier; m* as mission; 
+    ccl as crisisCheckList;;
+  }
+  activities {
+    rcv. (so,crisis) := receive();
+    a1. ccl := cms::buildCrisisCheckList(crisis);
+    a2. ui::promptCheckList(so,ccl);
+    a3. m* := cms::recommendSupObsMission(crisis);
+    aX cms::handleSupObsMissions(m*,so,crisis);
+    rpl. reply();
+  }
+  relations { rcv < a1; a1 < a2; a2 < a3; a3 < aX; aX < rpl; }
+}
+
+orchestration cms::handleSupObsMissions {
+  variables {
+    so as cmsEmployee; crisis as crisisIdentifier; m* as mission; 
+    choosen as mission; mr as misisonRequest; mi as missionInformation;
+    ack as boolean; quit as boolean;
+  }
+  activities {
+    rcv. (m*, so, crisis) := receive();
+    a4. choosen := ui::selectMission(so,m*);
+    a5. mr := cms::buildMissionRequest(choosen);
+    a6. mi := ui::promptMissionRequest(mr);
+    a7. ack := cms::submitMission(mi);
+    a8. msgBus::wait4Msg('status' as string, 'success' as string, mi);
+    t. quit := ui::prompt4departure(so);
+    a91. m* := cms::recommendSupObsMission(crisis);
+    a92. cms::handleSupObsMissions(m*, so, crisis);
+    rpl. reply();
+    a93. msgBus::send('info' as string, 'leaving' as string,so);
+  }
+  relations {
+    rcv < a4; a4 < a5; a5 < a6; a6 < a7; a7 < a8; a7 < t;
+    t < rpl when quit; t < a91 when ! quit; a91 < a92; a92 < rpl;
+    rpl < a93; a8 < rpl;
+  }
+}
+
+fragment replaceMission {
+  variables {
+    mi as missionInformation; ack as boolean;
+    subst* as mission;
+  }
+  activities {
+    h. ack := hook(mi);
+    a1. subst* := cms::findEquivalentMissions(mi);
+    a2. self::self(subst*); 
+    a3. reply();
+  }
+  relations { ^ < h; h < $ when ack; h < a1 when !ack; a1 < a2; a2 < a3; }
+}
+
+fragment noAvailableReplacement<user> {
+  variables {
+    mi as missionInformation; m* as mission;
+    empty as boolean; user as cmsEmployee; c as boolean;
+  }
+  activities {
+    h. m* := hook();
+    t. c := isEmptySet(m*);
+    a1. ui::promptNotifyNtlCrisisCtr(user);
+  }
+  relations { ^ < h; h < t; t < $ when !c; t < a1 when c; a1 < $; }
+} 
+
+fragment askedMissionFailure {
+  variables {
+    mi as mission; subst* as mission*;
+  }
+  activities {
+    h. hook(mi);
+    a1. msgBus::wait4Msg('status' as string, 'fail' as string, mi);
+    a2. subst* := cms::findEquivalentMissions(mi);
+    a3. self::self(subst*); 
+    // a4. reply();
+  }
+  relations {
+    ^ < h; h << $;  
+    ^ < a1; a1 < a2; a2 < a3; a3 << $; // a3 < a4; 
+  }
+} 
+
+composition cms::handleSupObsMissions {
+  apply replaceMission         => a7;
+  apply noAvailableReplacement => replaceMission::a1;
+  apply askedMissionFailure    => a8;
+}
