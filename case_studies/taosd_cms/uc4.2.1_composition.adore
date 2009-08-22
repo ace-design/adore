@@ -1,0 +1,33 @@
+require 'uc4.2.1bis.HandleAMission.adore' ;
+require 'uc4.2.1ter.HandleAWorker.adore' ;
+require 'uc4.2.1quater.HandleACrisis.adore';
+require 'common.adore';
+
+orchestration cms::finalResolveCrisis {
+  variables {
+    id as crisisIdentifier; coord as cmsEmployee;
+    m* as mission; choosen as mission;
+
+   still as boolean; auth as boolean;
+  }
+  activities {
+    rcv. (coord, id) := receive();
+    a1. cms::captureWitnessReport(coord,id);
+    a12. ui::actListener(coord, id, 'info' as string);
+    aX. cms::handleACrisis(coord,id);
+    a13. ui::validateClose(coord,id);
+    rpl. reply();
+    a12bis. ui::stopListener(coord, id, 'info' as string);
+
+    a1Auth. still :=  cms::isAuthentified(coord);
+    a2Auth. auth := cms::authUser(coord);
+    tAuth. throw('BadAuthentification' as string);
+
+  }
+  relations { 
+    rcv < a1; a1 < a12; a12 < aX; aX < a13; a13 < rpl; a13 < a12bis;
+
+    rcv < a1Auth; a1Auth < a1 when still; a1Auth < a2Auth when ! still; 
+    a2Auth < a1 when auth; a2Auth < tAuth when ! auth;
+  }
+}
