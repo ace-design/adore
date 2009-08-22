@@ -1,0 +1,42 @@
+/*
+
+//estce normal de passer au suivant sans attendre le signal au niveau du bus?
+//sacrement inversé... on lui demande s'il envoie des choses correctes.. pas grave
+
+//
+
+composition cms::requestExtRes {
+  apply degradedRes(treshold: '80') => a2; // Ext 2a.
+  apply noExtRes                    => a2; // Ext 2b.
+}
+
+ */
+orchestration cms::requestExtRes {
+  variables {
+    res as resource; w as worker;
+    m as mission; 
+    cx as ersConnexion;
+
+   dR_deg as boolean; 
+    dR_lvl as integer; 
+  }
+  activities {
+    rcv. (res,m) := receive();
+    a1. cx := ers::submitMissionDetails(m);
+    a2. w := ers::providesWorker(cx,res);
+    rpl. reply(w);
+
+    dR_a1. dR_lvl := ers::getLoadLevel(cx);
+    dR_t. dR_deg := isGreaterThan(dR_lvl,'80' as integer);
+    dR_a2. msgBus::send('info' as string, 'degraded' as string,w);
+
+    nER_a1. msgBus::send('info' as string, 'noSuchResource' as string,res);
+    nER_thr. throw('unavailable' as string);
+  }
+  relations { rcv < a1; a1 < a2; a2 < rpl; 
+
+    a2 < dR_a1; dR_a1 < dR_t; dR_t < dR_a2 when dR_deg;
+
+    fail(a2,'noResource') < nER_a1; nER_a1 < nER_thr; 
+}
+}

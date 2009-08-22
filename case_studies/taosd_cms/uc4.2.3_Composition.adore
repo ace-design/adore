@@ -1,0 +1,106 @@
+/*
+Pbme sur unavailableEmployee avec le delta.. que faut il faire?
+
+
+Result from : 
+
+composition cms::assignIntRes {
+  apply mustAuthenticate      => a1;      // Ext 1a.
+  apply unavailableEmployee => {a1,a2}; // Ext 1b.
+  apply employeeRefusal       => a2;      // Ext 2a.
+}
+}
+*/
+
+orchestration cms::assignIntRes {
+  variables {
+    e as cmsEmployee; m as mission; accept as boolean;
+    mA_still as boolean; mA_auth as boolean;
+
+    const uE_true := 'true' as boolean; const uE_false := 'false' as boolean;
+    const uE_delta := '10' as integer;  uE_expired as boolean; uE_c as boolean;
+     uE_subst as cmsEmployee; uE_r as boolean; 
+
+     eR_subst as cmsEmployee; 
+    eR_r as boolean;
+  }
+  activities {
+    rcv. (e,m) := receive();
+    a1. ui::sendMissionInfo(e,m);
+    a2. accept := ui::wait4Acceptance(e,m);
+    rpl. reply();
+
+    mA_a1. mA_still :=  cms::isAuthentified(e);
+    mA_a2. mA_auth := cms::authUser(e);
+    mA_t. throw('BadAuthentification' as string);
+
+    uE_a0. uE_expired := uE_false;
+    uE_a1. stopwatch::sleep(uE_delta);
+    uE_a2. uE_expired := uE_true ;
+    uE_a3. uE_c := isTrue(uE_expired);
+    uE_a4. msgBus::send('status' as string, 'unresponsive' as string,e); 
+    uE_a5. uE_subst := cms::findSubstitute(e);
+    uE_a6. uE_r := self::self(uE_subst,m);
+    uE_rpl. reply(uE_r);
+    uE_thr. throw('unavailable' as string);
+
+
+    eR_a1. msgBus::send('info' as string, 'refusal' as string,e); 
+    eR_a2. eR_subst := cms::findSubstitute(e);
+    eR_a3. eR_r := self::self(eR_subst,m);
+    eR_rpl. reply(eR_r);
+    eR_thr. throw('unavailable' as string);
+  }
+  relations { //rcv < a1; 
+    a1 < a2; //a2 < rpl;
+
+    rcv < mA_a1; mA_a1 < a1 when mA_still; mA_a1 < mA_a2 when ! mA_still; 
+    mA_a2 < a1 when mA_auth; mA_a2 < mA_t when ! mA_auth;
+
+   rcv < uE_a0;uE_a0 < a1; a2 << uE_a3; uE_a0 < uE_a1; uE_a1 < uE_a2; uE_a2 << uE_a3;
+    uE_a3 < uE_a4 when uE_c; uE_a3 < uE_a5 when uE_c; uE_a3 < rpl when !uE_c;
+    uE_a5 < uE_a6; uE_a6 < uE_rpl; fail(uE_a5,'noSubstituteFound') < uE_thr;
+
+
+    a2 < rpl when accept;
+    a2 < eR_a1 when ! accept; eR_a1 < eR_a2;eR_a2 < eR_a3; eR_a3 < eR_rpl; 
+    fail(eR_a2,'noSubstituteFound') < eR_thr;
+ }
+}
+
+
+
+
+
+/*
+fragment unavailableEmployee {
+  variables {
+    const uE_true := 'true' as boolean; const uE_false := 'false' as boolean;
+    const uE_delta := '10' as integer;  uE_expired as boolean; uE_c as boolean;
+    e as cmsEmployee; uE_subst as cmsEmployee; uE_r as boolean; m as mission;
+  }
+  activities {
+    uE_a0. uE_expired := false;
+    h. hook(e,m);
+    uE_a1. stopwatch::sleep(uE_delta);
+    uE_a2. uE_expired := true ;
+    uE_a3. uE_c := isTrue(uE_expired);
+    uE_a4. msgBus::send('status' as string, 'unresponsive' as string,e); 
+    uE_a5. uE_subst := cms::findSubstitute(e);
+    uE_a6. uE_r := self::self(uE_subst,m);
+    uE_rpl. reply(uE_r);
+    uE_thr. throw('unavailable' as string);
+  }
+  relations {
+    ^ < uE_a0;uE_a0 < h; h << uE_a3; uE_a0 < uE_a1; uE_a1 < uE_a2; uE_a2 << uE_a3;
+    uE_a3 < uE_a4 when uE_c; uE_a3 < uE_a5 when uE_c; uE_a3 < $ when !uE_c;
+    uE_a5 < uE_a6; uE_a6 < uE_rpl; fail(uE_a5,'noSubstituteFound') < uE_thr;
+  }
+}
+*/
+
+
+
+
+
+

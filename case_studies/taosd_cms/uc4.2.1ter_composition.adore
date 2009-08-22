@@ -1,0 +1,156 @@
+/*
+Result from : 
+
+=> a priori j'au eu u pme de hook signature sur useHelicopter
+
+=> idem sur lost il manque la crise la rajouter en <...>
+
+=> Pas fait rehandleOnChange
+
+=> dans missionFailed là tu avais la crise en parametre et on pouvait ne pas la rendre generique
+par contre tu introduis un reply sans valeur de retour alors que tous les autres ont une valeur de retour ==> est-ce un conflit? ne dervait-on pas lui en demander un.. mais comme ils ne l'ont pas dit... on leve un warning?
+
+=> avec le 2ieme lost on claucle deux fois le superobserver alors qu'une seule fois aurait suffi.... indetectable? sauf à chercher des actvités équivalentes dans le flot.. à mettre dans limite avec ref aux publis de clem
+
+
+==> extramission semble avoir été oublié.. 
+Il est tard je ne cherche pas... il faudrait le mettre aussi
+
+
+
+C'est super dure à lir le resultat...
+
+
+composition cms::handleAWorker {
+  apply useHelicopter(m: 'm', coord: 'coord')               => a6; // Ext 6a.
+  apply lostContact(action: 'requestForArrival')            => a6; // Ext 6b.
+  apply timeout(delay: 'm.delay',action: 'updateLocation')  => a6; // Ext 6c.
+  apply reHandleOnChange(cxt: 'm', crisis: 'crisis')         => a7; // Ext 7a.
+  apply missionFailed(crisis: 'crisis')                     => a7; // Ext 7b.
+  apply lostContact(action: 'requestForDeparture')          => a8; // Ext 8a.
+  // Ext 8b. can't be performed without a huge set of change in the workflow
+  apply missingReport                                       => a11; // Ext 11a. 
+}
+*/
+
+orchestration cms::handleAWorker {
+  variables {
+    crisis as crisisIdentifier;
+    w as worker; r as report; m as mission; coord as cmsEmployee;
+
+    uH_r as boolean;    uH_ok as boolean;
+
+    lC0_super as cmsEmployee;
+
+    const t0_true := 'true' as boolean;
+    const t0_false := 'false' as boolean;    
+    t0_c as boolean; t0_expired as boolean;
+    t0_r as report;
+
+    lC1_super as cmsEmployee;
+
+
+  }
+  activities {
+    rcv. (crisis,w,m,coord) := receive();
+    a100. ui::actListener(w, crisis, 'info' as string);
+    a101. ui::actListener(w, m, 'info' as string);
+    a6. msgBus::wait4Msg('info' as string, 'arrived' as string, w);
+    a7. cms::executeMission(m,w,crisis,coord);
+    a8. msgBus::wait4Msg('info' as string, 'leaving' as string, w);
+    a11. r := ui::askForReport(w);
+    rpl. reply(r);
+    a100bis. ui::stopListener(w,crisis, 'info' as string);
+    a101bis. ui::stopListener(w, m, 'info' as string);
+
+    uH_a1. uH_r := cms::helicopterRequired(m);
+    uH_a2. uH_ok := ui::ask4Helicopter(coord,w,m);
+    uH_a3. cms::transportByHelicopter(w,m.loc);
+
+    lC0_a1. msg::wait4Msg('info' as string, 'lost' as string, w);
+    lC0_a2. lC0_super := cms::getSuperObserver(crisis);
+    lC0_a3. ui::requestForArrival(lC0_super,w);
+
+    t0_a0. t0_expired := t0_false;
+    t0_a1. stopwatch::sleep(m.delay);
+    t0_a2. t0_expired := t0_true;
+    t0_a3. t0_c := isTrue(t0_expired);
+    t0_a4. ui::updateLocation(w);
+    t0_a5. t0_r := self::self();
+    t0_a6. reply(t0_r);
+
+    mF_h. hook(m);
+    mF_a1. msgBus::send('status' as string, 'failed' as string, m);
+    mF_a2. cms::handleCrisis(crisis);
+    mF_a3. reply();
+
+    lC1_a1. msg::wait4Msg('info' as string, 'lost' as string, w);
+    lC1_a2. super := cms::getSuperObserver(crisis);
+    lC1_a3. ui::requestForDeparture(lC1_super,w);
+
+    mR_a1. r := id('null' as report);
+  }
+  relations {
+    rcv < a100; rcv < a101; a100 < a6; a101 < a6; 
+    //a6 < a7; 
+     a7 < a8; 
+     //a8 < a11 ; 
+     //a11 < rpl;
+    //a8 < a100bis; a8 < a101bis;
+
+    a100 < uH_a1; a101 < uH_a1; uH_a1 < a6 when ! uH_r;  uH_a1 < uH_a2 when uH_r;
+    uH_a2 < uH_a3 when uH_ok; uH_a2 < a6  when !uH_ok; uH_a3 < a6; a6 < a7;
+
+
+    a100 < lC0_a1; a101 < lC0_a1; a6 << a7; lC0_a1 < lC0_a2; lC0_a2 < lC0_a3; lC0_a3 << a7;
+
+    a100 < t0_a0; a101 < t0_a0; 
+    t0_a0 < a6; t0_a0 < t0_a1; t0_a1 < t0_a2; a6 << t0_a3; t0_a2 << t0_a3;
+    t0_a3 < t0_a4 when t0_c; t0_a4 < t0_a5; t0_a5 < t0_a6; t0_a3 < a7 when !t0_c;
+
+    fail(a7,'failed') < mF_a1; mF_a1 < mF_a2; mF_a2 < mF_a3;
+
+    a7 < lC1_a1; a8<<a11; a8 <<a100bis; a8 <<a101bis ; 
+    lC1_a1 < lC1_a2; lC1_a2 < lC1_a3; 
+    lC1_a3 << a11;lC1_a3 << a100bis ; lC1_a3 << a101bis; 
+
+   fail(a11) < mR_a1; a11 << rpl; mR_a1 << rpl;
+  }
+}
+
+
+
+
+
+
+/*
+
+
+fragment extraMissionsRequired<crisis> {
+  variables {
+    m as mission; crisis as crisisIdentifier;
+  }
+  activities {
+    h. hook(m);
+    a1. msgBus::wait4msg('status' as string, 'extra' as string, m);
+    a2. cms::handleCrisis(crisis);
+  }
+  relations {
+    ^ < h; ^ < a1; h < $; a1 < a2; 
+  }
+}
+
+
+
+
+composition cms::handleAWorker {
+  apply useHelicopter(m: 'm', coord: 'coord')               => a6; // Ext 6a.
+  apply lostContact(action: 'requestForArrival')            => a6; // Ext 6b.
+  apply timeout(delay: 'm.delay',action: 'updateLocation')  => a6; // Ext 6c.
+  apply reHandleOnChange(cxt: 'm', crisis: 'crisis')         => a7; // Ext 7a.
+  apply missionFailed(crisis: 'crisis')                     => a7; // Ext 7b.
+  apply lostContact(action: 'requestForDeparture')          => a8; // Ext 8a.
+  // Ext 8b. can't be performed without a huge set of change in the workflow
+  apply missingReport                                       => a11; // Ext 11a. 
+}
+*/

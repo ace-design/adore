@@ -1,0 +1,50 @@
+/*
+
+chaud la decision du hook alors que l'on est sur un bloc...
+
+
+result From
+// building the global process
+composition cms::authUser {
+  apply cancelAuth => a1a2 ;
+  apply only3times => {a1a2,a3} ;
+}
+
+*/
+
+
+// UC 4.2.10 AuthenticateUser
+orchestration cms::authUser {
+  variables {
+    user as cmsEmployee;
+    log as string; pwd as string; 
+    isValid as boolean;
+
+    o3_n as integer;
+    o3_c as boolean;  o3_r as boolean;
+  }
+  activities {
+    a0. user := receive();
+    a1a2. (log, pwd) := ui::promptPass(user);
+    a3. isValid := cms::checkPass(user,log,pwd);
+    a4. reply(isValid);
+
+    cA_r. reply('false' as boolean);
+
+    o3_e1. o3_n := cms::incrAuthCpt(user);
+    o3_t. o3_c := isLesserThan(o3_n,'3' as string);
+    o3_e2. throw('TooManyLoginAttempts' as string);
+    o3_e3. o3_r := cms::authUser(user);
+    o3_e4. reply(o3_r);
+  }
+  relations { 
+    a0 < a1a2; a1a2 < a3; //a3 < a4; 
+
+    fail(a1a2,'cancel') < cA_r;
+
+    a0 < o3_e1; o3_e1 < o3_t; 
+    o3_t < a1a2 when o3_c; o3_t < o3_e2 when ! o3_c;
+    a3 < a4 when isValid; a3 < o3_e3 when ! isValid;
+    o3_e3 < o3_e4;
+ }
+}

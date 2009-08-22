@@ -1,14 +1,17 @@
-require 'uc4.2.1bis.HandleAMission.adore' ;
-require 'uc4.2.1ter.HandleAWorker.adore' ;
-require 'uc4.2.1quater.HandleACrisis.adore';
-require 'common.adore';
+/*
+Result from : 
 
-orchestration cms::finalResolveCrisis {
+composition cms::resolveCrisis {
+  apply mustAuthenticate => a1  ; // Ext 1a;
+}
+*/
+
+orchestration cms::resolveCrisis {
   variables {
     id as crisisIdentifier; coord as cmsEmployee;
     m* as mission; choosen as mission;
 
-   still as boolean; auth as boolean;
+   mA_still as boolean; mA_auth as boolean;
   }
   activities {
     rcv. (coord, id) := receive();
@@ -19,15 +22,15 @@ orchestration cms::finalResolveCrisis {
     rpl. reply();
     a12bis. ui::stopListener(coord, id, 'info' as string);
 
-    a1Auth. still :=  cms::isAuthentified(coord);
-    a2Auth. auth := cms::authUser(coord);
-    tAuth. throw('BadAuthentification' as string);
+    mA_a1. mA_still :=  cms::isAuthentified(coord);
+    mA_a2. mA_auth := cms::authUser(coord);
+    mA_t. throw('BadAuthentification' as string);
 
   }
   relations { 
     rcv < a1; a1 < a12; a12 < aX; aX < a13; a13 < rpl; a13 < a12bis;
 
-    rcv < a1Auth; a1Auth < a1 when still; a1Auth < a2Auth when ! still; 
-    a2Auth < a1 when auth; a2Auth < tAuth when ! auth;
+    rcv < mA_a1; mA_a1 < a1 when mA_still; mA_a1 < mA_a2 when ! mA_still; 
+    mA_a2 < a1 when mA_auth; mA_a2 < mA_t when ! mA_auth;
   }
 }
