@@ -13,7 +13,7 @@ orchestration cms::captureWitnessReport {
     a2a12. pi := phoneCie::getInfo(wi.id);
     a2a3. exact := cms::validateWitnessInfo(wi,pi);
     a3. ccl := cms::buildCheckList(i);
-    a4. ci := ui::promptCrisisInfo(coord,ccl);
+    a4. ci := ui::promptCheclList(coord,id, ccl);
     a50. cms::assignEmergencyLvl(id,ci);
     a51. msgBus::send('status' as string, 'active' as string,id);
     rpl. reply();

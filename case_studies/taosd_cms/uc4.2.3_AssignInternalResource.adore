@@ -60,7 +60,7 @@ fragment employeeRefusal {
 
 composition cms::assignIntRes {
   apply mustAuthenticate      => a1;      // Ext 1a.
-  apply unavailableEmployee() => {a1,a2}; // Ext 1b.
+  apply unavailableEmployee => {a1,a2}; // Ext 1b.
   apply employeeRefusal       => a2;      // Ext 2a.
 }
 

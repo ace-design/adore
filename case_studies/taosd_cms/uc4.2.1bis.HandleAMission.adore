@@ -58,7 +58,7 @@ composition cms::handleAMission {
   toSet ir; toSet er;                  // Main success scenario
   apply unavailableIntResource                      => a41; // Ext 4a.
   apply unavailableExtResource                      => a51; // Ext 5a.
-  apply reHandleOnchange(cxt:'m', crisis: 'crisis') => a4x; // Ext 9a.
-  apply reHandleOnchange(cxt:'m', crisis: 'crisis') => a5x; // Ext 9a.
+  apply reHandleOnChange(cxt: 'm', crisis: 'crisis') => a4x; // Ext 9a.
+  apply reHandleOnChange(cxt: 'm', crisis: 'crisis') => a5x; // Ext 9a.
 }
 l

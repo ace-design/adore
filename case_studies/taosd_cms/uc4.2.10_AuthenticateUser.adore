@@ -49,5 +49,5 @@ fragment only3times {
 // building the global process
 composition cms::authUser {
   apply cancelAuth => a1a2 ;
-  apply only3times => {a1a2;a3} ;
+  apply only3times => {a1a2,a3} ;
 }

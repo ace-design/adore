@@ -34,7 +34,7 @@ fragment useHelicopter<m,coord> {
     a1. r := cms::helicopterRequired(m);
     h. hook(w,c);
     a2. ok := ui::ask4Helicopter(coord,w,m);
-    a3. cms::transportByHelicopter(w,c);
+    a3. cms::transportByHelicopter(w,m.loc);
   }
   relations {
     ^ < a1; a1 < h when ! r;  a1 < a2 when r;
