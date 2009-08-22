@@ -3,7 +3,7 @@ orchestration cms::captureWitnessReport {
     id as crisisIdentifier; coord as cmsEmployee;
     wi as witness; i as preliminaryInformation;
     ccl as crisisCheckList; ci as crisisInformation;
-    pi as phoneInformation;
+    pi as phoneInformation; exact as boolean;
   }
   activities {
     rcv. (coord, id) := receive();
@@ -11,11 +11,11 @@ orchestration cms::captureWitnessReport {
     a11. cms::setWitness(wi,id);
     a2. i := ui::promptPrelimInfo(coord);
     a2a12. pi := phoneCie::getInfo(wi.id);
-    a2a3. cms::validateWitnessInfo(wi,pi);
+    a2a3. exact := cms::validateWitnessInfo(wi,pi);
     a3. ccl := cms::buildCheckList(i);
     a4. ci := ui::promptCrisisInfo(coord,ccl);
     a50. cms::assignEmergencyLvl(id,ci);
-    a51. msgBus::sendMsg('active' as string,coord,id);
+    a51. msgBus::send('status' as string, 'active' as string,id);
     rpl. reply();
   }
   relations {
@@ -45,12 +45,9 @@ fragment requestVideo<user> {
     t. c := survSys::canCover(info.loc);
     h. hook(info);
     a12. feedId := survSys::activateVideo(info.loc);
-    a30. ui::displayVideoFeed(user, feedId); 
-    a31. ui::shutdownVideoFeed(user, feedId);
+    a3. ui::displayVideoFeed(user, feedId); 
   }
-  relations {
-    ^ < t; t < h when ! c; t < a12 when c; a12 < a30 ; a30 < h; h < $; h < a31;
-  }
+  relations { ^ < h; h < $; ^ < t; t < a12 when c; a12 < a3; }
 }
 
 fragment fakeWitnessInfo {
@@ -68,26 +65,21 @@ fragment fakeWitnessInfo {
 }
 
 fragment fakeCrisisDetected {
-  variables {
-    user as cmsEmployee; isReal as boolean;
-  }
+  variables { user as cmsEmployee; isReal as boolean; }
   activities {
     h. hook(user);
     t. isReal := ui::prompt4RealCrisis(user);
     thr. throw('fakeCrisis' as string);
   }
-  relations {
-    ^ < h; h < t; t < $ when isReal; t < thr when ! isReal; 
-  }
+  relations { ^ < h; h < t; t < $ when isReal; t < thr when ! isReal; }
 }
 
-
 composition cms::captureWitnessReport{
-  apply callDisconnected    => a10;     // Ext 1a.
-  apply callDisconnected    => a2;      // Ext 2a. 
+  apply callDisconnected            => a10;     // Ext 1a.
+  apply callDisconnected            => a2;      // Ext 2a. 
   apply requestVideo(user: 'coord') => {a3,a4}; // Ext 3a.
-  apply ignoreDisconnection => a4;      // Ext 4a.
+  apply ignoreDisconnection         => a4;      // Ext 4a.
   apply fakeWitnessInfo     => a2a3;    // Ext 5a. (Rq: too weird on a5 :S )
   apply fakeCrisisDetected  => a4;      // Ext 5b. (Rq: too weird on a5 :S )
-  apply fakeCrisisDetected  => requestVideo::a30; // Ext 5b. impacts Ext 3a.
+  apply fakeCrisisDetected  => requestVideo::a3; // Ext 5b. impacts Ext 3a.
 }

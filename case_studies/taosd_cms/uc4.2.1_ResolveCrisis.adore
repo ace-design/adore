@@ -11,35 +11,17 @@ orchestration cms::resolveCrisis {
   activities {
     rcv. (coord, id) := receive();
     a1. cms::captureWitnessReport(coord,id);
-    a12. ui::actListener('info' as string,coord,id);
-    aX. cms::handleACrisis(id);
+    a12. ui::actListener(coord, id, 'info' as string);
+    aX. cms::handleACrisis(coord,id);
     a13. ui::validateClose(coord,id);
     rpl. reply();
-    a12bis. ui::stopListener('info' as string,coord,id);
+    a12bis. ui::stopListener(coord, id, 'info' as string);
   }
   relations { 
-    rcv < a1; rcv < a12;
-    a1 < aX; aX < a13; a12 < a13;
-    a13 < rpl; a13 < a12bis;
-  }
-}
-
-fragment crisisChange<crisis> {
-  variables {
-    crisis as crisisIdentifier;
-    coord as cmsEmployee;
-  }
-  activities {
-    h. hook(coord);
-    a1. msgBus::wait4msg('change' as string,coord,crisis);
-    a2. cms::handleACrisis(crisis);
-  }
-  relations {
-    ^ < h; h < $; h < a1; a1 < a2; 
+    rcv < a1; a1 < a12; a12 < aX; aX < a13; a13 < rpl; a13 < a12bis;
   }
 }
 
 composition cms::resolveCrisis {
   apply mustAuthenticate => a1  ; // Ext 1a;
-  apply crisisChange     => a12 ; // Ext 12a.
 }

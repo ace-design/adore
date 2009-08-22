@@ -1,40 +1,44 @@
+require 'common.adore';
+
 orchestration cms::handleAWorker {
   variables {
     crisis as crisisIdentifier;
-    w as worker; r as report; m as mission;
+    w as worker; r as report; m as mission; coord as cmsEmployee;
   }
   activities {
-    rcv. (crisis,w,m) := receive();
-    a6. msgBus::wait4Msg('arrived' as string, w, crisis);
-    a7. cms::executeMission(m,w);
-    a8. msgBus::wait4Msg('leaving' as string, w);
-    a100. ui::actListener('info' as string, w, crisis);
-    a101. ui::actListener('mission' as string, w, crisis);
+    rcv. (crisis,w,m,coord) := receive();
+    a100. ui::actListener(w, crisis, 'info' as string);
+    a101. ui::actListener(w, m, 'info' as string);
+    a6. msgBus::wait4Msg('info' as string, 'arrived' as string, w);
+    a7. cms::executeMission(m,w,crisis,coord);
+    a8. msgBus::wait4Msg('info' as string, 'leaving' as string, w);
     a11. r := ui::askForReport(w);
     rpl. reply(r);
-    a100bis. ui::stopListener('info' as string, w, crisis);
-    a101bis. ui::stopListener('mission' as string, w, crisis);
+    a100bis. ui::stopListener(w,crisis, 'info' as string);
+    a101bis. ui::stopListener(w, m, 'info' as string);
   }
   relations {
-    rcv < a6; a6 < a7; a7 < a8; a8 < a11; 
-    rcv < a100; a100 < a101; a101 < a11;
-    a11 < rpl; a11 < a100bis; a100bis < a101bis; 
+    rcv < a100; rcv < a101; a100 < a6; a101 < a6; 
+    a6 < a7; a7 < a8; a8 < a11 ; a11 < rpl;
+    a8 < a100bis; a8 < a101bis;
   }
 }
 
-fragment useHelicopter<m> {
+fragment useHelicopter<m,coord> {
   variables {
     w as worker;   c as crisisIdentifier;
-    r as boolean;   m as mission;
+    r as boolean;   m as mission; ok as boolean;
+    coord as cmsEmployee;
   }
   activities {
     a1. r := cms::helicopterRequired(m);
     h. hook(w,c);
-    a2. cms::transportByHelicopter(w,c);
+    a2. ok := ui::ask4Helicopter(coord,w,m);
+    a3. cms::transportByHelicopter(w,c);
   }
   relations {
-    ^ < a1; a1 < h when r;  a1 < a2 when !r;
-    a2 < h; h < $;
+    ^ < a1; a1 < h when ! r;  a1 < a2 when r;
+    a2 < a3 when ok; a2 < h when !ok; a3 < h; h < $;
   }
 }
 
@@ -44,7 +48,7 @@ fragment lostContact<action> {
     super as cmsEmployee;
   }
   activities {
-    a1. msg::wait4Msg('lost' as string, w,c);
+    a1. msg::wait4Msg('info' as string, 'lost' as string, w);
     a2. super := cms::getSuperObserver(c);
     a3. ui::action(super,w);
     h. hook(w,c);
@@ -76,13 +80,14 @@ fragment timeout<delay,action> {
   }
 }
 
+
 fragment extraMissionsRequired<crisis> {
   variables {
     m as mission; crisis as crisisIdentifier;
   }
   activities {
     h. hook(m);
-    a1. msgBus::wait4msg('extra' as string, m,crisis);
+    a1. msgBus::wait4msg('status' as string, 'extra' as string, m);
     a2. cms::handleCrisis(crisis);
   }
   relations {
@@ -90,13 +95,14 @@ fragment extraMissionsRequired<crisis> {
   }
 }
 
+
 fragment missionFailed<crisis> {
   variables {
     m as mission; crisis as crisisIdentifier;
   }
   activities { 
     h. hook(m);
-    a1. msgBus::send('failed' as string, m, crisis);
+    a1. msgBus::send('status' as string, 'failed' as string, m);
     a2. cms::handleCrisis(crisis);
     a3. reply();
   }
@@ -113,12 +119,12 @@ fragment missingReport {
 }
 
 composition cms::handleAWorker {
-  apply useHelicopter(m: 'm')                               => a6; // Ext 6a.
+  apply useHelicopter(m: 'm', coord: 'coord')               => a6; // Ext 6a.
   apply lostContact(action: 'requestForArrival')            => a6; // Ext 6b.
   apply timeout(delay: 'm.delay',action: 'updateLocation')  => a6; // Ext 6c.
-  apply extraMissionsRequired(crisis: 'crisis')             => a7; // Ext 7a.
+  apply reHandleOnChange(cxt: 'm', crisis: 'crisis')         => a7; // Ext 7a.
   apply missionFailed(crisis: 'crisis')                     => a7; // Ext 7b.
   apply lostContact(action: 'requestForDeparture')          => a8; // Ext 8a.
-  // Ext 8b. can't be performed without a huge set of change in the wf
+  // Ext 8b. can't be performed without a huge set of change in the workflow
   apply missingReport                                       => a11; // Ext 11a. 
 }

@@ -12,3 +12,16 @@ fragment mustAuthenticate {
     a2 < h when auth; a2 < t when ! auth;
   }
 }
+
+fragment reHandleOnChange<cxt,crisis> {
+ variables {
+    cxt as contextIdentifier;
+    crisis as crisisIdentifier;
+  }
+  activities {
+    h. hook();
+    a1. msgBus::wait4msg('status' as string, 'change' as string, cxt);
+    a2. cms::handleACrisis(crisis);
+  }
+  relations { ^ < h; h < $; h < a1; a1 < a2; a2 < $; }
+}

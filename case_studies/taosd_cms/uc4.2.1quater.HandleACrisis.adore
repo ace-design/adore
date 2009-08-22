@@ -1,22 +1,24 @@
+require 'common.adore';
+
 orchestration cms::handleACrisis {
   variables {
     id as crisisIdentifier; coord as cmsEmployee;
     m* as mission; choosen as mission;
   }
   activities {
-    rcv. (id) := receive();
+    rcv. (coord, id) := receive();
     a2. m* := cms::recommendMission(id);
-    a30. coord := cms::getCoord(id);
-    a31. choosen := ui::selectMission(coord,m*);
-    aX. cms::handleAMission(id, choosen);
+    a3. choosen := ui::selectMission(coord,m*);
+    aX. cms::handleAMission(coord,id, choosen);
     rpl. reply();
   }
   relations { 
-    rcv < a2; a2 < a31; rcv < a30; a30 < a31; 
-    a31 < aX; aX < rpl;
+    rcv < a2; a2 < a3;  
+    a3 < aX; aX < rpl;
   }
 }
 
 composition cms::handleACrisis {
   toSet choosen; // Main success scenario
+  apply reHandleOnChange(cxt: 'id', crisis: 'id') => aX; // Ext 12a.
 }
