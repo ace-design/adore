@@ -1,0 +1,44 @@
+orchestration cms::requestExtRes {
+  variables {
+    res as resource; w as worker;
+    m as mission; c as crisisIdentifier;
+    cx as ersConnexion;
+  }
+  activities {
+    rcv. (res,c,m) := receive();
+    a1. cx := ers::submitMissionDetails(m);
+    a2. w := ers::providesWorker(cx,res);
+    rpl. reply(w);
+  }
+  relations {
+    rcv < a1; a1 < a2; a2 < rpl;
+  }
+}
+
+fragment degradedRes<crisis> {
+  variables { 
+    deg as boolean; res as resource; crisis as crisisIdentifier;
+    w as worker;
+  }
+  activities {
+    h. w := hook(res);
+    t. deg := ers::isDegradedWorker(w);
+    a1. msgBus::send('degraded' as string,w,crisis);
+  }
+  relations { ^ < h; h < t; t < $ when !deg; t < a1 when deg; a1 < $; }
+}
+
+fragment noExtRes<crisis> {
+  variables { res as resource; crisis as crisisIdentifier; }
+  activities {
+    h. hook(res);
+    a1. msgBus::send('noSuchResource' as string,res,crisis);
+    thr. throw('unavailable' as string);
+  }
+  relations { ^ < h; h < $; fail(h,'noResource') < a1; a1 < thr; }
+}
+
+composition cms::requestExtRes {
+  apply degradedRes(crisis: 'c') => a2; // Ext 2a.
+  apply noExtRes(crisis: 'c')    => a2; // Ext 2b.
+}

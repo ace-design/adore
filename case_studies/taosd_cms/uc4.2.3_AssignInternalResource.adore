@@ -1,0 +1,70 @@
+require 'common.adore';
+
+orchestration cms::assignIntRes {
+  variables {
+    r as resource; c as crisisIdentifier; m as mission;
+    e as cmsEmployee;
+  }
+  activities {
+    rcv. (r,c,m) := receive();
+    a10. e := cms::findAvailableEmployee(r,m);
+    a11. ui::sendMissionInfo(e,m);
+    a2. ui::wait4Acceptance(e,m);
+    rpl. reply(e);
+  }
+  relations {
+    rcv < a10; a10 < a11; a11 < a2; a2 < rpl;
+  }
+}
+
+fragment unavailableEmployee<delta,crisis> {
+  variables {
+    const true := 'true' as boolean; const false := 'false' as boolean;
+    delta as integer; expired as boolean; c as boolean;
+    e as cmsEmployee; subst as cmsEmployee;
+    crisis as crisisIdentifier;
+  }
+  activities {
+    a0. expired := false;
+    h. hook(e);
+    a1. stopwatch::sleep(delta);
+    a2. expired := true ;
+    a3. c := isTrue(expired);
+    a4. msgBus::send('unresponsive' as string,e,crisis); 
+    a5. subst := cms::findSubstitute(e);
+    rpl. reply(subst);
+    thr. throw('unavailable' as string);
+  }
+  relations {
+    ^ < a0; a0 < h; h << a3; a0 < a1; a1 < a2; a2 << a3;
+    a3 < a4 when c; a3 < a5 when c; a3 < $ when !c;
+    a5 < rpl; fail(a5,'noSubstituteFound') < thr;
+  }
+}
+
+fragment employeeRefusal<crisis> {
+  variables {
+    e as cmsEmployee; subst as cmsEmployee;
+    crisis as crisisIdentifier;
+    ok as boolean;
+  }
+  activities {
+    h. ok := hook(e);
+    a1. msgBus::send('refusal' as string,e,crisis); 
+    a2. subst := cms::findSubstitute(e);
+    rpl. reply(subst);
+    thr. throw('unavailable' as string);
+  }
+  relations {
+    ^ < h; h < $ when ok;
+    h < a1 when ! ok; a1 < a2; a2 < rpl; 
+    fail(a2,'noSubstituteFound') < thr;
+  }
+}
+
+composition cms::assignIntRes {
+  apply mustAuthenticate                 => a11; // Ext 1a.
+  apply unavailableEmployee(delta:'10', 
+			    crisis: 'c') => a11; // Ext 1b.
+  apply employeeRefusal(crisis: 'c')     => a2;  // Ext 2a.
+}
