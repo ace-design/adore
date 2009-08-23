@@ -27,8 +27,8 @@ fragment reHandleOnChange<cxt,crisis> {
     a4. nop();
   }
   relations { 
-    ^ < h; h < t; t < $ when !c; ^< a0; 
-    a0 < a1; a1 < a2; a2 < t; a1 < a3; a3 < a4; t < a4 when c; a4 < $;
+    ^ < h; h << t; t < $ when !c; ^< a0; 
+    a0 < a1; a1 < a2; a2 << t; a1 < a3; a3 < a4; t < a4 when c; a4 < $;
   }
 }
 

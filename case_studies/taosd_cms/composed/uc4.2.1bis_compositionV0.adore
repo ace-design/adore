@@ -1,45 +1,14 @@
 /*
-Pbme? : 
-qui ecoute sur status er? bizarre qu'il n'y ait pas la mission en parametre..
-alors que on crée un listener sur status mais m
-
-
-*/
-/*
-On a besoin d'un nop dans cette figure...expliqué par mail
-
-La figure doit etre encore corrigé en effet....
-
-Interprétation de lien faible en sortie de boucle : on ne sait pas faire..
-donc on pousse dans la boucle les activités qui dépendent d'un lien faible sortant : i.e. a derniere du bloc mais avec un lien faible je cherche son autre lien faible et remonte dans la boucle la ou les activités en cause. => ici uER_a2
-
-*/
-
-/* Questions of Designs : 
-- DO you want to handelCrisis again after evaluating all the unavailabable ressources (the result obtains in an automatic way) or do you want to take into account that a worker is unavailabale as soon as you know that (putting the activty uER_a2 inside the loop)? The last point is the only solution due to partial order links. ...
-=> Quand on a une récupération d'erreur dans une boucle on pourrait mettre un boolean à faux à la levée d'erreur . Du coup on se branche sur les successeurs de la levée d'erreur avec test sur ce boolean avant et les successeurs de l'activité normal (tout cela en sortie de boucle) ce qui permet de suprimer un lien faible... "  si une ressource a été non valide handleCrisis sinon reply. On pourrait la faire apparaitre comme un fragment en sortie sur la "politique" obtenue"
-
-
-Do we win to design thinking to a set of ressources? or is it better to leave the system to compute? Fragment approach implies to manage data set in a semi automatic way because we don't knwow exactly how fragments will interact.
-
-
-irep* and erep* never used : consequence of erep and irep never used
-
-.
-
-
-
- */
-
-/*
 Result of : 
 
-//V1 : after detection of errors when applying fragments
 composition cms::handleAMission {
   toSet ir; toSet er;                  // Main success scenario
   apply unavailableIntResource                      => a41; // Ext 4a.
   apply unavailableExtResource                      =>  {a51;a5x;} // Ext 5a.
-  apply reHandleOnChange(cxt: 'm', crisis: 'crisis') => {a40;a41;a42;a4x;a9;a50;a51;a5x} // Ext 9a.
+  apply reHandleOnChange(cxt: 'm', crisis: 'crisis') => a4x; // Ext 9a.
+  apply reHandleOnChange(cxt: 'm', crisis: 'crisis') => a5x; // Ext 9a.
+}
+
 }
 */
 
@@ -55,12 +24,15 @@ orchestration cms::handleAMission {
 
     rHOC_mustWait as boolean; rHOC_c as boolean;
 
+    rHOC1_mustWait as boolean; rHOC1_c as boolean;
 
-
+    //ir* as resource;
+    //irep* as report;
   }
   activities {
     rcv. (coord,crisis, m) := receive();
     a9. ui::actListener(coord,m,'status' as string); 
+    //a40. ir := get(m,'intResource' as string);
     a40. ir := get(m,'intResource' as string);
     a41. iw := cms::findRelevantEmployee(ir);
     a42. cms::assignIntRes(iw,m);
@@ -84,7 +56,15 @@ orchestration cms::handleAMission {
     rHOC_t. rHOC_c := isTrue(rHOC_mustWait);
     rHOC_a3. cms::handleACrisis(crisis);
     rHOC_a4. nop();
-    rHOC_n. nop;
+
+    rHOC1_a0. rHOC1_mustWait := id('false' as boolean);
+    rHOC1_a1. msgBus::wait4msg('status' as string, 'change' as string, m);
+    rHOC1_a2. rHOC1_mustWait := id('true' as boolean);
+    rHOC1_t. rHOC1_c := isTrue(rHOC1_mustWait);
+    rHOC1_a3. cms::handleACrisis(crisis);
+    rHOC1_a4. nop();
+
+    //ts0. irep* := append(irep*,irep);
 
   }
   relations { 
@@ -93,19 +73,22 @@ orchestration cms::handleAMission {
     rcv < a50; a50 < a51; a51 < a5x; 
     //a5x < rpl;
     a5x<<rpl;
-    rcv < a9; a9 < a41; a9 < a51; rpl < a9bis; 
+    rcv < a9; a9 < a4x; a9 < a5x; rpl < a9bis; 
 
    fail(a41,'unavailable') < uIR_a1; uIR_a1 < uIR_a2; uIR_a2 < a4x; 
 
    fail(a51,'unavailable') < uER_a1;
    fail(a5x,'unavailable') < uER_a1; uER_a1 < uER_a2; uER_a2 << rpl;
 
- 
-
-   a4x <rHOC_n;
-   a5x <rHOC_n;
-rHOC_n << rHOC_t; rHOC_t < rpl when !rHOC_c; rcv< rHOC_a0; 
+    a4x << rHOC_t; rHOC_t < rpl when !rHOC_c; a42< rHOC_a0; a9< rHOC_a0;
     rHOC_a0 < rHOC_a1; rHOC_a1 < rHOC_a2; rHOC_a2 << rHOC_t; rHOC_a1 < rHOC_a3; rHOC_a3 < rHOC_a4; rHOC_t < rHOC_a4 when rHOC_c; rHOC_a4 < rpl;
+
+  a5x<< rHOC1_t; rHOC1_t < rpl when !rHOC1_c; a9< rHOC1_a0; a51< rHOC1_a0; 
+    rHOC1_a0 < rHOC1_a1; rHOC1_a1 < rHOC1_a2; rHOC1_a2 << rHOC1_t; rHOC1_a1 < rHOC1_a3; rHOC1_a3 < rHOC1_a4; rHOC1_t < rHOC1_a4 when rHOC1_c; rHOC1_a4 < rpl;
+
+    //toset sur irep
+    //a4x < ts0 ; 
+    //ts0 < rpl;
  
   }
 }
@@ -121,8 +104,8 @@ rHOC_n << rHOC_t; rHOC_t < rpl when !rHOC_c; rcv< rHOC_a0;
     //setIteration(cms_handleAMission_ts0,hAM_ir),
     //setIteration(cms_handleAMission_uIR_a1,hAM_ir),
     //setIteration(cms_handleAMission_uIR_a2,hAM_ir),
-doSetify(cms_handleAMission,cms_handleAMission_ir),
 
+doSetify(cms_handleAMission,cms_handleAMission_ir),
 doSetify(cms_handleAMission, cms_handleAMission_ir),
 %%% ENGAGE %%%
 */
