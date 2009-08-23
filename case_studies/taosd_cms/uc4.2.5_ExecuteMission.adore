@@ -7,9 +7,9 @@ orchestration cms::executeMission {
   activities {
     rcv. (mis, wrk, crs, coord) := receive();
     t1. isSupObs := isEqualsTo(mis.kind, 'superObs' as string);
-    a1. cms::execSupObsMission(mis,wrk,crs,coord);
+    a1. cms::execSupObsMission(wrk,crs);
     t2. isRescue := isEqualsTo(mis.kind, 'rescue' as string);
-    a2. cms::execRescMission(mis,wrk,crs,coord);
+    a2. cms::execRescMission(wrk,crs,mis); 
     t3. isHelicopter := isEqualsTo(mis.kind, 'helicopter' as string);
     a3. cms::transportByHelicopter(wrk,mis.loc);
     t4. isTow := isEqualsTo(mis.kind, 'removeObstacle' as string);

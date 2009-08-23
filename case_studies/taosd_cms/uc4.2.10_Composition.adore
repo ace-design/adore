@@ -1,16 +1,16 @@
-/*
+/** chaud la decision du hook alors que l'on est sur un bloc...
 
-chaud la decision du hook alors que l'on est sur un bloc...
+@mi: pour moi, le 'hook' d'un bloc, c'est une 'activité composite'. elle prend
+en entrée toutes les entrées des 'premières' du bloc, et en sortie toutes les
+sorties des dernières du bloc. 
+*/ 
 
-
-result From
-// building the global process
+/** This file contains the result of: 
 composition cms::authUser {
   apply cancelAuth => a1a2 ;
   apply only3times => {a1a2,a3} ;
 }
-
-*/
+**/
 
 
 // UC 4.2.10 AuthenticateUser
