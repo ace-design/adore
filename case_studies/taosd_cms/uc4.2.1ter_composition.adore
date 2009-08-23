@@ -2,23 +2,45 @@
 Result from : 
 
 => a priori j'au eu u pme de hook signature sur useHelicopter
+@mi: la crise n'est pas utilisée par le fragmznt => elle peut sauter.
 
 => idem sur lost il manque la crise la rajouter en <...>
+@mi: elle est utilisée par contre, effectivement, pas le choix, 
+il faut la passer en générique.
 
 => Pas fait rehandleOnChange
+@mi: normal, il est faux de toutes façons.
 
 => dans missionFailed là tu avais la crise en parametre et on pouvait ne pas la rendre generique
+@mi: clairement, j'avais plus les yeux en face des trous. c'est un paramètre
+ du hook.
+
 par contre tu introduis un reply sans valeur de retour alors que tous les autres ont une valeur de retour ==> est-ce un conflit? ne dervait-on pas lui en demander un.. mais comme ils ne l'ont pas dit... on leve un warning?
+@mi: c'est un reste 'legacy', on avait pas les rapport avant (je les 
+renvoyait pas). Oui, je pense qu'il faut lever un warning. Ou on retourne 'null'
+dans le fragment, ce qui aurait du sens aussi.
 
 => avec le 2ieme lost on claucle deux fois le superobserver alors qu'une seule fois aurait suffi.... indetectable? sauf à chercher des actvités équivalentes dans le flot.. à mettre dans limite avec ref aux publis de clem
-
+@mi: clairement indetectable. Il faudrait retrouver ces appels dans le flot, et
+factoriser pour les remonter. Et encore, ce n'est pas forcément ce que l'on veut
+car on va introduire des attentes qu'on aurait pas forcément voulu en le 
+remontant. Je ne suis même pas sur que ce soit une bonne idée de le faire ...
+il me parait plus interessant de tisser un fragment qui va nous donner 'super' 
+au départ si c'est VRAIMENT ce qu'on veut, et la réutiliser ailleurs au besoin.
+Et bing, des variables VOLONTAIREMENT partagée entre fragment ... et paf, ca 
+fait des chocapics.
 
 ==> extramission semble avoir été oublié.. 
 Il est tard je ne cherche pas... il faudrait le mettre aussi
-
-
+@mi: oui, j'ai oublier de binder :'(. too bad. Il va sur a9, ce qui est 
+bizarre, c'est que cette activité n'est pas dans ce flot là (c'est un listener).
+En plus, extraMission est une 'interprétation' de ma part, ca devrait être un 
+reHandleOnchange ... qui est bindé sur sur a4x et a5x (qui sont les appels à
+ce process dans le parent) ... c'est p'tetre pour ca qu'il est pas composé, il
+est comme le H de Hawaï, il sert à rien.
 
 C'est super dure à lir le resultat...
+@mi: je vais demander a prolog le nombre d'activité, de liens, ...
 
 
 composition cms::handleAWorker {

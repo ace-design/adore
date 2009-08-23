@@ -2,9 +2,12 @@
 Result from 
 
 ==> request video.. balaise la detection du info... 
+@mi: ce fragment se composre sur {a3,a4}. son hook manipule donc en entrée
+les entrées de 'a3', et en sortie les sorties de 'a4', respectivement 1ere et
+dernière du bloc. donc, c'ets bon. non ?
 
 //pas de sucesseurs dans le dernier = je ne fais rien
-..
+@mi: pas compris la question / le problème.
 
 composition cms::captureWitnessReport{
   apply callDisconnected            => a10;     // Ext 1a.

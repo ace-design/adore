@@ -13,7 +13,6 @@ composition cms::authUser {
 **/
 
 
-// UC 4.2.10 AuthenticateUser
 orchestration cms::authUser {
   variables {
     user as cmsEmployee;

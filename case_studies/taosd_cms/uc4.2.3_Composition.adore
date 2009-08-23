@@ -1,5 +1,11 @@
 /*
 Pbme sur unavailableEmployee avec le delta.. que faut il faire?
+@mi: en passer un. Genre une 'règle métier' qui dit qu'on employé n'est pas
+dispo s'il ne répond pas en 10 minutes. => delta=10. C'ets bizarre qu'il ne 
+hurle pas en chargeant dans swipl, il me semblait interdir de lier un fragment 
+générique sans spécifier sa généricité ... Ah non, je le fais a l'envers, 
+j'interdis de lier un param générique s'il n'est pas dans la signature du 
+fragment, mais pas l'inverse. to do ...
 
 
 Result from : 
