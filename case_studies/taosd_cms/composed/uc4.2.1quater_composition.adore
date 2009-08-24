@@ -3,7 +3,7 @@ DONE
 
 Note : When we apply reHandleOnChange we know that formally the variable "mustwait" can be accessed in concurent way in writing and reading. 
 We accept this possibility knowing our system.
-We add in the knowledge :
+We add the knowledge :
 noConflict('concurrentAccess', 'reHandleOnChange_a2','reHandleOnChange_t').
 So, each time a conflict is identified such as :
 conflict(concurrentAccess, 'rHOC_a2','rHOC_t') we don't raise an error.

@@ -13,6 +13,8 @@ fragment mustAuthenticate {
   }
 }
 
+
+//noConflict('concurrentAccess', 'reHandleOnChange_a2','reHandleOnChange_t').
 fragment reHandleOnChange<cxt,crisis> {
  variables {
    cxt as contextIdentifier; crisis as crisisIdentifier; mustWait as boolean; c as boolean;

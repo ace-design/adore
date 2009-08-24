@@ -1,5 +1,15 @@
 /*
-Pbme? : 
+DataFlow and error management : 
+When computing the data flow on external ressources, the system detects an error: there are several possible activities following the execution end of the block : uER_a2 when a ressource was unavailable and rpl to reply when a worker is assigned.  
+Solution : Designer asks to consider the activity uER_a2 into the dataFlow. It means that each time a worker is unavailable, the system will ask the system to find a new solution. All the requests are executed in a conncurent way. We consider that the activity corresponding to the data flow will be terminated when all the workers will finish their task and the system will terminate to handle the problems.
+
+
+Variable accessed and not initialized :
+When computing the data flow on external ressources, the system detects an error: the variable er can be uninitialized when accessed in reading. Indeed when the ressource is unavalaible no report is produced. 
+
+ : one if the 
+Working on the set of  implies t
+
 qui ecoute sur status er? bizarre qu'il n'y ait pas la mission en parametre..
 alors que on crée un listener sur status mais m
 
@@ -130,6 +140,8 @@ doSetify(cms_handleAMission, cms_handleAMission_ir),
 %%% DISENGAGE %%%
 doSetify(cms_handleAMission, cms_handleAMission_ir),
 doSetify(cms_handleAMission, cms_handleAMission_er),
+setIteration(cms_handleAMission_uER_a2,p2),
+
 %%% ENGAGE %%%
 
 

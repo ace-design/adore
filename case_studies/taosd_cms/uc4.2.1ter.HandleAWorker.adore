@@ -1,10 +1,12 @@
 require 'common.adore';
 
 /*
-Remark : 
-A fragment is well-formed if all the variable used as input are earlier initialized inside the fragment or are generic parameter.
+Remarks : 
+- A fragment is well-formed if all the variable used as input are earlier initialized inside the fragment or are generic parameter.
 If they correspond to generic parameter they have to be initialised before.
 This error is only detected when the set of fragments has been applied to the final orchestration.
+
+- self::self is unified with an invocation to the orchestration on which the fragment is applied. The arguments of this call are unified with the arguments of the receive.
 
  */
 
@@ -65,6 +67,7 @@ fragment lostContact<action,c> {
   relations { ^ < a1; ^ < h; h << $; a1 < a2; a2 < a3; a3 << $; }
 }
 
+//noConflict('concurrentAccess', 'timeout_a2','timeout_a3').
 fragment timeout<delay,action> {
   variables {
     w as worker; delay as integer;
@@ -128,12 +131,12 @@ fragment missingReport {
 }
 
 composition cms::handleAWorker {
-  apply useHelicopter(m: 'm', coord: 'coord')               => a6; // Ext 6a.
-  apply lostContact(action: 'requestForArrival')            => a6; // Ext 6b.
+  apply useHelicopter(m: 'm')               => a6; // Ext 6a.
+  apply lostContact(action: 'requestForArrival', c : 'crisis') => a6; // Ext 6b.
   apply timeout(delay: 'm.delay',action: 'updateLocation')  => a6; // Ext 6c.
   apply reHandleOnChange(cxt: 'm', crisis: 'crisis')         => a7; // Ext 7a.
-  apply missionFailed(crisis: 'crisis')                     => a7; // Ext 7b.
-  apply lostContact(action: 'requestForDeparture')          => a8; // Ext 8a.
-  // Ext 8b. can't be performed without a huge set of change in the workflow
+  apply missionFailed()                     => a7; // Ext 7b.
+  apply lostContact(action: 'requestForDeparture', c : 'crisis') => a8; //Ext 8a.
+  // Ext 8b. can't be performed without a huge set of changes in the workflow
   apply missingReport                                       => a11; // Ext 11a. 
 }

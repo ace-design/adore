@@ -1,4 +1,8 @@
 /*
+
+This version fails because we can't compute a data flow when there can be several outputs.
+Moreover this version fails in applying reHandleOnChange at two activities when we need only on one.
+
 Result of : 
 
 composition cms::handleAMission {

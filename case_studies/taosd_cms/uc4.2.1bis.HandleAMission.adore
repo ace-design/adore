@@ -27,7 +27,7 @@ orchestration cms::handleAMission {
   relations { 
     rcv < a40; a40 < a41; a41 < a42; a42 < a4x; a4x < rpl;
     rcv < a50; a50 < a51; a51 < a5x; a5x < rpl;
-    rcv < a9; a9 < a41; a9 < a51; rpl < a9bis; 
+    rcv < a9; a9 < a5x; a9 < a4x; rpl < a9bis; 
   }
 }
 

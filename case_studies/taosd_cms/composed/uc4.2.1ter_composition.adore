@@ -30,33 +30,17 @@ fait des chocapics.
 
 Result from : 
 
-
-=> Pas fait rehandleOnChange
-@mi: normal, il est faux de toutes façons.
-
-
-
-==> extramission semble avoir été oublié.. 
-Il est tard je ne cherche pas... il faudrait le mettre aussi
-@mi: oui, j'ai oublier de binder :'(. too bad. Il va sur a9, ce qui est 
-bizarre, c'est que cette activité n'est pas dans ce flot là (c'est un listener).
-En plus, extraMission est une 'interprétation' de ma part, ca devrait être un 
-reHandleOnchange ... qui est bindé sur sur a4x et a5x (qui sont les appels à
-ce process dans le parent) ... c'est p'tetre pour ca qu'il est pas composé, il
-est comme le H de Hawaï, il sert à rien.
-
-
-
 composition cms::handleAWorker {
   apply useHelicopter(m: 'm')               => a6; // Ext 6a.
-  apply lostContact(action: 'requestForArrival', c : 'crisis')            => a6; // Ext 6b.
+  apply lostContact(action: 'requestForArrival', c : 'crisis') => a6; // Ext 6b.
   apply timeout(delay: 'm.delay',action: 'updateLocation')  => a6; // Ext 6c.
   apply reHandleOnChange(cxt: 'm', crisis: 'crisis')         => a7; // Ext 7a.
   apply missionFailed()                     => a7; // Ext 7b.
-  apply lostContact(action: 'requestForDeparture')          => a8; // Ext 8a.
-  // Ext 8b. can't be performed without a huge set of change in the workflow
+  apply lostContact(action: 'requestForDeparture', c : 'crisis') => a8; //Ext 8a.
+  // Ext 8b. can't be performed without a huge set of changes in the workflow
   apply missingReport                                       => a11; // Ext 11a. 
 }
+
 */
 
 orchestration cms::handleAWorker {
@@ -74,6 +58,8 @@ orchestration cms::handleAWorker {
     t0_r as report;
 
     lC1_super as cmsEmployee;
+
+    rHOC_mustWait as boolean; rHOC_c as boolean;
 
 
   }
@@ -102,24 +88,32 @@ orchestration cms::handleAWorker {
     t0_a2. t0_expired := t0_true;
     t0_a3. t0_c := isTrue(t0_expired);
     t0_a4. ui::updateLocation(w);
-    t0_a5. t0_r := self::self();
+    t0_a5. t0_r := cms::handleAWorker(crisis,w,m,coord);
     t0_a6. reply(t0_r);
 
-    mF_h. hook(m);
     mF_a1. msgBus::send('status' as string, 'failed' as string, m);
     mF_a2. cms::handleCrisis(crisis);
     mF_a3. reply();
 
     lC1_a1. msg::wait4Msg('info' as string, 'lost' as string, w);
-    lC1_a2. super := cms::getSuperObserver(crisis);
+    lC1_a2. lC1_super := cms::getSuperObserver(crisis);
     lC1_a3. ui::requestForDeparture(lC1_super,w);
 
     mR_a1. r := id('null' as report);
+
+
+    rHOC_a0. rHOC_mustWait := id('false' as boolean);
+    rHOC_a1. msgBus::wait4msg('status' as string, 'change' as string, m);
+    rHOC_a2. rHOC_mustWait := id('true' as boolean);
+    rHOC_t. rHOC_c := isTrue(rHOC_mustWait);
+    rHOC_a3. cms::handleACrisis(crisis);
+    rHOC_a4. nop();
+
   }
   relations {
     rcv < a100; rcv < a101; a100 < a6; a101 < a6; 
     //a6 < a7; 
-     a7 < a8; 
+    // a7 < a8; 
      //a8 < a11 ; 
      //a11 < rpl;
     //a8 < a100bis; a8 < a101bis;
@@ -141,6 +135,12 @@ orchestration cms::handleAWorker {
     lC1_a3 << a11;lC1_a3 << a100bis ; lC1_a3 << a101bis; 
 
    fail(a11) < mR_a1; a11 << rpl; mR_a1 << rpl;
+
+
+    a7 << rHOC_t; rHOC_t < a8 when !rHOC_c; a6< rHOC_a0; 
+    rHOC_a0 < rHOC_a1; rHOC_a1 < rHOC_a2; rHOC_a2 << rHOC_t; 
+    rHOC_a1 < rHOC_a3; rHOC_a3 < rHOC_a4; rHOC_t < rHOC_a4 when rHOC_c; 
+    rHOC_a4 < a8;
   }
 }
 
@@ -169,14 +169,5 @@ fragment extraMissionsRequired<crisis> {
 
 
 
-composition cms::handleAWorker {
-  apply useHelicopter(m: 'm', coord: 'coord')               => a6; // Ext 6a.
-  apply lostContact(action: 'requestForArrival')            => a6; // Ext 6b.
-  apply timeout(delay: 'm.delay',action: 'updateLocation')  => a6; // Ext 6c.
-  apply reHandleOnChange(cxt: 'm', crisis: 'crisis')         => a7; // Ext 7a.
-  apply missionFailed(crisis: 'crisis')                     => a7; // Ext 7b.
-  apply lostContact(action: 'requestForDeparture')          => a8; // Ext 8a.
-  // Ext 8b. can't be performed without a huge set of change in the workflow
-  apply missingReport                                       => a11; // Ext 11a. 
-}
+
 */
