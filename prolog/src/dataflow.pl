@@ -40,6 +40,12 @@ variableUsageClosure(V,A) :-
 	usesElemAsInput(A,Vin), usesElemAsOutput(APrime,Vin), 
 	variableUsageClosure(V,APrime).
 
+variableUsageClosure(V,A) :- 
+	isDfActivity(A), isDfActivity(APrime), \+ A == APrime, 
+	isContainedBy(APrime,P), isContainedBy(A,P), existsPath(APrime,A), 
+	usesElemAsOutput(A,Vout), usesElemAsOutput(APrime,Vout), 
+	variableUsageClosure(V,APrime).
+
 %% isDfActivity(+A): an activity inside a dataflow can't be of any kind.
 isDfActivity(A) :- activity(A), hasForKind(A,assign).
 isDfActivity(A) :- activity(A), hasForKind(A,invoke).
