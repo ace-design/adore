@@ -61,7 +61,7 @@ fragment unavailableExtResource {
 composition cms::handleAMission {
   toSet ir; toSet er;                  // Main success scenario
   apply unavailableIntResource                      => a41; // Ext 4a.
-  apply unavailableExtResource                      =>  {a51;a5x;} // Ext 5a.
+  apply unavailableExtResource                      =>  {a51,a5x}; // Ext 5a.
   apply reHandleOnChange(cxt: 'm', crisis: 'crisis') => a4x; // Ext 9a.
   apply reHandleOnChange(cxt: 'm', crisis: 'crisis') => a5x; // Ext 9a.
 }
@@ -71,7 +71,7 @@ composition cms::handleAMission {
 composition cms::handleAMission {
   toSet ir; toSet er;                  // Main success scenario
   apply unavailableIntResource                      => a41; // Ext 4a.
-  apply unavailableExtResource                      =>  {a51;a5x;} // Ext 5a.
-  apply reHandleOnChange(cxt: 'm', crisis: 'crisis') => {a40;a41;a42;a4x;a9;a50;a51;a5x} // Ext 9a.
+  apply unavailableExtResource                      =>  {a51,a5x}; // Ext 5a.
+  apply reHandleOnChange(cxt: 'm', crisis: 'crisis') => {a40,a41,a42,a4x,a9,a50,a51,a5x}; // Ext 9a.
 }
 
