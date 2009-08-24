@@ -1,5 +1,13 @@
 require 'common.adore';
 
+/*
+Remark : 
+A fragment is well-formed if all the variable used as input are earlier initialized inside the fragment or are generic parameter.
+If they correspond to generic parameter they have to be initialised before.
+This error is only detected when the set of fragments has been applied to the final orchestration.
+
+ */
+
 orchestration cms::handleAWorker {
   variables {
     crisis as crisisIdentifier;
@@ -26,13 +34,13 @@ orchestration cms::handleAWorker {
 
 fragment useHelicopter<m,coord> {
   variables {
-    w as worker;   c as crisisIdentifier;
+    w as worker;  
     r as boolean;   m as mission; ok as boolean;
     coord as cmsEmployee;
   }
   activities {
     a1. r := cms::helicopterRequired(m);
-    h. hook(w,c);
+    h. hook(w);
     a2. ok := ui::ask4Helicopter(coord,w,m);
     a3. cms::transportByHelicopter(w,m.loc);
   }
@@ -42,7 +50,8 @@ fragment useHelicopter<m,coord> {
   }
 }
 
-fragment lostContact<action> {
+
+fragment lostContact<action,c> {
   variables {
     c as crisisIdentifier; w as worker;
     super as cmsEmployee;
@@ -96,12 +105,12 @@ fragment extraMissionsRequired<crisis> {
 }
 
 
-fragment missionFailed<crisis> {
+fragment missionFailed {
   variables {
     m as mission; crisis as crisisIdentifier;
   }
   activities { 
-    h. hook(m);
+    h. hook(crisis,m);
     a1. msgBus::send('status' as string, 'failed' as string, m);
     a2. cms::handleCrisis(crisis);
     a3. reply();

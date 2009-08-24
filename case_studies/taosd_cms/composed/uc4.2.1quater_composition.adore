@@ -1,7 +1,15 @@
 /*
+DONE
 
-PBME : en l'etat (gros pbme)
-Ma solution revient à avoir boucle... je suis inquiete et s'il y en a plusieurs des wait ...
+Note : When we apply reHandleOnChange we know that formally the variable "mustwait" can be accessed in concurent way in writing and reading. 
+We accept this possibility knowing our system.
+We add in the knowledge :
+noConflict('concurrentAccess', 'reHandleOnChange_a2','reHandleOnChange_t').
+So, each time a conflict is identified such as :
+conflict(concurrentAccess, 'rHOC_a2','rHOC_t') we don't raise an error.
+
+
+
 composition cms::handleACrisis {
   toSet choosen; // Main success scenario
   apply reHandleOnChange(cxt: 'id', crisis: 'id') => aX; // Ext 12a.
@@ -12,30 +20,49 @@ orchestration cms::handleACrisis {
   variables {
     id as crisisIdentifier; coord as cmsEmployee;
     m* as mission; choosen as mission;
-    choosen* as mission;
+    //choosen* as mission;
+
+    rHOC_mustWait as boolean; rHOC_c as boolean;
   }
   activities {
     rcv. (coord, id) := receive();
     a2. m* := cms::recommendMission(id);
-    a3. choosen* := ui::selectMission(coord,m*);
+    a3. choosen := ui::selectMission(coord,m*);
     aX. cms::handleAMission(coord,id, choosen);
     rpl. reply();
 
+
+    rHOC_a0. rHOC_mustWait := id('false' as boolean);
     rHOC_a1. msgBus::wait4msg('status' as string, 'change' as string, id);
-    rHOC_a2. cms::handleACrisis(id);
+    rHOC_a2. rHOC_mustWait := id('true' as boolean);
+    rHOC_t. rHOC_c := isTrue(rHOC_mustWait);
+    rHOC_a3. cms::handleACrisis(id);
+    rHOC_a4. nop();
+
+
   }
   relations { 
     rcv < a2; a2 < a3;  
     a3 < aX; aX < rpl;
 
-    a3<rHOC_a1; rHOC_a1 < rHOC_a2; rHOC_a2 < rpl;
+     aX << rHOC_t; rHOC_t < rpl when !rHOC_c; a3< rHOC_a0; 
+    rHOC_a0 < rHOC_a1; rHOC_a1 < rHOC_a2; rHOC_a2 << rHOC_t; 
+    rHOC_a1 < rHOC_a3; rHOC_a3 < rHOC_a4; rHOC_t < rHOC_a4 when rHOC_c; 
+    rHOC_a4 < rpl;
+
   }
 }
 
+
 %%% DISENGAGE %%%
+doSetify(cms_handleACrisis, cms_handleACrisis_choosen),
+%%% ENGAGE %%%
+
+/*%%% DISENGAGE %%%
 defPolicy(hAC_choosen,forall(cms_handleACrisis_choosen,cms_handleACrisis_choosen_star),none),
 setIteration(cms_handleACrisis_aX,hAC_choosen),
 %%% ENGAGE %%%
+*/
 
 
 

@@ -1,8 +1,10 @@
-/** chaud la decision du hook alors que l'on est sur un bloc...
+/** 
+Remark : 
+The parameters of a "hook" are first identified according  to their type.
+For the output variable of a hook we look among all the variables in output which appear in the corresponding set of activities.
 
-@mi: pour moi, le 'hook' d'un bloc, c'est une 'activité composite'. elle prend
-en entrée toutes les entrées des 'premières' du bloc, et en sortie toutes les
-sorties des dernières du bloc. 
+If several variables can apply, we ask the designer to explicit which variable has to be selected.
+
 */ 
 
 /** This file contains the result of: 

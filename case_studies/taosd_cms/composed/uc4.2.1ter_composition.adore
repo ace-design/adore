@@ -1,34 +1,40 @@
 /*
-Result from : 
+Remarks : 
 
-=> a priori j'au eu u pme de hook signature sur useHelicopter
-@mi: la crise n'est pas utilisée par le fragmznt => elle peut sauter.
+1) "Complexity"
+To Deal with such a complexity we really need separation of concerns.
+But to "try" to deal with consistency we also need to build the resulting global system and to visualize it. The main interests of our approach are to automatically build the final result, to visualize it, to check in an automatic way for inconsistency, to memorize solutions given by final user as reusable knowledge. So the designer will be able to retract fragments, add new ones, recompute the result without repeating solutions he has already given to the system.
 
-=> idem sur lost il manque la crise la rajouter en <...>
-@mi: elle est utilisée par contre, effectivement, pas le choix, 
-il faut la passer en générique.
 
-=> Pas fait rehandleOnChange
-@mi: normal, il est faux de toutes façons.
+2) "signature conformance"
+We are expecting from an orchestration to respect the signature. So all the reply activities should return a variable of the same type.
 
-=> dans missionFailed là tu avais la crise en parametre et on pouvait ne pas la rendre generique
-@mi: clairement, j'avais plus les yeux en face des trous. c'est un paramètre
- du hook.
+In this example, when a "missionFailed" we don't reply a report as it was not asked in the requirement document. So the resulting orchestration is false. An error is raised. Adding "null" as parameter of reply in this report is a way to solve this error.
 
-par contre tu introduis un reply sans valeur de retour alors que tous les autres ont une valeur de retour ==> est-ce un conflit? ne dervait-on pas lui en demander un.. mais comme ils ne l'ont pas dit... on leve un warning?
-@mi: c'est un reste 'legacy', on avait pas les rapport avant (je les 
-renvoyait pas). Oui, je pense qu'il faut lever un warning. Ou on retourne 'null'
-dans le fragment, ce qui aurait du sens aussi.
 
-=> avec le 2ieme lost on claucle deux fois le superobserver alors qu'une seule fois aurait suffi.... indetectable? sauf à chercher des actvités équivalentes dans le flot.. à mettre dans limite avec ref aux publis de clem
-@mi: clairement indetectable. Il faudrait retrouver ces appels dans le flot, et
-factoriser pour les remonter. Et encore, ce n'est pas forcément ce que l'on veut
-car on va introduire des attentes qu'on aurait pas forcément voulu en le 
-remontant. Je ne suis même pas sur que ce soit une bonne idée de le faire ...
+3) "Limites of our approach" : Redundant call and shared variables beetween several fragments
+
+In this example, we use twice the same fragment "lost". One optimisation could be to share the variable super and the activity    "a2. super := cms::getSuperObserver(c);" as they apply on the same variables.
+
+We don't do that. Overlapping activities have been studied in ... Such a process could be applied on the resulting orchestration to optimise it. But the process is complex as factorizing activities can introduce unexpected precedences between activities. 
+
+JE COMPREND PAS CE QUI SUIT : 
+=> 
+@mi: 
 il me parait plus interessant de tisser un fragment qui va nous donner 'super' 
 au départ si c'est VRAIMENT ce qu'on veut, et la réutiliser ailleurs au besoin.
 Et bing, des variables VOLONTAIREMENT partagée entre fragment ... et paf, ca 
 fait des chocapics.
+
+
+
+Result from : 
+
+
+=> Pas fait rehandleOnChange
+@mi: normal, il est faux de toutes façons.
+
+
 
 ==> extramission semble avoir été oublié.. 
 Il est tard je ne cherche pas... il faudrait le mettre aussi
@@ -39,16 +45,14 @@ reHandleOnchange ... qui est bindé sur sur a4x et a5x (qui sont les appels à
 ce process dans le parent) ... c'est p'tetre pour ca qu'il est pas composé, il
 est comme le H de Hawaï, il sert à rien.
 
-C'est super dure à lir le resultat...
-@mi: je vais demander a prolog le nombre d'activité, de liens, ...
 
 
 composition cms::handleAWorker {
-  apply useHelicopter(m: 'm', coord: 'coord')               => a6; // Ext 6a.
-  apply lostContact(action: 'requestForArrival')            => a6; // Ext 6b.
+  apply useHelicopter(m: 'm')               => a6; // Ext 6a.
+  apply lostContact(action: 'requestForArrival', c : 'crisis')            => a6; // Ext 6b.
   apply timeout(delay: 'm.delay',action: 'updateLocation')  => a6; // Ext 6c.
   apply reHandleOnChange(cxt: 'm', crisis: 'crisis')         => a7; // Ext 7a.
-  apply missionFailed(crisis: 'crisis')                     => a7; // Ext 7b.
+  apply missionFailed()                     => a7; // Ext 7b.
   apply lostContact(action: 'requestForDeparture')          => a8; // Ext 8a.
   // Ext 8b. can't be performed without a huge set of change in the workflow
   apply missingReport                                       => a11; // Ext 11a. 

@@ -55,6 +55,36 @@ orchestration cms::resolve {
 }
 
 */
+
+orchestration cms::resolveToSet {
+  variables {
+    
+    mission* as mission;
+    selectedMission* as mission;
+    selectedMission as mission;
+    internalRessource as ressource;
+    externalRessource as ressource;
+    user as cmsEmployee;
+    crisisIdentifier as string ;
+  }
+  activities {
+    a0. (user,crisisIdentifier) := receive();
+    a1. cms::witnessReportCapture(user,crisisIdentifier);
+    a2. mission* := cms::missionsToDo(crisisIdentifier);
+    a3. selectedMission* := coordinatorSystem::select(mission*,user);
+    a45. cms::dealWithOneMission(selectedMission,user,crisisIdentifier);
+    a13. coordinatorSystem::close(user,crisisIdentifier);
+    a6.reply();
+  }
+  relations { a0 < a1; a1 < a2; a2<a3; a3<a45 ; a45<a13; a13<a6;}
+}
+
+
+%%% DISENGAGE %%%
+defPolicy(pResolve,forall(cms_resolveToSet_selectedMission,cms_resolveToSet_selectedMission_star),none),
+setIteration(cms_resolveToSet_a45,pResolve),
+%%% ENGAGE %%%
+
 /*
 success.
 Extensions:
@@ -141,7 +171,7 @@ orchestration cms::dealWithOneMission {
 //  toSet  cms::dealWithOneMission::externalRessource;
 //}
 
-*/
+
 /* //4a. Internal resource is not available after step 4.  */
 /* //4a.1 System requests an external resource instead (i.e., use case continues in parallel with step 5).  */
 /* composition cms::dealWithOneMission {  */
@@ -203,6 +233,7 @@ a4a < availabilityTest1; availabilityTest1<a4a2 when b1 ;
 }
 
 */
+/*
 orchestration cms::dealWithOneMissionToSet {
   variables {
     m as mission;
@@ -226,6 +257,8 @@ orchestration cms::dealWithOneMissionToSet {
   }
   relations { a0 <a4a ; a4a<a4a2; a4a2<a4a3; a4a3<a6; a0<a5a;a5a<a5a2;a5a2<a5a3;a5a3<a6;}
 }
+*/
+/*
 
 %%% DISENGAGE %%%
 defPolicy(p0,forall(cms_dealWithOneMissionToSet_internalRessource,cms_dealWithOneMissionToSet_internalRessource_star),none),
@@ -235,7 +268,8 @@ setIteration(cms_dealWithOneMissionToSet_a4a3,p0),
 setIteration(cms_dealWithOneMissionToSet_a5a2,p1),
 setIteration(cms_dealWithOneMissionToSet_a5a3,p1),
 %%% ENGAGE %%%
-
+*/
+/*
 */
 
 /*
@@ -307,8 +341,8 @@ orchestration cms::dealWithOneMissionToSetExt4a5b {
     %setIteration(cms_dealWithOneMissionToSetExt4a5b_xor1,p2),
 %%% ENGAGE %%% 
 
-
-*/  
+*/
+  
 //========================================
 //========================================
 //========================================
@@ -328,7 +362,7 @@ orchestration cms::dealWithOneMissionToSetExt4a5b {
 //5. System assigns an initial emergency level to the crisis and sets the crisis status to active. 
 //Use case ends in success. 
 
-/*
+
 orchestration cms::witnessReportCapture {
   variables {
     wi as witnessInformation;
@@ -356,7 +390,7 @@ orchestration cms::witnessReportCapture {
   relations { a0 < a1; a1 < a2; a1<a2a12; a2<a2a3; a1<a3; a3<a4; a2<a4; a4<a5; a5<a6;a2a3<a5 when exact;} 
 }
 
-*/
+
 /*
 //from 4.2.2
 //1a,2a. The call is disconnected. The base use case terminates. 
