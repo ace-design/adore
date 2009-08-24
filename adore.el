@@ -183,8 +183,9 @@
 (defun adore-facts () (interactive) (adore-run-genfacts))
 
 (defun adore-pict  () (interactive) 
-  (let ((i (read-from-minibuffer "Process Id: "))
-	(f (make-temp-file "adore-pict" nil ".png")))
+  (let* ((i (read-from-minibuffer "Process Id: "))
+	 ;;(f (make-temp-file "adore-pict" nil ".png")))
+	 (f (adore-gen-picture-name i)))
     (adore-exec-synchronous (concat "adore2png(" i ",\'" f "\')") 
 			    "Adore Picture" t)
     (adore-display-picture f)))
@@ -194,22 +195,24 @@
     (adore-exec-synchronous g "Adore Goal Execution" nil)))
 
 (defun adore-dgraph  () (interactive)
-  (let ((p (read-from-minibuffer "Process Id: "))
-	(f (make-temp-file "adore-dgraph" nil ".png")))
+  (let* ((p (read-from-minibuffer "Process Id: "))
+	 ;;(f (make-temp-file "adore-dgraph" nil ".png")))
+	 (f (adore-gen-picture-name (concat "dgraph-" p))))
     (adore-exec-synchronous (concat "adore2dgraph(" p ",'" f "')")
 			    "Adore Dependecies Graph" t)
     (adore-display-picture f)))
     
 (defun adore-complete-dgraph () (interactive)
-  (let ((f (make-temp-file "adore-dgraph" nil ".png")))
+  (let ((f (adore-gen-picture-name "dgraph")))
     (adore-exec-synchronous (concat "adore2dgraph('" f "')") 
 			    "Adore Dependencies Execution" t)
     (adore-display-picture f)))
 
 
 (defun adore-gen-current-pict () (interactive)
-  (let ((i (adore-extract-id))
-	(f (make-temp-file "adore-pict" nil ".png")))
+  (let* ((i (adore-extract-id))
+	 (f (adore-gen-picture-name i)))
+    ;;(f (make-temp-file "adore-pict" nil ".png")))
     (if (equal nil i)
 	(message "Adore: Unable to guess the process identifier")
       (progn
