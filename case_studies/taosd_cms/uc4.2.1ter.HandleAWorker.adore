@@ -1,5 +1,4 @@
 require 'common.adore';
-
 /*
 Remarks : 
 - A fragment is well-formed if all the variable used as input are earlier initialized inside the fragment or are generic parameter.
@@ -7,8 +6,16 @@ If they correspond to generic parameter they have to be initialised before.
 This error is only detected when the set of fragments has been applied to the final orchestration.
 
 - self::self is unified with an invocation to the orchestration on which the fragment is applied. The arguments of this call are unified with the arguments of the receive.
-
  */
+
+/*
+WARNING : Orchestration returns when an activity can continue to be executed
+Pbme: 
+Solution : He adds knowledge about this choice to avoid warnings.
+knowledge : 
+disableWarning('returnBeforeToComplet',cms::handleAWorker, a100bis)
+disableWarning('returnBeforeToComplet',cms::handleAWorker, a101bis)
+*/
 
 orchestration cms::handleAWorker {
   variables {
@@ -93,6 +100,7 @@ fragment timeout<delay,action> {
 }
 
 
+/*
 fragment extraMissionsRequired<crisis> {
   variables {
     m as mission; crisis as crisisIdentifier;
@@ -106,7 +114,7 @@ fragment extraMissionsRequired<crisis> {
     ^ < h; ^ < a1; h < $; a1 < a2; 
   }
 }
-
+*/
 
 fragment missionFailed {
   variables {
@@ -120,6 +128,22 @@ fragment missionFailed {
   }
   relations { ^ < h; h < $; fail(h,'failed') < a1; a1 < a2; a2 < a3; }
 }
+/*
+The fragment is modified to deal with the report as return value
+
+fragment missionFailed {
+  variables {
+    m as mission; crisis as crisisIdentifier;
+  }
+  activities { 
+    h. hook(crisis,m);
+    a1. msgBus::send('status' as string, 'failed' as string, m);
+    a2. cms::handleCrisis(crisis);
+    a3. reply('null' as report);
+  }
+  relations { ^ < h; h < $; fail(h,'failed') < a1; a1 < a2; a2 < a3; }
+}
+ */
 
 fragment missingReport {
   variables { r as report; w as worker; }

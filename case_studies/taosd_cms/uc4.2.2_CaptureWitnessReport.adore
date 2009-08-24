@@ -1,3 +1,17 @@
+/*
+WARNING : Orchestration returns when an activity can continue to be executed
+Pbme: In this example, the message is sent when the orchestration returns.
+Solution : He adds knowledge to avoid warnings.
+Knowledge : 
+disableWarning('returnBeforeToComplet',cms::captureWitnessReport, a51)
+disableWarning('returnBeforeToComplet',cms::captureWitnessReport, a11)
+
+WARNING : Unused variable
+Knowledge : the activity a2a3 returns a variable "exact" which is never used.
+Solution : He will add a dedicated fragment as asked in the requirement document.
+
+*/
+
 orchestration cms::captureWitnessReport {
   variables {
     id as crisisIdentifier; coord as cmsEmployee;
@@ -13,7 +27,7 @@ orchestration cms::captureWitnessReport {
     a2a12. pi := phoneCie::getInfo(wi.id);
     a2a3. exact := cms::validateWitnessInfo(wi,pi);
     a3. ccl := cms::buildCheckList(i);
-    a4. ci := ui::promptCheclList(coord,id, ccl);
+    a4. ci := ui::promptCheckList(coord,id, ccl);
     a50. cms::assignEmergencyLvl(id,ci);
     a51. msgBus::send('status' as string, 'active' as string,id);
     rpl. reply();
@@ -24,7 +38,7 @@ orchestration cms::captureWitnessReport {
   }
 }
 
-fragment callDisconected {
+fragment callDisconnected {
   variables {}
   activities { h. hook(); thr. throw('lostWitnessContact' as string); }
   relations { ^ < h; h < $; fail(h,'disconnected') < thr; }
@@ -36,6 +50,16 @@ fragment ignoreDisconnection {
   relations { ^ < h; h < $; fail(h,'disconnected') < $; }
 }
 
+/*
+WARNING : Orchestration returns when an activity can continue to be executed
+Pbme: In this example, the message is sent when the orchestration returns.
+Solution : He adds knowledge to avoid warnings.
+Knowledge : 
+disableWarning('returnBeforeToComplet',requestVideo, t)
+disableWarning('returnBeforeToComplet',requestVideo, a12)
+disableWarning('returnBeforeToComplet',requestVideo, a3)
+
+*/
 fragment requestVideo<user> {
   variables {
     c as boolean; info as preliminaryInformation;

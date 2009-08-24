@@ -1,21 +1,17 @@
 /*
-Pbme sur unavailableEmployee avec le delta.. que faut il faire?
-@mi: en passer un. Genre une 'règle métier' qui dit qu'on employé n'est pas
-dispo s'il ne répond pas en 10 minutes. => delta=10. C'ets bizarre qu'il ne 
-hurle pas en chargeant dans swipl, il me semblait interdir de lier un fragment 
-générique sans spécifier sa généricité ... Ah non, je le fais a l'envers, 
-j'interdis de lier un param générique s'il n'est pas dans la signature du 
-fragment, mais pas l'inverse. to do ...
+Remarks : 
+When a same exception is left even in a concurrent way we don't raise a warning.
 
+ */
 
-Result from : 
-
+/*
+Result from :
 composition cms::assignIntRes {
   apply mustAuthenticate      => a1;      // Ext 1a.
-  apply unavailableEmployee => {a1,a2}; // Ext 1b.
+  apply unavailableEmployee(delta : '10') => {a1,a2}; // Ext 1b.
   apply employeeRefusal       => a2;      // Ext 2a.
 }
-}
+
 */
 
 orchestration cms::assignIntRes {
@@ -47,14 +43,14 @@ orchestration cms::assignIntRes {
     uE_a4. msgBus::send('status' as string, 'unresponsive' as string,e); 
     uE_a5. uE_subst := cms::findSubstitute(e);
     uE_a6. uE_r := self::self(uE_subst,m);
-    uE_rpl. reply(uE_r);
+    uE_rpl. reply();//uE_r);
     uE_thr. throw('unavailable' as string);
 
 
     eR_a1. msgBus::send('info' as string, 'refusal' as string,e); 
     eR_a2. eR_subst := cms::findSubstitute(e);
     eR_a3. eR_r := self::self(eR_subst,m);
-    eR_rpl. reply(eR_r);
+    eR_rpl. reply();//eR_r);
     eR_thr. throw('unavailable' as string);
   }
   relations { //rcv < a1; 

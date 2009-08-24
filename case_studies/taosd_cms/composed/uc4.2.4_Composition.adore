@@ -1,3 +1,4 @@
+
 /*
 
 //estce normal de passer au suivant sans attendre le signal au niveau du bus?
@@ -41,9 +42,10 @@ orchestration cms::requestExtRes {
     nER_a1. msgBus::send('info' as string, 'noSuchResource' as string,res);
     nER_thr. throw('unavailable' as string);
   }
-  relations { rcv < a1; a1 < a2; a2 < rpl; 
+  relations { rcv < a1; a1 < a2; //a2 < rpl; 
 
-    a2 < dR_a1; dR_a1 < dR_t; dR_t < dR_a2 when dR_deg;
+    a2 < dR_a1; dR_a1 < dR_t; dR_t < dR_a2 when dR_deg;  
+    dR_t < rpl when ! dR_deg;  dR_a2<rpl;
 
     fail(a2,'noResource') < nER_a1; nER_a1 < nER_thr; 
 }

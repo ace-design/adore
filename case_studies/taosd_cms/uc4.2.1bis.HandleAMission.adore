@@ -1,5 +1,18 @@
-//Je le modifie pour deplacer le lien depuis a9...
-// qui est embetant par la suite et fait du bruit pour rien
+
+/*
+WARNING : Variable never used :
+Pbme: The variables irep and erep are never used
+Solution : The designer modifies the orchestration asking the CMS to memorize the reports.
+
+WARNING : Orchestration returns when an activity can continue to be executed
+Pbme: In this example, the designer has chosen to return not expecting the end of memorizing the reports (a5r et a4r)
+Solution : He adds knowledge about this choice to avoid warnings.
+knowledge : 
+disableWarning('returnBeforeToComplet',cms::handleAMission, a4r)
+disableWarning('returnBeforeToComplet',cms::handleAMission, a5r)
+*/
+
+
 
 require 'common.adore';
 
@@ -31,6 +44,43 @@ orchestration cms::handleAMission {
   }
 }
 
+
+/* Orchestration after corrections to deal with unused variables
+
+
+orchestration cms::handleAMission {
+  variables {
+    crisis as crisisIdentifier;
+    m as mission;      coord as cmsEmployee;
+    ir as resource; er as resource;
+    iw as cmsEmployee; ew as externalWorker;
+    irep as report; erep as report;
+  }
+  activities {
+    rcv. (coord,crisis, m) := receive();
+    a9. ui::actListener(coord,m,'status' as string); 
+    a40. ir := get(m,'intResource' as string);
+    a41. iw := cms::findRelevantEmployee(ir);
+    a42. cms::assignIntRes(iw,m);
+    a4x. irep := cms::handleAWorker(crisis,iw, m);
+    a4r. cms::memorizeReport(irep);
+    a50. er := get(m,'extResource' as string);
+    a51. ew := cms::requestExtRes(er,crisis,m);
+    a5x. erep := cms::handleAWorker(crisis, ew, m,coord);
+    a5r. cms::memorizeReport(erep);
+    rpl. reply();
+    a9bis. ui::stopListener(coord, m, 'status' as string); 
+  }
+  relations { 
+    rcv < a40; a40 < a41; a41 < a42; a42 < a4x; a4x < rpl;
+    rcv < a50; a50 < a51; a51 < a5x; a5x < rpl;
+    rcv < a9; a9 < a5x; a9 < a4x; rpl < a9bis; 
+    
+  }
+}
+
+*/
+
 fragment unavailableIntResource {
   variables {
     res as resource; worker as worker;
@@ -44,18 +94,46 @@ fragment unavailableIntResource {
   relations { ^ < h; h < $; fail(h,'unavailable') < a1; a1 < a2; a2 < $; }
 }
 
+
 fragment unavailableExtResource {
   variables {
     res as resource; 
     crisis as crisisIdentifier; m as mission;
+    token as string;
   }
   activities {
     h.  hook(res,crisis,m);
-    a1. msgBus::send('status' as string, 'unavailable' as string, res);
+    ac. token := concat('unavailable' as string,res);
+    a1. msgBus::send('status' as string, 'unavailable' as string, m);
     a2. cms::handleCrisis(crisis);
   }
-  relations { ^ < h; h << $; fail(h,'unavailable') < a1; a1 < a2; a2 << $; }
+  relations { ^ < h; h << $; fail(h,'unavailable')  <ac; ac<a1; a1 < a2; a2 << $; }
 }
+
+
+/*
+Modification of the fragment to take into account return value of the hook.
+
+fragment unavailableExtResource {
+  variables {
+    res as resource; 
+    crisis as crisisIdentifier; m as mission;
+    erep as report;
+    token as string;
+  }
+  activities {
+    h.  erep := hook(res,crisis,m);
+    a0. erep := id('null' as report);
+    ac. token := concat('unavailable' as string,res);
+    a1. msgBus::send('status' as string, token , m);
+    a2. cms::handleCrisis(crisis);
+
+  }
+  relations { ^ < h; h << $; h << $; fail(h,'unavailable') < a0; a0<ac; ac<a1; a1 < a2; a2<< $; }
+}
+
+*/
+
 
 //V0 based on the requirement document
 composition cms::handleAMission {

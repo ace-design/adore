@@ -1,5 +1,22 @@
 require 'common.adore';
 
+
+/*
+On a un PBMe
+
+L'orchestration de base ne retourne pas de valeur alors 
+que les fragments renvoient un boolean.
+
+J'ai enlevé toutes les valeurs de retours car les appelant n'utilisent pas la valeur... et qu'on en fait rien....
+*/
+
+/*
+WARNING : Variable never used :
+Pbme: The variables accept is never used
+Solution : He will add a dedicated fragment as asked in the requirement document.
+
+
+*/
 orchestration cms::assignIntRes {
   variables {
     e as cmsEmployee; m as mission; accept as boolean;
@@ -12,6 +29,7 @@ orchestration cms::assignIntRes {
   }
   relations { rcv < a1; a1 < a2; a2 < rpl; }
 }
+
 
 fragment unavailableEmployee<delta> {
   variables {
@@ -28,7 +46,7 @@ fragment unavailableEmployee<delta> {
     a4. msgBus::send('status' as string, 'unresponsive' as string,e); 
     a5. subst := cms::findSubstitute(e);
     a6. r := self::self(subst,m);
-    rpl. reply(r);
+    rpl. reply();
     thr. throw('unavailable' as string);
   }
   relations {
@@ -48,7 +66,7 @@ fragment employeeRefusal {
     a1. msgBus::send('info' as string, 'refusal' as string,e); 
     a2. subst := cms::findSubstitute(e);
     a3. r := self::self(subst,m);
-    rpl. reply(r);
+    rpl. reply();
     thr. throw('unavailable' as string);
   }
   relations {
@@ -60,7 +78,7 @@ fragment employeeRefusal {
 
 composition cms::assignIntRes {
   apply mustAuthenticate      => a1;      // Ext 1a.
-  apply unavailableEmployee => {a1,a2}; // Ext 1b.
+  apply unavailableEmployee(delta : '10') => {a1,a2}; // Ext 1b.
   apply employeeRefusal       => a2;      // Ext 2a.
 }
 

@@ -1,18 +1,16 @@
 /*
-Remarks : 
-
-1) "Complexity"
+1) Remarks : "Complexity"
 To Deal with such a complexity we really need separation of concerns.
 But to "try" to deal with consistency we also need to build the resulting global system and to visualize it. The main interests of our approach are to automatically build the final result, to visualize it, to check in an automatic way for inconsistency, to memorize solutions given by final user as reusable knowledge. So the designer will be able to retract fragments, add new ones, recompute the result without repeating solutions he has already given to the system.
 
 
-2) "signature conformance"
+2) Error : "signature conformance"
 We are expecting from an orchestration to respect the signature. So all the reply activities should return a variable of the same type.
 
 In this example, when a "missionFailed" we don't reply a report as it was not asked in the requirement document. So the resulting orchestration is false. An error is raised. Adding "null" as parameter of reply in this report is a way to solve this error.
 
 
-3) "Limites of our approach" : Redundant call and shared variables beetween several fragments
+3) "Limites of our approach" : Redundant calls and shared variables beetween several fragments
 
 In this example, we use twice the same fragment "lost". One optimisation could be to share the variable super and the activity    "a2. super := cms::getSuperObserver(c);" as they apply on the same variables.
 
@@ -93,7 +91,7 @@ orchestration cms::handleAWorker {
 
     mF_a1. msgBus::send('status' as string, 'failed' as string, m);
     mF_a2. cms::handleCrisis(crisis);
-    mF_a3. reply();
+    mF_a3. reply('null' as report);
 
     lC1_a1. msg::wait4Msg('info' as string, 'lost' as string, w);
     lC1_a2. lC1_super := cms::getSuperObserver(crisis);

@@ -1,13 +1,14 @@
 /*
+
+WARNING : Multiple exceptions can be thrown under the same "formel" conditions.
+Pbme : fakeCrisis, fakeWitnessInformation are errors that can be thrown in a concurrent way. 
+Solution : As designer doesn't want to introduce useless waiting beetween activities that throw these errors. He adds Knowledge.
+Knowledge : 
+disableWarning('multipleExceptions',cms::captureWitnessReport, 'fakeWitnessInformation','fakeCrisis')
+
+
+
 Result from 
-
-==> request video.. balaise la detection du info... 
-@mi: ce fragment se composre sur {a3,a4}. son hook manipule donc en entrée
-les entrées de 'a3', et en sortie les sorties de 'a4', respectivement 1ere et
-dernière du bloc. donc, c'ets bon. non ?
-
-//pas de sucesseurs dans le dernier = je ne fais rien
-@mi: pas compris la question / le problème.
 
 composition cms::captureWitnessReport{
   apply callDisconnected            => a10;     // Ext 1a.
@@ -33,8 +34,7 @@ orchestration cms::captureWitnessReport {
    rV_feedId as videoFeedIdentifier;
    rV_fCD_isReal as boolean;
 
-
- fCD0_isReal as boolean; 
+   fCD0_isReal as boolean; 
   }
   activities {
     rcv. (coord, id) := receive();
@@ -44,7 +44,7 @@ orchestration cms::captureWitnessReport {
     a2a12. pi := phoneCie::getInfo(wi.id);
     a2a3. exact := cms::validateWitnessInfo(wi,pi);
     a3. ccl := cms::buildCheckList(i);
-    a4. ci := ui::promptCheclList(coord,id, ccl);
+    a4. ci := ui::promptCheckList(coord,id, ccl);
     a50. cms::assignEmergencyLvl(id,ci);
     a51. msgBus::send('status' as string, 'active' as string,id);
     rpl. reply();
@@ -83,14 +83,13 @@ orchestration cms::captureWitnessReport {
 
 a4 < fCD0_t; fCD0_t < a50 when fCD0_isReal; fCD0_t < fCD0_thr when ! fCD0_isReal;
 
-
   }
 }
 
 
-
-
-
+/*
+  apply fakeCrisisDetected  => requestVideo::a3; // Ext 5b. impacts Ext 3a.
+*/
 
 fragment requestVideo<user> {
   variables {
@@ -115,8 +114,3 @@ fragment requestVideo<user> {
 }
 
 
-/*
-
-  relations {  }
-}
-*/

@@ -1,7 +1,10 @@
 /*
+I think we could forget this version as the same problem occurs in moving the reHandleOnChange.
 
-This version fails because we can't compute a data flow when there can be several outputs.
-Moreover this version fails in applying reHandleOnChange at two activities when we need only on one.
+
+ERROR : This version fails because we can't compute a data flow when there can be several outputs.
+
+SUGGESTION : Moreover this version fails in applying reHandleOnChange at two activities when we need only on one.
 
 Result of : 
 

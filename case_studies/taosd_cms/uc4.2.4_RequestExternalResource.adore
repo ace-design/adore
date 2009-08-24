@@ -24,7 +24,7 @@ fragment degradedRes<treshold> {
     t. deg := isGreaterThan(lvl,treshold);
     a2. msgBus::send('info' as string, 'degraded' as string,w);
   }
-  relations { ^ < h; h< $; h < a1; a1 < t; t < a2 when deg; }
+  relations { ^ < h;  h < a1; a1 < t; t < a2 when deg; t<$ when !deg; a2<$; }
 }
 
 fragment noExtRes {
