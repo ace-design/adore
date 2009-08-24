@@ -135,7 +135,7 @@ composition cms::handleAWorker {
   apply lostContact(action: 'requestForArrival', c : 'crisis') => a6; // Ext 6b.
   apply timeout(delay: 'm.delay',action: 'updateLocation')  => a6; // Ext 6c.
   apply reHandleOnChange(cxt: 'm', crisis: 'crisis')         => a7; // Ext 7a.
-  apply missionFailed()                     => a7; // Ext 7b.
+  apply missionFailed                     => a7; // Ext 7b.
   apply lostContact(action: 'requestForDeparture', c : 'crisis') => a8; //Ext 8a.
   // Ext 8b. can't be performed without a huge set of changes in the workflow
   apply missingReport                                       => a11; // Ext 11a. 
