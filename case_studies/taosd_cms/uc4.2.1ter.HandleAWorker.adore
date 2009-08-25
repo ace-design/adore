@@ -5,7 +5,7 @@ Remarks :
 If they correspond to generic parameter they have to be initialised before.
 This error is only detected when the set of fragments has been applied to the final orchestration.
 
-- self::self is unified with an invocation to the orchestration on which the fragment is applied. The arguments of this call are unified with the arguments of the receive.
+- self::self is unified with an invocation to the orchestration on which the fragment is applied. The arguments of this call are unified with the arguments of the receive, i.e. as for evaluate the hook we use the same process based on type identification to evaluate arguments.
  */
 
 /*

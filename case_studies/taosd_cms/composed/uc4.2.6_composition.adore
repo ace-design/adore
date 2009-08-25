@@ -14,15 +14,24 @@ orchestration cms::execSupObsMission {
   relations { rcv < a1; a1 < a2; a2 < a3; a3 < aX; aX < rpl; }
 }
 
-/*WARNING : Variable never used :
-Pbme: The variable ack is never used. 
-Solution : It will be used by a fragment.
+
+/*
+Result From 
+
+}
+
 */
+
 orchestration cms::handleSupObsMissions {
   variables {
     so as cmsEmployee; crisis as crisisIdentifier; m* as mission; 
     choosen as mission; mr as misisonRequest; mi as missionInformation;
     ack as boolean; quit as boolean;
+
+     rM_subst* as mission;
+     rM_nAR_c as boolean;
+
+    aMF_subst* as mission; 
   }
   activities {
     rcv. (m*, so, crisis) := receive();
@@ -36,28 +45,67 @@ orchestration cms::handleSupObsMissions {
     a92. cms::handleSupObsMissions(m*, so, crisis);
     rpl. reply();
     a93. msgBus::send('info' as string, 'leaving' as string,so);
+
+
+    aMF_a1. msgBus::wait4Msg('status' as string, 'fail' as string, mi);
+    aMF_a2. aMF_subst* := cms::recommendSupObsMission(crisis);
+    aMF_a3. self::self(aMF_subst*); 
+
+    rM_a1. rM_subst* := cms::findEquivalentMissions(mi);
+    rM_a2. cms::handleSupObsMissions(rM_subst*, so, crisis);
+    rM_a3. reply();
+
+    rM_nAR_t. rM_nAR_c := isEmptySet(rM_subst*);
+    rM_nAR_a1. ui::promptNotifyNtlCrisisCtr(so);
+
   }
   relations {
-    rcv < a4; a4 < a5; a5 < a6; a6 < a7; a7 < a8 when ack; a7 < t when ack ;
+    rcv < a4; a4 < a5; a5 < a6; a6 < a7; 
+    //a7 < a8; a7 < t;
     t < rpl when quit; t < a91 when ! quit; a91 < a92; a92 < rpl;
-    rpl < a93; a8 < rpl;
+    rpl < a93; //a8 < rpl;
+
+
+ a7 < a8 when ack; a7 < t when ack; a7 < rM_a1 when !ack; //rM_a1 < rM_a2; 
+ rM_a2 < rM_a3;
+rM_a1 < rM_nAR_t; rM_nAR_t < rM_a2 when !rM_nAR_c; rM_nAR_t < rM_nAR_a1 when rM_nAR_c; rM_nAR_a1 < rM_a2;
+
+
+    a8 << rpl;  
+    a7 < aMF_a1 when ack; aMF_a1 < aMF_a2; aMF_a2 < aMF_a3; aMF_a3 << rpl;
+
   }
 }
 
-fragment replaceMission {
+
+
+fragment replaceMissionAndnAR {
   variables {
-    mi as missionInformation; ack as boolean;
-    subst* as mission;
+  mi as missionInformation; ack as boolean;
+user as cmsEmployee;
+    rM_subst* as mission;
+
+    rM_nAR_c as boolean;
   }
   activities {
     h. ack := hook(mi);
-    a1. subst* := cms::findEquivalentMissions(mi);
-    a2. self::self(subst*); 
-    a3. reply();
+    rM_a1. rM_subst* := cms::findEquivalentMissions(mi);
+    rM_a2. self::self(rM_subst*); 
+    rM_a3. reply();
+
+    rM_nAR_t. rM_nAR_c := isEmptySet(rM_subst*);
+    rM_nAR_a1. ui::promptNotifyNtlCrisisCtr(user);
   }
-  relations { ^ < h; h < $ when ack; h < a1 when !ack; a1 < a2; a2 < a3; }
+  relations { 
+    h < $ when ack; h < rM_a1 when !ack; //rM_a1 < rM_a2; 
+ rM_a2 < rM_a3;
+rM_a1 < rM_nAR_t; rM_nAR_t < rM_a2 when !rM_nAR_c; rM_nAR_t < rM_nAR_a1 when rM_nAR_c; rM_nAR_a1 < rM_a2;
+
+
+}
 }
 
+/*
 fragment noAvailableReplacement<user> {
   variables {
     m* as mission;
@@ -68,30 +116,7 @@ fragment noAvailableReplacement<user> {
     t. c := isEmptySet(m*);
     a1. ui::promptNotifyNtlCrisisCtr(user);
   }
-  relations { ^ < h; h < t; t < $ when !c; t < a1 when c; a1 < $; }
+  relations { a1 < rM_nAR_t; rM_nAR_t < a2 when !rM_nAR_c; rM_nAR_t < rM_nAR_a1 when rM_nAR_c; rM_nAR_a1 < a2; }
 } 
 
-fragment askedMissionFailure<crisis> {
-  variables {
-    mi as mission; subst* as mission; 
-    crisis as crisisIdentifier;
-   
-  }
-  activities {
-    h. hook(mi);
-    a1. msgBus::wait4Msg('status' as string, 'fail' as string, mi);
-    a2. subst* := cms::recommendSupObsMission(crisis);
-    a3. self::self(subst*); 
-    // a4. reply();
-  }
-  relations {
-    ^ < h; h << $;  
-    ^ < a1 ; a1 < a2; a2 < a3; a3 << $; // a3 < a4; 
-  }
-} 
-
-composition cms::handleSupObsMissions {
-  apply replaceMission         => a7;
-  apply noAvailableReplacement(user : 'so') => replaceMission::a1;
-  apply askedMissionFailure (crisis : 'crisis')  => a7;
-}
+*/

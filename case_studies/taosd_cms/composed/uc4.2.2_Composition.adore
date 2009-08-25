@@ -75,13 +75,13 @@ orchestration cms::captureWitnessReport {
     fail(a2,'disconnected') < cD1_thr;
 
     a2 < rV_t; rV_t < rV_a12 when rV_c; rV_a12 < rV_a3; 
-   rV_a3 < rV_fCD_t; rV_fCD_t < rV_fCD_thr when ! rV_fCD_isReal;
+   rV_a12 < rV_fCD_t; rV_fCD_t < rV_fCD_thr when ! rV_fCD_isReal;
 
     fail(a4,'disconnected') < a50;
 
     a2a3 < a50 when exact; a2a3 < fWI_thr when ! exact;
 
-    a4 < fCD0_t; fCD0_t < a50 when fCD0_isReal; fCD0_t < fCD0_thr when ! fCD0_isReal;
+    a3 < fCD0_t; fCD0_t < a50 when fCD0_isReal; fCD0_t < fCD0_thr when ! fCD0_isReal;
 
   }
 }
@@ -109,8 +109,8 @@ fragment requestVideo<user> {
   }
   relations { ^ < h; 
               h < $; t < a12 when c; a12 < a3; 
-              h<t ;
- a3 < fCD_t; fCD_t < fCD_thr when ! fCD_isReal;}
+              h<t ; 
+ a12 < fCD_t; fCD_t < fCD_thr when ! fCD_isReal;}
 }
 
 
