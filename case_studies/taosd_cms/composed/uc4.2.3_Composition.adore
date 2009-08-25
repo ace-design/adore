@@ -74,35 +74,5 @@ orchestration cms::assignIntRes {
 
 
 
-/*
-fragment unavailableEmployee {
-  variables {
-    const uE_true := 'true' as boolean; const uE_false := 'false' as boolean;
-    const uE_delta := '10' as integer;  uE_expired as boolean; uE_c as boolean;
-    e as cmsEmployee; uE_subst as cmsEmployee; uE_r as boolean; m as mission;
-  }
-  activities {
-    uE_a0. uE_expired := false;
-    h. hook(e,m);
-    uE_a1. stopwatch::sleep(uE_delta);
-    uE_a2. uE_expired := true ;
-    uE_a3. uE_c := isTrue(uE_expired);
-    uE_a4. msgBus::send('status' as string, 'unresponsive' as string,e); 
-    uE_a5. uE_subst := cms::findSubstitute(e);
-    uE_a6. uE_r := self::self(uE_subst,m);
-    uE_rpl. reply(uE_r);
-    uE_thr. throw('unavailable' as string);
-  }
-  relations {
-    ^ < uE_a0;uE_a0 < h; h << uE_a3; uE_a0 < uE_a1; uE_a1 < uE_a2; uE_a2 << uE_a3;
-    uE_a3 < uE_a4 when uE_c; uE_a3 < uE_a5 when uE_c; uE_a3 < $ when !uE_c;
-    uE_a5 < uE_a6; uE_a6 < uE_rpl; fail(uE_a5,'noSubstituteFound') < uE_thr;
-  }
-}
-*/
-
-
-
-
 
 

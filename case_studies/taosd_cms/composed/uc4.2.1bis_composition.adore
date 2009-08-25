@@ -100,42 +100,14 @@ orchestration cms::handleAMission {
   }
 }
 
-
-
-/*
-%%% DISENGAGE %%%
-    //defPolicy(hAM_ir,forall(cms_handleAMission_ir,cms_handleAMission_ir_star),none),
-    //setIteration(cms_handleAMission_a41,hAM_ir),
-    //setIteration(cms_handleAMission_a42,hAM_ir),
-    //setIteration(cms_handleAMission_a4x,hAM_ir),
-    //setIteration(cms_handleAMission_ts0,hAM_ir),
-    //setIteration(cms_handleAMission_uIR_a1,hAM_ir),
-    //setIteration(cms_handleAMission_uIR_a2,hAM_ir),
-doSetify(cms_handleAMission,cms_handleAMission_ir),
-
-doSetify(cms_handleAMission, cms_handleAMission_ir),
-%%% ENGAGE %%%
-*/
-
 %%% DISENGAGE %%%
 doSetify(cms_handleAMission, cms_handleAMission_ir),
-    doSetify(cms_handleAMission, cms_handleAMission_er),
-    setIteration(cms_handleAMission_uER_a2,p2),
-
+doSetify(cms_handleAMission, cms_handleAMission_er),
+setIteration(cms_handleAMission_uER_a2,p2),
 %%% ENGAGE %%%
 
-
-orchestration z::zut {
-  variables { a as string;
-
-  }
-  activities {
-    rcv. receive();
-    a1. a:=ilLeFaut();
-    rpl. reply();
-  }
-  relations { 
-    rcv < a1 ; a1<rpl;
-  }
+fragment nop_2 {
+  variables {}
+  activities { n. nop(); }
 }
 

@@ -109,7 +109,7 @@ orchestration cms::handleAWorker {
 
   }
   relations {
-    rcv < a100; rcv < a101; a100 < a6; a101 < a6; 
+    rcv < a100; rcv < a101; 
     //a6 < a7; 
     // a7 < a8; 
      //a8 < a11 ; 
@@ -117,7 +117,7 @@ orchestration cms::handleAWorker {
     //a8 < a100bis; a8 < a101bis;
 
     a100 < uH_a1; a101 < uH_a1; uH_a1 < a6 when ! uH_r;  uH_a1 < uH_a2 when uH_r;
-    uH_a2 < uH_a3 when uH_ok; uH_a2 < a6  when !uH_ok; uH_a3 < a6; a6 < a7;
+    uH_a2 < uH_a3 when uH_ok; uH_a2 < a6  when !uH_ok; uH_a3 < a6; 
 
 
     a100 < lC0_a1; a101 < lC0_a1; a6 << a7; lC0_a1 < lC0_a2; lC0_a2 < lC0_a3; lC0_a3 << a7;
@@ -142,30 +142,3 @@ orchestration cms::handleAWorker {
   }
 }
 
-
-
-
-
-
-/*
-
-
-fragment extraMissionsRequired<crisis> {
-  variables {
-    m as mission; crisis as crisisIdentifier;
-  }
-  activities {
-    h. hook(m);
-    a1. msgBus::wait4msg('status' as string, 'extra' as string, m);
-    a2. cms::handleCrisis(crisis);
-  }
-  relations {
-    ^ < h; ^ < a1; h < $; a1 < a2; 
-  }
-}
-
-
-
-
-
-*/

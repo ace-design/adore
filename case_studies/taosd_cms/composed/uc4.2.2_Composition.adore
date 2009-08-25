@@ -81,7 +81,7 @@ orchestration cms::captureWitnessReport {
 
     a2a3 < a50 when exact; a2a3 < fWI_thr when ! exact;
 
-a4 < fCD0_t; fCD0_t < a50 when fCD0_isReal; fCD0_t < fCD0_thr when ! fCD0_isReal;
+    a4 < fCD0_t; fCD0_t < a50 when fCD0_isReal; fCD0_t < fCD0_thr when ! fCD0_isReal;
 
   }
 }
@@ -108,7 +108,7 @@ fragment requestVideo<user> {
     fCD_thr. throw('fakeCrisis' as string);
   }
   relations { ^ < h; 
-              h < $; ^ < t; t < a12 when c; a12 < a3; 
+              h < $; t < a12 when c; a12 < a3; 
               h<t ;
  a3 < fCD_t; fCD_t < fCD_thr when ! fCD_isReal;}
 }

@@ -1,16 +1,7 @@
-/*
-
-composition cms::handleACrisis {
-  toSet choosen; // Main success scenario
-  apply reHandleOnChange(cxt: 'id', crisis: 'id') => aX; // Ext 12a.
-}
-*/
-
 orchestration cms::handleACrisis {
   variables {
     id as crisisIdentifier; coord as cmsEmployee;
     m* as mission; choosen as mission;
-    //choosen* as mission;
 
     rHOC_mustWait as boolean; rHOC_c as boolean;
   }
@@ -33,7 +24,7 @@ orchestration cms::handleACrisis {
   }
   relations { 
     rcv < a2; a2 < a3;  
-    a3 < aX; aX < rpl;
+    a3 < aX; 
 
      aX << rHOC_t; rHOC_t < rpl when !rHOC_c; a3< rHOC_a0; 
     rHOC_a0 < rHOC_a1; rHOC_a1 < rHOC_a2; rHOC_a2 << rHOC_t; 
@@ -43,70 +34,11 @@ orchestration cms::handleACrisis {
   }
 }
 
-
 %%% DISENGAGE %%%
 doSetify(cms_handleACrisis, cms_handleACrisis_choosen),
 %%% ENGAGE %%%
 
-/*%%% DISENGAGE %%%
-defPolicy(hAC_choosen,forall(cms_handleACrisis_choosen,cms_handleACrisis_choosen_star),none),
-setIteration(cms_handleACrisis_aX,hAC_choosen),
-%%% ENGAGE %%%
-*/
-
-
-
-orchestration z::zut {
-  variables { a as string;
-
-  }
-  activities {
-    rcv. receive();
-    a1. a:=ilLeFaut();
-    rpl. reply();
-  }
-  relations { 
-    rcv < a1 ; a1<rpl;
-  }
-}
-
-
-fragment reHandleOnChangeNV<cxt,crisis> {
- variables {
-    cxt as contextIdentifier;
-    crisis as crisisIdentifier;
-    again as boolean;
-    wait as boolean;
-  }
-  activities {
-    a0. again := id('false' as boolean);
-    h. hook();
-    a1. msgBus::wait4msg('status' as string, 'change' as string, cxt);
-    a1bis. again :=  id('true' as boolean);
-    a2. cms::handleACrisis(crisis);
-    test. wait := isTrue(again);
-    n. nop();
-    
-  }
-  relations { ^ < a0; a0<h; a0<a1; a1<a1bis; a1bis<a2; h < test; 
-    test<$ when !wait; a2<n; test<n when wait; n<$; }
-}
-
-
-fragment reHandleOnChangeNVBis<cxt,crisis> {
- variables {
-    cxt as contextIdentifier;
-    crisis as crisisIdentifier;
-    more as boolean;
-    handlerIdent as Identifier;
-  }
-  activities {
-    h. hook();
-    a1. handlerIdent:= cms::dealWithChange(cxt,crisis);
-    test. more := cms::newChanges(cxt,crisis,handlerIdent);
-    wait. cms::notifyEndOfAllMissions(handlerIdent);
-    
-  }
-  relations {^<h;^<a1; h<test ; a1<test;
-    test<$ when !more; test< wait when more; wait <$; }
+fragment nop_1 {
+  variables {}
+  activities { n. nop(); }
 }

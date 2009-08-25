@@ -28,7 +28,7 @@ orchestration cms::resolveCrisis {
 
   }
   relations { 
-    rcv < a1; a1 < a12; a12 < aX; aX < a13; a13 < rpl; a13 < a12bis;
+    a1 < a12; a12 < aX; aX < a13; a13 < rpl; a13 < a12bis;
 
     rcv < mA_a1; mA_a1 < a1 when mA_still; mA_a1 < mA_a2 when ! mA_still; 
     mA_a2 < a1 when mA_auth; mA_a2 < mA_t when ! mA_auth;
