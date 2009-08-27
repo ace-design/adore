@@ -30,7 +30,7 @@ orchestration cms::handleAMission {
     a40. ir := get(m,'intResource' as string);
     a41. iw := cms::findRelevantEmployee(ir);
     a42. cms::assignIntRes(iw,m);
-    a4x. irep := cms::handleAWorker(crisis,iw, m);
+    a4x. irep := cms::handleAWorker(crisis,iw, m,coord);
     a50. er := get(m,'extResource' as string);
     a51. ew := cms::requestExtRes(er,crisis,m);
     a5x. erep := cms::handleAWorker(crisis, ew, m,coord);
