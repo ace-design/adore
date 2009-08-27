@@ -16,6 +16,19 @@ orchestration cms::execSupObsMission {
 
 
 /*
+
+//WARNING : 
+Conflicts = [ warning(areTheseActivitiesDuplicated, [cms_handleSupObsMissions_a91, cms_handleSupObsMissions_aMF_a2]), 
+PBME : cms is called twice to recommand missions to superObserver if the mission fails and he refuses to quit.
+Solution : 
+We can add a link between these activities to repare it as probably we want to ask him only if he refuses to quit or event we don't have to ask him...
+
+TO BE DONE ?
+
+
+
+
+
 Result From 
 
 }

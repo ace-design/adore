@@ -12,6 +12,13 @@ ERROR : Variable accessed and not initialized :
 This error can be detected before computing the resulting orchestration as the fragment implied doesn't deal with return variable for the hook
 - Solution : the fragment is modified to take into account the return value.
 
+
+
+WARNING : 
+ Pbme : warning(areTheseActivitiesDuplicated, [cms_handleAMission_a51, cms_handleAMission_uIR_a2]))] 
+ Solution : 
+We call twice cms::requestExtRes but it's wanted.
+ Knowledge : forget('areTheseActivitiesDuplicated',[cms_handleAMission_a51, cms_handleAMission_uIR_a2]).
 */
 
 /*

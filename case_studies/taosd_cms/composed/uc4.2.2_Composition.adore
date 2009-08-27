@@ -6,9 +6,11 @@ Solution : As designer doesn't want to introduce useless waiting beetween activi
 Knowledge : 
 disableWarning('multipleExceptions',cms::captureWitnessReport, 'fakeWitnessInformation','fakeCrisis')
 
+WARNING : Conflicts = [warning(areTheseActivitiesDuplicated, [cms_captureWitnessReport_fCD0_t, cms_captureWitnessReport_rV_fCD_t])] 
+Solution : 
+We assume UI will managed concurrent popup? The pbme has to be solved.
 
 
-Result from 
 
 composition cms::captureWitnessReport{
   apply callDisconnected            => a10;     // Ext 1a.

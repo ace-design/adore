@@ -1,19 +1,6 @@
 
 /*
 
-//estce normal de passer au suivant sans attendre le signal au niveau du bus?
-@mi: oui, effectivement, c'est bizarre. Mais dans ce cas, ce n'est plus en //
-du hook. On sait le faire, exclusivité des conditions sur le hook, et ca roule.
-
-//sacrement inversé... on lui demande s'il envoie des choses correctes.. pas grave
-@mi: le CdC dit 'l'ERS approuve partiellement la requête'. Je traduit ça en
-lui posant une question sur son 'état', et en en deduisant si la 
-ressource est degradée ou pas. C'est effectivmeent déviant rapport au CdC ...
-et merde.
-
-
-//
-
 composition cms::requestExtRes {
   apply degradedRes(treshold: '80') => a2; // Ext 2a.
   apply noExtRes                    => a2; // Ext 2b.

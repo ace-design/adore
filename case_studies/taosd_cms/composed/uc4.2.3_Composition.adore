@@ -2,6 +2,18 @@
 Remarks : 
 When a same exception is left even in a concurrent way we don't raise a warning.
 
+
+WARNING : 
+Conflicts = [ warning(areTheseActivitiesDuplicated, [cms_assignIntRes_uE_a5, cms_assignIntRes_eR_a2]),
+warning(areTheseActivitiesDuplicated, [cms_assignIntRes_uE_a6, cms_assignIntRes_eR_a3])]
+There is an implicit exclusion between these two activities that we are not able to detect.
+Solution : User has to declare they can exist : 
+forget(areTheseActivitiesDuplicated, [cms_assignIntRes_uE_a6, cms_assignIntRes_eR_a3])] ).
+forget(areTheseActivitiesDuplicated, [cms_assignIntRes_uE_a5, cms_assignIntRes_eR_a2]).
+
+
+Solution : 
+
  */
 
 /*
@@ -42,14 +54,14 @@ orchestration cms::assignIntRes {
     uE_a3. uE_c := isTrue(uE_expired);
     uE_a4. msgBus::send('status' as string, 'unresponsive' as string,e); 
     uE_a5. uE_subst := cms::findSubstitute(e);
-    uE_a6. uE_r := self::self(uE_subst,m);
+    uE_a6. uE_r := cms::assignIntRes(uE_subst,m);
     uE_rpl. reply();//uE_r);
     uE_thr. throw('unavailable' as string);
 
 
     eR_a1. msgBus::send('info' as string, 'refusal' as string,e); 
     eR_a2. eR_subst := cms::findSubstitute(e);
-    eR_a3. eR_r := self::self(eR_subst,m);
+    eR_a3. eR_r := cms::assignIntRes(eR_subst,m);
     eR_rpl. reply();//eR_r);
     eR_thr. throw('unavailable' as string);
   }
