@@ -37,6 +37,11 @@ path(X,Y) :- sameProcess(X,Y), onFailure(Y,X,_).
 existsPath(X,Y) :- path(X,Y).
 existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).
 
+%% getPath/3: getPath(+A,+B,-Path) => return activities from A to B
+getPath(A,B,[A|O]) :- extractPath(A,B,O). 
+extractPath(A,B,[B]) :- path(A,B).
+extractPath(A,B,[X|O]) :- path(A,X), extractPath(X,B,O).
+
 %%%%
 %% Access to variable
 %%%%
@@ -76,7 +81,8 @@ getLastActivitiesOfBlock(Block,Activities) :-
 isLastActivity(Block,Activity) :- 
 	member(Activity,Block),	\+ path(Activity,_).
 isLastActivity(Block,Activity) :- 
-	member(Activity,Block), path(Activity,APrime), \+ member(APrime,Block). 
+	member(Activity,Block), path(Activity,APrime),
+	\+ member(APrime,Block). 
 
 getBlockInputVariable(Block, Vars) :-
 	findall(V,isBlockInputVariable(Block,V),Tmp),
@@ -89,3 +95,23 @@ getBlockOutputVariable(Block, Vars) :-
 	sort(Tmp,Vars).
 isBlockOutputVariable(Block,V) :- 
 	isLastActivity(Block,A), usesElemAsOutput(A,V).
+
+%%%%
+%% Process entry and exit points
+%%%%
+
+%% isProcessEntryPoint(?P,?A): A is an entry of P (receive|pred)
+isProcessEntryPoint(P,A) :- 
+	process(P), isContainedBy(A,P), activity(A), hasForKind(A,receive).
+isProcessEntryPoint(F,A) :- 
+	process(F), isFragment(F), isContainedBy(A,F), activity(A), 
+	hasForKind(A,predecessors).
+
+%% isProcessExitPoint(?P,?A): A is an exit of P (reply|throw|succ)
+isProcessExitPoint(P,A) :-
+	process(P), isContainedBy(A,P), activity(A), hasForKind(A,reply).
+isProcessExitPoint(P,A) :-
+	process(P), isContainedBy(A,P), activity(A), hasForKind(A,throw).
+isProcessExitPoint(F,A) :-
+	process(F), isFragment(F), isContainedBy(A,F), activity(A), 
+	hasForKind(A,successors).
