@@ -1,15 +1,5 @@
 require 'common.adore';
 
-
-/*
-On a un PBMe
-
-L'orchestration de base ne retourne pas de valeur alors 
-que les fragments renvoient un boolean.
-
-J'ai enlevé toutes les valeurs de retours car les appelant n'utilisent pas la valeur... et qu'on en fait rien....
-*/
-
 /*
 WARNING : Variable never used :
 Pbme: The variables accept is never used
