@@ -17,6 +17,12 @@ orchestration cms::execSupObsMission {
 /*WARNING : Variable never used :
 Pbme: The variable ack is never used. 
 Solution : It will be used by a fragment.
+
+
+WARNING :
+L = [warning(noComplementaryBranchFor, cms_handleSupObsMissions, [ (cms_handleSupObsMissions_a7, cms_handleSupObsMissions_ack, true), (cms_handleSupObsMissions_a7, cms_handleSupObsMissions_ack, true)])] 
+SOl: We hope the fragments will solve it.
+
 */
 orchestration cms::handleSupObsMissions {
   variables {

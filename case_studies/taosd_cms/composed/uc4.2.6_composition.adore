@@ -27,6 +27,10 @@ TO BE DONE ?
 
 
 
+WARNING : 
+[warning(noComplementaryBranchFor, cms_handleSupObsMissions, [ (cms_handleSupObsMissions_a7, cms_handleSupObsMissions_ack, true), (cms_handleSupObsMissions_a7, cms_handleSupObsMissions_ack, true)])] 
+
+
 
 
 Result From 
@@ -62,13 +66,13 @@ orchestration cms::handleSupObsMissions {
 
     aMF_a1. msgBus::wait4Msg('status' as string, 'fail' as string, mi);
     aMF_a2. aMF_subst* := cms::recommendSupObsMission(crisis);
-    aMF_a3. self::self(aMF_subst*); 
+    aMF_a3.  cms::handleSupObsMissions(aMF_subst*, so, crisis); 
 
     rM_a1. rM_subst* := cms::findEquivalentMissions(mi);
     rM_a2. cms::handleSupObsMissions(rM_subst*, so, crisis);
     rM_a3. reply();
 
-    rM_nAR_t. rM_nAR_c := isEmptySet(rM_subst*);
+    rM_nAR_t. rM_nAR_c := isEmptySet(rM_subst*,so, crisis);
     rM_nAR_a1. ui::promptNotifyNtlCrisisCtr(so);
 
   }

@@ -10,6 +10,18 @@ WARNING : Conflicts = [warning(areTheseActivitiesDuplicated, [cms_captureWitness
 Solution : 
 We assume UI will managed concurrent popup? The pbme has to be solved.
 
+WARNING : 
+Conflicts = [warning(noComplementaryBranchFor, cms_captureWitnessReport, [ (cms_captureWitnessReport_rV_t, cms_captureWitnessReport_rV_c, true), (cms_captureWitnessReport_rV_fCD_t, cms_captureWitnessReport_rV_fCD_isReal, false)])] 
+Solution : It's OK. This branches are complementary they are not required to reply.
+Knowledge:
+
+
+[warning('ConcurrentEnd', cms_captureWitnessReport, [cms_captureWitnessReport_rpl, cms_captureWitnessReport_rV_fCD_thr])],
+
+ [warning('ConcurrentEnd', cms_captureWitnessReport, [cms_captureWitnessReport_cD1_thr, cms_captureWitnessReport_fWI_thr])],
+ [warning('ConcurrentEnd', cms_captureWitnessReport, [cms_captureWitnessReport_fWI_thr, cms_captureWitnessReport_fCD0_thr])], 
+[warning('ConcurrentEnd', cms_captureWitnessReport, [cms_captureWitnessReport_fWI_thr, cms_captureWitnessReport_rV_fCD_thr])], [warning('ConcurrentEnd', cms_captureWitnessReport, [cms_captureWitnessReport_fCD0_thr, cms_captureWitnessReport_rV_fCD_thr])]] ;
+
 
 
 composition cms::captureWitnessReport{

@@ -1,3 +1,12 @@
+/*
+WARNING : 
+L = [warning(noComplementaryBranchFor, cms_executeMission, [ (cms_executeMission_t1, cms_executeMission_isSupObs, true), (cms_executeMission_t2, cms_executeMission_isRescue, true), (cms_executeMission_t3, cms_executeMission_isHelicopter, true), (cms_executeMission_t4, cms_executeMission_isTow, true)])] ;
+
+When there is an error on the mission kind it will never reply. We have to add a fragment which throw an error in this case.
+
+*/
+
+
 orchestration cms::executeMission {
   variables {
     mis as mission; wrk as worker; crs as crisis; coord as cmsEmployee;

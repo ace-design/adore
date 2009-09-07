@@ -59,6 +59,11 @@ disableWarning('returnBeforeToComplet',requestVideo, t)
 disableWarning('returnBeforeToComplet',requestVideo, a12)
 disableWarning('returnBeforeToComplet',requestVideo, a3)
 
+
+WARNING : 
+L = [warning(noComplementaryBranchFor, requestVideo, [ (requestVideo_t, requestVideo_c, true)])] ;
+
+
 */
 fragment requestVideo<user> {
   variables {

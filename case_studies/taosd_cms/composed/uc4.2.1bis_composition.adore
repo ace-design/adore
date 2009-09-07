@@ -19,6 +19,9 @@ WARNING :
  Solution : 
 We call twice cms::requestExtRes but it's wanted.
  Knowledge : forget('areTheseActivitiesDuplicated',[cms_handleAMission_a51, cms_handleAMission_uIR_a2]).
+
+WARNING : 
+Conflicts = [warning(noComplementaryBranchFor, cms_captureWitnessReport, [ (cms_captureWitnessReport_rV_t, cms_captureWitnessReport_rV_c, true), (cms_captureWitnessReport_rV_fCD_t, cms_captureWitnessReport_rV_fCD_isReal, false)])] 
 */
 
 /*
@@ -107,10 +110,11 @@ orchestration cms::handleAMission {
   }
 }
 
+
 %%% DISENGAGE %%%
-doSetify(cms_handleAMission, cms_handleAMission_ir),
-doSetify(cms_handleAMission, cms_handleAMission_er),
-setIteration(cms_handleAMission_uER_a2,p2),
+%doSetify(cms_handleAMission, cms_handleAMission_ir),
+%doSetify(cms_handleAMission, cms_handleAMission_er),
+%setIteration(cms_handleAMission_uER_a2,p2),
 %%% ENGAGE %%%
 
 fragment nop_2 {
