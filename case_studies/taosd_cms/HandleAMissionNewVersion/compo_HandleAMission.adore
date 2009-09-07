@@ -1,0 +1,142 @@
+
+//V1 : after detection of errors when applying fragments
+
+
+orchestration cms::handleAMission {
+  variables {
+    crisis as crisisIdentifier;
+    m as mission;      coord as cmsEmployee;
+    ir as resource; er as resource;
+    iw as cmsEmployee; ew as externalWorker;
+    irep as report; erep as report;
+
+    uER_token as string;
+    uIR_worker as worker;
+   rHOC_mustWait as boolean; rHOC_c as boolean;
+  }
+  activities {
+    rcv. (coord,crisis, m) := receive();
+    a9. ui::actListener(coord,m,'status' as string); 
+    a40. ir := get(m,'intResource' as string);
+    a41. iw := cms::findRelevantEmployee(ir);
+    a42. cms::assignIntRes(iw,m);
+    a4x. irep := cms::handleAWorker(crisis,iw, m,coord);
+    a4r. cms::memorizeReport(irep);
+    a50. er := get(m,'extResource' as string);
+    a51. ew := cms::requestExtRes(er,crisis,m);
+    a5x. erep := cms::handleAWorker(crisis, ew, m,coord);
+    a5r. cms::memorizeReport(erep);
+    rpl. reply();
+    a9bis. ui::stopListener(coord, m, 'status' as string); 
+
+    
+       uER_a0. erep := id('null' as report);
+    uER_ac. uER_token := concat('unavailable' as string,er);
+    uER_a1. msgBus::send('status' as string, uER_token , m);
+    uER_a2. cms::handleCrisis(crisis);
+    
+    // nop1. nop();
+    
+    
+uIR_a1. msgBus::send('status' as string,'unavailable' as string, ir);
+    uIR_a2. uIR_worker := cms::requestExtRes(ir,crisis,m);
+    uIR_a3. irep := cms::handleAWorker(crisis, uIR_worker, m,coord);
+// nop2. nop();
+    
+    
+rHOC_a0. rHOC_mustWait := id('false' as boolean);
+    rHOC_a1. msgBus::wait4msg('status' as string, 'change' as string, m);
+    rHOC_a2. rHOC_mustWait := id('true' as boolean);
+    rHOC_t. rHOC_c := isTrue(rHOC_mustWait);
+    rHOC_a3. cms::handleACrisis(crisis);
+    rHOC_a4. nop();
+
+    nop3. nop();
+    nop4. nop();
+    
+  }
+  relations { 
+
+    //rcv < a40; 
+    a40 < a41; a41 < a42; a42 < a4x; 
+//a4x <a4r; //=> uIR2
+    a4r< rpl; //=> uIR 1
+    rcv < a50; a50 < a51; a51 < a5x;
+    // a5x < a5r; //=> uER 1
+a5r< rpl;
+//rcv < a9; 
+a9 < a51; a9 < a41; rpl < a9bis; 
+ 
+    /*  //Unavaliable Internal Ressource avec a4r dedans
+    a4r << nop2 ; 
+fail(a41,'unavailable') < uIR_a1;fail(a42,'unavailable') < uIR_a1;fail(a4x,'unavailable') < uIR_a1; fail(a4r,'unavailable') < uIR_a1; 
+uIR_a1<uIR_a2; 
+    uIR_a2<uIR_a3;  uIR_a3<< nop2; nop2<rpl;
+
+    */
+    //Unavaliable Internal Ressource avec a4r dehors
+    
+    a4x << a4r ; 
+   fail(a41,'unavailable') < uIR_a1;fail(a42,'unavailable') < uIR_a1;
+   fail(a4x,'unavailable') < uIR_a1;
+    uIR_a1<uIR_a2; 
+    uIR_a2<uIR_a3;  uIR_a3<<a4r;
+
+    //Unavailable External ressource
+    
+    a5x<<a5r;
+    fail(a51,'*') < uER_a0; 
+    fail(a5x,'*') < uER_a0; 
+    uER_a0<uER_ac; uER_ac<uER_a1; uER_a1 < uER_a2;
+    uER_a2<< a5r;
+
+
+    //RehandleOnChange memorise in...
+   
+
+   rcv < rHOC_a0; //^ < a0;
+   rHOC_a0<a40 ; rHOC_a0<a9 ; rHOC_a0<a50 ; // a0<h ; 
+   a4r<<nop3; a5r<<nop4; nop3<rHOC_t;nop4<rHOC_t; //h << t; 
+
+   rHOC_t < rpl when !rHOC_c; //t < $ when !c; 
+
+    rHOC_a0 < rHOC_a1; rHOC_a1 < rHOC_a2; 
+    rHOC_a2 << nop3; rHOC_a2 << nop4; //a2 << t; 
+    rHOC_a1 < rHOC_a3; rHOC_a3 < rHOC_a4; 
+
+    rHOC_t < rHOC_a4 when rHOC_c; 
+    rHOC_a4 < rpl; //a4 < $;
+    */
+    /*
+rcv < rHOC_a0; rHOC_a0<a40 ; rHOC_a0<a9 ; rHOC_a0<a50 ;
+ a4r <nop3; a5x<nop3; nop3 << rHOC_t;
+ h << t; t < $ when !c; ^< a0; 
+    a0 < a1; a1 < a2; a2 << t; a1 < a3; a3 < a4; t < a4 when c; a4 < $;
+    */
+    
+/*   a4x << uIR_nop0; uIR_a3<<uIR_nop0; 
+      uIR_nop0<<rpl; 
+	      uIR_nop0<<a4r;
+             fail(a41,'unavailable') < uIR_a1; uIR_a1 < uIR_a2; uIR_a2<uIR_a3;
+fail(a42,'unavailable') < uIR_a1;
+fail(a4x,'unavailable') < uIR_a1;
+	     fail(uIR_a2,'*') < uIR_uER_a0;
+             fail(uIR_a3,'*') < uIR_uER_a0;
+             uIR_uER_a0<uIR_uER_ac; uIR_uER_ac<uIR_uER_a1; uIR_uER_a1 < uIR_uER_a2; 
+	     uIR_uER_a2<< a4r; uIR_uER_a2<< rpl;
+*/
+  }
+}
+
+%%% DISENGAGE %%%
+doSetify(cms_handleAMission, cms_handleAMission_ir),
+doSetify(cms_handleAMission, cms_handleAMission_er),
+%setIteration(cms_handleAMission_nop2,p1),
+    %    setIteration(cms_handleAMission_nop1,p2),
+        setIteration(cms_handleAMission_uER_a2,p2),
+%%% ENGAGE %%%
+
+fragment nop_1 {
+  variables {}
+  activities { n. nop(); }
+}
