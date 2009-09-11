@@ -39,7 +39,7 @@ orchestration cms::authUser {
     o3_e4. reply(o3_r);
   }
   relations { 
-    a0 < a1a2; a1a2 < a3; //a3 < a4; 
+     a1a2 < a3; //a3 < a4; 
 
     fail(a1a2,'cancel') < cA_r;
 

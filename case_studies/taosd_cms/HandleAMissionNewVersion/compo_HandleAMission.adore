@@ -84,11 +84,14 @@ uIR_a1<uIR_a2;
 
     //Unavailable External ressource
     
-    a5x<<a5r;
-    fail(a51,'*') < uER_a0; 
-    fail(a5x,'*') < uER_a0; 
-    uER_a0<uER_ac; uER_ac<uER_a1; uER_a1 < uER_a2;
-    uER_a2<< a5r;
+    // a5x<<a5r;
+    a5x < a5r;
+    //fail(a51,'*') < uER_a0; 
+    //fail(a5x,'*') < uER_a0; 
+    //uER_a0 <uER_ac; 
+    fail(a51,'*') < uER_ac; fail(a5x,'*') < uER_ac; 
+    uER_ac<uER_a1; uER_a1 < uER_a2;
+    uER_a2 < a5r;
 
 
     //RehandleOnChange memorise in...

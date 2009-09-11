@@ -1,0 +1,384 @@
+//RESULTAT Avec composition provider::entry{
+//	apply timeContract => bloc sous receive jusqu'a reply non compris... ;
+//}
+/*
+orchestration provider::entrywithTime {
+	variables { 
+		idVar as newsType;
+		diplomaVar as string;
+		firstVar as newsType;
+		lastVar as newsType;
+		infos2troncateVar as newsType;
+		infoNumberVar as integer;
+		infosVar as newsType;
+
+                delay as integer;
+		timeout as boolean;
+		const duration := '10' as integer;
+		const zero := '0' as integer;
+		const timerxerror := 'RESPONSE TIME VIOLATION' as string;
+	} 
+	activities { 
+		rec. (diplomaVar,infoNumberVar):= receive() ;
+		sourceTimetablesxtimetable4Diploma0. firstVar := sourceTimetables::timetable4Diploma(diplomaVar) ;
+		sourceNewsxnewsNow1. lastVar := sourceNews::newsNow() ;
+		concat2. infos2troncateVar := concat(firstVar,lastVar) ;
+		truncate3. infosVar := truncate(infos2troncateVar,infoNumberVar) ;
+		fromProviderinfoSinkxid4. idVar := fromProviderinfoSink::id(infosVar) ;
+		last. reply (idVar) ;
+
+                e0. delay := id(zero) ;
+		timestart. delay := timer::timeout(duration) ;
+		
+		test. timeout := diff(delay,zero) ;
+		o. throw(timerxerror) ;
+
+
+	} 
+	relations { 
+		rec<sourceTimetablesxtimetable4Diploma0 ;
+		rec<sourceNewsxnewsNow1 ;
+		sourceTimetablesxtimetable4Diploma0<concat2 ;
+		sourceNewsxnewsNow1<concat2 ;
+		concat2<truncate3 ;
+		truncate3<fromProviderinfoSinkxid4 ;
+		//fromProviderinfoSinkxid4<last ; inutile mais on peut la laisser
+
+		rec<e0 ; //rec est le predecesseur du bloc
+		e0<timestart ;
+		e0<sourceTimetablesxtimetable4Diploma0 ;//comme <h on ne prend que les 1er du bloc
+		e0< sourceNewsxnewsNow1;
+
+		fromProviderinfoSinkxid4<<test ;
+		timestart<<test ;
+		test<o when timeout ;
+		test<last when  ! timeout ; //last est le sucesseur du bloc
+
+	} 
+}
+fragment timeContract{
+	variables { 
+		delay as integer;
+		timeout as boolean;
+		const duration := '10' as integer;
+		const zero := '0' as integer;
+		const timerxerror := 'RESPONSE TIME VIOLATION' as string;
+	} 
+	activities { 
+		e0. delay := id(zero) ;
+		timestart. delay := timer::wait(duration) ;
+		h. hook() ;
+		test. timeout := diff(delay,zero) ;
+		o. throw(timerxerror) ;
+	} 
+	relations { 
+		^<e0 ;
+		e0<timestart ;
+		e0<h ;
+		h<<test ;
+		timestart<<test ;
+		test<o when timeout ;
+		test<$ when  ! timeout ;
+	} 
+}
+
+//RESULTAT Avec composition provider::entry{
+//	apply capacityContract => fromProviderinfoSinkxid4
+//ou sur le bloc ouf ca marche aussi...
+//}
+//}
+
+
+orchestration provider::entrywithCapacity{
+	variables { 
+		idVar as newsType;
+		diplomaVar as string;
+		firstVar as newsType;
+		lastVar as newsType;
+		infos2troncateVar as newsType;
+		infoNumberVar as integer;
+		infosVar as newsType;
+
+		// res* as newsType; aie aie ne pas oublier de l'oter
+		ok as boolean;
+		listSize as integer;
+		const size := 'infoNumber' as integer;
+		const capacityError := 'Capacity Violation' as string;
+
+	} 
+	activities { 
+		rec. (diplomaVar,infoNumberVar):= receive() ;
+		sourceTimetablesxtimetable4Diploma0. firstVar := sourceTimetables::timetable4Diploma(diplomaVar) ;
+		sourceNewsxnewsNow1. lastVar := sourceNews::newsNow() ;
+		concat2. infos2troncateVar := concat(firstVar,lastVar) ;
+		truncate3. infosVar := truncate(infos2troncateVar,infoNumberVar) ;
+		fromProviderinfoSinkxid4. idVar := fromProviderinfoSink::id(infosVar) ;
+		last. reply (idVar) ;
+
+		//h. res* := hook() ; res* est positionné sur idVar comme resultat de la derniere instruction du bloc....
+		t. listSize := size(idVar) ;
+		test. ok := inf(listSize,size) ;
+		o. throw(capacityError) ;
+	        
+
+	} 
+	relations { 
+		rec<sourceTimetablesxtimetable4Diploma0 ;
+		rec<sourceNewsxnewsNow1 ;
+		sourceTimetablesxtimetable4Diploma0<concat2 ;
+		sourceNewsxnewsNow1<concat2 ;
+		concat2<truncate3 ;
+		truncate3<fromProviderinfoSinkxid4 ;
+		//fromProviderinfoSinkxid4<last ;
+
+	        //^<h ; cela revient à ne rien faire
+		fromProviderinfoSinkxid4<t ;
+		t<test ;
+		test<o when ! ok ;
+		test<last when  ok ;//last est sucesseur
+	} 
+}
+
+
+
+orchestration provider::entrywithTimeAndCapacity{
+	variables { 
+		idVar as newsType;
+		diplomaVar as string;
+		firstVar as newsType;
+		lastVar as newsType;
+		infos2troncateVar as newsType;
+		infoNumberVar as integer;
+		infosVar as newsType;
+
+                delay as integer;
+		timeout as boolean;
+		const duration := '10' as integer;
+		const zero := '0' as integer;
+		const timerxerror := 'RESPONSE TIME VIOLATION' as string;
+
+                ok as boolean;
+		listSize as integer;
+		const size := 'infoNumber' as integer;
+		const capacityError := 'Capacity Violation' as string;
+	} 
+	activities { 
+		rec. (diplomaVar,infoNumberVar):= receive() ;
+		sourceTimetablesxtimetable4Diploma0. firstVar := sourceTimetables::timetable4Diploma(diplomaVar) ;
+		sourceNewsxnewsNow1. lastVar := sourceNews::newsNow() ;
+		concat2. infos2troncateVar := concat(firstVar,lastVar) ;
+		truncate3. infosVar := truncate(infos2troncateVar,infoNumberVar) ;
+		fromProviderinfoSinkxid4. idVar := fromProviderinfoSink::id(infosVar) ;
+		last. reply (idVar) ;
+
+                e0. delay := id(zero) ;
+		timestart. delay := timer::wait(duration) ;
+		
+		test. timeout := diff(delay,zero) ;
+		o. throw(timerxerror) ;
+
+
+		t. listSize := size(idVar) ;
+		testc. ok := inf(listSize,size) ;
+		oc. throw(capacityError) ;
+
+
+
+	} 
+	relations { 
+		rec<sourceTimetablesxtimetable4Diploma0 ;
+		rec<sourceNewsxnewsNow1 ;
+		sourceTimetablesxtimetable4Diploma0<concat2 ;
+		sourceNewsxnewsNow1<concat2 ;
+		concat2<truncate3 ;
+		truncate3<fromProviderinfoSinkxid4 ;
+		//fromProviderinfoSinkxid4<last ; inutile mais on peut la laisser
+
+		rec<e0 ; //rec est le predecesseur du bloc
+		e0<timestart ;
+		e0<sourceTimetablesxtimetable4Diploma0 ;//comme <h on ne prend que les 1er du bloc
+		e0< sourceNewsxnewsNow1;
+
+		fromProviderinfoSinkxid4<<test ;
+		timestart<<test ;
+		test<o when timeout ;
+		test<last when  ! timeout ; //last est le sucesseur du bloc
+
+
+ 	        fromProviderinfoSinkxid4<t ;
+		t<testc ;
+		testc<oc when ! ok ;
+		testc<last when  ok ;//last est sucesseur
+
+	} 
+}
+
+
+
+//Resultat dans version 3 attendu pour composition provider::entry{
+//	apply cache => sourceTimetablesxtimetable4Diploma0 ;
+//}
+
+orchestration provider::entryV3WithCache{
+	variables { 
+		idVar as newsType;
+		diplomaVar as string;
+		firstVar as newsType;
+		lastVar as newsType;
+		infos2troncateVar as newsType;
+		infoNumberVar as integer;
+		infosresultVar as newsType;
+		last2Var as infosType;
+
+		//	res* as newsType; devient firstVar
+		//arg as string; devient diplomaVar
+		valid as boolean;
+		cacheRes as cacheRes;
+		const validField := 'valid' as string;
+		const resField := 'res' as string;
+	} 
+	activities { 
+		rec. (diplomaVar,infoNumberVar):= receive() ;
+		sourceTimetablesxtimetable4Diploma0. firstVar := sourceTimetables::timetable4Diploma(diplomaVar) ;
+		sourceNewsxnewsNow1. lastVar := sourceNews::newsNow() ;
+		concat2. firstVar := concat(firstVar,lastVar) ;
+		menuxmenuToday3. last2Var := menu::menuToday() ;
+		concat4. infos2troncateVar := concat(firstVar,last2Var) ;
+		truncate5. infosresultVar := truncate(infos2troncateVar,infoNumberVar) ;
+		fromProviderinfoSinkxid6. idVar := fromProviderinfoSink::id(infosresultVar) ;
+		last. reply (idVar) ;
+
+
+		c. cacheRes := cache::get(diplomaVar) ;
+		test. valid := get(validField,cacheRes) ;
+		r. firstVar := get(resField,cacheRes) ;
+		e. cache::memorize(firstVar,diplomaVar) ;
+
+	} 
+	relations { 
+	  //rec<sourceTimetablesxtimetable4Diploma0 ;
+		rec<sourceNewsxnewsNow1 ;
+		//	sourceTimetablesxtimetable4Diploma0<concat2 ; attention elle doit absolument disparaitre... et ne pas voi que c'est uen sorte de delagate a priori nous fait perdre la propriété de conversion des relations...
+		sourceNewsxnewsNow1<concat2 ;
+		rec<menuxmenuToday3 ;
+		concat2<concat4 ;
+		menuxmenuToday3<concat4 ;
+		concat4<truncate5 ;
+		truncate5<fromProviderinfoSinkxid6 ;
+		fromProviderinfoSinkxid6<last ;
+
+		rec<c ; //^<c ; Suppose de retirer les ^<h sinon ici 
+		c<test ;
+		test<r when valid ;
+		test<sourceTimetablesxtimetable4Diploma0 when  ! valid ;
+		sourceTimetablesxtimetable4Diploma0<e ;
+		sourceTimetablesxtimetable4Diploma0<<concat2 ;
+		r<<concat2 ;
+	} 
+}
+
+*/
+//Resultat dans version 3 attendu pour composition provider::entry{
+//avec tous les contrats
+//	apply cache => sourceTimetablesxtimetable4Diploma0 ;
+//}
+
+orchestration provider::entryV3WithAll{
+	variables { 
+		idVar as newsType;
+		diplomaVar as string;
+		firstVar as newsType;
+		lastVar as newsType;
+		infos2troncateVar as newsType;
+		infoNumberVar as integer;
+		infosresultVar as newsType;
+		last2Var as infosType;
+
+		//	res* as newsType; devient firstVar
+		//arg as string; devient diplomaVar
+		valid as boolean;
+		cacheRes as cacheRes;
+		const validField := 'valid' as string;
+		const resField := 'res' as string;
+
+
+		// res* as newsType; aie aie ne pas oublier de l'oter
+		ok as boolean;
+		listSize as integer;
+		const size := 'infoNumber' as integer;
+		const capacityError := 'Capacity Violation' as string;
+
+		delay as integer;
+		timeout as boolean;
+		const duration := '10' as integer;
+		const zero := '0' as integer;
+		const timerxerror := 'RESPONSE TIME VIOLATION' as string;
+	} 
+	activities { 
+		rec. (diplomaVar,infoNumberVar):= receive() ;
+		sourceTimetablesxtimetable4Diploma0. firstVar := sourceTimetables::timetable4Diploma(diplomaVar) ;
+		sourceNewsxnewsNow1. lastVar := sourceNews::newsNow() ;
+		concat2. firstVar := concat(firstVar,lastVar) ;
+		menuxmenuToday3. last2Var := menu::menuToday() ;
+		concat4. infos2troncateVar := concat(firstVar,last2Var) ;
+		truncate5. infosresultVar := truncate(infos2troncateVar,infoNumberVar) ;
+		fromProviderinfoSinkxid6. idVar := fromProviderinfoSink::id(infosresultVar) ;
+		last. reply (idVar) ;
+
+
+		c. cacheRes := cache::get(diplomaVar) ;
+		test. valid := get(validField,cacheRes) ;
+		r. firstVar := get(resField,cacheRes) ;
+		e. cache::memorize(firstVar,diplomaVar) ;
+
+		//h. res* := hook() ; res* est positionné sur idVar comme resultat de la derniere instruction du bloc....
+		t. listSize := size(idVar) ;
+		testcapa. ok := inf(listSize,size) ;
+		o. throw(capacityError) ;
+
+                e0. delay := id(zero) ;
+		timestart. delay := timer::timeout(duration) ;
+		
+		testTime. timeout := diff(delay,zero) ;
+		oTime. throw(timerxerror) ;
+
+	} 
+	relations { 
+	  //rec<sourceTimetablesxtimetable4Diploma0 ;
+		rec<sourceNewsxnewsNow1 ;
+		//	sourceTimetablesxtimetable4Diploma0<concat2 ; attention elle doit absolument disparaitre... et ne pas voi que c'est uen sorte de delagate a priori nous fait perdre la propriété de conversion des relations...
+		sourceNewsxnewsNow1<concat2 ;
+		rec<menuxmenuToday3 ;
+		concat2<concat4 ;
+		menuxmenuToday3<concat4 ;
+		concat4<truncate5 ;
+		truncate5<fromProviderinfoSinkxid6 ;
+		//fromProviderinfoSinkxid6<last ;
+
+		rec<c ; //^<c ; Suppose de retirer les ^<h sinon ici 
+		c<test ;
+		test<r when valid ;
+		test<sourceTimetablesxtimetable4Diploma0 when  ! valid ;
+		sourceTimetablesxtimetable4Diploma0<e ;
+		sourceTimetablesxtimetable4Diploma0<<concat2 ;
+		r<<concat2 ;
+
+	        //^<h ; cela revient à ne rien faire
+		fromProviderinfoSinkxid6<t ;
+		t<testcapa ;
+		testcapa<o when ! ok ;
+		testcapa<last when  ok ;//last est sucesseur
+
+
+		rec<e0 ; //rec est le predecesseur du bloc
+		e0<timestart ;
+		e0<sourceTimetablesxtimetable4Diploma0 ;//comme <h on ne prend que les 1er du bloc
+		e0< sourceNewsxnewsNow1;
+		e0<menuxmenuToday3;
+
+		fromProviderinfoSinkxid6<<testTime ;
+		timestart<<testTime ;
+		testTime<oTime when timeout ;
+		testTime<last when  ! timeout ; //last est le sucesseur du bloc
+	} 
+}

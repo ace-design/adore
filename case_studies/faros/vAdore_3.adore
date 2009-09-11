@@ -1,0 +1,110 @@
+orchestration provider::entry {
+  variables { 
+    idVar as informationList; diplomaVar as string;
+    timetableInfoListVar as informationList; newsListVar as informationList;
+    infos2troncateVar as informationList; infoNumberVar as integer;
+    infosresultVar as informationList;
+    newsAndTimetableInfoListVar as informationList;
+    menuInfoListVar as informationList;
+  } 
+  
+  activities { 
+    rec. (diplomaVar,infoNumberVar):= receive() ;
+    sourceTimetablesxtimetable4Diploma0. 
+      timetableInfoListVar := sourceTimetables::timetable4Diploma(diplomaVar) ;
+    sourceNewsxnewsNow1. newsListVar := sourceNews::newsNow() ;
+    concat2. 
+      newsAndTimetableInfoListVar := concat(timetableInfoListVar,newsListVar) ;
+    menuxmenuToday3. menuInfoListVar := menu::menuToday() ;
+    concat4. infos2troncateVar := 
+      concat(newsAndTimetableInfoListVar,menuInfoListVar) ;
+    truncate5. infosresultVar := truncate(infos2troncateVar,infoNumberVar) ;
+    fromProviderinfoSinkxid6. idVar := id(infosresultVar) ;
+    last. reply (idVar) ;
+  } 
+
+  relations { 
+    rec < sourceTimetablesxtimetable4Diploma0 ; rec<sourceNewsxnewsNow1 ;
+    sourceTimetablesxtimetable4Diploma0 < concat2 ; 
+    sourceNewsxnewsNow1 < concat2 ; rec < menuxmenuToday3 ; concat2 < concat4 ;
+    menuxmenuToday3 < concat4 ; concat4 < truncate5 ;
+    truncate5<fromProviderinfoSinkxid6 ; fromProviderinfoSinkxid6<last ;
+  } 
+}
+
+fragment cache{
+
+  variables { 
+    res as informationList; arg as string;
+    valid as boolean;
+  } 
+
+  activities { 
+    r. res := cache::get(arg) ;
+    test. valid := isValid(arg) ;
+    h. res := hook(arg) ;
+    e. cache::memorize(res,arg) ;
+  } 
+  
+  relations { 
+    ^ < test; test < r when valid; test < h when !valid; h < e; 
+    e < $ ; r < $;
+  } 
+}
+composition provider::entry{
+  apply cache => {sourceTimetablesxtimetable4Diploma0} ;
+}
+
+fragment timeContract{
+
+  variables { 
+    delay as integer; timeout as boolean; const duration := '10' as integer;
+    const zero := '0' as integer;
+    const timerxerror := 'RESPONSE TIME VIOLATION' as string;
+  } 
+
+  activities { 
+    e0. delay := id(zero) ;
+    timestart. delay := timer::wait(duration) ;
+    h. hook() ;
+    test. timeout := isDifferent(delay,zero) ;
+    o. throw(timerxerror) ;
+  } 
+
+  relations { 
+    ^ < e0 ; e0 < timestart ; e0 < h ; h << test ; timestart << test ;
+    test < o when timeout ; test < $ when  ! timeout ;
+  } 
+}
+
+composition provider::entry{
+  apply timeContract => {sourceTimetablesxtimetable4Diploma0,
+			 sourceNewsxnewsNow1,concat2,menuxmenuToday3,
+			 concat4,truncate5,fromProviderinfoSinkxid6} ;
+}
+
+fragment capacityContract{
+
+  variables { 
+    res as informationList; ok as boolean; listSize as integer;
+    const size := 'infoNumber' as integer;
+    const capacityError := 'Capacity Violation' as string;
+  } 
+
+  activities { 
+    h. res := hook() ;
+    t. listSize := size(res) ;
+    test. ok := isLesserThan(listSize,size) ;
+    o. throw(capacityError) ;
+  } 
+
+  relations { 
+    ^ < h;  h < t;  t < test; test < o when ! ok; test < $ when  ok;
+  } 
+}
+
+composition provider::entry{
+  apply capacityContract => {sourceTimetablesxtimetable4Diploma0,
+			     sourceNewsxnewsNow1,concat2,menuxmenuToday3,
+			     concat4,truncate5,fromProviderinfoSinkxid6} ;
+}
