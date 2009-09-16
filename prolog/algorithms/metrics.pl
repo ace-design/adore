@@ -132,7 +132,6 @@ metrics_processHeight(P,H) :-
 	getPath(Entry,Exit,Path), length(Path,H).
 
 getProcessWidth(P,0) :- findall(T,metrics_processWidth(P,T), []).
-
 getProcessWidth(P,W) :- 
 	findall(T,metrics_processWidth(P,T), Tmp), 
 	sort(Tmp,Sorted), last(Sorted,W).
