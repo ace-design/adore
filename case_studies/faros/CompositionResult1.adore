@@ -37,8 +37,6 @@ orchestration provider::entrywithTime {
     
   } 
   relations { 
-    rec<sourceTimetablesxtimetable4Diploma0 ;
-    rec<sourceNewsxnewsNow1 ;
     sourceTimetablesxtimetable4Diploma0<concat2 ;
     sourceNewsxnewsNow1<concat2 ;
     concat2<truncate3 ;
@@ -321,10 +319,10 @@ orchestration provider::entryV3WithAll{
   } 
   relations { 
     //rec<sourceTimetablesxtimetable4Diploma0 ;
-    rec<sourceNewsxnewsNow1 ;
+    //  rec<sourceNewsxnewsNow1 ;
     //	sourceTimetablesxtimetable4Diploma0<concat2 ; attention elle doit absolument disparaitre... et ne pas voi que c'est uen sorte de delagate a priori nous fait perdre la propriété de conversion des relations...
     sourceNewsxnewsNow1<concat2 ;
-    rec<menuxmenuToday3 ;
+    //rec<menuxmenuToday3 ;
     concat2<concat4 ;
     menuxmenuToday3<concat4 ;
     concat4<truncate5 ;
