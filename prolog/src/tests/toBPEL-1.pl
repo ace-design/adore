@@ -83,9 +83,36 @@ getConditionnedSuccessors(A,FreeSucessors,TrueSuc,FalseSuc,Others) :-
      
 getDirectSuccessors(A,FreeSucessors,LinkedSuccessors) :-
     getSuccessors(A,LS),
-    findall(S,(member(S,LS),(waitFor(S,X)|isGuardedBy(S,X,_,_)),X\=A),LinkedSuccessors),
+    findall(S,(member(S,LS),(waitFor(S,X)|isGuardedBy(S,X,_,_)),X\=A,\+ exclusiveRelativelyTo(S,A,X)),LinkedSuccessors),
     subtract(LS,LinkedSuccessors,FreeSucessors).
 
+
+exclusiveRelativelyTo(S,A,B) :-
+    weakWait(S,A),
+    weakWait(S,B), !.
+exclusiveRelativelyTo(S,A,B) :-
+    isGuardedBy(S,A,V,T1),
+    isGuardedBy(S,B,V,T2), T1 \=T2,!.
+exclusiveRelativelyTo(_S,A,B) :-
+    exclusive(A,B).
+ 
+ %%Ne suffit pas ... mais si je generalise c'est n'importe quoi...
+ %% je dois tester alos la complementarite....
+ 
+ %%Une activité liée par des liens faibles à ces predecesseurs est dupliquée...
+%donc ... pour faros.... elle est exclusive avec tout autre activité......
+exclusive(A,B) :-
+    (duplicated(A) | duplicated(B)), !.
+exclusive(A,B) :-
+    isGuardedBy(A,Test,V,T1),
+    isGuardedBy(B,Test,V,T2), T1 \=T2,!.
+exclusive(A,B) :-
+    weakWait(A,S),
+    weakWait(B,S), !.
+    
+duplicated(A) :-
+    weakWait(A,_S).
+        
 getBlocks([],[]).
 getBlocks(L,[Res]):-
       getBlock4Activity(L,LB,LToBe),
@@ -182,3 +209,27 @@ buildSequence([A],Succ,seq(A,BlockSucc)) :-
 %																[provider_entrywithTimeAndCapacity_o], [])])])])])])])])])])])], 
 %		[[provider_entrywithTimeAndCapacity_last]])]
 
+%%ATTENTION IDVAR EST NON INITIALISEE MAIS ON LE SAIT... IL NE DEVRAIT JAMAIS PASSER PAR LA...
+%%ON DOIT POUVOIR OTER LE TEST
+%O = provider_entrywithTimeAndCapacity,
+%[[seq(provider_entrywithTimeAndCapacity_e0, 
+%			[flow(	[seq	(provider_entrywithTimeAndCapacity_timestart, 
+%								[seq(provider_entrywithTimeAndCapacity_test, 
+%									[if(provider_entrywithTimeAndCapacity_timeout, 
+%										[provider_entrywithTimeAndCapacity_o], 
+%										[provider_entrywithTimeAndCapacity_last])])]), 
+%					flow([	seq(
+%								flow([provider_entrywithTimeAndCapacity_sourceTimetablesxtimetable4Diploma0, 
+%											provider_entrywithTimeAndCapacity_sourceNewsxnewsNow1]), 
+%								[seq(provider_entrywithTimeAndCapacity_concat2, 
+%										[seq( provider_entrywithTimeAndCapacity_truncate3, 
+%												[seq(provider_entrywithTimeAndCapacity_fromProviderinfoSinkxid4, 
+%													[flow([	seq(provider_entrywithTimeAndCapacity_t, 
+%																[seq(	provider_entrywithTimeAndCapacity_testc, 
+%																		[if(provider_entrywithTimeAndCapacity_ok, 
+%																			[provider_entrywithTimeAndCapacity_last], 
+%																			[provider_entrywithTimeAndCapacity_oc])])]), 
+%															flow([seq(provider_entrywithTimeAndCapacity_test, 
+%																[if(provider_entrywithTimeAndCapacity_timeout, 
+%																	[provider_entrywithTimeAndCapacity_o], 
+%																	[provider_entrywithTimeAndCapacity_last])])])])])])])])])])])]]
