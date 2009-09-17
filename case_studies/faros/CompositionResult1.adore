@@ -247,8 +247,8 @@ orchestration provider::entryV3WithCache{
     test<r when valid ;
     test<sourceTimetablesxtimetable4Diploma0 when  ! valid ;
     sourceTimetablesxtimetable4Diploma0<e ;
-    sourceTimetablesxtimetable4Diploma0<<concat2 ;
-    r<<concat2 ;
+    sourceTimetablesxtimetable4Diploma0<concat2 ;
+    r<concat2 ;
   } 
 }
 
