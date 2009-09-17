@@ -257,7 +257,7 @@ orchestration provider::entryV3WithCache{
 //	apply cache => sourceTimetablesxtimetable4Diploma0 ;
 //}
 
-orchestration provider::entryV3WithAll{
+orchestration provider::entryV3WithAll {
   variables { 
     idVar as newsType;
     diplomaVar as string;
@@ -334,8 +334,8 @@ orchestration provider::entryV3WithAll{
     test<r when valid ;
     test<sourceTimetablesxtimetable4Diploma0 when  ! valid ;
     sourceTimetablesxtimetable4Diploma0<e ;
-    sourceTimetablesxtimetable4Diploma0<<concat2 ;
-    r<<concat2 ;
+    sourceTimetablesxtimetable4Diploma0<concat2 ;
+    r<concat2 ;
     
     //^<h ; cela revient à ne rien faire
     fromProviderinfoSinkxid6<t ;
@@ -356,3 +356,9 @@ orchestration provider::entryV3WithAll{
     testTime<last when  ! timeout ; //last est le sucesseur du bloc
   } 
 }
+
+
+
+
+
+
