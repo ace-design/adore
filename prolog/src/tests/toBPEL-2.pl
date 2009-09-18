@@ -1,5 +1,8 @@
 %consult('/Users/mireilleblay-fornarino/Documents/workspace/adoreCode/toBPEL-2.pl').
-toBpel(O,seq([R|Blocks])) :-
+
+%example
+%toBpel(O,P), postProcessing(P,NP),write('\n==============\n'),write(NP).
+toBpel(O,seq(R,Blocks)) :-
   process(O),
   preprocessing(O),
   getReceive(O,R),
@@ -122,6 +125,8 @@ getDirectSuccessors(A,ToBeIn,ToBeOut) :-
 
  getDirectSuccessorsAccordingToWeakLink(A,LS,LS,[]) :-   
      weakWait(A,_),!.
+ getDirectSuccessorsAccordingToWeakLink(A,LS,LS,[]) :-   
+     member(S,LS),weakWait(S,A),!.
  getDirectSuccessorsAccordingToWeakLink(A,LS,ToBeIn,ToBeOut) :-   
     findall(S,(member(S,LS),(waitFor(S,X)|isGuardedBy(S,X,_,_)),X\=A,\+ exclusiveRelativelyTo(S,A,X)),LinkedSuccessors),
     subtract(LS,LinkedSuccessors,FreeSucessors),
@@ -298,15 +303,50 @@ compareSucessorsTo(Succ,L,NonCommon,Common) :-
     intersection(Succ,Successors,Common),
     subtract(Succ,Common,NonCommon).
     
-%buildSequence([A],Succ,seq(A,BlockSucc)) :-
-%    getBlocks(Succ,BlockSucc).
-%buildSequence([A],Succ,seq(A,BlockSucc)) :-
-%    getBlocks(Succ,BlockSucc).    
-    
-    
-%?- trace, toBpel(O,B).
 
 
+
+postProcessing([],[]) :-!.
+postProcessing(flow(Flow),flow(NewFlow) ) :- !,
+    flatten(Flow,NList),
+ 	findall(X, member(flow(X),NList), LX),
+ 	findall(RX,(member(X,LX), postProcessing(X,RX)),LRX),
+ 	findall(flow(X), member(flow(X),NList), ToRetract),
+ 	subtract(NList,ToRetract,FlowRest),
+ 	postProcessing(FlowRest,NewRestFlow),
+ 	append(LRX,SimpleList),
+    append(SimpleList,NewRestFlow,NewFlow1),
+    ( (LX = [], NewFlow=NewFlow1) | (LX \=[], postProcessing(flow(NewFlow1),flow(NewFlow)))).  
+postProcessing(seq(A,Seq),seq(NewSeq)) :- !,
+    flatten([A|Seq],NList),
+ 	findall((X,Y), member(seq(X,Y),NList), LX),
+ 	( 	(LX =[], postProcessing(NList,NewSeq)) |
+ 		(LX \=[], flatten([A|Seq],NList), postProcessingSeq(NList,NewSeq))). 
+postProcessing(if(V,LATrue,LAFalse),if(V,NLATrue,NLAFalse) ) :- !,
+ 	postProcessing(LATrue,NLATrue),
+ 	postProcessing(LAFalse,NLAFalse).
+    
+postProcessing([A|LA],[NX|NLX]) :- !,
+	flatten([A|LA],[X|LX]), 
+    postProcessing(X,NX),
+    postProcessing(LX,NLX).
+postProcessing(X,X).
+
+
+postProcessingSeq([],[]) :- !.
+postProcessingSeq([seq(X,Y)|L],NewList) :- !,
+    postProcessing([X|Y],RX),
+    postProcessingSeq(RX,NRX),
+    postProcessingSeq(L,NewList1),
+    append(NRX,NewList1,NewList).
+postProcessingSeq([seq(X)|L],NewList) :- !,
+    postProcessing(X,RX),
+    postProcessingSeq(RX,NRX),
+    postProcessingSeq(L,NewList1),
+    append(NRX,NewList1,NewList).
+postProcessingSeq([X|L],[RX|NewList]) :- !,
+    postProcessing(X,RX),
+    postProcessingSeq(L,NewList).
 
 %O = provider_entrywithTime
 %seq(provider_entrywithTime_e0,
@@ -337,35 +377,6 @@ compareSucessorsTo(Succ,L,NonCommon,Common) :-
 %	   ])
  %   ]
 
-[ flow([ seq(provider_entrywithTime_e0,
-	     [ flow([ seq(provider_entrywithTime_timestart,
-			  [ seq(provider_entrywithTime_test,
-				[ if(provider_entrywithTime_timeout,
-				     [provider_entrywithTime_o],
-				     [provider_entrywithTime_last])
-				])
-			  ]),
-		      seq(flow([ provider_entrywithTime_sourceTimetablesxtimetable4Diploma0,
-				 provider_entrywithTime_sourceNewsxnewsNow1
-			       ]),
-			  [ seq(provider_entrywithTime_concat2,
-				[ seq(provider_entrywithTime_truncate3,
-				      [ seq(provider_entrywithTime_fromProviderinfoSinkxid4,
-					    [ seq(provider_entrywithTime_test,
-						  [ if(provider_entrywithTime_timeout,
-						       [ provider_entrywithTime_o
-						       ],
-						       [ provider_entrywithTime_last
-						       ])
-						  ])
-					    ])
-				      ])
-				])
-			  ])
-		    ])
-	     ])
-       ])
-]
 
 
 
@@ -392,28 +403,6 @@ compareSucessorsTo(Succ,L,NonCommon,Common) :-
  %      ])
 %]
 
-[ flow([ flow([ seq(flow([ provider_entrywithCapacity_sourceTimetablesxtimetable4Diploma0,
-			   provider_entrywithCapacity_sourceNewsxnewsNow1
-			 ]),
-		    [ seq(provider_entrywithCapacity_concat2,
-			  [ seq(provider_entrywithCapacity_truncate3,
-				[ seq(provider_entrywithCapacity_fromProviderinfoSinkxid4,
-				      [ seq(provider_entrywithCapacity_t,
-					    [ seq(provider_entrywithCapacity_test,
-						  [ if(provider_entrywithCapacity_ok,
-						       [ provider_entrywithCapacity_last
-						       ],
-						       [ provider_entrywithCapacity_o
-						       ])
-						  ])
-					    ])
-				      ])
-				])
-			  ])
-		    ])
-	      ])
-       ])
-]
 %O = provider_entrywithTimeAndCapacity,
 %[ flow([ seq(provider_entrywithTimeAndCapacity_e0,
 %	     		[ flow(	[ seq(provider_entrywithTimeAndCapacity_timestart,
@@ -485,7 +474,7 @@ compareSucessorsTo(Succ,L,NonCommon,Common) :-
 %			])
 %		   ])
 %	     ])
- %      ])
+%      ])
 
 
 
@@ -500,7 +489,7 @@ compareSucessorsTo(Succ,L,NonCommon,Common) :-
 %						[ provider_entryV3WithAll_last
 %						])
 %%				     ]),
-	%			 provider_entryV3WithAll_sourceNewsxnewsNow1,
+%			 provider_entryV3WithAll_sourceNewsxnewsNow1,
 %				 provider_entryV3WithAll_menuxmenuToday3
 %			       ])
 %			])
@@ -543,63 +532,6 @@ compareSucessorsTo(Succ,L,NonCommon,Common) :-
 %			  ])
 %		    ])
 %	     ])
- %      ])
+%      ])
 %]
 %
-
-[ flow([ seq(flow([ provider_entryV3WithAll_c,
-		    seq(provider_entryV3WithAll_e0,
-			[ flow([ seq(provider_entryV3WithAll_timestart,
-				     [ seq(provider_entryV3WithAll_testTime,
-					   [ if(provider_entryV3WithAll_timeout,
-						[ provider_entryV3WithAll_oTime
-						],
-						[ provider_entryV3WithAll_last
-						])
-					   ])
-				     ]),
-				 provider_entryV3WithAll_sourceNewsxnewsNow1,
-				 provider_entryV3WithAll_menuxmenuToday3
-			       ])
-			])
-		  ]),
-	     [ flow([ seq(seq(provider_entryV3WithAll_test,
-			      [ if(provider_entryV3WithAll_valid,
-				   [provider_entryV3WithAll_r],
-				   [ seq(provider_entryV3WithAll_sourceTimetablesxtimetable4Diploma0,
-					 [provider_entryV3WithAll_e])
-				   ])
-			      ]),
-			  [ flow([ seq(provider_entryV3WithAll_concat2,
-				       [ flow([ flow([]),
-						seq(provider_entryV3WithAll_concat4,
-						    [ seq(provider_entryV3WithAll_truncate5,
-							  [ seq(provider_entryV3WithAll_fromProviderinfoSinkxid6,
-								[ flow([ seq(provider_entryV3WithAll_t,
-									     [ seq(provider_entryV3WithAll_testcapa,
-										   [ if(provider_entryV3WithAll_ok,
-											[ provider_entryV3WithAll_last
-											],
-											[ provider_entryV3WithAll_o
-											])
-										   ])
-									     ]),
-									 seq(provider_entryV3WithAll_testTime,
-									     [ if(provider_entryV3WithAll_timeout,
-										  [ provider_entryV3WithAll_oTime
-										  ],
-										  [ provider_entryV3WithAll_last
-										  ])
-									     ])
-								       ])
-								])
-							  ])
-						    ])
-					      ])
-				       ])
-				 ])
-			  ])
-		    ])
-	     ])
-       ])
-]
