@@ -1,0 +1,53 @@
+orchestration provider::entryV2 {
+
+  variables { 
+    idVar as informationList;  diplomaVar as string;
+    timetableInfoListVar as informationList; newsListVar as informationList;
+    infos2troncateVar as informationList; infoNumberVar as integer;
+    infosVar as informationList; newsAndTimetableInfoListVar as informationList;
+    menuInfoListVar as informationList;
+    delay as integer; timeout as boolean; const duration := '10' as integer;
+    const zero := '0' as integer;
+    const timerxerror := 'RESPONSE TIME VIOLATION' as string;
+
+    listSize as integer; const size := 'infoNumber' as integer;
+    const capacityError := 'Capacity Violation' as string;
+  } 
+
+  activities { 
+    rec. (diplomaVar,infoNumberVar):= receive() ;
+    sourceTimetablesxtimetable4Diploma0. 
+      timetableInfoListVar := sourceTimetables::timetable4Diploma(diplomaVar) ;
+    sourceNewsxnewsNow1. newsListVar := sourceNews::newsNow() ;
+    concat2. infos2troncateVar := concat(timetableInfoListVar,newsListVar) ;
+    truncate3. 
+      newsAndTimetableInfoListVar := truncate(infos2troncateVar,infoNumberVar) ;
+    menuxmenuToday4. menuInfoListVar := menu::menuToday() ;
+    concat5. infosVar := concat(newsAndTimetableInfoListVar,menuInfoListVar) ;
+    fromProviderinfoSinkxid6. idVar := id(infosVar) ;
+    last. reply (idVar) ;
+
+   e0. delay := id(zero) ;
+    timestart. delay := timer::wait(duration) ;
+
+    test. timeout := isDifferent(delay,zero) ;
+    o. throw(timerxerror) ;
+
+    tcapa. listSize := size(infosVar) ;
+    testcapa. ok := isLesserThan(listSize,size) ;
+    ocapa. throw(capacityError) ;
+  } 
+
+  relations { 
+    e0<sourceTimetablesxtimetable4Diploma0 ; e0<sourceNewsxnewsNow1 ;
+    sourceTimetablesxtimetable4Diploma0<concat2 ; sourceNewsxnewsNow1<concat2 ;
+    concat2<truncate3 ; rec<menuxmenuToday4 ; truncate3<concat5 ;
+    menuxmenuToday4<concat5 ; concat5<fromProviderinfoSinkxid6 ;
+
+    rec<e0 ; e0<timestart ;  fromProviderinfoSinkxid6<<test ; timestart<<test ;
+    test<o when timeout ; test<last when  ! timeout ;
+
+  fromProviderinfoSinkxid6 < tcapa ; tcapa<testcapa ;  testcapa < ocapa when ! ok ; testcapa < last when  ok ;
+  } 
+}
+

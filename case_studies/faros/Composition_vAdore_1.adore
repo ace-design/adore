@@ -1,0 +1,83 @@
+orchestration provider::entryV1 {
+
+  variables { 
+    idVar as informationList;  diplomaVar as string;
+    timetableInfoListVar as informationList; newsListVar as informationList;
+    infos2troncateVar as informationList; infoNumberVar as integer;
+    infosVar as informationList;
+
+  } 
+
+  activities { 
+    rec. (diplomaVar,infoNumberVar):= receive() ;
+    sourceTimetablesxtimetable4Diploma0. 
+      timetableInfoListVar := sourceTimetables::timetable4Diploma(diplomaVar) ;
+    sourceNewsxnewsNow1. newsListVar := sourceNews::newsNow() ;
+    concat2. infos2troncateVar := concat(timetableInfoListVar,newsListVar) ;
+    truncate3. infosVar := truncate(infos2troncateVar,infoNumberVar) ;
+    fromProviderinfoSinkxid4. idVar := id(infosVar) ;
+    last. reply (idVar) ;
+  } 
+  
+  relations { 
+    rec < sourceTimetablesxtimetable4Diploma0 ;
+    rec < sourceNewsxnewsNow1 ; sourceTimetablesxtimetable4Diploma0 < concat2 ;
+    sourceNewsxnewsNow1 < concat2 ; concat2 < truncate3 ;
+    truncate3 < fromProviderinfoSinkxid4 ; fromProviderinfoSinkxid4 < last ;
+  } 
+
+}
+
+orchestration provider::entryV1Composed {
+
+  variables { 
+    idVar as informationList;  diplomaVar as string;
+    timetableInfoListVar as informationList; newsListVar as informationList;
+    infos2troncateVar as informationList; infoNumberVar as integer;
+    infosVar as informationList;
+
+    delay as integer; timeout as boolean;
+    const duration := '10' as integer; const zero := '0' as integer;
+    const timerxerror := 'RESPONSE TIME VIOLATION' as string;
+
+    res as informationList; ok as boolean;
+    listSize as integer; const size := 'infoNumber' as integer;
+    const capacityError := 'Capacity Violation' as string;
+  } 
+
+  activities { 
+    rec. (diplomaVar,infoNumberVar):= receive() ;
+    sourceTimetablesxtimetable4Diploma0. 
+      timetableInfoListVar := sourceTimetables::timetable4Diploma(diplomaVar) ;
+    sourceNewsxnewsNow1. newsListVar := sourceNews::newsNow() ;
+    concat2. infos2troncateVar := concat(timetableInfoListVar,newsListVar) ;
+    truncate3. infosVar := truncate(infos2troncateVar,infoNumberVar) ;
+    fromProviderinfoSinkxid4. idVar := id(infosVar) ;
+    last. reply (idVar) ;
+
+    e0. delay := id(zero) ;
+    timestart. delay := timer::wait(duration) ;
+    test. timeout := isDifferent(delay,zero) ;
+    o. throw(timerxerror) ;
+
+    tcapa. listSize := size(res) ;
+    testcapa. ok := isLesserThan(listSize,size) ;
+    ocapa. throw(capacityError) ;
+
+
+  } 
+  
+  relations { 
+    
+    sourceTimetablesxtimetable4Diploma0 < concat2 ;
+    sourceNewsxnewsNow1 < concat2 ; concat2 < truncate3 ;
+    truncate3 < fromProviderinfoSinkxid4 ; 
+    rec < e0 ; e0 < timestart ; e0 < sourceTimetablesxtimetable4Diploma0 ; e0 < sourceNewsxnewsNow1;
+     fromProviderinfoSinkxid4 << test ; 
+ timestart << test ;
+    test < o when timeout ; test < last when  ! timeout ;
+   fromProviderinfoSinkxid4<tcapa ;
+    tcapa<testcapa ; testcapa<ocapa when ! ok ;
+    testcapa<last when  ok ;
+  } 
+}

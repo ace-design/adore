@@ -1,0 +1,219 @@
+//================== V1 ======================
+seq(
+     [provider_entryV1_rec, 
+     flow(
+	[seq(
+	    [flow(
+		[provider_entryV1_sourceTimetablesxtimetable4Diploma0, 
+		provider_entryV1_sourceNewsxnewsNow1]), 
+	    provider_entryV1_concat2, 
+	    provider_entryV1_truncate3, 
+	    provider_entryV1_fromProviderinfoSinkxid4, 
+	    provider_entryV1_last])])])
+
+
+
+//
+seq(
+	[provider_entryV1Composed_rec,
+	flow(
+		[seq(
+			[provider_entryV1Composed_e0,
+			flow(
+				[seq(
+					[provider_entryV1Composed_timestart,
+					provider_entryV1Composed_test, 
+					if(provider_entryV1Composed_timeout,
+						[provider_entryV1Composed_o], 
+						[provider_entryV1Composed_last])]),
+				seq(
+					[flow(
+						[provider_entryV1Composed_sourceTimetablesxtimetable4Diploma0,
+						provider_entryV1Composed_sourceNewsxnewsNow1]),
+					provider_entryV1Composed_concat2, 
+					provider_entryV1Composed_truncate3,
+					provider_entryV1Composed_fromProviderinfoSinkxid4,
+					flow([
+						seq([provider_entryV1Composed_tcapa,
+							provider_entryV1Composed_testcapa, 
+							if(provider_entryV1Composed_ok,
+								[provider_entryV1Composed_last], 
+								[provider_entryV1Composed_ocapa])]),
+						seq([provider_entryV1Composed_test,
+							if(provider_entryV1Composed_timeout, 
+								[provider_entryV1Composed_o],
+								[provider_entryV1Composed_last])])])])])])])])
+
+
+
+//================== V2 ======================
+//Fausse...
+seq(
+	[provider_entryV2_rec, 
+	flow(
+		[seq(
+			[flow(
+				[provider_entryV2_menuxmenuToday4, 
+				seq(
+					[provider_entryV2_e0, 
+					flow(
+						[seq(
+							[flow(
+								[provider_entryV2_sourceTimetablesxtimetable4Diploma0,
+								provider_entryV2_sourceNewsxnewsNow1]),
+							provider_entryV2_concat2, 
+							provider_entryV2_truncate3]),
+						seq(
+							[provider_entryV2_timestart, 
+							provider_entryV2_test,
+							if(provider_entryV2_timeout, 
+										     [provider_entryV2_o],
+										     [provider_entryV2_last])])])])]),
+			flow([seq([provider_entryV2_concat5,
+	provider_entryV2_fromProviderinfoSinkxid6,
+	flow([seq([provider_entryV2_tcapa, provider_entryV2_testcapa,
+	if(provider_entryV2_ok, [provider_entryV2_last],
+	[provider_entryV2_ocapa])]), seq([provider_entryV2_test,
+	if(provider_entryV2_timeout, [provider_entryV2_o],
+	[provider_entryV2_last])])])])])])])])
+
+
+
+//================== V3 ======================
+//Attention non revu depuis correction du code
+-seq(	[provider_entrywithTime_rec, 
+	flow(			     [seq(
+					[provider_entrywithTime_e0, 
+				    	flow([
+						seq([
+							provider_entrywithTime_timestart, 
+							provider_entrywithTime_test, 
+							if(provider_entrywithTime_timeout,
+								[provider_entrywithTime_o], [provider_entrywithTime_last])]), 
+						seq([
+							flow([
+								provider_entrywithTime_sourceTimetablesxtimetable4Diploma0, 
+								provider_entrywithTime_sourceNewsxnewsNow1]), 
+							provider_entrywithTime_concat2, 
+							provider_entrywithTime_truncate3, 
+							provider_entrywithTime_fromProviderinfoSinkxid4,
+							provider_entrywithTime_test, 
+							if(provider_entrywithTime_timeout,
+								[provider_entrywithTime_o],
+								[provider_entrywithTime_last])])])])])])
+
+
+//Attention non revu depuis correction du code
+seq( [provider_entrywithCapacity_rec, 
+     flow(  
+     	    [seq(
+		   [flow(
+		        [provider_entrywithCapacity_sourceTimetablesxtimetable4Diploma0, 
+			provider_entrywithCapacity_sourceNewsxnewsNow1]), 
+		    provider_entrywithCapacity_concat2, 
+		    provider_entrywithCapacity_truncate3, 
+		    provider_entrywithCapacity_fromProviderinfoSinkxid4, 
+		    provider_entrywithCapacity_t, 
+		    provider_entrywithCapacity_test, 
+		    if(provider_entrywithCapacity_ok, [provider_entrywithCapacity_last], [provider_entrywithCapacity_o])])])])
+
+//Attention non revu depuis correction du code
+-seq( [provider_entrywithTimeAndCapacity_rec, 
+      flow(
+	   [seq(
+		[provider_entrywithTimeAndCapacity_e0, 
+		flow([
+		      seq(
+			[provider_entrywithTimeAndCapacity_timestart, 
+			provider_entrywithTimeAndCapacity_test, 
+			if(provider_entrywithTimeAndCapacity_timeout,
+				[provider_entrywithTimeAndCapacity_o],
+      				[provider_entrywithTimeAndCapacity_last])]), 
+		      seq(
+			[flow(
+				[provider_entrywithTimeAndCapacity_sourceTimetablesxtimetable4Diploma0, 
+				provider_entrywithTimeAndCapacity_sourceNewsxnewsNow1]), 
+			 provider_entrywithTimeAndCapacity_concat2, 
+			 provider_entrywithTimeAndCapacity_truncate3,
+			 provider_entrywithTimeAndCapacity_fromProviderinfoSinkxid4, 
+			 flow([
+				seq(
+				   [provider_entrywithTimeAndCapacity_t, 
+				   provider_entrywithTimeAndCapacity_testc, 
+				   if(provider_entrywithTimeAndCapacity_ok,
+					[provider_entrywithTimeAndCapacity_last],
+      					[provider_entrywithTimeAndCapacity_oc])]), 
+      				seq(
+				    [provider_entrywithTimeAndCapacity_test, 
+				    if(provider_entrywithTimeAndCapacity_timeout, [provider_entrywithTimeAndCapacity_o], [provider_entrywithTimeAndCapacity_last])])])])])])])])
+
+
+FAUX..........
+
+
+
+seq(	[provider_entryV3WithCache_rec,
+	flow(
+		[seq(
+			[flow(
+				[provider_entryV3WithCache_sourceNewsxnewsNow1,
+				provider_entryV3WithCache_menuxmenuToday3]),
+			flow(
+				[seq(
+					[provider_entryV3WithCache_concat2,
+					flow(
+						[seq(
+							[provider_entryV3WithCache_concat4,
+							provider_entryV3WithCache_truncate5,
+							provider_entryV3WithCache_fromProviderinfoSinkxid6,
+							provider_entryV3WithCache_last])])])])]),
+		seq([provider_entryV3WithCache_c, 
+		    provider_entryV3WithCache_test,
+if(provider_entryV3WithCache_valid, [provider_entryV3WithCache_r],
+[seq([provider_entryV3WithCache_sourceTimetablesxtimetable4Diploma0,
+provider_entryV3WithCache_e])])])])])
+
+
+
+//Semble OK
+
+seq([provider_entryV3WithAll_rec,
+	flow(
+		[seq(
+			[flow(
+				[provider_entryV3WithAll_c,
+				seq(
+				   [provider_entryV3WithAll_e0,
+				   flow(
+					[seq(
+						[provider_entryV3WithAll_timestart,
+						provider_entryV3WithAll_testTime, 
+						if(provider_entryV3WithAll_timeout,
+							[provider_entryV3WithAll_oTime], 
+							[provider_entryV3WithAll_last])]),
+					provider_entryV3WithAll_sourceNewsxnewsNow1,
+					provider_entryV3WithAll_menuxmenuToday3])])]),
+			flow([
+				seq(
+					[provider_entryV3WithAll_test,
+					if(provider_entryV3WithAll_valid, 
+							[provider_entryV3WithAll_r],
+							[seq(	[provider_entryV3WithAll_sourceTimetablesxtimetable4Diploma0,
+							provider_entryV3WithAll_e])]),
+					flow(
+					     [seq(
+						[provider_entryV3WithAll_concat2,
+						flow(
+							[seq(
+								[provider_entryV3WithAll_concat4,
+								provider_entryV3WithAll_truncate5,
+								provider_entryV3WithAll_fromProviderinfoSinkxid6,
+								flow([
+									seq(	[provider_entryV3WithAll_t,
+										provider_entryV3WithAll_testcapa, 
+										if(provider_entryV3WithAll_ok,
+										[provider_entryV3WithAll_last], 
+										[provider_entryV3WithAll_o])]),
+									seq([provider_entryV3WithAll_testTime,
+if(provider_entryV3WithAll_timeout, [provider_entryV3WithAll_oTime],
+[provider_entryV3WithAll_last])])])])])])])])])])])])
