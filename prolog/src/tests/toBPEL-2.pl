@@ -40,10 +40,11 @@ getSuccessors(A,LA) :-
      append(LAS,LAG,LASG),
      append(LASG,LAW,LA).
 				
-getStrongSuccessors(A,LA) :-
-     findall(S,waitFor(S,A),LAS),
-     findall(S,isGuardedBy(S,A,_V,_),LAG),
-     append(LAS,LAG,LA).
+getStrongSuccessors(A,LAS) :-
+     findall(S,waitFor(S,A),LAS).
+ %Pour ne pas separer les conditions...
+ %    findall(S,isGuardedBy(S,A,_V,_),LAG),
+ %    append(LAS,LAG,LA).
      
 getReceive(O,R) :-
   isContainedBy(R,O),
@@ -59,11 +60,11 @@ getBlockOnActivity(A,B,ToBefollowedBy) :-
 buildFlowBlock([],[],[]) :-!.
 buildFlowBlock([B],[NB],Succs) :- !,
    getBlockOnActivity(B,NB,Succs).
-buildFlowBlock(LB,SB,Succs) :-
+buildFlowBlock(LB,[flow(SB)],Succs) :-
    buildSubBlocks(LB,SB,Succs).
  
 buildSubBlocks([],[],[]).
-buildSubBlocks([A|LB],[flow([SubPart|Flow])],Succs) :-
+buildSubBlocks([A|LB],[SubPart|Flow],Succs) :-
      getAllActivitiesWithSameSuccessors(A,LB,WithSameSuc,Rest),
      buildSubpart(A,WithSameSuc,SuccSP,SubPart),
      buildSubBlocks(Rest,Flow,SuccR),
@@ -71,9 +72,10 @@ buildSubBlocks([A|LB],[flow([SubPart|Flow])],Succs) :-
      
 buildSubpart(A,[],Successors,B) :-
 	getBlockOnActivity(A,B,Successors).       
-buildSubpart(A,WithSameSuc,Followings,seq(flow([A|WithSameSuc]),SubPart)) :-
+buildSubpart(A,WithSameSuc,Followings,Res) :-
     getSuccessors(A,Successors),
-    getBlocksOnActivities(Successors,SubPart,Followings).
+    getBlocksOnActivities(Successors,SubPart,Followings),
+    dealWithResSeqBlock(flow([A|WithSameSuc]), SubPart, Res).
    
  buildIfBlock(_A,[],[],[],[]).
 
@@ -83,15 +85,18 @@ buildSubpart(A,WithSameSuc,Followings,seq(flow([A|WithSameSuc]),SubPart)) :-
      getBlocksOnActivities(FalseSuc,NFalseSuc,FalseSucFollowings),
      merge_set(TrueSucFollowings,FalseSucFollowings,Followings).
      
- buildSeqBlock(A,[],A,[]) :- !.  
-     
- buildSeqBlock(A,FreeSucessors,seq(A,Flow),Successors) :-
+ buildSeqBlock(A,[],A,[]) :- !.   
+ buildSeqBlock(A,FreeSucessors,Res,Successors) :-
      getConditionnedSuccessors(A,FreeSucessors,TrueSuc,FalseSuc,Others),
      buildIfBlock(A,TrueSuc,FalseSuc,BlockIf,Succs),
      %getBlocksOnActivities(Others,NOthers,Followings),
      buildFlowBlock(Others,OFlow,Followings),
      append(BlockIf,OFlow,Flow),
-     merge_set(Succs,Followings,Successors).
+     merge_set(Succs,Followings,Successors),
+     dealWithResSeqBlock(A,Flow,Res).
+dealWithResSeqBlock(A,[],A) :-!.
+dealWithResSeqBlock(A,Flow,seq(A,Flow)).
+     
  
 getBlocksOnActivities([],[],[]).   
 getBlocksOnActivities([A|Others],[B|NOthers],Followings) :-
@@ -113,20 +118,37 @@ getConditionnedSuccessors(A,FreeSucessors,TrueSuc,FalseSuc,Others) :-
      
 getDirectSuccessors(A,ToBeIn,ToBeOut) :-
     getSuccessors(A,LS),
+    getDirectSuccessorsAccordingToWeakLink(A,LS,ToBeIn,ToBeOut).
+
+ getDirectSuccessorsAccordingToWeakLink(A,LS,LS,[]) :-   
+     weakWait(A,_),!.
+ getDirectSuccessorsAccordingToWeakLink(A,LS,ToBeIn,ToBeOut) :-   
     findall(S,(member(S,LS),(waitFor(S,X)|isGuardedBy(S,X,_,_)),X\=A,\+ exclusiveRelativelyTo(S,A,X)),LinkedSuccessors),
     subtract(LS,LinkedSuccessors,FreeSucessors),
-    conditionningEnd(FreeSucessors,NotConditionned,ToBeIn),
-    append(LinkedSuccessors,NotConditionned,ToBeOut).
+    ToBeIn = FreeSucessors, ToBeOut=LinkedSuccessors.
+ %   conditionningEnd(FreeSucessors,NotConditionned,ToBeIn),
+ %   append(LinkedSuccessors,NotConditionned,ToBeOut).
 
 %conditionningEnd(LS,NotConditionning,Conditionning) :-
 conditionningEnd([],[],[]). 
 conditionningEnd([A|LS],NotConditionning,[A|Conditionning]) :-
-   getSuccessors(A,LSS),
+   onlyConditionnedSuccessors(A,_LSS),!,
+   conditionningEnd(LS,NotConditionning,Conditionning). 
+conditionningEnd([A|LS],[A|NotConditionning],Conditionning) :-
+   conditionningEnd(LS,NotConditionning,Conditionning). 
+conditionningEnd([A|LS],NotConditionning,[A|Conditionning]) :-
+   getStrongSuccessors(A,LSS),
    conditionnedSuccessors(LSS,[A|LSS]),!,
    conditionningEnd(LS,NotConditionning,Conditionning). 
 conditionningEnd([A|LS],[A|NotConditionning],Conditionning) :-
    conditionningEnd(LS,NotConditionning,Conditionning).    
   
+onlyConditionnedSuccessors(A,LSS) :-
+    findall(X,isGuardedBy(A,X,_,_),LSS),
+    LSS \= [],
+    findall(X,waitFor(A,X),Lw),
+    Lw == [].
+    
 conditionnedSuccessors([X|_LSA],LSS) :-
 	%getStrongSuccessors(X,_LSX),
 	getPredecessors(X,LPX),
@@ -171,13 +193,63 @@ duplicated(A) :-
     weakWait(A,_S).
         
 getBlocks([],[]).
-getBlocks(L,[Res]):-
-      getBlock4Activity(L,LB,LToBe),
-      list_to_set(LToBe,LNA),
-      removeLinkedActivities(LNA,LA1),
-      getBlocks(LA1,LS),
-      buildFlowBlock(LB,NLB,_),
+getBlocks(L,[flow([Res|BS])]):-
+      extraireBlocsSolitaires(L,BS,RL),
+      getBlock4Activity(RL,LB,LToBe),
+      buildFlowBlock(LB,[NLB],Succ),
+      removeActivityInBlock(NLB,LToBe,LToBeRest),
+      merge_set(Succ,LToBeRest,LA),
+      list_to_set(LA,LNA),
+      dealWithFollowingActivites(LNA,LS),
       buildSeqBlock(NLB,LS,Res,_),!.
+ 
+ extraireBlocsSolitaires([],[],[]).
+ extraireBlocsSolitaires([A|L],BS,RL) :-
+  getPredecessors(A,LPA),   
+  solitaire(A,BS1,LPA),!,
+  extraireBlocsSolitaires(L,BS2,RL),
+  append(BS1,BS2,BS).
+ extraireBlocsSolitaires([A|L],BS,[A|RL]) :-
+  extraireBlocsSolitaires(L,BS,RL).
+ 
+solitaire(A,[BA],LPA) :-
+    isSolitaire(A,LPA),
+    getBlockOnActivity(A,BA,_ToBefollowedBy).
+    
+isSolitaire(A,[]) :-    
+    weakWait(A,_),!.
+isSolitaire(A,L) :-
+    getPredecessors(A,LPA),
+    intersection(LPA,L,LPA),
+    getSuccessors(A,LSX),
+    areSolitaires(LSX,[A|L]).
+areSolitaires([A|LR],L) :-
+	getPredecessors(A,LPA),
+    intersection(LPA,L,LPA),
+    getStrongSuccessors(A,LSX),
+    areSolitaires(LR,L),
+    append(L,LR,NL),
+    areSolitaires(LSX,[A|NL]).
+areSolitaires([],_).
+         
+removeActivityInBlock(flow([A|L]),LA,LToBeRest) :-
+    subtract(LA,[A|L],LToBeRest1),
+	removeActivityInBlock(A,LToBeRest1,LToBeRest2),
+	removeActivityInBlock(L,LToBeRest2,LToBeRest).
+removeActivityInBlock(seq(A,L),LA,LToBeRest) :-
+    removeActivityInBlock(A,LA,LToBeRest1),
+	removeActivityInBlock(L,LToBeRest1,LToBeRest).
+removeActivityInBlock([A|L],LA,LToBeRest) :-
+	removeActivityInBlock(A,LA,LA1),
+	removeActivityInBlock(L,LA1,LToBeRest).
+removeActivityInBlock(A,LToBe,LToBeRest) :-
+    subtract(LToBe,[A],LToBeRest).
+    
+dealWithFollowingActivites([],[]) :-!.   
+dealWithFollowingActivites(LNA,LS) :-    
+      removeLinkedActivities(LNA,LA1),
+      getBlocks(LA1,LS).
+     
  
 getBlock4Activity([],[],[]).
 getBlock4Activity([A|L],[B|LB],LToBe) :-
@@ -188,11 +260,22 @@ getBlock4Activity([A|L],[B|LB],LToBe) :-
       
 removeLinkedActivities(LNA,LA1) :-
   findall(A, 
-  	( member(A,LNA),member(B,LNA), (waitFor(A,B) | isGuardedBy(A,B,_,_))),LA),
+  	( member(A,LNA),member(B,LNA),B\=A, pathRec(B,A,_) ) ,LA),
   subtract( LNA,LA,LA1).     
-      
-    
-    
+     
+pathRec(A1,A2,[A1,A2]) :-
+	      pathControl(A1,A2).
+pathRec(A1,A3,[A1|P]) :-
+	      pathControl(A1,A2),
+	      pathRec(A2,A3,P).   
+	
+pathControl(A, B) :-
+		waitFor(B, A).
+pathControl(A, B) :-
+		isGuardedBy(B, A, _, _).
+pathControl(A, B) :-
+		weakWait(B, A).
+		    
 %getBlocks([A|L],[B|Blocks]) :-
 %    getSuccessors(A,Sucessors),
 %    compareSucessorsTo(Sucessors,L,NonCommon,Common),
@@ -215,112 +298,308 @@ compareSucessorsTo(Succ,L,NonCommon,Common) :-
     intersection(Succ,Successors,Common),
     subtract(Succ,Common,NonCommon).
     
-buildSequence([A],Succ,seq(A,BlockSucc)) :-
-    getBlocks(Succ,BlockSucc).
-    
+%buildSequence([A],Succ,seq(A,BlockSucc)) :-
+%    getBlocks(Succ,BlockSucc).
+%buildSequence([A],Succ,seq(A,BlockSucc)) :-
+%    getBlocks(Succ,BlockSucc).    
     
     
 %?- trace, toBpel(O,B).
-%O = provider_entry,
-%[ seq(
-%[     flow([provider_entry_sourceTimetablesxtimetable4Diploma0, provider_entry_sourceNewsxnewsNow1]), 
-%      seq([
-%           seq([provider_entry_concat2, provider_entry_truncate3]), 
-%           seq([provider_entry_fromProviderinfoSinkxid4, provider_entry_last])])])]
 
 
-%O = cms_setNewCrisisInformation,
-%P = seq([cms_setNewCrisisInformation_a0, 
-%       seq(cms_setNewCrisisInformation_a1, 
-%        if(cms_setNewCrisisInformation_relevant, [cms_setNewCrisisInformation_a10], [cms_setNewCrisisInformation_r]))])
 
 %O = provider_entrywithTime
-%[[seq(provider_entrywithTime_e0, 
-% [flow(    [seq(provider_entrywithTime_timestart, [seq(provider_entrywithTime_test, [if(provider_entrywithTime_timeout, [provider_entrywithTime_o], [provider_entrywithTime_last])])
-%                                                  ]), 
-%           flow([
-%              seq( flow([provider_entrywithTime_sourceTimetablesxtimetable4Diploma0, provider_entrywithTime_sourceNewsxnewsNow1]), 
-%                   [seq(provider_entrywithTime_concat2, 
-%                        [seq(provider_entrywithTime_truncate3, 
-%							[seq(provider_entrywithTime_fromProviderinfoSinkxid4, 
-%									[seq(provider_entrywithTime_test, 
-%										[if(provider_entrywithTime_timeout, [provider_entrywithTime_o], [provider_entrywithTime_last])])])])])])])])])]]
+%seq(provider_entrywithTime_e0,
+%    [ flow([ seq(provider_entrywithTime_timestart,
+%		 [ seq(provider_entrywithTime_test,
+%		       [ if(provider_entrywithTime_timeout,
+%			    [provider_entrywithTime_o],
+%			    [provider_entrywithTime_last])
+%		       ])
+%		 ]),
+%	     seq(flow([ provider_entrywithTime_sourceTimetablesxtimetable4Diploma0,
+%			provider_entrywithTime_sourceNewsxnewsNow1
+%		      ]),
+%		 [ seq(provider_entrywithTime_concat2,
+%		       [ seq(provider_entrywithTime_truncate3,
+%			     [ seq(provider_entrywithTime_fromProviderinfoSinkxid4,
+%				   [ seq(provider_entrywithTime_test,
+%					 [ if(provider_entrywithTime_timeout,
+%					      [ provider_entrywithTime_o
+%					      ],
+%					      [ provider_entrywithTime_last
+%					      ])
+%					 ])
+%				   ])
+%			     ])
+%		       ])
+%		 ])
+%	   ])
+ %   ]
+
+[ flow([ seq(provider_entrywithTime_e0,
+	     [ flow([ seq(provider_entrywithTime_timestart,
+			  [ seq(provider_entrywithTime_test,
+				[ if(provider_entrywithTime_timeout,
+				     [provider_entrywithTime_o],
+				     [provider_entrywithTime_last])
+				])
+			  ]),
+		      seq(flow([ provider_entrywithTime_sourceTimetablesxtimetable4Diploma0,
+				 provider_entrywithTime_sourceNewsxnewsNow1
+			       ]),
+			  [ seq(provider_entrywithTime_concat2,
+				[ seq(provider_entrywithTime_truncate3,
+				      [ seq(provider_entrywithTime_fromProviderinfoSinkxid4,
+					    [ seq(provider_entrywithTime_test,
+						  [ if(provider_entrywithTime_timeout,
+						       [ provider_entrywithTime_o
+						       ],
+						       [ provider_entrywithTime_last
+						       ])
+						  ])
+					    ])
+				      ])
+				])
+			  ])
+		    ])
+	     ])
+       ])
+]
 
 
+
+%provider_entrywithCapacity
+%[ flow([ flow([ seq(	flow([ provider_entrywithCapacity_sourceTimetablesxtimetable4Diploma0,
+%			   				provider_entrywithCapacity_sourceNewsxnewsNow1
+%			 				]),
+%		    		[ seq(provider_entrywithCapacity_concat2,
+%			  			[ seq(provider_entrywithCapacity_truncate3,
+%							[ seq(provider_entrywithCapacity_fromProviderinfoSinkxid4,
+%				      			[ seq(provider_entrywithCapacity_t,
+%					    			[ seq(provider_entrywithCapacity_test,
+%						  				[ if(provider_entrywithCapacity_ok,
+%						       [ provider_entrywithCapacity_last
+%						       ],
+%						       [ provider_entrywithCapacity_o
+%						  ])
+%					    ])
+%				      ])
+%				])
+%			  ])
+%		    ])
+%	      ])
+ %      ])
+%]
+
+[ flow([ flow([ seq(flow([ provider_entrywithCapacity_sourceTimetablesxtimetable4Diploma0,
+			   provider_entrywithCapacity_sourceNewsxnewsNow1
+			 ]),
+		    [ seq(provider_entrywithCapacity_concat2,
+			  [ seq(provider_entrywithCapacity_truncate3,
+				[ seq(provider_entrywithCapacity_fromProviderinfoSinkxid4,
+				      [ seq(provider_entrywithCapacity_t,
+					    [ seq(provider_entrywithCapacity_test,
+						  [ if(provider_entrywithCapacity_ok,
+						       [ provider_entrywithCapacity_last
+						       ],
+						       [ provider_entrywithCapacity_o
+						       ])
+						  ])
+					    ])
+				      ])
+				])
+			  ])
+		    ])
+	      ])
+       ])
+]
 %O = provider_entrywithTimeAndCapacity,
-%[seq( [seq( provider_entrywithTimeAndCapacity_e0, 
-%            [flow( [seq(provider_entrywithTimeAndCapacity_timestart, 
-%                     [seq(provider_entrywithTimeAndCapacity_test, 
-%                        [if(provider_entrywithTimeAndCapacity_timeout, [provider_entrywithTimeAndCapacity_o], [])])]), 
-%                   flow([seq( flow([provider_entrywithTimeAndCapacity_sourceTimetablesxtimetable4Diploma0, 
-%                                    provider_entrywithTimeAndCapacity_sourceNewsxnewsNow1]), 
-%                              [seq(provider_entrywithTimeAndCapacity_concat2, 
-%                                 [seq(provider_entrywithTimeAndCapacity_truncate3, 
-%                                     [seq(provider_entrywithTimeAndCapacity_fromProviderinfoSinkxid4, 
-%                                        [flow([seq(provider_entrywithTimeAndCapacity_t, 
-%													[seq(provider_entrywithTimeAndCapacity_testc, 
-%															[if(provider_entrywithTimeAndCapacity_ok, [], 
-%																[provider_entrywithTimeAndCapacity_oc])])]), 
-%												flow([seq(provider_entrywithTimeAndCapacity_test, 
-%														[if(provider_entrywithTimeAndCapacity_timeout, 
-%																[provider_entrywithTimeAndCapacity_o], [])])])])])])])])])])])], 
-%		[[provider_entrywithTimeAndCapacity_last]])]
-
-%%ATTENTION IDVAR EST NON INITIALISEE MAIS ON LE SAIT... IL NE DEVRAIT JAMAIS PASSER PAR LA...
-%%ON DOIT POUVOIR OTER LE TEST
-%O = provider_entrywithTimeAndCapacity,
-%[[seq(provider_entrywithTimeAndCapacity_e0, 
-%			[flow(	[seq	(provider_entrywithTimeAndCapacity_timestart, 
-%								[seq(provider_entrywithTimeAndCapacity_test, 
-%									[if(provider_entrywithTimeAndCapacity_timeout, 
-%										[provider_entrywithTimeAndCapacity_o], 
-%										[provider_entrywithTimeAndCapacity_last])])]), 
-%					flow([	seq(
-%								flow([provider_entrywithTimeAndCapacity_sourceTimetablesxtimetable4Diploma0, 
-%											provider_entrywithTimeAndCapacity_sourceNewsxnewsNow1]), 
-%								[seq(provider_entrywithTimeAndCapacity_concat2, 
-%										[seq( provider_entrywithTimeAndCapacity_truncate3, 
-%												[seq(provider_entrywithTimeAndCapacity_fromProviderinfoSinkxid4, 
-%													[flow([	seq(provider_entrywithTimeAndCapacity_t, 
-%																[seq(	provider_entrywithTimeAndCapacity_testc, 
-%																		[if(provider_entrywithTimeAndCapacity_ok, 
-%																			[provider_entrywithTimeAndCapacity_last], 
-%																			[provider_entrywithTimeAndCapacity_oc])])]), 
-%															flow([seq(provider_entrywithTimeAndCapacity_test, 
-%																[if(provider_entrywithTimeAndCapacity_timeout, 
-%																	[provider_entrywithTimeAndCapacity_o], 
-%																	[provider_entrywithTimeAndCapacity_last])])])])])])])])])])])]]
+%[ flow([ seq(provider_entrywithTimeAndCapacity_e0,
+%	     		[ flow(	[ seq(provider_entrywithTimeAndCapacity_timestart,
+%			  				[ seq(provider_entrywithTimeAndCapacity_test,
+%								[ if(provider_entrywithTimeAndCapacity_timeout,
+%				     				[ provider_entrywithTimeAndCapacity_o
+%				     				],
+%				     				[ provider_entrywithTimeAndCapacity_last
+%				     				])
+%								])
+%			  				]),
+%		      			seq(	flow([ provider_entrywithTimeAndCapacity_sourceTimetablesxtimetable4Diploma0,
+%				 provider_entrywithTimeAndCapacity_sourceNewsxnewsNow1
+%			       ]),
+%			  [ seq(provider_entrywithTimeAndCapacity_concat2,
+%				[ seq(provider_entrywithTimeAndCapacity_truncate3,
+%				      [ seq(provider_entrywithTimeAndCapacity_fromProviderinfoSinkxid4,
+%					    [ flow([ seq(provider_entrywithTimeAndCapacity_t,
+%							 [ seq(provider_entrywithTimeAndCapacity_testc,
+%							       [ if(provider_entrywithTimeAndCapacity_ok,
+%								    [ provider_entrywithTimeAndCapacity_last
+%								    ],
+%								    [ provider_entrywithTimeAndCapacity_oc
+%								    ])
+%							       ])
+%							 ]),
+%						     seq(provider_entrywithTimeAndCapacity_test,
+%							 [ if(provider_entrywithTimeAndCapacity_timeout,
+%							      [ provider_entrywithTimeAndCapacity_o
+%							      ],
+%							      [ provider_entrywithTimeAndCapacity_last
+%							      ])
+%							 ])
+%						   ])
+%					    ])
+%				      ])
+%				])
+%			  ])
+%		    ])
+%	     ])
+%      ])
+%]
 
 %Des ordres supplementaires ont été introduits masi on ne peut pas faire autrement
 %O = provider_entryV3WithCache,
-%[seq([	flow(	[provider_entryV3WithCache_sourceNewsxnewsNow1, 
-%				flow([provider_entryV3WithCache_menuxmenuToday3, 
-%					flow(	[seq(provider_entryV3WithCache_c,	[seq(provider_entryV3WithCache_test, 
-%																	[if(provider_entryV3WithCache_valid, 
-%																		[provider_entryV3WithCache_r], 
-%																		[seq(	provider_entryV3WithCache_sourceTimetablesxtimetable4Diploma0, 
-%																				[provider_entryV3WithCache_e])])])])])])])], 
-%		[seq(	[provider_entryV3WithCache_concat2], 
-%				[[seq(	provider_entryV3WithCache_concat4, 
-%						[seq(	provider_entryV3WithCache_truncate5, 
-%								[seq(provider_entryV3WithCache_fromProviderinfoSinkxid6, [provider_entryV3WithCache_last])])])]])])]
-
+%[ flow([ seq
+%			(flow([ provider_entryV3WithCache_sourceNewsxnewsNow1,
+%		    		provider_entryV3WithCache_menuxmenuToday3
+%		  		]),
+%	     	[ flow([ seq(provider_entryV3WithCache_concat2,
+%			  			[ flow([ flow([]),
+%				   		seq(provider_entryV3WithCache_concat4,
+%				       	[ seq(provider_entryV3WithCache_truncate5,
+%					     [ seq(provider_entryV3WithCache_fromProviderinfoSinkxid6,
+%						   [ provider_entryV3WithCache_last
+%						   ])
+%					     ])
+%				       ])
+%				 ])
+%			  ])
+%		    ])
+%	     ]),
+%	 seq(provider_entryV3WithCache_c,
+%	     [ seq(provider_entryV3WithCache_test,
+%		   [ if(provider_entryV3WithCache_valid,
+%			[provider_entryV3WithCache_r],
+%			[ seq(provider_entryV3WithCache_sourceTimetablesxtimetable4Diploma0,
+%			      [provider_entryV3WithCache_e])
+%			])
+%		   ])
+%	     ])
+ %      ])
 
 
 
 %O = provider_entryV3WithAll,
-%[seq([	flow(	[provider_entryV3WithAll_c,
-%           	flow([	seq(	provider_entryV3WithAll_e0, 
-%								[flow(	[seq(	provider_entryV3WithAll_timestart, 
-%												[seq(	provider_entryV3WithAll_testTime, 
-%														[if(provider_entryV3WithAll_timeout, 
-%															[provider_entryV3WithAll_oTime], 
-%															[provider_entryV3WithAll_last])])]), 
-%										flow(	[provider_entryV3WithAll_sourceNewsxnewsNow1, 
-%												flow(	[provider_entryV3WithAll_menuxmenuToday3])])
-%										])])])])], 
-% 		[seq( [flow(	[seq( 	provider_entryV3WithAll_test, 
-%							[if(provider_entryV3WithAll_valid, 
-%									[provider_entryV3WithAll_r],
-% 									[seq(	provider_entryV3WithAll_sourceTimetablesxtimetable4Diploma0, [provider_entryV3WithAll_e])])]), 
-%						flow([provider_entryV3WithAll_concat2])] )], [seq([provider_entryV3WithAll_concat2], [[seq(provider_entryV3WithAll_concat4, [seq(provider_entryV3WithAll_truncate5, [seq(provider_entryV3WithAll_fromProviderinfoSinkxid6, [flow([seq(provider_entryV3WithAll_t, [seq(provider_entryV3WithAll_testcapa, [if(provider_entryV3WithAll_ok, [provider_entryV3WithAll_last], [provider_entryV3WithAll_o])])]), flow([seq(provider_entryV3WithAll_testTime, [if(provider_entryV3WithAll_timeout, [provider_entryV3WithAll_oTime], [provider_entryV3WithAll_last])])])])])])])]])])])]
+%[[ flow([ seq(flow([ provider_entryV3WithAll_c,
+%		    seq(provider_entryV3WithAll_e0,
+%			[ flow([ seq(provider_entryV3WithAll_timestart,
+%				     [ seq(provider_entryV3WithAll_testTime,
+%					   [ if(provider_entryV3WithAll_timeout,
+%						[ provider_entryV3WithAll_oTime
+%						],
+%						[ provider_entryV3WithAll_last
+%						])
+%%				     ]),
+	%			 provider_entryV3WithAll_sourceNewsxnewsNow1,
+%				 provider_entryV3WithAll_menuxmenuToday3
+%			       ])
+%			])
+%		  ]),
+%	     [ flow([ seq(seq(provider_entryV3WithAll_test,
+%			      [ if(provider_entryV3WithAll_valid,
+%				   [provider_entryV3WithAll_r],
+%				   [ seq(provider_entryV3WithAll_sourceTimetablesxtimetable4Diploma0,
+%					 [provider_entryV3WithAll_e])
+%				   ])
+%			      ]),
+%			  [ flow([ seq(provider_entryV3WithAll_concat2,
+%				       [ flow([ flow([]),
+%						seq(provider_entryV3WithAll_concat4,
+%						    [ seq(provider_entryV3WithAll_truncate5,
+%							  [ seq(provider_entryV3WithAll_fromProviderinfoSinkxid6,
+%								[ flow([ seq(provider_entryV3WithAll_t,
+%									     [ seq(provider_entryV3WithAll_testcapa,
+%%										   [ if(provider_entryV3WithAll_ok,
+%											[ provider_entryV3WithAll_last
+%											],
+%											[ provider_entryV3WithAll_o
+%											])
+%										   ])
+%									     ]),
+%									 seq(provider_entryV3WithAll_testTime,
+%									     [ if(provider_entryV3WithAll_timeout,
+%										  [ provider_entryV3WithAll_oTime
+%										  ],
+%										  [ provider_entryV3WithAll_last
+%										  ])
+%									     ])
+%								       ])
+%								])
+%							  ])
+%						    ])
+%					      ])
+%				       ])
+%				 ])
+%			  ])
+%		    ])
+%	     ])
+ %      ])
+%]
+%
+
+[ flow([ seq(flow([ provider_entryV3WithAll_c,
+		    seq(provider_entryV3WithAll_e0,
+			[ flow([ seq(provider_entryV3WithAll_timestart,
+				     [ seq(provider_entryV3WithAll_testTime,
+					   [ if(provider_entryV3WithAll_timeout,
+						[ provider_entryV3WithAll_oTime
+						],
+						[ provider_entryV3WithAll_last
+						])
+					   ])
+				     ]),
+				 provider_entryV3WithAll_sourceNewsxnewsNow1,
+				 provider_entryV3WithAll_menuxmenuToday3
+			       ])
+			])
+		  ]),
+	     [ flow([ seq(seq(provider_entryV3WithAll_test,
+			      [ if(provider_entryV3WithAll_valid,
+				   [provider_entryV3WithAll_r],
+				   [ seq(provider_entryV3WithAll_sourceTimetablesxtimetable4Diploma0,
+					 [provider_entryV3WithAll_e])
+				   ])
+			      ]),
+			  [ flow([ seq(provider_entryV3WithAll_concat2,
+				       [ flow([ flow([]),
+						seq(provider_entryV3WithAll_concat4,
+						    [ seq(provider_entryV3WithAll_truncate5,
+							  [ seq(provider_entryV3WithAll_fromProviderinfoSinkxid6,
+								[ flow([ seq(provider_entryV3WithAll_t,
+									     [ seq(provider_entryV3WithAll_testcapa,
+										   [ if(provider_entryV3WithAll_ok,
+											[ provider_entryV3WithAll_last
+											],
+											[ provider_entryV3WithAll_o
+											])
+										   ])
+									     ]),
+									 seq(provider_entryV3WithAll_testTime,
+									     [ if(provider_entryV3WithAll_timeout,
+										  [ provider_entryV3WithAll_oTime
+										  ],
+										  [ provider_entryV3WithAll_last
+										  ])
+									     ])
+								       ])
+								])
+							  ])
+						    ])
+					      ])
+				       ])
+				 ])
+			  ])
+		    ])
+	     ])
+       ])
+]
