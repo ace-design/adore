@@ -62,7 +62,7 @@ orchestration provider::entrywithTime {
 //}
 
 
-orchestration provider::entrywithCapacity{
+orchestration provider::entrywithCapacity {
   variables { 
     idVar as newsType;
     diplomaVar as string;
@@ -194,7 +194,7 @@ orchestration provider::entrywithTimeAndCapacity {
 //	apply cache => sourceTimetablesxtimetable4Diploma0 ;
 //}
 
-orchestration provider::entryV3WithCache{
+orchestration provider::entryV3WithCache {
   variables { 
     idVar as newsType;
     diplomaVar as string;

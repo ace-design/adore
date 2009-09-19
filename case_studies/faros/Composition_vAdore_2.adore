@@ -40,8 +40,9 @@ orchestration provider::entryV2 {
 
   relations { 
     e0<sourceTimetablesxtimetable4Diploma0 ; e0<sourceNewsxnewsNow1 ;
+    e0<menuxmenuToday4;
     sourceTimetablesxtimetable4Diploma0<concat2 ; sourceNewsxnewsNow1<concat2 ;
-    concat2<truncate3 ; rec<menuxmenuToday4 ; truncate3<concat5 ;
+    concat2<truncate3  ; truncate3<concat5 ;
     menuxmenuToday4<concat5 ; concat5<fromProviderinfoSinkxid6 ;
 
     rec<e0 ; e0<timestart ;  fromProviderinfoSinkxid6<<test ; timestart<<test ;
