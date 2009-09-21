@@ -1,3 +1,4 @@
+%Require dedicatedFunctions
 %consult('/Users/mireilleblay-fornarino/Documents/workspace/adoreCode/toBPEL-4.pl').
 
 %example
@@ -51,12 +52,12 @@ correct4Singles(A,[S|LinkedSuccessors]) :-
 	correct4Singles(A,LinkedSuccessors) .
 correct4Singles(_A,[]).	
 	 
-avoidUselessWait(P,A) :-
-   waitFor(P,A),
-   waitFor(A,R),
-   waitFor(P,R),
-   retract(waitFor(P,R)).  
- avoidUselessWait(_P,_A). 
+%avoidUselessWait(P,A) :-
+%   waitFor(P,A),
+%   waitFor(A,R),
+%   waitFor(P,R),
+%   retract(waitFor(P,R)).  
+% avoidUselessWait(_P,_A). 
     
 preprocessing(P) :-
     process(P), findall(X,isContainedBy(X,P),LA),
@@ -79,12 +80,12 @@ movePrecedenceRelationShip(A,Tests,LP) :-
 	 retractall( waitFor(A,_P)),
 	 findall(P, (member(T,Tests), member(P,LP),asserta(waitFor(T,P))),_).  
 
-getSuccessors(A,LA) :-
-     findall(S,waitFor(S,A),LAS),
-     findall(S,isGuardedBy(S,A,_V,_),LAG),
-     findall(S,weakWait(S,A),LAW),
-     append(LAS,LAG,LASG),
-     append(LASG,LAW,LA).
+%getSuccessors(A,LA) :-
+%     findall(S,waitFor(S,A),LAS),
+%     findall(S,isGuardedBy(S,A,_V,_),LAG),
+%     findall(S,weakWait(S,A),LAW),
+%     append(LAS,LAG,LASG),
+%     append(LASG,LAW,LA).
 				
 getStrongSuccessors(A,LAS) :-
      findall(S,waitFor(S,A),LAS).
@@ -224,11 +225,11 @@ conditionnedSuccessors([X|LSA],LSS) :-
 	append(LSX,LSS,LSXS),
 	conditionnedSuccessors(LSA,LSXS).
 	   
-getPredecessors(A,LASG) :-
-	findall(P,waitFor(A,P),LAS),
-     findall(P,isGuardedBy(A,P,_V,_),LAG),
- %    findall(S,weakWait(S,A),LAW),
-     append(LAS,LAG,LASG).
+%getPredecessors(A,LASG) :-
+%	findall(P,waitFor(A,P),LAS),
+%     findall(P,isGuardedBy(A,P,_V,_),LAG),
+% %ATTENTION    findall(S,weakWait(S,A),LAW),
+%     append(LAS,LAG,LASG).
      
 exclusiveRelativelyTo(S,A,B) :-
     weakWait(S,A),
@@ -353,12 +354,12 @@ pathRec(A1,A3,[A1|P]) :-
 	      pathControl(A1,A2),
 	      pathRec(A2,A3,P).   
 	
-pathControl(A, B) :-
-		waitFor(B, A).
-pathControl(A, B) :-
-		isGuardedBy(B, A, _, _).
-pathControl(A, B) :-
-		weakWait(B, A).
+%pathControl(A, B) :-
+%		waitFor(B, A).
+%pathControl(A, B) :-
+%		isGuardedBy(B, A, _, _).
+%pathControl(A, B) :-
+%		weakWait(B, A).
 		    
 %getBlocks([A|L],[B|Blocks]) :-
 %    getSuccessors(A,Sucessors),
