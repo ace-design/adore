@@ -38,7 +38,7 @@ loadFiles :-
         loadAlgo('setify'), loadAlgo('weave'), loadAlgo('metrics'),
 	aw('%%%% Loading Transformations'),
         loadTransfo('adore2dot'), loadTransfo('adore2png'), 
-	loadTransfo('adore2dgraph').
+	loadTransfo('adore2dgraph'), loadTransfo('adore2bpel_gen').
 
 
 loadTransfo(Name) :-  

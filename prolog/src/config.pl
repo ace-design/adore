@@ -32,7 +32,10 @@ debugSubscription(transfo).
 %% Model transformation parameters: 
 %%%%
 
-%% Adore -> PNG model transformation
-adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
-adore2png_param(viewer, 'open -a Preview').
+%% Seb:
+adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+
+%% Mireille:
+%% adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+
 

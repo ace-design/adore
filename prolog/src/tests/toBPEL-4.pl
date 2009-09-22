@@ -5,12 +5,12 @@
 %toBpel(O,P),write('\n==============\n'),write(P).
 toBpel(O,seq(R,Final)) :-
   process(O),
-  preprocessing(O),
+  preprocessing(O), normalise(O),
   getReceive(O,R),
  %Recupere les descendants immediats (sur un receive on ne peut pas avoir autre chose que des wait4all
   getSuccessors(R,LS),
   getBlocks(LS,Blocks),
-  print(Blocks),
+%  print(Blocks),
   postProcessing(Blocks,Final).
   
 

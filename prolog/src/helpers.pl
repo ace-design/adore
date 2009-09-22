@@ -24,6 +24,7 @@
 concatenate(L,C) :- concatenate(L,C,'\n').
 concatenate([],'',_).
 concatenate([E],R,_) :- swritef(R,'%w',[E]),!.
+concatenate([''|T],R,Sep) :- !, concatenate(T,R,Sep).
 concatenate([H|T],R,Sep) :- 
 	concatenate(T,Tmp,Sep), swritef(R,'%w%w%w',[H,Sep,Tmp]).
 
