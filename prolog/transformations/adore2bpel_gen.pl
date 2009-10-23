@@ -50,14 +50,15 @@ adore2bpel_genNamespaces(P,Code) :-
 	findall(E,(isContainedBy(A,P),bpelBridge(activity,A,E)),L),
 	bpelBridge(process,P,Process), 
 	flatten([Process,L],LComplete), sort(LComplete,Entities),
-	write(Entities),
 	findall(S,(member(X,Entities),adore2bpel_genNamespace(X,S)),Lines),
 	concatenate(Lines,Code,'\n').
 
 adore2bpel_genNamespace(Elem,Code) :-
 	bpelNamespace(Elem,Prefix,Namespace),
 	swritef(Code,'    xmlns:%w="%w"',[Prefix,Namespace]).
-adore2bpel_genNamespace(Elem,'') :- \+ bpelNamespace(Elem,_,_), write('Warning: missing namespace for element ['),write(Elem),write(']\n').
+adore2bpel_genNamespace(Elem,'') :- 
+	\+ bpelNamespace(Elem,_,_). 
+%	write('Warning: missing namespace for element ['),write(Elem),write(']\n').
 
 %%%%
 %% Imports 
@@ -74,7 +75,8 @@ adore2bpel_genImport(Elem,Code) :-
 	bpelImport(Elem,Namespace,Location,Type),
 	swritef(Code,'  <import namespace="%w" location="%w" importType="%w"/>',
     [Namespace,Location,Type]).
-adore2bpel_genImport(Elem,'') :- \+ bpelImport(Elem,_,_,_), write('Warning: missing import for element ['),write(Elem),write(']\n').
+adore2bpel_genImport(Elem,'') :- \+ bpelImport(Elem,_,_,_).
+%write('Warning: missing import for element ['),write(Elem),write(']\n').
 
 %%%%
 %% Partners Links
@@ -94,7 +96,8 @@ adore2bpel_genPartnerLink(Elem,Code) :-
 adore2bpel_genPartnerLink(Elem,Code) :-
 	bpelPnlk(Elem,Name,Namespace,Type,'',Role),
 	swritef(Code,'    <partnerLink name="%w" xmlns:tns="%w" partnerLinkType="%w" myRole="%w"/>', [Name,Namespace,Type,Role]).
-adore2bpel_genPartnerLink(Elem,'') :- \+ bpelPnlk(Elem,_,_,_,_,_), write('Warning: missing PartnerLink for element ['),write(Elem),write(']\n').
+adore2bpel_genPartnerLink(Elem,'') :- \+ bpelPnlk(Elem,_,_,_,_,_).
+	%write('Warning: missing PartnerLink for element ['),write(Elem),write(']\n').
 
 %%%%
 %% Variables
@@ -110,8 +113,8 @@ adore2bpel_genVariable(V,Code) :-
 	bpelVariable(V,Type),
 	swritef(Code,'    <variable name="%w" type="%w" />',[V,Type]).
 adore2bpel_genVariable(V,'') :- 
-	\+ bpelVariable(V,_),
-	write('Warning: missing Variable for element ['),write(V),write(']\n').
+	\+ bpelVariable(V,_).
+	%write('Warning: missing Variable for element ['),write(V),write(']\n').
 	
 
 %%%%
@@ -142,16 +145,16 @@ adore2bpel_genActivity(if(Var,Lif,Lelse),Code) :- !,
 	swritef(Code,'  <if>\n    <condition>$%w</condition>\n%w\n<else>%w</else></if>',[Var,ContentIf,ContentElse]).
 
 adore2bpel_genActivity(A,Code) :- 
-%	write(A),nl,
+%% %	write(A),nl,
 	bpelBridge(activity,A,Template),
-	gensym(A,Label),
-	findall(V,usesAsInput(A,V),Ins),
-	findall(V,usesAsOutput(A,V),Outs),
-%	write(Template),nl,write(Ins), nl, write(Outs),nl,
-	bpelTemplate(Template,Label,Ins,Outs,Code).
+ 	gensym(A,Label),
+ 	findall(V,usesAsInput(A,V),Ins),
+ 	findall(V,usesAsOutput(A,V),Outs),
+%% %	write(Template),nl,write(Ins), nl, write(Outs),nl,
+ 	bpelTemplate(Template,Label,Ins,Outs,Code).
 
 adore2bpel_genActivity(A,Code) :- 
 	\+ bpelBridge(activity,A,_),
-	write('Warning: missing ActTemplate for element ['),write(A),write(']\n'),
+	%write('Warning: missing ActTemplate for element ['),write(A),write(']\n'),
 	gensym(A,Label), swritef(Code,'  <empty name="%w" />',[Label]).
 
