@@ -1,0 +1,40 @@
+/** A bunch of fragment to deal with exceptions 
+ * @author Sebastien Mosser <mosser@polytech.unice.fr> 
+ */
+
+fragment precondition<fct,part> {
+  variables  { 
+    i as integer; c as boolean; exc as exception; name as string;
+  }
+  activities { 
+    h. (part: i) := hook();
+    t. c := fct(i);
+    e1. exc.key := id('bad_precond' as string);
+    e2. name := toString('fct' as string);
+    e3. exc.msg := concat('function ' as string,  name, 
+			  'is not true for ' as string, i);
+    e4. throw(exc); 
+  }
+  relations { 
+    ^ < h; h < t; t < $ when c; t < e1 when !c; e1 < e2 ; e2 < e3; e3 < e4;
+  }
+}
+
+fragment postcondition<fct> {
+  variables  { 
+    i as integer; c as boolean; exc as exception; name as string;
+  }
+  activities { 
+    t. c := fct(i);
+    h. hook(i);
+    e1. exc.key := id('bad_postcond' as string);
+    e2. name := toString('fct' as string);
+    e3. exc.msg := concat('function ' as string,  name, 
+			  'is not true for ' as string, i);
+    e4. throw(exc); 
+  }
+  relations { 
+    ^ < t; t < h when c; h < $; t < e1 when !c; e1 < e2 ; e2 < e3; e3 < e4;
+  }
+}
+

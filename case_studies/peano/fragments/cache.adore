@@ -1,0 +1,22 @@
+/** A fragment to store intermediate results using a cache
+ * @author Sebastien Mosser <mosser@polytech.unice.fr> 
+ */
+
+fragment cache<prefix> {
+  variables  { 
+    a as integer; b as integer; result as integer;
+    exists as boolean; key as string; prefix as string; 
+  }
+  activities { 
+    e1. key := concat(prefix, a, '_' as string, b);
+    t. exists := cache::exists(key);
+    e2. result := cache::read(key);    
+    h. result := hook(a,b);
+    e4. cache::store(key, result);
+  }
+  relations {
+    ^ < e1; e1 < t; t < e2 when exists; e2 < $; 
+    t < h when ! exists; h < e4; e4 < $; 
+  }
+}
+

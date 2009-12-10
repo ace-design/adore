@@ -1,0 +1,14 @@
+/** A fragment to swap parameters when a > b 
+ * @author Sebastien Mosser <mosser@polytech.unice.fr> 
+ */
+
+fragment swap {
+  variables  { a as integer; b as integer; tmp as integer; lt as boolean; }
+  activities { 
+    h. (a,b) := hook(); t. lt := isLesserThan(a,b);
+    e1. tmp := a; e2. a := b; e3. b := tmp; 
+  }
+  relations {
+    ^ < h; h < t; t < $ when ! lt; t < e1 when lt; e1 < e2; e2 < e3; e3 < $;
+  }
+}

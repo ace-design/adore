@@ -1,0 +1,43 @@
+/** A complex peano machine, implementing the 2 complex operations
+ * @author Sebastien Mosser <mosser@polytech.unice.fr>
+ */
+
+orchestration complex::sum {
+  variables { 
+    a as integer; b as integer; result as integer;
+    ap as integer; bm as integer; isZero as boolean;
+  }
+  activities {
+    a0. (a,b) := receive();
+    a1. isZero := atomic::isZero(b);
+    a2. result := a;
+    a3. ap := atomic::next(n: a);
+    a4. bm := atomic::prev(n: b);
+    a5. result := complex::sum(a: ap,b: bm);
+    a6. reply(result);
+  }
+  relations { 
+    a0 < a1; a1 < a2 when isZero; a2 < a6; 
+    a1 < a3 when ! isZero; a1 < a4 when ! isZero; a3 < a5; a4 < a5; a5 < a6; 
+  }
+}
+
+orchestration complex::mult {
+  variables {
+    a as integer; b as integer; result as integer;
+    bm as integer; tmp as integer; isZero as boolean;
+  }
+  activities {
+    a0. (a,b) := receive();
+    a1. isZero := atomic::isZero(b);
+    a2. result := id('0' as integer);
+    a3. bm := atomic::prev(n: b);
+    a4. tmp := complex::sum(a: a, b: bm);
+    a5. result := complex::sum(a: a,b: tmp);
+    a6. reply(result);
+  }
+  relations {
+    a0 < a1; a1 < a2 when isZero; a2 < a6;
+    a1 < a3 when ! isZero; a3 < a4; a4 < a5; a5 < a6;
+  }
+}

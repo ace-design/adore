@@ -1,0 +1,61 @@
+/** Building the machine as a composition of fragments
+ * @author Sebastien Mosser <mosser@polytech.unice.fr>
+ */
+
+// loading the set of orchestration (aka the Machine)
+require 'processes/atomic.adore';
+require 'processes/complex.adore';
+
+// loading defined fragments (aka the Extensions)
+require 'fragments/swap.adore';
+require 'fragments/cache.adore';
+require 'fragments/precondition.adore';
+
+/*********************
+ ** Atomic entities **
+ *********************/
+
+composition atomic::isZero {
+  apply precondition(fct: 'isNatural', part: 'n') => a0;
+}
+
+composition atomic::next {
+  apply precondition(fct: 'isNatural', part: 'n') => a0;
+}
+
+composition atomic::prev {
+  apply precondition(fct: 'isNatural', part: 'n') => a0;
+  apply postcondition(fct: 'isNatural')           => a2;
+}
+
+/********************** 
+ ** Complex entities **
+ **********************/
+
+composition complex::sum {
+  apply precondition(fct: 'isNatural', part: 'a') => a0;
+  apply precondition(fct: 'isNatural', part: 'b') => a0;
+  apply swap                                      => a0;
+  apply cache(prefix: 'sum_')                     => {a3, a4, a5};
+}
+
+composition complex::mult {
+  apply precondition(fct: 'isNatural', part: 'a') => a0;
+  apply precondition(fct: 'isNatural', part: 'b') => a0;
+  apply swap                                      => a0;
+  apply cache(prefix: 'mult_')                    => {a3, a4, a5};
+}
+
+/**********************
+ ** Vectorial entity **
+ **********************/
+
+composition complex::sum as vectorialsum { 
+  apply precondition(fct: 'isNatural', part: 'a') => a0;
+  apply precondition(fct: 'isNatural', part: 'b') => a0;
+  apply swap                                      => a0;
+  apply cache(prefix: 'sum_')                     => {a3, a4, a5};
+  toSet a; toSet b; 
+}
+
+

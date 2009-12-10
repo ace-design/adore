@@ -1,0 +1,144 @@
+/** An Adore modelisation of the PicWeb System
+ * author: mosser@polytech.unice.fr
+ * date:   12/10/09
+ */
+
+/**************************
+ ** Initial Process (v0) **
+ **************************/
+orchestration picweb::get {
+  variables {
+    tag as string; threshold as integer; flickr* as pictureUrl;
+    key as string;
+  }
+  activities {
+    a0. (tag, threshold) := receive();
+    a1. key := keyRegistry::get('flickr' as string);
+    a2. flickr* := flickrWrapper::exploreFolksonomy(tag,key);
+    a3. reply(flickr*);
+  }
+  relations { a0 < a1; a1 < a2; a2 < a3; }
+}
+
+/*****************************************
+ ** v1: Truncate according to treshold  **
+ *****************************************/
+
+fragment truncate<limit> {
+  variables { pict* as pictureUrl; limit as integer;}
+  activities {
+    e0. pict* := truncate::run(pict*,limit);
+    h. hook(pict*);
+  }
+  relations { ^ < e0; e0 < h; h < $; }
+}
+
+composition picweb::get as picweb_v1 {
+  apply truncate(limit: 'threshold') => a3;
+}
+
+/*************************************
+ ** v2: Merge results with picasa's **
+ *************************************/
+
+fragment addPicasa {
+  variables { 
+    picasa* as pictureUrl; pict* as pictureUrl; tag as string; 
+  }
+  activities {
+    h. pict* := hook(tag);
+    e0. picasa* := picasaBinder::getOnTag(tag);
+    e1. pict* := merge::run(pict*,picasa*);
+  }
+  relations { ^ < h; ^ < e0; h < e1; e0 < e1; e1 < $; }
+}
+
+composition picweb::get as picweb_v2 {
+  apply truncate(limit: 'threshold') => a3;
+  apply addPicasa                    => a2;
+}
+
+/*******************************************************
+ ** v3: Add a cache mechanism in front of the process **
+ *******************************************************/
+
+fragment cache<key,delta> {
+  variables {
+    isValid as boolean; key as string; 
+    pict* as pictureUrl; delta as integer;
+  }
+  activities {
+    e0. isValid := cache::isValid(key,delta);
+    e1. pict* := cache::getValue(key);
+    h. pict* := hook();
+    e2. cache::memorize(pict*, key);
+  }
+  relations { 
+    ^ < e0; e0 < e1 when isValid; 
+    e0 < h when !isValid; h < e2;
+    e2 < $; e1 < $;
+  }
+}
+
+composition picweb::get as picweb_v3 {
+  apply truncate(limit: 'threshold')    => a3;
+  apply addPicasa                       => a2;
+  apply cache(key: 'tag', delta: '600') => {a1,a2} ;
+}
+
+/**************************************************
+ ** v4: Shuffle the result set before truncating **
+ **************************************************/
+
+fragment shuffle {
+  variables { pict* as pictureUrl; }
+  activities {
+    e0. pict* := shuffle::run(pict*);
+    h. hook(pict*);
+  }
+  relations { ^ < e0; e0 < h; h < $; }
+}
+
+composition picweb::get as picweb_v4 {
+  apply shuffle => truncate::e0;
+  apply truncate(limit: 'threshold')    => a3;
+  apply addPicasa                       => a2;
+  apply cache(key: 'tag', delta: '600') => {a1,a2} ;
+}
+
+/***********************************************
+ ** Vectorial implementation, using a wrapper **
+ ***********************************************/
+
+orchestration multiplePicWeb::get {
+  variables {
+    tag as string; threshold as integer;
+    pict* as pictureUrl;
+  }
+  activities {
+    a0. (tag, threshold) := receive();
+    a1. pict* := picWeb::get(tag, threshold);
+    a2. reply(pict*);
+  }
+  relations { a0 < a1; a1 < a2; }
+}
+
+composition multiplePicWeb::get { 
+  toSet tag; 
+}
+
+/************************************************************
+ ** Vectorial implemntation, using an internal enhancement **
+ ************************************************************/
+
+composition picweb::get as mulitplePicWeb_internal {
+  apply shuffle => truncate::e0;
+  apply truncate(limit: 'threshold')    => a3;
+  apply addPicasa                       => a2;
+  apply cache(key: 'tag', delta: '600') => {a1,a2} ;
+  toSet tag;
+}
+
+
+
+
