@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe>
+  <process name="cms_assignIntRes" fragment="false">
+    <activities total="21">
+      <invoke>11</invoke>
+      <reply>3</reply>
+      <throw>3</throw>
+      <misc>4</misc>
+    </activities>
+    <relations total="24">
+      <wait_for>11</wait_for>
+      <guard>9</guard>
+      <weak_wait>2</weak_wait>
+      <fail>2</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>9</height>
+      <surface>27</surface>
+      <maze>22</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_authUser" fragment="false">
+    <activities total="10">
+      <invoke>4</invoke>
+      <reply>3</reply>
+      <throw>1</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="9">
+      <wait_for>4</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>7</height>
+      <surface>14</surface>
+      <maze>4</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_captureWitnessReport" fragment="false">
+    <activities total="21">
+      <invoke>14</invoke>
+      <reply>1</reply>
+      <throw>5</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="23">
+      <wait_for>14</wait_for>
+      <guard>6</guard>
+      <weak_wait>0</weak_wait>
+      <fail>3</fail>
+    </relations>
+    <complexity>
+      <width>4</width>
+      <height>7</height>
+      <surface>28</surface>
+      <maze>9</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_execRescMission" fragment="false">
+    <activities total="13">
+      <invoke>10</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="16">
+      <wait_for>12</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>2</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>12</height>
+      <surface>24</surface>
+      <maze>5</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_execSupObsMission" fragment="false">
+    <activities total="6">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>5</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>6</height>
+      <surface>6</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_handleACrisis" fragment="false">
+    <activities total="11">
+      <invoke>5</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>5</misc>
+    </activities>
+    <relations total="13">
+      <wait_for>9</wait_for>
+      <guard>2</guard>
+      <weak_wait>2</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>9</height>
+      <surface>18</surface>
+      <maze>5</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_handleAMission" fragment="false">
+    <activities total="26">
+      <invoke>15</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>10</misc>
+    </activities>
+    <relations total="35">
+      <wait_for>26</wait_for>
+      <guard>2</guard>
+      <weak_wait>4</weak_wait>
+      <fail>3</fail>
+    </relations>
+    <complexity>
+      <width>4</width>
+      <height>10</height>
+      <surface>40</surface>
+      <maze>21</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_handleAWorker" fragment="false">
+    <activities total="36">
+      <invoke>24</invoke>
+      <reply>3</reply>
+      <throw>0</throw>
+      <misc>9</misc>
+    </activities>
+    <relations total="51">
+      <wait_for>27</wait_for>
+      <guard>8</guard>
+      <weak_wait>14</weak_wait>
+      <fail>2</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>15</height>
+      <surface>45</surface>
+      <maze>198</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_handleSupObsMissions" fragment="false">
+    <activities total="19">
+      <invoke>15</invoke>
+      <reply>2</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="22">
+      <wait_for>12</wait_for>
+      <guard>8</guard>
+      <weak_wait>2</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>4</width>
+      <height>10</height>
+      <surface>40</surface>
+      <maze>6</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_requestExtRes" fragment="false">
+    <activities total="9">
+      <invoke>5</invoke>
+      <reply>1</reply>
+      <throw>1</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="9">
+      <wait_for>6</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>7</height>
+      <surface>14</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_resolveCrisis" fragment="false">
+    <activities total="10">
+      <invoke>7</invoke>
+      <reply>1</reply>
+      <throw>1</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="10">
+      <wait_for>6</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>8</height>
+      <surface>16</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="nop_1" fragment="true">
+    <activities total="0">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="0">
+      <wait_for>0</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>0</width>
+      <height>0</height>
+      <surface>0</surface>
+      <maze>0</maze>
+    </complexity>
+    <usage>
+      <apply>0</apply>
+      <targets>0</targets>
+    </usage>
+  </process>
+  <process name="nop_2" fragment="true">
+    <activities total="0">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="0">
+      <wait_for>0</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>0</width>
+      <height>0</height>
+      <surface>0</surface>
+      <maze>0</maze>
+    </complexity>
+    <usage>
+      <apply>0</apply>
+      <targets>0</targets>
+    </usage>
+  </process>
+  <process name="requestVideo" fragment="true">
+    <activities total="5">
+      <invoke>4</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>0</apply>
+      <targets>0</targets>
+    </usage>
+  </process>
+
+</universe>

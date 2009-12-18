@@ -49,13 +49,14 @@ composition complex::mult {
 /**********************
  ** Vectorial entity **
  **********************/
-
-composition complex::sum as vectorialsum { 
-  apply precondition(fct: 'isNatural', part: 'a') => a0;
-  apply precondition(fct: 'isNatural', part: 'b') => a0;
-  apply swap                                      => a0;
-  apply cache(prefix: 'sum_')                     => {a3, a4, a5};
-  toSet a; toSet b; 
-}
+/*
+  composition complex::sum as vectorialsum { 
+    apply precondition(fct: 'isNatural', part: 'a') => a0;
+    apply precondition(fct: 'isNatural', part: 'b') => a0;
+    apply swap                                      => a0;
+    apply cache(prefix: 'sum_')                     => {a3, a4, a5};
+    toSet a; toSet b; 
+  } 
+*/
 
 

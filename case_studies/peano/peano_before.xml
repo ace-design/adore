@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe>
+  <process name="atomic_isZero" fragment="false">
+    <activities total="3">
+      <invoke>0</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="2">
+      <wait_for>2</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>3</height>
+      <surface>3</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="atomic_next" fragment="false">
+    <activities total="3">
+      <invoke>0</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="2">
+      <wait_for>2</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>3</height>
+      <surface>3</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="atomic_prev" fragment="false">
+    <activities total="3">
+      <invoke>0</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="2">
+      <wait_for>2</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>3</height>
+      <surface>3</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cache" fragment="true">
+    <activities total="4">
+      <invoke>3</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>2</apply>
+      <targets>2</targets>
+    </usage>
+  </process>
+  <process name="complex_mult" fragment="false">
+    <activities total="7">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="complex_sum" fragment="false">
+    <activities total="7">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="8">
+      <wait_for>5</wait_for>
+      <guard>3</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>5</height>
+      <surface>15</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="postcondition" fragment="true">
+    <activities total="5">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>4</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="precondition" fragment="true">
+    <activities total="5">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>4</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>7</height>
+      <surface>14</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>7</apply>
+      <targets>5</targets>
+    </usage>
+  </process>
+  <process name="swap" fragment="true">
+    <activities total="4">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>4</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>7</height>
+      <surface>14</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>2</apply>
+      <targets>2</targets>
+    </usage>
+  </process>
+  <composition id="context_17" target="atomic_isZero">
+    <apply id="apply_19">
+      <fragment name="precondition" />
+      <targets>
+        <act name="atomic_isZero_a0" />
+      </targets>
+    </apply>
+  </composition>
+  <composition id="context_20" target="atomic_next">
+    <apply id="apply_22">
+      <fragment name="precondition" />
+      <targets>
+        <act name="atomic_next_a0" />
+      </targets>
+    </apply>
+  </composition>
+  <composition id="context_23" target="atomic_prev">
+    <apply id="apply_25">
+      <fragment name="precondition" />
+      <targets>
+        <act name="atomic_prev_a0" />
+      </targets>
+    </apply>
+    <apply id="apply_27">
+      <fragment name="postcondition" />
+      <targets>
+        <act name="atomic_prev_a2" />
+      </targets>
+    </apply>
+  </composition>
+  <composition id="context_28" target="complex_sum">
+    <apply id="apply_30">
+      <fragment name="precondition" />
+      <targets>
+        <act name="complex_sum_a0" />
+      </targets>
+    </apply>
+    <apply id="apply_32">
+      <fragment name="precondition" />
+      <targets>
+        <act name="complex_sum_a0" />
+      </targets>
+    </apply>
+    <apply id="apply_34">
+      <fragment name="swap" />
+      <targets>
+        <act name="complex_sum_a0" />
+      </targets>
+    </apply>
+    <apply id="apply_36">
+      <fragment name="cache" />
+      <targets>
+        <act name="complex_sum_a3" />
+        <act name="complex_sum_a4" />
+        <act name="complex_sum_a5" />
+      </targets>
+    </apply>
+  </composition>
+  <composition id="context_37" target="complex_mult">
+    <apply id="apply_39">
+      <fragment name="precondition" />
+      <targets>
+        <act name="complex_mult_a0" />
+      </targets>
+    </apply>
+    <apply id="apply_41">
+      <fragment name="precondition" />
+      <targets>
+        <act name="complex_mult_a0" />
+      </targets>
+    </apply>
+    <apply id="apply_43">
+      <fragment name="swap" />
+      <targets>
+        <act name="complex_mult_a0" />
+      </targets>
+    </apply>
+    <apply id="apply_45">
+      <fragment name="cache" />
+      <targets>
+        <act name="complex_mult_a3" />
+        <act name="complex_mult_a4" />
+        <act name="complex_mult_a5" />
+      </targets>
+    </apply>
+  </composition>
+</universe>

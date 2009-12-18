@@ -194,6 +194,10 @@
   (let ((g (read-from-minibuffer "Goal: ")))
     (adore-exec-synchronous g "Adore Goal Execution" nil)))
 
+(defun adore-metrics () (interactive)
+  (let* ((p (read-from-minibuffer "Metrics File Name: ")))
+	 (adore-exec-synchronous (concat "writeMetricsIntoFile('" p "')")
+				 "Adore Metrics Data" t)))
 (defun adore-dgraph  () (interactive)
   (let* ((p (read-from-minibuffer "Process Id: "))
 	 ;;(f (make-temp-file "adore-dgraph" nil ".png")))
@@ -238,6 +242,7 @@
     (define-key adore-mode-map [menu-bar adore] (cons "Adore" menuMap)) 
     (define-key menuMap [goal] '("Execute goal" . adore-goal))
     (define-key menuMap [s3] '("--"))
+    (define-key menuMap [metrics] '("Generate Metrics" . adore-metrics))
     (define-key menuMap [dgraph] '("Gen. Dependencies Graph" . adore-dgraph))
     (define-key menuMap [complete-dgraph] 
       '("Gen. Complete Dependencies Graph" . adore-complete-dgraph))
