@@ -92,7 +92,7 @@ relationsMetricsAsXml(P,Xml) :-
 	findall([_,_],metrics_isWeakWait(P,_,_),WWl), length(WWl,WWr),
 	findall([_,_],metrics_isFail(P,_,_),Fl), length(Fl,Fr),
 	Total is WFr + Gr + WWr + Fr,
-	swritef(Xml, '    <relations total="">\n      <wait_for>%w</wait_for>\n      <guard>%w</guard>\n      <weak_wait>%w</weak_wait>\n      <fail>%w</fail>\n    </relations>\n',[Total, WFr,Gr, WWr, Fr]).
+	swritef(Xml, '    <relations total="%w">\n      <wait_for>%w</wait_for>\n      <guard>%w</guard>\n      <weak_wait>%w</weak_wait>\n      <fail>%w</fail>\n    </relations>\n',[Total, WFr,Gr, WWr, Fr]).
 	
 getRelationCardinality(P,R) :- 
 	findall([_,_],metrics_isWaitFor(P,_,_),WFl), length(WFl,WFr),
