@@ -81,8 +81,8 @@ definition
 
 
 composition
-	:	COMPOSITION (s=ID (DBL_COL o=ID)?)? (AS out=ID)? merge_core	
-							-> ^(UNIT ^(TARGET $s? $o?) ^(OUTPUT $out?) merge_core)
+	:	COMPOSITION (s=ID (DBL_COL o=ID)?)? (AS srvOut=ID (DBL_COL opOut=ID)?)? merge_core	
+							-> ^(UNIT ^(TARGET $s? $o?) ^(OUTPUT $srvOut? $opOut?) merge_core)
 	;
 
 params	

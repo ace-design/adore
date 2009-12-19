@@ -34,7 +34,7 @@ createProcess(P) :- %% \exists p \in Process* => fail
 	process(P), !, 
 	dfail(create,'Cannot create process \'~w\': it exists!',P).
 createProcess(P) :- 
-	assert(process(P)), 
+	adoreAssert(process(P)), 
 	dinfo(create,'Process  \'~w\' created.',P).
 
 %% setAsFragment/1: setAsFragment(P)
@@ -42,7 +42,7 @@ setAsFragment(P) :- %% \not \exists p \in Process* => fail
 	\+ process(P), !, 
 	dfail(set,'setAsFragment/1: Unkown process \'~w\'!',P).
 setAsFragment(P) :-
-	assert(isFragment(P)), 
+	adoreAssert(isFragment(P)), 
 	dinfo(set,'Process  \'~w\' flagged as fragment.',P).
 
 %% setAsFragmentParameter/1: setAsFragmentParameter(P,I)
@@ -53,22 +53,22 @@ setAsFragmentParameter(P,_) :- %% \not isFragment(p) => fail
 	\+ isFragment(P), !, 
 	dfail(set,'setAsFragmentParameter/2: Process \'~w\' is not a fragment!',P).
 setAsFragmentParameter(P,I) :- %% \not \exists p \in Process* => fail
-	assert(hasForParameter(P,I)), !, 
+	adoreAssert(hasForParameter(P,I)), !, 
 	dinfo(set,'Fragment \'~w\' uses \'~w\' as parameter.',[P,I]).
 
 %% setService/2: setService(P,I).
-setService(P,_) :- %% \not \exists p \in Process* => fail
-	\+ process(P), !,
+setService(P,_) :- %% \not \exists p \in CompositionOutput* => fail
+	\+ process(P), \+ contextOutput(_,P), !,
 	dfail(set,'setService/2: Unkown process \'~w\'!',P).
 setService(P,I) :- 
-	assert(hasForSrvName(P,I)).
+	adoreAssert(hasForSrvName(P,I)).
 
 %% setOperation/2: setOperation(P,I).
 setOperation(P,_) :- %% \not \exists p \in Process* => fail
-	\+ process(P), !,
+	\+ process(P), \+ contextOutput(_,P), !,
 	dfail(set,'setOperation/2: Unkown process \'~w\'!',P).
 setOperation(P,I) :- 
-	assert(hasForOpName(P,I)).
+	adoreAssert(hasForOpName(P,I)).
 
 %%%%
 %% Activities
@@ -79,14 +79,14 @@ createActivity(A) :- %% \exists a \in Activity* => fail
 	activity(A), !, 
 	dfail(create,'Cannot create activity \'~w\': it exists!',A).
 createActivity(A) :-
-	assert(activity(A)), dinfo(create,'Activity \'~w\' created.',A).
+	adoreAssert(activity(A)), dinfo(create,'Activity \'~w\' created.',A).
 
 %% setActivityKind/2: setActivityKind(A,K)
 setActivityKind(A,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(set,'setActivityKind/2: Unknown activity \'~w\'!',A).
 setActivityKind(A,K) :- 
-	assert(hasForKind(A,K)),
+	adoreAssert(hasForKind(A,K)),
 	dinfo(set,'Activity \'~w\' flagged with kind \'~w\'.',[A,K]).
 
 %% setContainment/2: setContainment(A,P)
@@ -97,7 +97,7 @@ setContainment(_,P) :- %% \not \exists p \in Process* => fail
 	\+ process(P), !, 
 	dfail(set,'setContainment/2: Unkown process \'~w\'!',P).
 setContainment(A,P) :- 
-	assert(isContainedBy(A,P)),
+	adoreAssert(isContainedBy(A,P)),
 	dinfo(set,'Activity \'~w\' contained by  \'~w\'',[A,P]).
 
 %% setInvokedService/2: setInvokedService(A,I)
@@ -108,7 +108,7 @@ setInvokedService(A,_) :- %% kind(a) != invoke => fail
 	\+ hasForKind(A,invoke), !, 
 	dfail(set,'setInvokedService/2: Activity \'~w\' isn\'t an invocation!',A).
 setInvokedService(A,I) :- 
-	assert(hasForService(A,I)), 
+	adoreAssert(hasForService(A,I)), 
 	dinfo(set,'Activity \'~w\' invokes service  \'~w\'',[A,I]).
 
 %% setInvokedOperation/2: setInvokedOperation(A,I)
@@ -119,7 +119,7 @@ setInvokedOperation(A,_) :- %% kind(a) != invoke => fail
 	\+ hasForKind(A,invoke), !, 
 	dfail(set,'setInvokedOperation/2: Activity \'~w\' isn\'t an invocation!',A).
 setInvokedOperation(A,I) :- 
-	assert(hasForOperation(A,I)), 
+	adoreAssert(hasForOperation(A,I)), 
 	dinfo(set,'Activity \'~w\' invokes operation  \'~w\'',[A,I]).
 
 %% setMessageBinding/3: setMessageBinding(A,I,V)
@@ -127,7 +127,7 @@ setMessageBinding(A,_,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(set,'setMessageBinding/23 Unknown activity \'~w\'!',A).
 setMessageBinding(A,I,V) :-
-	assert(usesAsBinding(A,V,I)), 
+	adoreAssert(usesAsBinding(A,V,I)), 
 	dinfo(set,'Activity \'~w\' binds variable \'~w\' to part \'~w\'',[A,V,I]).
 
 %% setFunction/2: setFunction(A,I)
@@ -138,7 +138,7 @@ setFunction(A,_) :- %% kind(a) != assign => fail
 	\+ hasForKind(A,assign), !, 
 	dfail(set,'setFunction/2: Activity \'~w\' isn\'t an assignment!',A).
 setFunction(A,I) :- 
-	assert(hasForFunction(A,I)),
+	adoreAssert(hasForFunction(A,I)),
 	dinfo(set,'Activity \'~w\' uses function \'~w\'',[A,I]).
 
 %%%%
@@ -150,7 +150,7 @@ createVariable(V) :- %% \exists v \in Variable* => fail
 	variable(V), !, 
 	dfail(create,'Cannot create variable \'~w\': it exists!',V).
 createVariable(V) :-
-	assert(variable(V)), dinfo(create,'Variable \'~w\' created.',V).
+	adoreAssert(variable(V)), dinfo(create,'Variable \'~w\' created.',V).
 
 
 %% setVariableType/2: setVariableType(V,T)
@@ -158,7 +158,7 @@ setVariableType(V,_) :- %% \not \exists v \in Variable* => fail
 	\+ variable(V), !, 
 	dfail(set,'setVariableType/2: Unknown variable \'~w\'!',V).
 setVariableType(V,T) :- 
-	assert(hasForType(V,T)), 
+	adoreAssert(hasForType(V,T)), 
 	dinfo(set,'Variable \'~w\' flagged with type \'~w\'',[V,T]).
 
 %% setInitValue/2: setInitValue(V,I)
@@ -166,7 +166,7 @@ setInitValue(V,_) :- %% \not \exists v \in Variable* => fail
 	\+ variable(V), !, 
 	dfail(set,'setInitValue/2: Unknown variable \'~w\'!',V).
 setInitValue(V,I) :- 
-	assert(hasForInitValue(V,I)),
+	adoreAssert(hasForInitValue(V,I)),
 	dinfo(set,'Variable \'~w\' initialized with \'~w\' value',[V,I]).
 
 %% setConstancy/1: setConstancy(V)
@@ -174,7 +174,7 @@ setConstancy(V) :- %% \not \exists v \in Variable* => fail
 	\+ variable(V), !, 
 	dfail(set,'setConstancy/1: Unknown variable \'~w\'!',V).
 setConstancy(V) :-
-	assert(isConstant(V)), 
+	adoreAssert(isConstant(V)), 
 	dinfo(set,'Variable \'~w\' flagged as constant',V).
 
 %% flagAsSet/1: flagAsSet(V)
@@ -182,7 +182,7 @@ flagAsSet(V) :- %% \not \exists v \in Variable* => fail
 	\+ variable(V), !, 
 	dfail(set,'flagAsSet/1: Unknown variable \'~w\'!',V).
 flagAsSet(V) :-
-	assert(isConstant(V)), 
+	adoreAssert(isConstant(V)), 
 	dinfo(set,'Variable \'~w\' flagged as a dataset',V).
 
 
@@ -194,7 +194,7 @@ addAsInput(_,A) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(set,'addAsInput/2: Unknown activity \'~w\'!',A).
 addAsInput(V,A) :- 
-	assert(usesAsInput(A,V)), 
+	adoreAssert(usesAsInput(A,V)), 
 	dinfo(set,'Variable \'~w\' used as \'~w\' input.',[V,A]).
 
 %% addAsOutput/2: addAsOutput(V,A)
@@ -205,7 +205,7 @@ addAsOutput(_,A) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(set,'addAsOutput/2: Unknown activity \'~w\'!',A).
 addAsOutput(V,A) :- 
-	assert(usesAsOutput(A,V)), 
+	adoreAssert(usesAsOutput(A,V)), 
 	dinfo(set,'Variable \'~w\' used as \'~w\' input.',[V,A]).
 
 %% fieldAccess/3: accesstoField(I,V,L)
@@ -218,7 +218,7 @@ createFieldAccess(_,V,_) :-  %% \not \exists v \in Variable* => fail
 createFieldAccess(_,_,[]) :- %% isEmpty(l) => fail
 	dfail(set,'createFieldAccess/3: Empty field list!',[]).
 createFieldAccess(I,V,L) :- 
-	assert(fieldAccess(I,V,L)),
+	adoreAssert(fieldAccess(I,V,L)),
 	dinfo(create,'Creating named access \'~w\' to fields ~w of variable \'~w\'',[I,L,V]).
 
 %%%%
@@ -239,7 +239,7 @@ defWaitFor(A1,A2) :- %% \exists a2 < a1 \in WaitFor* => warning
 	waitFor(A1,A2), !, 
 	dwarn(def,'defWaitFor/2: \'~w\' < \'~w\' still exists!',[A2,A1]).
 defWaitFor(A1,A2) :- 
-	assert(waitFor(A1,A2)), 
+	adoreAssert(waitFor(A1,A2)), 
 	dinfo(def,'Relation \'~w\' < \'~w\' is defined.',[A2,A1]).
 
 %% defWeakWait/2: defWeakWait(A,A)
@@ -256,7 +256,7 @@ defWeakWait(A1,A2) :- %% \exists a2 < a1 \in WeakWait* => warning
 	weakWait(A1,A2), !, 
 	dwarn(def,'defWeakWait/2: \'~w\' << \'~w\' still exists!',[A2,A1]).
 defWeakWait(A1,A2) :- 
-	assert(weakWait(A1,A2)), 
+	adoreAssert(weakWait(A1,A2)), 
 	dinfo(def,'Relation \'~w\' << \'~w\' is defined.',[A2,A1]).
 
 
@@ -274,7 +274,7 @@ defGuard(_,A,V,_) :- %% v \not \in Outputs(a) => fail
 	\+ usesAsOutput(A,V), !, 
 	dfail(def,'defGuard/4: Activity \'~w\' doesn\'t assign \'~w\'!',[A,V]).
 defGuard(A1,A2,V,B) :- 
-	assert(isGuardedBy(A1,A2,V,B)),
+	adoreAssert(isGuardedBy(A1,A2,V,B)),
 	dinfo(def,'Relation \'~w\' < \'~w\' when \'~w\' is ~w is defined.',[A2,A1,V,B]).
 
 %% defOnFail/3: defOnFail(A,A,S)
@@ -288,7 +288,7 @@ defOnFail(A1,A2,_) :- %% \exists path(a1 -> a2)  => fail
 	existsPath(A1,A2), !, 
 	dfail(def,'defOnFail/4: \'~w\' < \'~w\' introduces a cycle!',[A2,A1]).
 defOnFail(A1,A2,M) :- 
-	assert(onFailure(A1,A2,M)),
+	adoreAssert(onFailure(A1,A2,M)),
 	dinfo(def,'Relation \'~w\' < \'~w\' exists on failure \'~w\'',[A2,A1,M]).
 	
 
@@ -301,7 +301,7 @@ defCompositionContext(I) :- %% \exists p in Context* => fail
 	context(I),!,
 	dfail(def,'defCompositionContext/1: Context  \'~w\' still exists!',I).
 defCompositionContext(I) :-
-	assert(context(I)),
+	adoreAssert(context(I)),
 	dinfo(def,'Context  \'~w\' created with success!',I).
 
 %% setCompositionTarget/2: setCompositionTarget(I,P)
@@ -312,7 +312,7 @@ setCompositionTarget(_,P) :- %% \not \exists p in Process* => fail
 	\+ process(P), !,
 	dfail(set,'setCompositionTarget/2: Unknown process \'~w\'',P).
 setCompositionTarget(I,P) :- 
-	assert(contextTarget(I,P)),
+	adoreAssert(contextTarget(I,P)),
 	dinfo(set,'Context \'~w\' uses \'~w\' as infered target',[I,P]).
 
 %% setContextOutput/2: setContextOutput(I,I)
@@ -323,7 +323,7 @@ setContextOutput(_,I) :-
 	process(I), !, 
 	dfail(def,'setContextOutput/2: Process \'~w\' still exists!',I).
 setContextOutput(I,P) :- 
-	assert(contextOutput(I,P)),
+	adoreAssert(contextOutput(I,P)),
 	dinfo(set,'Context \'~w\' uses \'~w\' as identified result',[I,P]).
 
 
@@ -340,7 +340,7 @@ defActivityBlock(C,_,L) :-
 	dfail(def,'defActivityBlock/3: Some elements in  ~w are not regular activities!',[Acts]).
 defActivityBlock(C,I,L) :- 
 	getAbsoluteNames(C,L,Acts),
-	assert(activityBlock(C,I,Acts)),
+	adoreAssert(activityBlock(C,I,Acts)),
 	dinfo(def,'Block \'~w\' containing activities ~w created!',[I,Acts]).
 
 %% defApply/4: defApply(I,P,A,P).
@@ -362,7 +362,7 @@ defApply(_,C,B,_) :- %% \not \exists a \in Activities(p) => fail
 	\+ L == 1, !,
 	dfail(def,'defApply/4: Activities in ~w come from different processes \'~w\'!',[Content,Targets]).
 defApply(I,O,A,F) :- 
-	assert(applyFragment(I,O,A,F)),
+	adoreAssert(applyFragment(I,O,A,F)),
 	dinfo(def,'Directive apply \'~w\' to \'~w\' successfuly created in context \'~w\' with id \'~w\'!',[F,A,O,I]).
 
 %% setApplyParam/3: setApplyParam(I,I,S).
@@ -374,7 +374,7 @@ setApplyParam(ApplyId, I,_) :-
 	\+ hasForParameter(F,I), !, 
 	dfail(set,'setApplyParameter/3: unknown parameter \'~w\' for fragment \'~w\'!',[I,F]).
 setApplyParam(ApplyId, I, S) :-
-	assert(applyParameter(ApplyId,I,S)),
+	adoreAssert(applyParameter(ApplyId,I,S)),
 	dinfo(set,'Directive \'~w\' uses \'~w\' for \'~w\' parameter',[ApplyId,S,I]).
 
 %% defSetify/2: defSetify(I,V)
@@ -387,7 +387,8 @@ defSetify(C,V) :-
 	dfail(def,'defSetify/2: Unkown variable \'~w\' (from ~w)!',[Name,V]).
 defSetify(C,V) :- 
 	getAbsoluteName(C,V,Name),
-	dinfo(def,'ToSet directive stored for variable \'~w\'.',[Name]).
+	adoreAssert(setify(C,V)),
+	dinfo(def,'toSet directive stored for variable \'~w\'.',[Name]).
 
 %%%%
 %% Policies
@@ -397,7 +398,7 @@ defPolicy(I,_,_) :-
 	policy(I,_,_), !, 
 	dfail(def,'defPolicy/2: Id \'~w\' still exist!',I).
 defPolicy(I,Fin,Fout) :- 
-	assert(policy(I,Fin,Fout)),
+	adoreAssert(policy(I,Fin,Fout)),
 	dinfo(def,'Policy \'~w\' created with formulas [~w,~w].',[I,Fin,Fout]).
 
 setIteration(A,_) :- 
@@ -407,5 +408,5 @@ setIteration(_,P) :-
 	\+ policy(P,_,_), !, 
 	dfail(set,'setIteration/2: Unknown policy \'~w\'!',P).
 setIteration(A,P) :- 
-	assert(iteratesOver(A,P)),
+	adoreAssert(iteratesOver(A,P)),
 	dinfo(set,'Activity \'~w\' iterates over \'~w\'.',[A,P]).

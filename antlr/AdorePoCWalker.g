@@ -302,8 +302,20 @@ merge 	returns [ArrayList<String> facts]
 		   	^(TARGET (s=ID 			{ targetId = $s.text; 							} 
 		   		 	(o=ID 		{targetId += "_" + $o.text; 						})?
 		   		 			{ $facts.add("setCompositionTarget("+id+","+targetId+")");		})?)
-		   	^(OUTPUT (out=ID		{ $facts.add("setContextOutput("+id+","+$out.text+")");			})?)
+		   	(mergeOutput[id]		{ safeAdd($facts,$mergeOutput.facts);                                   })
 		(directive[id]				{ safeAdd($facts,$directive.facts); 					})+) 
+	;
+
+mergeOutput[String id] returns [ArrayList<String> facts]
+	@init{ $facts = new ArrayList<String>();}
+	: OUTPUT  {}
+	| ^(OUTPUT (out=ID))		{ $facts.add("setContextOutput("+id+","+$out.text+")");
+					  $facts.add("setAsFragment("+$out.text+")");
+					}
+	| ^(OUTPUT (srv=ID op=ID))	{ $facts.add("setContextOutput("+id+","+$srv.text+"_"+$op.text+")");
+					  $facts.add("setService("+$srv.text+"_"+$op.text+","+$srv.text+")");
+					  $facts.add("setOperation("+$srv.text+"_"+$op.text+","+$op.text+")");
+					 }
 	;
 
 	

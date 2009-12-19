@@ -73,7 +73,7 @@
 :- dynamic hasForType/2.       %%  setVariableType(V,T)
 :- dynamic hasForInitValue/2.  %%  setInitValue(V,S)
 :- dynamic isConstant/1.       %%  setConstancy(V).
-:- dynamic isSet/1.            %% flagAsSet(V).
+:- dynamic isSet/1.            %%  flagAsSet(V).
 
 :- dynamic usesAsInput/2.      %%  addAsInput(V,A)
 :- dynamic usesAsOutput/2.     %%  addAsOutput(V,A)

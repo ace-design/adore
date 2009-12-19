@@ -35,7 +35,8 @@ loadFiles :-
 	[conflicts], [helpers], [dependencies], [dataflow], [engine], 
 	[substitution],
 	aw('%%%% Loading Algorithms'),
-        loadAlgo('setify'), loadAlgo('weave'), loadAlgo('metrics'),
+        loadAlgo('contextMerge'),loadAlgo('setify'), 
+	loadAlgo('weave'), loadAlgo('metrics'),
 	aw('%%%% Loading Transformations'),
         loadTransfo('adore2dot'), loadTransfo('adore2png'), 
 	loadTransfo('adore2dgraph'), loadTransfo('adore2bpel_gen').

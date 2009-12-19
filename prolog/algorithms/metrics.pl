@@ -182,8 +182,14 @@ compositionContextMetricAsXml(Ctx, Xml) :-
 	context(Ctx), contextTarget(Ctx, ProcessId),
 	findall(X,applyFragment(X,Ctx,_,_),Directives),
 	map(applyDirectiveAsXml,Directives,XmlDirList),
+	compositionOutputAsXml(Ctx,Output), 
 	concatenate(XmlDirList,XmlDir),
-	swritef(Xml,'  <composition id="%w" target=\"%w\">\n%w\n  </composition>',[Ctx,ProcessId,XmlDir]).
+	swritef(Xml,'  <composition id="%w" target=\"%w\">\n%w%w\n  </composition>',[Ctx,ProcessId,Output,XmlDir]).
+
+compositionOutputAsXml(Ctx,Xml) :- 
+	context(Ctx), contextOutput(Ctx,POut),!,
+	swritef(Xml,'    <output>%w</output>\n',[POut]).
+compositionOutputAsXml(_,'').
 
 applyDirectiveAsXml(Id,Xml) :- 
 	applyFragment(Id,_,Block,Fragment),

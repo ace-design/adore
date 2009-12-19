@@ -41,7 +41,7 @@ elementarize([H|T],[H|O]) :- elementarize(T,O).
 
 
 execute([]).
-execute([H|T]) :- H, execute(T).
+execute([H|T]) :- dinfo(exec,'#exec(~w)',H), H, execute(T).
 
 
 

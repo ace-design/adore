@@ -32,18 +32,23 @@ concatenate([H|T],R,Sep) :-
 map(_,[],[]).
 map(P,[H|T],[R|O]) :-
 	call(P,H,R), map(P,T,O).
+%% filter/3: Prolog doesn't provide a REAL filter implementation
+filter(_,[],[]).
+filter(P,[H|T],[H|O]) :- call(P,H), filter(P,T,O).
+filter(P,[H|T],O) :- \+ call(P,H), filter(P,T,O).
 
 %% getAbsoluteName: retrieve a named element from a context
 getAbsoluteName(_,absoluteReference(S,O,E),R) :-
 	swritef(Str,"%w_%w_%w",[S,O,E]),
-	string_to_atom(Str,R).
+	string_to_atom(Str,R),!.
 getAbsoluteName(_,absoluteReference(F,E),R) :-
 	swritef(Str,"%w_%w",[F,E]),
-	string_to_atom(Str,R).
+	string_to_atom(Str,R),!.
 getAbsoluteName(Cxt,inferedReference(E),R) :-
 	context(Cxt), contextTarget(Cxt,T),
 	swritef(Str,"%w_%w",[T,E]),
-	string_to_atom(Str,R).
+	string_to_atom(Str,R),!.
+getAbsoluteName(_,A,A).
 
 %% getAbsoluteNames: iterate over a list of name references
 getAbsoluteNames(_,[],[]).
@@ -54,3 +59,9 @@ getAbsoluteNames(Cxt,[H|T],[R|O]) :-
 writeList([]).
 writeList([H|T]) :- 
 	write(H), nl, writeList(T).
+
+%% assertWithoutDuplication
+adoreAssert(Fact) :- Fact, !.
+adoreAssert(Fact) :- assert(Fact).
+
+
