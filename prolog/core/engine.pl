@@ -20,9 +20,9 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%
-%% Adore Code Weaver %%
-%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Adore Code Execution Framework %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 executeActionSet(Set) :- 
 	elementarize(Set,Actions),

@@ -20,6 +20,8 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+:- module(metrics,[writeMetricsIntoFile/1]).
+
 writeMetricsIntoFile(F) :- 
 	computeUniverseMetrics(Content),
 	open(F,write,Stream), write(Stream,Content), close(Stream).
@@ -175,13 +177,13 @@ metrics_fragmentTarget(F,T) :-
 
 computeCompositionMetrics(Xml) :-
 	findall(X,context(X),Contexts),
-	map(compositionContextMetricAsXml,Contexts, RawData),
+	map(metrics:compositionContextMetricAsXml,Contexts, RawData),
 	concatenate(RawData,Xml).
 
 compositionContextMetricAsXml(Ctx, Xml) :- 
 	context(Ctx), contextTarget(Ctx, ProcessId),
 	findall(X,applyFragment(X,Ctx,_,_),Directives),
-	map(applyDirectiveAsXml,Directives,XmlDirList),
+	map(metrics:applyDirectiveAsXml,Directives,XmlDirList),
 	compositionOutputAsXml(Ctx,Output), 
 	concatenate(XmlDirList,XmlDir),
 	swritef(Xml,'  <composition id="%w" target=\"%w\">\n%w%w\n  </composition>',[Ctx,ProcessId,Output,XmlDir]).

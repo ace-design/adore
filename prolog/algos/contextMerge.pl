@@ -19,6 +19,8 @@
 %%
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
+:- module(contextMerge, 
+	  [doContextMerge/0,buildContextMergeDirectives/1,unifyContext/2]).
 
 %%%%%%
 %%% end user interface
@@ -31,12 +33,12 @@ doContextMerge :-
 %%% Computing context merge
 %%%%%%
 
-buildContextMergeDirectives(Directives) :- 
+buildContextMergeDirectives(Directives) :-  
 	findall(C, context(C), Contextes),
-	map(buildEquivalentContextList,Contextes,RawList),
+	map(contextMerge:buildEquivalentContextList,Contextes,RawList),
 	sort(RawList,RawWithoutDuplicates),
 	removeAtomicContext(RawWithoutDuplicates,FinalList),
-	map(contextListToDirectives,FinalList,Directives).
+	map(contextMerge:contextListToDirectives,FinalList,Directives).
 
 %% context equivalence (same target, and same output (empty or identified).
 isEquivalentContext(Id,Other) :- 
@@ -55,13 +57,13 @@ buildEquivalentContextList(Ctx,Equivalence) :-
 contextListToDirectives(L,unifyContext(L)).
 
 %% remove empty list from the contextList
-removeAtomicContext(L,R) :- filter(isCompositeContext,L,R).
+removeAtomicContext(L,R) :- filter(contextMerge:isCompositeContext,L,R).
 isCompositeContext(CList) :- length(CList,L), L > 1.
 
 %%%%%%
 %%% Performing context merge
 %%%%%%
-:- assert(isMacroAction(unifyContext,2)).
+:- assert(user:isMacroAction(unifyContext,2)).
 
 unifyContext(L,Actions) :- 
 	gensym(generatedContext_,CtxId),

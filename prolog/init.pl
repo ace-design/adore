@@ -32,17 +32,17 @@ aw(M) :- adore_silent(false), write(M), nl.
 loadFiles :- 
 	aw('%%%% Loading Source Core'),
         loadCore(debug), loadCore(trace), loadCore(metamodel), 
-	loadCore(actions), loadCore(functions), loadCore(conflicts), 
-	loadCore(helpers), loadCore(dependencies), loadCore(dataflow), 
-	loadCore(engine), loadCore(substitution),
+	loadCore(actions), loadCore(functions), loadCore(helpers), 
+	loadCore(dependencies), loadCore(dataflow), loadCore(engine), 
+	loadCore(substitution),
 	aw('%%%% Loading Algorithms'),
-        loadAlgo('contextMerge'),loadAlgo('setify'), 
-	loadAlgo('weave'), loadAlgo('metrics'),
+        loadAlgo('contextMerge'), loadAlgo('setify'), loadAlgo('metrics'),
 	aw('%%%% Loading Transformations'),
-        loadTransfo('adore2dsl'),
-        loadTransfo('adore2dot'), loadTransfo('adore2png'), 
-	loadTransfo('adore2dgraph'),
-	aw('%%%% Loading Local Configuration'), [config].
+        loadTransfo('adore2dsl'), loadTransfo('adore2dot'), 
+	loadTransfo('adore2png'), loadTransfo('adore2dgraph'),
+	aw('%%%% Loading Detection Rules'), 
+	aw('%%%% Loading Local Configuration'), 
+        [config].
 
 loadCore(Name) :- 
 	string_concat('core/',Name,File), [File].
@@ -51,7 +51,7 @@ loadTransfo(Name) :-
 	string_concat('transfos/',Name,File), use_module(File).
 
 loadAlgo(Name) :-  
-	string_concat('algos/',Name,File), [File].
+	string_concat('algos/',Name,File), use_module(File).
 
 header :- 
 	aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'),

@@ -1,3 +1,0 @@
-
-subscribeToChannel(x).
-subscribeToChannel(y).

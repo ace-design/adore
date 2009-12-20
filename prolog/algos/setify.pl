@@ -19,6 +19,7 @@
 %%
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
+:- module(setify,[doSetify/2,setify/3]).
 
 %%%%%%
 %% Related publication: 
