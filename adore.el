@@ -50,7 +50,6 @@
       (message "Adore is in SILENT mode")
     (message "Adore is in VERBOSE mode")))
 
-
 ;;;;
 ;; ADORE facts generator
 ;;;;
@@ -176,6 +175,22 @@
 	       (substring name 1)))))))
 
 ;;;;
+;; Adore Navigation
+;;;;
+
+(defun adore-navigate-to-required-file ()
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (let ((fileName (adore-extract "\\([a-zA-Z0-9]+/\\)*[a-zA-Z0-9]+.adore" 
+				  (adore-read-line))))
+      (if (equal nil fileName)
+	  (message "Adore: Unable to guess file name")
+	(let ((frame (make-frame)))
+	  (select-frame frame)
+	  (switch-to-buffer (find-file-noselect fileName)))))))
+
+;;;;
 ;; high level function for the UI
 ;;;;
 (defun adore-run   () (interactive) (adore-run-engine))
@@ -225,6 +240,16 @@
 	(adore-display-picture f)))))
 
 ;;;;
+;; Adore IDE reload
+;;;;
+
+(defun adore-mode-reload () (interactive)
+  (unload-feature 'adore-mode)
+  (load-file (concat (getenv "ADORE_HOME") "/adore.el"))
+  (adore-mode)
+  (message "Adore: Emacs major mode reloaded!"))
+
+;;;;
 ;; ADORE Keymap
 ;;;;
 (defvar adore-mode-map nil "Keymap for adore-mode")
@@ -235,24 +260,31 @@
   (define-key adore-mode-map (kbd "C-c C-k") 'adore-kill)
   (define-key adore-mode-map (kbd "C-c C-p") 'adore-gen-current-pict)
   (define-key adore-mode-map (kbd "C-c C-g") 'adore-goal)
+  (define-key adore-mode-map (kbd "C-c C-o") 'adore-navigate-to-required-file)
   
   (define-key adore-mode-map [remap comment-dwim] 'adore-comment-dwim)
   (define-key adore-mode-map [menu-bar] (make-sparse-keymap))
   (let ((menuMap (make-sparse-keymap "Adore"))) 
     (define-key adore-mode-map [menu-bar adore] (cons "Adore" menuMap)) 
+    (define-key menuMap [reload] '("Reload Adore Mode" . adore-mode-reload))
+    (define-key menuMap [s5] '("--"))
     (define-key menuMap [goal] '("Execute goal" . adore-goal))
     (define-key menuMap [s3] '("--"))
     (define-key menuMap [metrics] '("Generate Metrics" . adore-metrics))
     (define-key menuMap [dgraph] '("Gen. Dependencies Graph" . adore-dgraph))
     (define-key menuMap [complete-dgraph] 
       '("Gen. Complete Dependencies Graph" . adore-complete-dgraph))
+    (define-key menuMap [s4] '("--"))
+    (define-key menuMap [open-required] 
+      '("Open required file" . adore-navigate-to-required-file))
     (define-key menuMap [s2] '("--"))
     (define-key menuMap [silent] '("Toggle silence" . adore-silent))
     (define-key menuMap [verbose] '("Toggle verbosity" . adore-verbose))
     (define-key menuMap [s1] '("--"))
     (define-key menuMap [facts] '("Generate Prolog Facts" . adore-facts))
     (define-key menuMap [pict] '("Generate Picture" . adore-pict))
-    (define-key menuMap [curr-pict] '("Generate current Picture" . adore-gen-current-pict))
+    (define-key menuMap [curr-pict] '("Generate current Picture" . 
+				      adore-gen-current-pict))
     (define-key menuMap [s0] '("--"))
     (define-key menuMap [kill] '("Kill the ADORE engine" . adore-kill))
     (define-key menuMap [run] '("Start the ADORE engine" . adore-run))))

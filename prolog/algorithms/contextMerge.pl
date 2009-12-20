@@ -61,15 +61,15 @@ isCompositeContext(CList) :- length(CList,L), L > 1.
 %%%%%%
 %%% Performing context merge
 %%%%%%
+:- assert(isMacroAction(unifyContext,2)).
 
-unifyContext(L) :- 
+unifyContext(L,Actions) :- 
 	gensym(generatedContext_,CtxId),
 	Creation = [defCompositionContext(CtxId)],
 	extractTargetFromContextList(L,CtxId,Target),
 	extractOutputFromContextList(L,CtxId,Output),
 	propagateContextUnificationLoop(L,CtxId,Unification),
-	flatten([Creation, Target,Output,Unification],Actions),
-	executeActionSet(Actions).
+	flatten([Creation, Target, Output, Unification],Actions).
 
 extractTargetFromContextList([H|_],Ctx,[setCompositionTarget(Ctx,P)]) :-
 	contextTarget(H,P).

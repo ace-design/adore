@@ -11,6 +11,8 @@ require 'fragments/swap.adore';
 require 'fragments/cache.adore';
 require 'fragments/precondition.adore';
 
+require 'toto.adore' ;
+
 /*********************
  ** Atomic entities **
  *********************/
@@ -43,9 +45,6 @@ composition complex::mult {
   apply precondition(fct: 'isNatural', part: 'a') => a0;
   apply precondition(fct: 'isNatural', part: 'b') => a0;
   apply swap                                      => a0;
-}
-
-composition complex::mult {
   apply cache(prefix: 'mult_')                    => {a3, a4, a5};
 }
 
@@ -57,10 +56,9 @@ composition complex::sum as complex::vectorialsum {
   apply precondition(fct: 'isNatural', part: 'a') => a0;
   apply precondition(fct: 'isNatural', part: 'b') => a0;
   apply swap                                      => a0;
-}
-composition complex::sum as complex::vectorialsum { 
   apply cache(prefix: 'sum_')                     => {a3, a4, a5};
 }
+
 composition complex::sum as complex::vectorialsum { 
   toSet a; toSet b; 
 } 
