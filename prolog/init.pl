@@ -30,25 +30,28 @@ aw(M) :- adore_silent(false), write(M), nl.
 
 
 loadFiles :- 
-	aw('%%%% Loading Source Kernel'),
-        [debug], [trace], [config],  [metamodel], [actions], [functions], 
-	[conflicts], [helpers], [dependencies], [dataflow], [engine], 
-	[substitution],
+	aw('%%%% Loading Source Core'),
+        loadCore(debug), loadCore(trace), loadCore(metamodel), 
+	loadCore(actions), loadCore(functions), loadCore(conflicts), 
+	loadCore(helpers), loadCore(dependencies), loadCore(dataflow), 
+	loadCore(engine), loadCore(substitution),
 	aw('%%%% Loading Algorithms'),
         loadAlgo('contextMerge'),loadAlgo('setify'), 
 	loadAlgo('weave'), loadAlgo('metrics'),
 	aw('%%%% Loading Transformations'),
         loadTransfo('adore2dsl'),
         loadTransfo('adore2dot'), loadTransfo('adore2png'), 
-	loadTransfo('adore2dgraph'), 
-	loadTransfo('adore2bpel_gen').
+	loadTransfo('adore2dgraph'),
+	aw('%%%% Loading Local Configuration'), [config].
 
+loadCore(Name) :- 
+	string_concat('core/',Name,File), [File].
 
 loadTransfo(Name) :-  
-	string_concat('../transformations/',Name,File),	[File].
+	string_concat('transfos/',Name,File), use_module(File).
 
 loadAlgo(Name) :-  
-	string_concat('../algorithms/',Name,File), [File].
+	string_concat('algos/',Name,File), [File].
 
 header :- 
 	aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'),

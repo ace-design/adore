@@ -20,16 +20,22 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%% adore2png/2: adore2png(+P,+F)
-adore2png(P,F) :- 
-	adore2dot(P,DotCode), tmp_file('adore2dot',Tmp), 
-	open(Tmp,write,Stream), write(Stream,DotCode), close(Stream),
-	adore2png_param(exec,E), 
-	swritef(Cmd,'%w -Tpng %w > %w',[E,Tmp,F]), shell(Cmd).
+%%%%
+%% Debugging ADORE ...
+%%%%
+debugSubscription(create).
+debugSubscription(def).
+debugSubscription(set).
+debugSubscription(transfo).
 
-%% display/2: display(+P,-F)
-%% display(P,Tmp) :- %% OBSOLETE, SHOULD NOT BE USED
-%% 	tmp_file('adore2png',Tmp), adore2png(P,Tmp), 
-%% 	adore2png_param(viewer,E), swritef(Cmd,'%w %w',[E,Tmp]), shell(Cmd).
-	
-	
+%%%%
+%% Model transformation parameters: 
+%%%%
+
+%% Seb:
+adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+
+%% Mireille:
+%% adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+
+

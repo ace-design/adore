@@ -19,15 +19,11 @@
 %%
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
+:- module(adore2png,[adore2png/2]).
 
-%%%%
-%% Main interface with the transformation
-%%%%
-
-adore2dsl('').
-
-%% adore2dsl(+Process, -Code): generate DSL Code associated with Process
-adore2dsl(P,'') :-
-	process(P).
-
-
+%% adore2png/2: adore2png(+P,+F)
+adore2png(P,F) :- 
+	adore2dot(P,DotCode), tmp_file('adore2dot',Tmp), 
+	open(Tmp,write,Stream), write(Stream,DotCode), close(Stream),
+	adore2png_param(exec,E), 
+	swritef(Cmd,'%w -Tpng %w > %w',[E,Tmp,F]), shell(Cmd).

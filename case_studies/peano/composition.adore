@@ -11,8 +11,6 @@ require 'fragments/swap.adore';
 require 'fragments/cache.adore';
 require 'fragments/precondition.adore';
 
-require 'toto.adore' ;
-
 /*********************
  ** Atomic entities **
  *********************/
@@ -60,7 +58,8 @@ composition complex::sum as complex::vectorialsum {
 }
 
 composition complex::sum as complex::vectorialsum { 
-  toSet a; toSet b; 
+  toSet a; 
+  toSet b; 
 } 
 
 

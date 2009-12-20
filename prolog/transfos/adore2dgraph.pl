@@ -19,12 +19,12 @@
 %%
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
-
+:- module(adore2dgraph,[adore2dgraph/1,adore2dgraph/2]).
 %%%%
 %% Temporary facts ... used to 'flag' visited nodes and avoid infinite loops
 %%%%
-:- dynamic adore2dgraph_visited/2.
-adore2dgraph_flag(S,O) :- assert(adore2dgraph_visited(S,O)).
+:- dynamic adore2dgraph:visited/2.
+flag(S,O) :- assert(adore2dgraph:visited(S,O)).
 
 %%%%
 %% Main interface with the transformation
@@ -33,22 +33,22 @@ adore2dgraph_flag(S,O) :- assert(adore2dgraph_visited(S,O)).
 %% adore2dgraph(+File): generate a complete dep. graph, written in File
 adore2dgraph(F) :- 
 	findall(P,isDefinedAsAProcess(_,_,P), Processes), 
-	adore2dgraph_genProcesses(Processes,Codes),
+	genProcesses(Processes,Codes),
 	concatenate(Codes, Core),
-	adore2dgraph_genGraph(Core,F), 
-	retractall(adore2dgraph_visited(_,_)).
+	genGraph(Core,F), 
+	retractall(adore2dgraph:visited(_,_)).
 
 %% adore2dgraph(+Process,+File): generate Process dep. graph in File
 adore2dgraph(P,F) :- 
-	adore2dgraph_genProcesses([P],[Core]),
-	adore2dgraph_genGraph(Core,F), 
-	retractall(adore2dgraph_visited(_,_)).
+	genProcesses([P],[Core]),
+	genGraph(Core,F), 
+	retractall(adore2dgraph:visited(_,_)).
 
-%% adore2dgraph_genGraph(+Core, +File): generate a single graph (described
+%% genGraph(+Core, +File): generate a single graph (described
 %%  as DOT code in 'Core') as a PNG file stored in File
-adore2dgraph_genGraph(Core,F) :-
+genGraph(Core,F) :-
 	swritef(Code,'digraph dependencies {\n  fontname=Courier;\n  node [shape=record];\n  edge [fontname=Courier];\n rankdir=LR;\n%w } \n',[Core]), !, 
-        tmp_file('adore2dgraph_dot',TmpDot),
+        tmp_file('dot',TmpDot),
 	open(TmpDot,write,Stream), write(Stream,Code), close(Stream),
 	adore2png_param(exec,Exec), 
  	swritef(CmdExec,'%w -Tpng %w > %w',[Exec,TmpDot,F]), 
@@ -58,35 +58,35 @@ adore2dgraph_genGraph(Core,F) :-
 %% Code generation for processes
 %%%%
 
-%% adore2dgraph_genProcesses(+Processes,-Codes): iterates over Processes and 
+%% genProcesses(+Processes,-Codes): iterates over Processes and 
 %%  put each results (process generation) in the Codes list.
-adore2dgraph_genProcesses([],[]). 
-adore2dgraph_genProcesses([H|T],[R|O]) :-
-	adore2dgraph_genProcess(H,R), adore2dgraph_genProcesses(T,O). 
+genProcesses([],[]). 
+genProcesses([H|T],[R|O]) :-
+	genProcess(H,R), genProcesses(T,O). 
 
-%% adore2dgraph_genProcess(+Process,-Code):
+%% genProcess(+Process,-Code):
 %%  Generate the DOT Code corresponding to the dep graph of Process
-adore2dgraph_genProcess(P,'') :- 
-	hasForSrvName(P,S), hasForOpName(P,O), adore2dgraph_visited(S,O),!.
-adore2dgraph_genProcess(P,C) :- 
+genProcess(P,'') :- 
+	hasForSrvName(P,S), hasForOpName(P,O), visited(S,O),!.
+genProcess(P,C) :- 
 	hasForSrvName(P,S), hasForOpName(P,O),    %% S::O associated with P
-	adore2dgraph_genBox(S,O,Box), 	          %% Generate Process Box
+	genBox(S,O,Box), 	          %% Generate Process Box
 	getProcessPartners(P,Partners),	          %% Retrieving partners
-	adore2dgraph_genPartners(Partners,PartnersList), %% Generating Partners
+	genPartners(Partners,PartnersList), %% Generating Partners
 	concatenate(PartnersList,PartnersCode),
-	adore2dgraph_genLinks(P,Links),           %% Generating links
+	genLinks(P,Links),           %% Generating links
 	concatenate([Box,PartnersCode,Links],C).  %% Writing result
 
 %%%%
 %% Code generation handling "boxes" (i.e. Service::Operation dep.)
 %%%%
 
-adore2dgraph_genBox(S,O,'') :- adore2dgraph_visited(S,O), !.
-adore2dgraph_genBox(S,O,Code) :- 
-	isExtService(S), !, adore2dgraph_flag(S,O),
+genBox(S,O,'') :- visited(S,O), !.
+genBox(S,O,Code) :- 
+	isExtService(S), !, flag(S,O),
 	swritef(Code,'%w_%w [label="%w::%w",style=filled,fillcolor=grey];',[S,O,S,O]).
-adore2dgraph_genBox(S,O,Code) :- 
-	adore2dgraph_flag(S,O),
+genBox(S,O,Code) :- 
+	flag(S,O),
 	swritef(Code,'%w_%w [label="%w::%w"];',[S,O,S,O]).
 
 %%%%    
@@ -94,25 +94,25 @@ adore2dgraph_genBox(S,O,Code) :-
 %%%%
 
 %% Iteration over a set of partners to produces a set of codes
-adore2dgraph_genPartners([],[]).
-adore2dgraph_genPartners([H|T],[C|O]) :-
-	adore2dgraph_genPartner(H,C), adore2dgraph_genPartners(T,O). 
+genPartners([],[]).
+genPartners([H|T],[C|O]) :-
+	genPartner(H,C), genPartners(T,O). 
 
 %% Generate a given partner (process => recursive call)
-adore2dgraph_genPartner([S,O],Code) :- 
+genPartner([S,O],Code) :- 
 	isDefinedAsAProcess(S,O,P), !,
-	adore2dgraph_genProcess(P,Code).
-adore2dgraph_genPartner([S,O],Code) :- 
-	adore2dgraph_genBox(S,O,Code).
+	genProcess(P,Code).
+genPartner([S,O],Code) :- 
+	genBox(S,O,Code).
 
 %%%%
 %% Handling dependency links
 %%%%
-adore2dgraph_genLinks(P,Code) :- 
-	findall(C,adore2dgraph_genLink(P,C),Tmp),
+genLinks(P,Code) :- 
+	findall(C,genLink(P,C),Tmp),
 	sort(Tmp,Links), concatenate(Links,Code).
 
-adore2dgraph_genLink(P,Code) :- 
+genLink(P,Code) :- 
 	isDefinedAsAProcess(SourceSrv,SourceOp,P),
 	isPartnerOf(P,TargetSrv,TargetOp), 
 	swritef(Code,'  %w_%w -> %w_%w ;', [SourceSrv,SourceOp,TargetSrv,TargetOp]).
