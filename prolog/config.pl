@@ -27,7 +27,7 @@ debugSubscription(create).
 debugSubscription(def).
 debugSubscription(set).
 debugSubscription(transfo).
-
+debugSubscription(exec).
 %%%%
 %% Model transformation parameters: 
 %%%%
