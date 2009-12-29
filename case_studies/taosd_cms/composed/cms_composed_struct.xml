@@ -1,0 +1,1568 @@
+<?xml version="1.0" ?>
+<universe view="structure" >
+  <process id="cms_resolveCrisis" name="cms::resolveCrisis" isFragment="false" service="cms" operation="resolveCrisis" >
+    <variables>
+      <variable id="cms_resolveCrisis_coord" name="coord" isSet="false" type="cmsEmployee"/>
+      <variable id="cms_resolveCrisis_id" name="id" isSet="false" type="crisisIdentifier"/>
+      <variable id="cms_resolveCrisis_lambda_0" name="lambda_0" isSet="false" type="string" value="info" />
+      <variable id="cms_resolveCrisis_lambda_1" name="lambda_1" isSet="false" type="string" value="info" />
+      <variable id="cms_resolveCrisis_lambda_2" name="lambda_2" isSet="false" type="string" value="BadAuthentification" />
+      <variable id="cms_resolveCrisis_mA_auth" name="mA_auth" isSet="false" type="boolean"/>
+      <variable id="cms_resolveCrisis_mA_still" name="mA_still" isSet="false" type="boolean"/>
+    </variables>
+    <activities>
+      <activity id="cms_resolveCrisis_rcv" name="rcv" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="cms_resolveCrisis_coord" />
+          <variableRef uid="cms_resolveCrisis_id" />
+        </outputs>
+      </activity>
+      <activity id="cms_resolveCrisis_a1" name="a1"  kind="invoke" service="cms" operation="captureWitnessReport" >
+        <inputs>
+          <variableRef uid="cms_resolveCrisis_coord" />
+          <variableRef uid="cms_resolveCrisis_id" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_resolveCrisis_a12" name="a12"  kind="invoke" service="ui" operation="actListener" >
+        <inputs>
+          <variableRef uid="cms_resolveCrisis_coord" />
+          <variableRef uid="cms_resolveCrisis_id" />
+          <variableRef uid="cms_resolveCrisis_lambda_0" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_resolveCrisis_aX" name="aX"  kind="invoke" service="cms" operation="handleACrisis" >
+        <inputs>
+          <variableRef uid="cms_resolveCrisis_coord" />
+          <variableRef uid="cms_resolveCrisis_id" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_resolveCrisis_a13" name="a13"  kind="invoke" service="ui" operation="validateClose" >
+        <inputs>
+          <variableRef uid="cms_resolveCrisis_coord" />
+          <variableRef uid="cms_resolveCrisis_id" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_resolveCrisis_rpl" name="rpl" kind="reply" >
+        <inputs />
+        <outputs />
+      </activity>
+      <activity id="cms_resolveCrisis_a12bis" name="a12bis"  kind="invoke" service="ui" operation="stopListener" >
+        <inputs>
+          <variableRef uid="cms_resolveCrisis_coord" />
+          <variableRef uid="cms_resolveCrisis_id" />
+          <variableRef uid="cms_resolveCrisis_lambda_1" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_resolveCrisis_mA_a1" name="mA_a1"  kind="invoke" service="cms" operation="isAuthentified" >
+        <inputs>
+          <variableRef uid="cms_resolveCrisis_coord" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_resolveCrisis_mA_still" />
+        </outputs>
+      </activity>
+      <activity id="cms_resolveCrisis_mA_a2" name="mA_a2"  kind="invoke" service="cms" operation="authUser" >
+        <inputs>
+          <variableRef uid="cms_resolveCrisis_coord" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_resolveCrisis_mA_auth" />
+        </outputs>
+      </activity>
+      <activity id="cms_resolveCrisis_mA_t" name="mA_t" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_resolveCrisis_lambda_2" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="a1" right="a12" kind="waitFor" />
+      <relation left="a12" right="aX" kind="waitFor" />
+      <relation left="aX" right="a13" kind="waitFor" />
+      <relation left="a13" right="rpl" kind="waitFor" />
+      <relation left="a13" right="a12bis" kind="waitFor" />
+      <relation left="rcv" right="mA_a1" kind="waitFor" />
+      <relation left="mA_a1" right="a1" kind="guard" variable="cms_resolveCrisis_mA_still" condition="true" />
+      <relation left="mA_a2" right="a1" kind="guard" variable="cms_resolveCrisis_mA_auth" condition="true" />
+      <relation left="mA_a1" right="mA_a2" kind="guard" variable="cms_resolveCrisis_mA_still" condition="false" />
+      <relation left="mA_a2" right="mA_t" kind="guard" variable="cms_resolveCrisis_mA_auth" condition="false" />
+    </relations>
+  </process>
+  <process id="nop_1" name="nop_1" isFragment="true" >
+    <variables>
+
+    </variables>
+    <activities>
+      <activity id="nop_1_n" name="n" kind="nop" >
+        <inputs />
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+
+    </relations>
+  </process>
+  <process id="cms_handleAMission" name="cms::handleAMission" isFragment="false" service="cms" operation="handleAMission" >
+    <variables>
+      <variable id="cms_handleAMission_coord" name="coord" isSet="false" type="cmsEmployee"/>
+      <variable id="cms_handleAMission_crisis" name="crisis" isSet="false" type="crisisIdentifier"/>
+      <variable id="cms_handleAMission_er" name="er" isSet="false" type="resource"/>
+      <variable id="cms_handleAMission_erep" name="erep" isSet="false" type="report"/>
+      <variable id="cms_handleAMission_ew" name="ew" isSet="false" type="externalWorker"/>
+      <variable id="cms_handleAMission_ir" name="ir" isSet="false" type="resource"/>
+      <variable id="cms_handleAMission_irep" name="irep" isSet="false" type="report"/>
+      <variable id="cms_handleAMission_iw" name="iw" isSet="false" type="cmsEmployee"/>
+      <variable id="cms_handleAMission_lambda_10" name="lambda_10" isSet="false" type="string" value="status" />
+      <variable id="cms_handleAMission_lambda_11" name="lambda_11" isSet="false" type="string" value="status" />
+      <variable id="cms_handleAMission_lambda_12" name="lambda_12" isSet="false" type="string" value="unavailable" />
+      <variable id="cms_handleAMission_lambda_13" name="lambda_13" isSet="false" type="report" value="null" />
+      <variable id="cms_handleAMission_lambda_14" name="lambda_14" isSet="false" type="string" value="unavailable" />
+      <variable id="cms_handleAMission_lambda_15" name="lambda_15" isSet="false" type="string" value="status" />
+      <variable id="cms_handleAMission_lambda_16" name="lambda_16" isSet="false" type="boolean" value="false" />
+      <variable id="cms_handleAMission_lambda_17" name="lambda_17" isSet="false" type="string" value="status" />
+      <variable id="cms_handleAMission_lambda_18" name="lambda_18" isSet="false" type="string" value="change" />
+      <variable id="cms_handleAMission_lambda_19" name="lambda_19" isSet="false" type="boolean" value="true" />
+      <variable id="cms_handleAMission_lambda_7" name="lambda_7" isSet="false" type="string" value="status" />
+      <variable id="cms_handleAMission_lambda_8" name="lambda_8" isSet="false" type="string" value="intResource" />
+      <variable id="cms_handleAMission_lambda_9" name="lambda_9" isSet="false" type="string" value="extResource" />
+      <variable id="cms_handleAMission_m" name="m" isSet="false" type="mission"/>
+      <variable id="cms_handleAMission_rHOC_c" name="rHOC_c" isSet="false" type="boolean"/>
+      <variable id="cms_handleAMission_rHOC_mustWait" name="rHOC_mustWait" isSet="false" type="boolean"/>
+      <variable id="cms_handleAMission_uER_token" name="uER_token" isSet="false" type="string"/>
+    </variables>
+    <activities>
+      <activity id="cms_handleAMission_rcv" name="rcv" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="cms_handleAMission_coord" />
+          <variableRef uid="cms_handleAMission_crisis" />
+          <variableRef uid="cms_handleAMission_m" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_a9" name="a9"  kind="invoke" service="ui" operation="actListener" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_coord" />
+          <variableRef uid="cms_handleAMission_m" />
+          <variableRef uid="cms_handleAMission_lambda_7" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_a40" name="a40" kind="assign" function="get" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_m" />
+          <variableRef uid="cms_handleAMission_lambda_8" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_ir" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_a41" name="a41"  kind="invoke" service="cms" operation="findRelevantEmployee" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_ir" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_iw" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_a42" name="a42"  kind="invoke" service="cms" operation="assignIntRes" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_iw" />
+          <variableRef uid="cms_handleAMission_m" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_a4x" name="a4x"  kind="invoke" service="cms" operation="handleAWorker" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_crisis" />
+          <variableRef uid="cms_handleAMission_iw" />
+          <variableRef uid="cms_handleAMission_m" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_irep" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_a4r" name="a4r"  kind="invoke" service="cms" operation="memorizeReport" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_irep" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_a50" name="a50" kind="assign" function="get" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_m" />
+          <variableRef uid="cms_handleAMission_lambda_9" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_er" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_a51" name="a51"  kind="invoke" service="cms" operation="requestExtRes" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_er" />
+          <variableRef uid="cms_handleAMission_crisis" />
+          <variableRef uid="cms_handleAMission_m" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_ew" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_a5x" name="a5x"  kind="invoke" service="cms" operation="handleAWorker" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_crisis" />
+          <variableRef uid="cms_handleAMission_ew" />
+          <variableRef uid="cms_handleAMission_m" />
+          <variableRef uid="cms_handleAMission_coord" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_erep" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_a5r" name="a5r"  kind="invoke" service="cms" operation="memorizeReport" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_erep" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_rpl" name="rpl" kind="reply" >
+        <inputs />
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_a9bis" name="a9bis"  kind="invoke" service="ui" operation="stopListener" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_coord" />
+          <variableRef uid="cms_handleAMission_m" />
+          <variableRef uid="cms_handleAMission_lambda_10" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_uIR_a1" name="uIR_a1"  kind="invoke" service="msgBus" operation="send" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_lambda_11" />
+          <variableRef uid="cms_handleAMission_lambda_12" />
+          <variableRef uid="cms_handleAMission_ir" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_uIR_a2" name="uIR_a2"  kind="invoke" service="cms" operation="requestExtRes" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_ir" />
+          <variableRef uid="cms_handleAMission_crisis" />
+          <variableRef uid="cms_handleAMission_m" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_iw" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_uER_a0" name="uER_a0" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_lambda_13" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_erep" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_uER_ac" name="uER_ac" kind="assign" function="concat" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_lambda_14" />
+          <variableRef uid="cms_handleAMission_er" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_uER_token" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_uER_a1" name="uER_a1"  kind="invoke" service="msgBus" operation="send" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_lambda_15" />
+          <variableRef uid="cms_handleAMission_uER_token" />
+          <variableRef uid="cms_handleAMission_m" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_uER_a2" name="uER_a2"  kind="invoke" service="cms" operation="handleCrisis" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_crisis" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_rHOC_a0" name="rHOC_a0" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_lambda_16" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_rHOC_mustWait" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_rHOC_a1" name="rHOC_a1"  kind="invoke" service="msgBus" operation="wait4msg" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_lambda_17" />
+          <variableRef uid="cms_handleAMission_lambda_18" />
+          <variableRef uid="cms_handleAMission_m" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_rHOC_a2" name="rHOC_a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_lambda_19" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_rHOC_mustWait" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_rHOC_t" name="rHOC_t" kind="assign" function="isTrue" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_rHOC_mustWait" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAMission_rHOC_c" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAMission_rHOC_a3" name="rHOC_a3"  kind="invoke" service="cms" operation="handleACrisis" >
+        <inputs>
+          <variableRef uid="cms_handleAMission_crisis" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_rHOC_a4" name="rHOC_a4" kind="nop" >
+        <inputs />
+        <outputs />
+      </activity>
+      <activity id="cms_handleAMission_rHOC_n" name="rHOC_n" kind="nop" >
+        <inputs />
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="rcv" right="a9" kind="waitFor" />
+      <relation left="rcv" right="a40" kind="waitFor" />
+      <relation left="a9" right="a41" kind="waitFor" />
+      <relation left="a40" right="a41" kind="waitFor" />
+      <relation left="a41" right="a42" kind="waitFor" />
+      <relation left="a42" right="a4x" kind="waitFor" />
+      <relation left="uIR_a2" right="a4x" kind="waitFor" />
+      <relation left="a4x" right="a4r" kind="waitFor" />
+      <relation left="rcv" right="a50" kind="waitFor" />
+      <relation left="a9" right="a51" kind="waitFor" />
+      <relation left="a50" right="a51" kind="waitFor" />
+      <relation left="a51" right="a5x" kind="waitFor" />
+      <relation left="a5x" right="a5r" kind="waitFor" />
+      <relation left="rHOC_a4" right="rpl" kind="waitFor" />
+      <relation left="rpl" right="a9bis" kind="waitFor" />
+      <relation left="uIR_a1" right="uIR_a2" kind="waitFor" />
+      <relation left="uER_a0" right="uER_ac" kind="waitFor" />
+      <relation left="uER_ac" right="uER_a1" kind="waitFor" />
+      <relation left="uER_a1" right="uER_a2" kind="waitFor" />
+      <relation left="rcv" right="rHOC_a0" kind="waitFor" />
+      <relation left="rHOC_a0" right="rHOC_a1" kind="waitFor" />
+      <relation left="rHOC_a1" right="rHOC_a2" kind="waitFor" />
+      <relation left="rHOC_a1" right="rHOC_a3" kind="waitFor" />
+      <relation left="rHOC_a3" right="rHOC_a4" kind="waitFor" />
+      <relation left="a4x" right="rHOC_n" kind="waitFor" />
+      <relation left="a5x" right="rHOC_n" kind="waitFor" />
+      <relation left="a5x" right="rpl" kind="weakWait" />
+      <relation left="uER_a2" right="rpl" kind="weakWait" />
+      <relation left="rHOC_a2" right="rHOC_t" kind="weakWait" />
+      <relation left="rHOC_n" right="rHOC_t" kind="weakWait" />
+      <relation left="rHOC_t" right="rpl" kind="guard" variable="cms_handleAMission_rHOC_c" condition="false" />
+      <relation left="rHOC_t" right="rHOC_a4" kind="guard" variable="cms_handleAMission_rHOC_c" condition="true" />
+      <relation left="a41" right="uIR_a1" kind="fail" error="" />
+      <relation left="a51" right="uER_a0" kind="fail" error="" />
+      <relation left="a5x" right="uER_a0" kind="fail" error="" />
+    </relations>
+  </process>
+  <process id="nop_2" name="nop_2" isFragment="true" >
+    <variables>
+
+    </variables>
+    <activities>
+      <activity id="nop_2_n" name="n" kind="nop" >
+        <inputs />
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+
+    </relations>
+  </process>
+  <process id="cms_handleAWorker" name="cms::handleAWorker" isFragment="false" service="cms" operation="handleAWorker" >
+    <variables>
+      <variable id="cms_handleAWorker_coord" name="coord" isSet="false" type="cmsEmployee"/>
+      <variable id="cms_handleAWorker_crisis" name="crisis" isSet="false" type="crisisIdentifier"/>
+      <variable id="cms_handleAWorker_lC0_super" name="lC0_super" isSet="false" type="cmsEmployee"/>
+      <variable id="cms_handleAWorker_lC1_super" name="lC1_super" isSet="false" type="cmsEmployee"/>
+      <variable id="cms_handleAWorker_lambda_20" name="lambda_20" isSet="false" type="string" value="info" />
+      <variable id="cms_handleAWorker_lambda_21" name="lambda_21" isSet="false" type="string" value="info" />
+      <variable id="cms_handleAWorker_lambda_22" name="lambda_22" isSet="false" type="string" value="info" />
+      <variable id="cms_handleAWorker_lambda_23" name="lambda_23" isSet="false" type="string" value="arrived" />
+      <variable id="cms_handleAWorker_lambda_24" name="lambda_24" isSet="false" type="string" value="info" />
+      <variable id="cms_handleAWorker_lambda_25" name="lambda_25" isSet="false" type="string" value="leaving" />
+      <variable id="cms_handleAWorker_lambda_26" name="lambda_26" isSet="false" type="string" value="info" />
+      <variable id="cms_handleAWorker_lambda_27" name="lambda_27" isSet="false" type="string" value="info" />
+      <variable id="cms_handleAWorker_lambda_29" name="lambda_29" isSet="false" type="string" value="info" />
+      <variable id="cms_handleAWorker_lambda_30" name="lambda_30" isSet="false" type="string" value="lost" />
+      <variable id="cms_handleAWorker_lambda_32" name="lambda_32" isSet="false" type="string" value="status" />
+      <variable id="cms_handleAWorker_lambda_33" name="lambda_33" isSet="false" type="string" value="failed" />
+      <variable id="cms_handleAWorker_lambda_34" name="lambda_34" isSet="false" type="report" value="null" />
+      <variable id="cms_handleAWorker_lambda_35" name="lambda_35" isSet="false" type="string" value="info" />
+      <variable id="cms_handleAWorker_lambda_36" name="lambda_36" isSet="false" type="string" value="lost" />
+      <variable id="cms_handleAWorker_lambda_37" name="lambda_37" isSet="false" type="report" value="null" />
+      <variable id="cms_handleAWorker_lambda_38" name="lambda_38" isSet="false" type="boolean" value="false" />
+      <variable id="cms_handleAWorker_lambda_39" name="lambda_39" isSet="false" type="string" value="status" />
+      <variable id="cms_handleAWorker_lambda_40" name="lambda_40" isSet="false" type="string" value="change" />
+      <variable id="cms_handleAWorker_lambda_41" name="lambda_41" isSet="false" type="boolean" value="true" />
+      <variable id="cms_handleAWorker_m" name="m" isSet="false" type="mission"/>
+      <variable id="cms_handleAWorker_r" name="r" isSet="false" type="report"/>
+      <variable id="cms_handleAWorker_rHOC_c" name="rHOC_c" isSet="false" type="boolean"/>
+      <variable id="cms_handleAWorker_rHOC_mustWait" name="rHOC_mustWait" isSet="false" type="boolean"/>
+      <variable id="cms_handleAWorker_t0_c" name="t0_c" isSet="false" type="boolean"/>
+      <variable id="cms_handleAWorker_t0_expired" name="t0_expired" isSet="false" type="boolean"/>
+      <variable id="cms_handleAWorker_t0_false" name="t0_false" isSet="false" type="boolean" value="false" />
+      <variable id="cms_handleAWorker_t0_r" name="t0_r" isSet="false" type="report"/>
+      <variable id="cms_handleAWorker_t0_true" name="t0_true" isSet="false" type="boolean" value="true" />
+      <variable id="cms_handleAWorker_uH_ok" name="uH_ok" isSet="false" type="boolean"/>
+      <variable id="cms_handleAWorker_uH_r" name="uH_r" isSet="false" type="boolean"/>
+      <variable id="cms_handleAWorker_w" name="w" isSet="false" type="worker"/>
+
+    </variables>
+    <activities>
+      <activity id="cms_handleAWorker_rcv" name="rcv" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="cms_handleAWorker_crisis" />
+          <variableRef uid="cms_handleAWorker_w" />
+          <variableRef uid="cms_handleAWorker_m" />
+          <variableRef uid="cms_handleAWorker_coord" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_a100" name="a100"  kind="invoke" service="ui" operation="actListener" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_w" />
+          <variableRef uid="cms_handleAWorker_crisis" />
+          <variableRef uid="cms_handleAWorker_lambda_20" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_a101" name="a101"  kind="invoke" service="ui" operation="actListener" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_w" />
+          <variableRef uid="cms_handleAWorker_m" />
+          <variableRef uid="cms_handleAWorker_lambda_21" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_a6" name="a6"  kind="invoke" service="msgBus" operation="wait4Msg" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lambda_22" />
+          <variableRef uid="cms_handleAWorker_lambda_23" />
+          <variableRef uid="cms_handleAWorker_w" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_a7" name="a7"  kind="invoke" service="cms" operation="executeMission" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_m" />
+          <variableRef uid="cms_handleAWorker_w" />
+          <variableRef uid="cms_handleAWorker_crisis" />
+          <variableRef uid="cms_handleAWorker_coord" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_a8" name="a8"  kind="invoke" service="msgBus" operation="wait4Msg" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lambda_24" />
+          <variableRef uid="cms_handleAWorker_lambda_25" />
+          <variableRef uid="cms_handleAWorker_w" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_a11" name="a11"  kind="invoke" service="ui" operation="askForReport" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_w" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_r" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_rpl" name="rpl" kind="reply" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_r" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_a100bis" name="a100bis"  kind="invoke" service="ui" operation="stopListener" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_w" />
+          <variableRef uid="cms_handleAWorker_crisis" />
+          <variableRef uid="cms_handleAWorker_lambda_26" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_a101bis" name="a101bis"  kind="invoke" service="ui" operation="stopListener" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_w" />
+          <variableRef uid="cms_handleAWorker_m" />
+          <variableRef uid="cms_handleAWorker_lambda_27" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_uH_a1" name="uH_a1"  kind="invoke" service="cms" operation="helicopterRequired" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_m" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_uH_r" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_uH_a2" name="uH_a2"  kind="invoke" service="ui" operation="ask4Helicopter" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_coord" />
+          <variableRef uid="cms_handleAWorker_w" />
+          <variableRef uid="cms_handleAWorker_m" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_uH_ok" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_uH_a3" name="uH_a3"  kind="invoke" service="cms" operation="transportByHelicopter" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_w" />
+          <variableRef uid="cms_handleAWorker_m" path="loc" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_lC0_a1" name="lC0_a1"  kind="invoke" service="msg" operation="wait4Msg" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lambda_29" />
+          <variableRef uid="cms_handleAWorker_lambda_30" />
+          <variableRef uid="cms_handleAWorker_w" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_lC0_a2" name="lC0_a2"  kind="invoke" service="cms" operation="getSuperObserver" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_crisis" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_lC0_super" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_lC0_a3" name="lC0_a3"  kind="invoke" service="ui" operation="requestForArrival" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lC0_super" />
+          <variableRef uid="cms_handleAWorker_w" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_t0_a0" name="t0_a0" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_t0_false" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_t0_expired" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_t0_a1" name="t0_a1"  kind="invoke" service="stopwatch" operation="sleep" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_m" path="delay" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_t0_a2" name="t0_a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_t0_true" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_t0_expired" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_t0_a3" name="t0_a3" kind="assign" function="isTrue" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_t0_expired" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_t0_c" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_t0_a4" name="t0_a4"  kind="invoke" service="ui" operation="updateLocation" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_w" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_t0_a5" name="t0_a5"  kind="invoke" service="cms" operation="handleAWorker" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_crisis" />
+          <variableRef uid="cms_handleAWorker_w" />
+          <variableRef uid="cms_handleAWorker_m" />
+          <variableRef uid="cms_handleAWorker_coord" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_t0_r" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_t0_a6" name="t0_a6" kind="reply" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_t0_r" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_mF_a1" name="mF_a1"  kind="invoke" service="msgBus" operation="send" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lambda_32" />
+          <variableRef uid="cms_handleAWorker_lambda_33" />
+          <variableRef uid="cms_handleAWorker_m" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_mF_a2" name="mF_a2"  kind="invoke" service="cms" operation="handleCrisis" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_crisis" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_mF_a3" name="mF_a3" kind="reply" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lambda_34" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_lC1_a1" name="lC1_a1"  kind="invoke" service="msg" operation="wait4Msg" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lambda_35" />
+          <variableRef uid="cms_handleAWorker_lambda_36" />
+          <variableRef uid="cms_handleAWorker_w" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_lC1_a2" name="lC1_a2"  kind="invoke" service="cms" operation="getSuperObserver" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_crisis" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_lC1_super" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_lC1_a3" name="lC1_a3"  kind="invoke" service="ui" operation="requestForDeparture" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lC1_super" />
+          <variableRef uid="cms_handleAWorker_w" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_mR_a1" name="mR_a1" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lambda_37" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_r" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_rHOC_a0" name="rHOC_a0" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lambda_38" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_rHOC_mustWait" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_rHOC_a1" name="rHOC_a1"  kind="invoke" service="msgBus" operation="wait4msg" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lambda_39" />
+          <variableRef uid="cms_handleAWorker_lambda_40" />
+          <variableRef uid="cms_handleAWorker_m" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_rHOC_a2" name="rHOC_a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_lambda_41" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_rHOC_mustWait" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_rHOC_t" name="rHOC_t" kind="assign" function="isTrue" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_rHOC_mustWait" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_handleAWorker_rHOC_c" />
+        </outputs>
+      </activity>
+      <activity id="cms_handleAWorker_rHOC_a3" name="rHOC_a3"  kind="invoke" service="cms" operation="handleACrisis" >
+        <inputs>
+          <variableRef uid="cms_handleAWorker_crisis" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_handleAWorker_rHOC_a4" name="rHOC_a4" kind="nop" >
+        <inputs />
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="rcv" right="a100" kind="waitFor" />
+      <relation left="rcv" right="a101" kind="waitFor" />
+      <relation left="uH_a3" right="a6" kind="waitFor" />
+      <relation left="t0_a0" right="a6" kind="waitFor" />
+      <relation left="rHOC_a4" right="a8" kind="waitFor" />
+      <relation left="a100" right="uH_a1" kind="waitFor" />
+      <relation left="a101" right="uH_a1" kind="waitFor" />
+      <relation left="a100" right="lC0_a1" kind="waitFor" />
+      <relation left="a101" right="lC0_a1" kind="waitFor" />
+      <relation left="lC0_a1" right="lC0_a2" kind="waitFor" />
+      <relation left="lC0_a2" right="lC0_a3" kind="waitFor" />
+      <relation left="a100" right="t0_a0" kind="waitFor" />
+      <relation left="a101" right="t0_a0" kind="waitFor" />
+      <relation left="t0_a0" right="t0_a1" kind="waitFor" />
+      <relation left="t0_a1" right="t0_a2" kind="waitFor" />
+      <relation left="t0_a4" right="t0_a5" kind="waitFor" />
+      <relation left="t0_a5" right="t0_a6" kind="waitFor" />
+      <relation left="mF_a1" right="mF_a2" kind="waitFor" />
+      <relation left="mF_a2" right="mF_a3" kind="waitFor" />
+      <relation left="a7" right="lC1_a1" kind="waitFor" />
+      <relation left="lC1_a1" right="lC1_a2" kind="waitFor" />
+      <relation left="lC1_a2" right="lC1_a3" kind="waitFor" />
+      <relation left="a6" right="rHOC_a0" kind="waitFor" />
+      <relation left="rHOC_a0" right="rHOC_a1" kind="waitFor" />
+      <relation left="rHOC_a1" right="rHOC_a2" kind="waitFor" />
+      <relation left="rHOC_a1" right="rHOC_a3" kind="waitFor" />
+      <relation left="rHOC_a3" right="rHOC_a4" kind="waitFor" />
+      <relation left="a6" right="a7" kind="weakWait" />
+      <relation left="lC0_a3" right="a7" kind="weakWait" />
+      <relation left="a8" right="a11" kind="weakWait" />
+      <relation left="lC1_a3" right="a11" kind="weakWait" />
+      <relation left="a11" right="rpl" kind="weakWait" />
+      <relation left="mR_a1" right="rpl" kind="weakWait" />
+      <relation left="a8" right="a100bis" kind="weakWait" />
+      <relation left="lC1_a3" right="a100bis" kind="weakWait" />
+      <relation left="a8" right="a101bis" kind="weakWait" />
+      <relation left="lC1_a3" right="a101bis" kind="weakWait" />
+      <relation left="a6" right="t0_a3" kind="weakWait" />
+      <relation left="t0_a2" right="t0_a3" kind="weakWait" />
+      <relation left="a7" right="rHOC_t" kind="weakWait" />
+      <relation left="rHOC_a2" right="rHOC_t" kind="weakWait" />
+      <relation left="uH_a1" right="a6" kind="guard" variable="cms_handleAWorker_uH_r" condition="false" />
+      <relation left="uH_a2" right="a6" kind="guard" variable="cms_handleAWorker_uH_ok" condition="false" />
+      <relation left="t0_a3" right="a7" kind="guard" variable="cms_handleAWorker_t0_c" condition="false" />
+      <relation left="rHOC_t" right="a8" kind="guard" variable="cms_handleAWorker_rHOC_c" condition="false" />
+      <relation left="uH_a1" right="uH_a2" kind="guard" variable="cms_handleAWorker_uH_r" condition="true" />
+      <relation left="uH_a2" right="uH_a3" kind="guard" variable="cms_handleAWorker_uH_ok" condition="true" />
+      <relation left="t0_a3" right="t0_a4" kind="guard" variable="cms_handleAWorker_t0_c" condition="true" />
+      <relation left="rHOC_t" right="rHOC_a4" kind="guard" variable="cms_handleAWorker_rHOC_c" condition="true" />
+      <relation left="a7" right="mF_a1" kind="fail" error="" />
+      <relation left="a11" right="mR_a1" kind="fail" error="" />
+    </relations>
+  </process>
+  <process id="cms_captureWitnessReport" name="cms::captureWitnessReport" isFragment="false" service="cms" operation="captureWitnessReport" >
+    <variables>
+      <variable id="cms_captureWitnessReport_ccl" name="ccl" isSet="false" type="crisisCheckList"/>
+      <variable id="cms_captureWitnessReport_ci" name="ci" isSet="false" type="crisisInformation"/>
+      <variable id="cms_captureWitnessReport_coord" name="coord" isSet="false" type="cmsEmployee"/>
+      <variable id="cms_captureWitnessReport_exact" name="exact" isSet="false" type="boolean"/>
+      <variable id="cms_captureWitnessReport_fCD0_isReal" name="fCD0_isReal" isSet="false" type="boolean"/>
+      <variable id="cms_captureWitnessReport_i" name="i" isSet="false" type="preliminaryInformation"/>
+      <variable id="cms_captureWitnessReport_id" name="id" isSet="false" type="crisisIdentifier"/>
+      <variable id="cms_captureWitnessReport_lambda_43" name="lambda_43" isSet="false" type="string" value="status" />
+      <variable id="cms_captureWitnessReport_lambda_44" name="lambda_44" isSet="false" type="string" value="active" />
+      <variable id="cms_captureWitnessReport_lambda_45" name="lambda_45" isSet="false" type="string" value="lostWitnessContact" />
+      <variable id="cms_captureWitnessReport_lambda_46" name="lambda_46" isSet="false" type="string" value="lostWitnessContact" />
+      <variable id="cms_captureWitnessReport_lambda_49" name="lambda_49" isSet="false" type="string" value="fakeWitnessInformation" />
+      <variable id="cms_captureWitnessReport_lambda_50" name="lambda_50" isSet="false" type="string" value="fakeCrisis" />
+      <variable id="cms_captureWitnessReport_lambda_51" name="lambda_51" isSet="false" type="string" value="fakeCrisis" />
+      <variable id="cms_captureWitnessReport_pi" name="pi" isSet="false" type="phoneInformation"/>
+      <variable id="cms_captureWitnessReport_rV_c" name="rV_c" isSet="false" type="boolean"/>
+      <variable id="cms_captureWitnessReport_rV_fCD_isReal" name="rV_fCD_isReal" isSet="false" type="boolean"/>
+      <variable id="cms_captureWitnessReport_rV_feedId" name="rV_feedId" isSet="false" type="videoFeedIdentifier"/>
+      <variable id="cms_captureWitnessReport_wi" name="wi" isSet="false" type="witness"/>
+
+    </variables>
+    <activities>
+      <activity id="cms_captureWitnessReport_rcv" name="rcv" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_coord" />
+          <variableRef uid="cms_captureWitnessReport_id" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_a10" name="a10"  kind="invoke" service="ui" operation="promptWitnessInfo" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_coord" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_wi" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_a11" name="a11"  kind="invoke" service="cms" operation="setWitness" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_wi" />
+          <variableRef uid="cms_captureWitnessReport_id" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_captureWitnessReport_a2" name="a2"  kind="invoke" service="ui" operation="promptPrelimInfo" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_coord" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_i" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_a2a12" name="a2a12"  kind="invoke" service="phoneCie" operation="getInfo" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_wi" path="id" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_pi" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_a2a3" name="a2a3"  kind="invoke" service="cms" operation="validateWitnessInfo" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_wi" />
+          <variableRef uid="cms_captureWitnessReport_pi" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_exact" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_a3" name="a3"  kind="invoke" service="cms" operation="buildCheckList" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_i" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_ccl" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_a4" name="a4"  kind="invoke" service="ui" operation="promptCheckList" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_coord" />
+          <variableRef uid="cms_captureWitnessReport_id" />
+          <variableRef uid="cms_captureWitnessReport_ccl" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_ci" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_a50" name="a50"  kind="invoke" service="cms" operation="assignEmergencyLvl" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_id" />
+          <variableRef uid="cms_captureWitnessReport_ci" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_captureWitnessReport_a51" name="a51"  kind="invoke" service="msgBus" operation="send" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_lambda_43" />
+          <variableRef uid="cms_captureWitnessReport_lambda_44" />
+          <variableRef uid="cms_captureWitnessReport_id" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_captureWitnessReport_rpl" name="rpl" kind="reply" >
+        <inputs />
+        <outputs />
+      </activity>
+      <activity id="cms_captureWitnessReport_cD0_thr" name="cD0_thr" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_lambda_45" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_captureWitnessReport_cD1_thr" name="cD1_thr" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_lambda_46" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_captureWitnessReport_rV_t" name="rV_t"  kind="invoke" service="survSys" operation="canCover" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_i" path="loc" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_rV_c" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_rV_a12" name="rV_a12"  kind="invoke" service="survSys" operation="activateVideo" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_i" path="loc" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_rV_feedId" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_rV_a3" name="rV_a3"  kind="invoke" service="ui" operation="displayVideoFeed" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_coord" />
+          <variableRef uid="cms_captureWitnessReport_rV_feedId" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_captureWitnessReport_fWI_thr" name="fWI_thr" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_lambda_49" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_captureWitnessReport_fCD0_t" name="fCD0_t"  kind="invoke" service="ui" operation="prompt4RealCrisis" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_coord" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_fCD0_isReal" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_fCD0_thr" name="fCD0_thr" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_lambda_50" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_captureWitnessReport_rV_fCD_t" name="rV_fCD_t"  kind="invoke" service="ui" operation="prompt4RealCrisis" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_coord" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_captureWitnessReport_rV_fCD_isReal" />
+        </outputs>
+      </activity>
+      <activity id="cms_captureWitnessReport_rV_fCD_thr" name="rV_fCD_thr" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_captureWitnessReport_lambda_51" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="rcv" right="a10" kind="waitFor" />
+      <relation left="a10" right="a11" kind="waitFor" />
+      <relation left="a10" right="a2" kind="waitFor" />
+      <relation left="a10" right="a2a12" kind="waitFor" />
+      <relation left="a2a12" right="a2a3" kind="waitFor" />
+      <relation left="a2" right="a3" kind="waitFor" />
+      <relation left="a3" right="a4" kind="waitFor" />
+      <relation left="a4" right="a50" kind="waitFor" />
+      <relation left="a50" right="a51" kind="waitFor" />
+      <relation left="a50" right="rpl" kind="waitFor" />
+      <relation left="a2" right="rV_t" kind="waitFor" />
+      <relation left="rV_a12" right="rV_a3" kind="waitFor" />
+      <relation left="a3" right="fCD0_t" kind="waitFor" />
+      <relation left="rV_a12" right="rV_fCD_t" kind="waitFor" />
+      <relation left="a2a3" right="a50" kind="guard" variable="cms_captureWitnessReport_exact" condition="true" />
+      <relation left="fCD0_t" right="a50" kind="guard" variable="cms_captureWitnessReport_fCD0_isReal" condition="true" />
+      <relation left="rV_t" right="rV_a12" kind="guard" variable="cms_captureWitnessReport_rV_c" condition="true" />
+      <relation left="a2a3" right="fWI_thr" kind="guard" variable="cms_captureWitnessReport_exact" condition="false" />
+      <relation left="fCD0_t" right="fCD0_thr" kind="guard" variable="cms_captureWitnessReport_fCD0_isReal" condition="false" />
+      <relation left="rV_fCD_t" right="rV_fCD_thr" kind="guard" variable="cms_captureWitnessReport_rV_fCD_isReal" condition="false" />
+      <relation left="a4" right="a50" kind="fail" error="" />
+      <relation left="a10" right="cD0_thr" kind="fail" error="" />
+      <relation left="a2" right="cD1_thr" kind="fail" error="" />
+    </relations>
+  </process>
+  <process id="requestVideo" name="requestVideo" isFragment="true" >
+    <variables>
+      <variable id="requestVideo_c" name="c" isSet="false" type="boolean"/>
+      <variable id="requestVideo_fCD_isReal" name="fCD_isReal" isSet="false" type="boolean"/>
+      <variable id="requestVideo_feedId" name="feedId" isSet="false" type="videoFeedIdentifier"/>
+      <variable id="requestVideo_info" name="info" isSet="false" type="preliminaryInformation"/>
+      <variable id="requestVideo_lambda_54" name="lambda_54" isSet="false" type="string" value="fakeCrisis" />
+      <variable id="requestVideo_user" name="user" isSet="false" type="cmsEmployee"/>
+    </variables>
+    <activities>
+      <activity id="requestVideo_t" name="t"  kind="invoke" service="survSys" operation="canCover" >
+        <inputs>
+          <variableRef uid="requestVideo_info" path="loc" />
+        </inputs>
+        <outputs>
+          <variableRef uid="requestVideo_c" />
+        </outputs>
+      </activity>
+      <activity id="requestVideo_h" name="h" kind="hook" >
+        <inputs>
+          <variableRef uid="requestVideo_info" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="requestVideo_a12" name="a12"  kind="invoke" service="survSys" operation="activateVideo" >
+        <inputs>
+          <variableRef uid="requestVideo_info" path="loc" />
+        </inputs>
+        <outputs>
+          <variableRef uid="requestVideo_feedId" />
+        </outputs>
+      </activity>
+      <activity id="requestVideo_a3" name="a3"  kind="invoke" service="ui" operation="displayVideoFeed" >
+        <inputs>
+          <variableRef uid="requestVideo_user" />
+          <variableRef uid="requestVideo_feedId" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="requestVideo_fCD_t" name="fCD_t"  kind="invoke" service="ui" operation="prompt4RealCrisis" >
+        <inputs>
+          <variableRef uid="requestVideo_user" />
+        </inputs>
+        <outputs>
+          <variableRef uid="requestVideo_fCD_isReal" />
+        </outputs>
+      </activity>
+      <activity id="requestVideo_fCD_thr" name="fCD_thr" kind="throw" >
+        <inputs>
+          <variableRef uid="requestVideo_lambda_54" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="h" right="requestVideo_succs" kind="waitFor" />
+      <relation left="h" right="t" kind="waitFor" />
+      <relation left="requestVideo_preds" right="h" kind="waitFor" />
+      <relation left="a12" right="a3" kind="waitFor" />
+      <relation left="a12" right="fCD_t" kind="waitFor" />
+      <relation left="t" right="a12" kind="guard" variable="requestVideo_c" condition="true" />
+      <relation left="fCD_t" right="fCD_thr" kind="guard" variable="requestVideo_fCD_isReal" condition="false" />
+    </relations>
+  </process>
+  <process id="cms_assignIntRes" name="cms::assignIntRes" isFragment="false" service="cms" operation="assignIntRes" >
+    <variables>
+      <variable id="cms_assignIntRes_accept" name="accept" isSet="false" type="boolean"/>
+      <variable id="cms_assignIntRes_e" name="e" isSet="false" type="cmsEmployee"/>
+      <variable id="cms_assignIntRes_eR_r" name="eR_r" isSet="false" type="boolean"/>
+      <variable id="cms_assignIntRes_eR_subst" name="eR_subst" isSet="false" type="cmsEmployee"/>
+      <variable id="cms_assignIntRes_lambda_55" name="lambda_55" isSet="false" type="string" value="BadAuthentification" />
+      <variable id="cms_assignIntRes_lambda_56" name="lambda_56" isSet="false" type="string" value="status" />
+      <variable id="cms_assignIntRes_lambda_57" name="lambda_57" isSet="false" type="string" value="unresponsive" />
+      <variable id="cms_assignIntRes_lambda_58" name="lambda_58" isSet="false" type="string" value="unavailable" />
+      <variable id="cms_assignIntRes_lambda_59" name="lambda_59" isSet="false" type="string" value="info" />
+      <variable id="cms_assignIntRes_lambda_60" name="lambda_60" isSet="false" type="string" value="refusal" />
+      <variable id="cms_assignIntRes_lambda_61" name="lambda_61" isSet="false" type="string" value="unavailable" />
+      <variable id="cms_assignIntRes_m" name="m" isSet="false" type="mission"/>
+      <variable id="cms_assignIntRes_mA_auth" name="mA_auth" isSet="false" type="boolean"/>
+      <variable id="cms_assignIntRes_mA_still" name="mA_still" isSet="false" type="boolean"/>
+      <variable id="cms_assignIntRes_uE_c" name="uE_c" isSet="false" type="boolean"/>
+      <variable id="cms_assignIntRes_uE_delta" name="uE_delta" isSet="false" type="integer" value="10" />
+      <variable id="cms_assignIntRes_uE_expired" name="uE_expired" isSet="false" type="boolean"/>
+      <variable id="cms_assignIntRes_uE_false" name="uE_false" isSet="false" type="boolean" value="false" />
+      <variable id="cms_assignIntRes_uE_r" name="uE_r" isSet="false" type="boolean"/>
+      <variable id="cms_assignIntRes_uE_subst" name="uE_subst" isSet="false" type="cmsEmployee"/>
+      <variable id="cms_assignIntRes_uE_true" name="uE_true" isSet="false" type="boolean" value="true" />
+    </variables>
+    <activities>
+      <activity id="cms_assignIntRes_rcv" name="rcv" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="cms_assignIntRes_e" />
+          <variableRef uid="cms_assignIntRes_m" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_a1" name="a1"  kind="invoke" service="ui" operation="sendMissionInfo" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_e" />
+          <variableRef uid="cms_assignIntRes_m" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_assignIntRes_a2" name="a2"  kind="invoke" service="ui" operation="wait4Acceptance" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_e" />
+          <variableRef uid="cms_assignIntRes_m" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_assignIntRes_accept" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_rpl" name="rpl" kind="reply" >
+        <inputs />
+        <outputs />
+      </activity>
+      <activity id="cms_assignIntRes_mA_a1" name="mA_a1"  kind="invoke" service="cms" operation="isAuthentified" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_e" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_assignIntRes_mA_still" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_mA_a2" name="mA_a2"  kind="invoke" service="cms" operation="authUser" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_e" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_assignIntRes_mA_auth" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_mA_t" name="mA_t" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_lambda_55" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_assignIntRes_uE_a0" name="uE_a0" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_uE_false" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_assignIntRes_uE_expired" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_uE_a1" name="uE_a1"  kind="invoke" service="stopwatch" operation="sleep" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_uE_delta" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_assignIntRes_uE_a2" name="uE_a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_uE_true" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_assignIntRes_uE_expired" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_uE_a3" name="uE_a3" kind="assign" function="isTrue" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_uE_expired" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_assignIntRes_uE_c" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_uE_a4" name="uE_a4"  kind="invoke" service="msgBus" operation="send" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_lambda_56" />
+          <variableRef uid="cms_assignIntRes_lambda_57" />
+          <variableRef uid="cms_assignIntRes_e" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_assignIntRes_uE_a5" name="uE_a5"  kind="invoke" service="cms" operation="findSubstitute" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_e" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_assignIntRes_uE_subst" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_uE_a6" name="uE_a6"  kind="invoke" service="cms" operation="assignIntRes" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_uE_subst" />
+          <variableRef uid="cms_assignIntRes_m" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_assignIntRes_uE_r" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_uE_rpl" name="uE_rpl" kind="reply" >
+        <inputs />
+        <outputs />
+      </activity>
+      <activity id="cms_assignIntRes_uE_thr" name="uE_thr" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_lambda_58" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_assignIntRes_eR_a1" name="eR_a1"  kind="invoke" service="msgBus" operation="send" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_lambda_59" />
+          <variableRef uid="cms_assignIntRes_lambda_60" />
+          <variableRef uid="cms_assignIntRes_e" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_assignIntRes_eR_a2" name="eR_a2"  kind="invoke" service="cms" operation="findSubstitute" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_e" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_assignIntRes_eR_subst" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_eR_a3" name="eR_a3"  kind="invoke" service="cms" operation="assignIntRes" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_eR_subst" />
+          <variableRef uid="cms_assignIntRes_m" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_assignIntRes_eR_r" />
+        </outputs>
+      </activity>
+      <activity id="cms_assignIntRes_eR_rpl" name="eR_rpl" kind="reply" >
+        <inputs />
+        <outputs />
+      </activity>
+      <activity id="cms_assignIntRes_eR_thr" name="eR_thr" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_assignIntRes_lambda_61" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="uE_a0" right="a1" kind="waitFor" />
+      <relation left="a1" right="a2" kind="waitFor" />
+      <relation left="rcv" right="mA_a1" kind="waitFor" />
+      <relation left="rcv" right="uE_a0" kind="waitFor" />
+      <relation left="uE_a0" right="uE_a1" kind="waitFor" />
+      <relation left="uE_a1" right="uE_a2" kind="waitFor" />
+      <relation left="uE_a5" right="uE_a6" kind="waitFor" />
+      <relation left="uE_a6" right="uE_rpl" kind="waitFor" />
+      <relation left="eR_a1" right="eR_a2" kind="waitFor" />
+      <relation left="eR_a2" right="eR_a3" kind="waitFor" />
+      <relation left="eR_a3" right="eR_rpl" kind="waitFor" />
+      <relation left="a2" right="uE_a3" kind="weakWait" />
+      <relation left="uE_a2" right="uE_a3" kind="weakWait" />
+      <relation left="mA_a1" right="a1" kind="guard" variable="cms_assignIntRes_mA_still" condition="true" />
+      <relation left="mA_a2" right="a1" kind="guard" variable="cms_assignIntRes_mA_auth" condition="true" />
+      <relation left="a2" right="rpl" kind="guard" variable="cms_assignIntRes_accept" condition="true" />
+      <relation left="uE_a3" right="rpl" kind="guard" variable="cms_assignIntRes_uE_c" condition="false" />
+      <relation left="mA_a1" right="mA_a2" kind="guard" variable="cms_assignIntRes_mA_still" condition="false" />
+      <relation left="mA_a2" right="mA_t" kind="guard" variable="cms_assignIntRes_mA_auth" condition="false" />
+      <relation left="uE_a3" right="uE_a4" kind="guard" variable="cms_assignIntRes_uE_c" condition="true" />
+      <relation left="uE_a3" right="uE_a5" kind="guard" variable="cms_assignIntRes_uE_c" condition="true" />
+      <relation left="a2" right="eR_a1" kind="guard" variable="cms_assignIntRes_accept" condition="false" />
+      <relation left="uE_a5" right="uE_thr" kind="fail" error="" />
+      <relation left="eR_a2" right="eR_thr" kind="fail" error="" />
+    </relations>
+  </process>
+  <process id="cms_requestExtRes" name="cms::requestExtRes" isFragment="false" service="cms" operation="requestExtRes" >
+    <variables>
+      <variable id="cms_requestExtRes_cx" name="cx" isSet="false" type="ersConnexion"/>
+      <variable id="cms_requestExtRes_dR_deg" name="dR_deg" isSet="false" type="boolean"/>
+      <variable id="cms_requestExtRes_dR_lvl" name="dR_lvl" isSet="false" type="integer"/>
+      <variable id="cms_requestExtRes_lambda_62" name="lambda_62" isSet="false" type="integer" value="80" />
+      <variable id="cms_requestExtRes_lambda_63" name="lambda_63" isSet="false" type="string" value="info" />
+      <variable id="cms_requestExtRes_lambda_64" name="lambda_64" isSet="false" type="string" value="degraded" />
+      <variable id="cms_requestExtRes_lambda_65" name="lambda_65" isSet="false" type="string" value="info" />
+      <variable id="cms_requestExtRes_lambda_66" name="lambda_66" isSet="false" type="string" value="noSuchResource" />
+      <variable id="cms_requestExtRes_lambda_67" name="lambda_67" isSet="false" type="string" value="unavailable" />
+      <variable id="cms_requestExtRes_m" name="m" isSet="false" type="mission"/>
+      <variable id="cms_requestExtRes_res" name="res" isSet="false" type="resource"/>
+      <variable id="cms_requestExtRes_w" name="w" isSet="false" type="worker"/>
+    </variables>
+    <activities>
+      <activity id="cms_requestExtRes_rcv" name="rcv" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="cms_requestExtRes_res" />
+          <variableRef uid="cms_requestExtRes_m" />
+        </outputs>
+      </activity>
+      <activity id="cms_requestExtRes_a1" name="a1"  kind="invoke" service="ers" operation="submitMissionDetails" >
+        <inputs>
+          <variableRef uid="cms_requestExtRes_m" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_requestExtRes_cx" />
+        </outputs>
+      </activity>
+      <activity id="cms_requestExtRes_a2" name="a2"  kind="invoke" service="ers" operation="providesWorker" >
+        <inputs>
+          <variableRef uid="cms_requestExtRes_cx" />
+          <variableRef uid="cms_requestExtRes_res" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_requestExtRes_w" />
+        </outputs>
+      </activity>
+      <activity id="cms_requestExtRes_rpl" name="rpl" kind="reply" >
+        <inputs>
+          <variableRef uid="cms_requestExtRes_w" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_requestExtRes_dR_a1" name="dR_a1"  kind="invoke" service="ers" operation="getLoadLevel" >
+        <inputs>
+          <variableRef uid="cms_requestExtRes_cx" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_requestExtRes_dR_lvl" />
+        </outputs>
+      </activity>
+      <activity id="cms_requestExtRes_dR_t" name="dR_t" kind="assign" function="isGreaterThan" >
+        <inputs>
+          <variableRef uid="cms_requestExtRes_dR_lvl" />
+          <variableRef uid="cms_requestExtRes_lambda_62" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_requestExtRes_dR_deg" />
+        </outputs>
+      </activity>
+      <activity id="cms_requestExtRes_dR_a2" name="dR_a2"  kind="invoke" service="msgBus" operation="send" >
+        <inputs>
+          <variableRef uid="cms_requestExtRes_lambda_63" />
+          <variableRef uid="cms_requestExtRes_lambda_64" />
+          <variableRef uid="cms_requestExtRes_w" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_requestExtRes_nER_a1" name="nER_a1"  kind="invoke" service="msgBus" operation="send" >
+        <inputs>
+          <variableRef uid="cms_requestExtRes_lambda_65" />
+          <variableRef uid="cms_requestExtRes_lambda_66" />
+          <variableRef uid="cms_requestExtRes_res" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_requestExtRes_nER_thr" name="nER_thr" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_requestExtRes_lambda_67" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="rcv" right="a1" kind="waitFor" />
+      <relation left="a1" right="a2" kind="waitFor" />
+      <relation left="dR_a2" right="rpl" kind="waitFor" />
+      <relation left="a2" right="dR_a1" kind="waitFor" />
+      <relation left="dR_a1" right="dR_t" kind="waitFor" />
+      <relation left="nER_a1" right="nER_thr" kind="waitFor" />
+      <relation left="dR_t" right="rpl" kind="guard" variable="cms_requestExtRes_dR_deg" condition="false" />
+      <relation left="dR_t" right="dR_a2" kind="guard" variable="cms_requestExtRes_dR_deg" condition="true" />
+      <relation left="a2" right="nER_a1" kind="fail" error="" />
+    </relations>
+  </process>
+  <process id="cms_execRescMission" name="cms::execRescMission" isFragment="false" service="cms" operation="execRescMission" >
+    <variables>
+      <variable id="cms_execRescMission_crs" name="crs" isSet="false" type="crisis"/>
+      <variable id="cms_execRescMission_hosp" name="hosp" isSet="false" type="hospital"/>
+      <variable id="cms_execRescMission_id" name="id" isSet="false" type="idRef"/>
+      <variable id="cms_execRescMission_injRep" name="injRep" isSet="false" type="injuryReport"/>
+      <variable id="cms_execRescMission_lambda_75" name="lambda_75" isSet="false" type="string" value="info" />
+      <variable id="cms_execRescMission_lambda_76" name="lambda_76" isSet="false" type="string" value="leaving" />
+      <variable id="cms_execRescMission_lambda_77" name="lambda_77" isSet="false" type="string" value="info" />
+      <variable id="cms_execRescMission_lambda_78" name="lambda_78" isSet="false" type="string" value="victimDropped" />
+      <variable id="cms_execRescMission_lambda_79" name="lambda_79" isSet="false" type="string" value="status" />
+      <variable id="cms_execRescMission_lambda_80" name="lambda_80" isSet="false" type="string" value="success" />
+      <variable id="cms_execRescMission_mis" name="mis" isSet="false" type="mission"/>
+      <variable id="cms_execRescMission_rVH_c" name="rVH_c" isSet="false" type="boolean"/>
+      <variable id="cms_execRescMission_rVH_history" name="rVH_history" isSet="false" type="medicalHistory"/>
+      <variable id="cms_execRescMission_wrk" name="wrk" isSet="false" type="worker"/>
+
+    </variables>
+    <activities>
+      <activity id="cms_execRescMission_rcv" name="rcv" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="cms_execRescMission_wrk" />
+          <variableRef uid="cms_execRescMission_crs" />
+          <variableRef uid="cms_execRescMission_mis" />
+        </outputs>
+      </activity>
+      <activity id="cms_execRescMission_a1" name="a1"  kind="invoke" service="ui" operation="promptVictimDescription" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_wrk" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_execRescMission_injRep" />
+        </outputs>
+      </activity>
+      <activity id="cms_execRescMission_a2" name="a2"  kind="invoke" service="ui" operation="promptVictimIdentity" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_wrk" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_execRescMission_id" />
+        </outputs>
+      </activity>
+      <activity id="cms_execRescMission_a3" name="a3"  kind="invoke" service="hospitals" operation="requestHistory" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_id" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_execRescMission_a40" name="a40"  kind="invoke" service="cms" operation="identifyAppropriateHospital" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_injRep" />
+          <variableRef uid="cms_execRescMission_mis" path="loc" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_execRescMission_hosp" />
+        </outputs>
+      </activity>
+      <activity id="cms_execRescMission_a41" name="a41"  kind="invoke" service="ui" operation="displayDestination" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_wrk" />
+          <variableRef uid="cms_execRescMission_hosp" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_execRescMission_a5" name="a5"  kind="invoke" service="msgBus" operation="wait4msg" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_lambda_75" />
+          <variableRef uid="cms_execRescMission_lambda_76" />
+          <variableRef uid="cms_execRescMission_wrk" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_execRescMission_a6" name="a6"  kind="invoke" service="msgBus" operation="wait4msg" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_lambda_77" />
+          <variableRef uid="cms_execRescMission_lambda_78" />
+          <variableRef uid="cms_execRescMission_wrk" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_execRescMission_a7" name="a7"  kind="invoke" service="msgBus" operation="send" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_lambda_79" />
+          <variableRef uid="cms_execRescMission_lambda_80" />
+          <variableRef uid="cms_execRescMission_mis" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_execRescMission_rpl" name="rpl" kind="reply" >
+        <inputs />
+        <outputs />
+      </activity>
+      <activity id="cms_execRescMission_rVH_a1" name="rVH_a1"  kind="invoke" service="hospitals" operation="guessHistory" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_id" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_execRescMission_rVH_history" />
+        </outputs>
+      </activity>
+      <activity id="cms_execRescMission_rVH_t" name="rVH_t" kind="assign" function="isNotNull" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_rVH_history" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_execRescMission_rVH_c" />
+        </outputs>
+      </activity>
+      <activity id="cms_execRescMission_rVH_a2" name="rVH_a2"  kind="invoke" service="ui" operation="displayHistory" >
+        <inputs>
+          <variableRef uid="cms_execRescMission_wrk" />
+          <variableRef uid="cms_execRescMission_rVH_history" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="rcv" right="a1" kind="waitFor" />
+      <relation left="rcv" right="a2" kind="waitFor" />
+      <relation left="a2" right="a3" kind="waitFor" />
+      <relation left="a1" right="a40" kind="waitFor" />
+      <relation left="rVH_a2" right="a40" kind="waitFor" />
+      <relation left="a40" right="a41" kind="waitFor" />
+      <relation left="a41" right="a5" kind="waitFor" />
+      <relation left="a5" right="a6" kind="waitFor" />
+      <relation left="a6" right="a7" kind="waitFor" />
+      <relation left="a7" right="rpl" kind="waitFor" />
+      <relation left="a3" right="rVH_a1" kind="waitFor" />
+      <relation left="rVH_a1" right="rVH_t" kind="waitFor" />
+      <relation left="rVH_t" right="a40" kind="guard" variable="cms_execRescMission_rVH_c" condition="false" />
+      <relation left="rVH_t" right="rVH_a2" kind="guard" variable="cms_execRescMission_rVH_c" condition="true" />
+      <relation left="a2" right="a40" kind="fail" error="" />
+      <relation left="a3" right="a40" kind="fail" error="" />
+    </relations>
+  </process>
+  <process id="cms_authUser" name="cms::authUser" isFragment="false" service="cms" operation="authUser" >
+    <variables>
+      <variable id="cms_authUser_isValid" name="isValid" isSet="false" type="boolean"/>
+      <variable id="cms_authUser_lambda_81" name="lambda_81" isSet="false" type="boolean" value="false" />
+      <variable id="cms_authUser_lambda_82" name="lambda_82" isSet="false" type="string" value="3" />
+      <variable id="cms_authUser_lambda_83" name="lambda_83" isSet="false" type="string" value="TooManyLoginAttempts" />
+      <variable id="cms_authUser_log" name="log" isSet="false" type="string"/>
+      <variable id="cms_authUser_o3_c" name="o3_c" isSet="false" type="boolean"/>
+      <variable id="cms_authUser_o3_n" name="o3_n" isSet="false" type="integer"/>
+      <variable id="cms_authUser_o3_r" name="o3_r" isSet="false" type="boolean"/>
+      <variable id="cms_authUser_pwd" name="pwd" isSet="false" type="string"/>
+      <variable id="cms_authUser_user" name="user" isSet="false" type="cmsEmployee"/>
+    </variables>
+    <activities>
+      <activity id="cms_authUser_a0" name="a0" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="cms_authUser_user" />
+        </outputs>
+      </activity>
+      <activity id="cms_authUser_a1a2" name="a1a2"  kind="invoke" service="ui" operation="promptPass" >
+        <inputs>
+          <variableRef uid="cms_authUser_user" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_authUser_log" />
+          <variableRef uid="cms_authUser_pwd" />
+        </outputs>
+      </activity>
+      <activity id="cms_authUser_a3" name="a3"  kind="invoke" service="cms" operation="checkPass" >
+        <inputs>
+          <variableRef uid="cms_authUser_user" />
+          <variableRef uid="cms_authUser_log" />
+          <variableRef uid="cms_authUser_pwd" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_authUser_isValid" />
+        </outputs>
+      </activity>
+      <activity id="cms_authUser_a4" name="a4" kind="reply" >
+        <inputs>
+          <variableRef uid="cms_authUser_isValid" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_authUser_cA_r" name="cA_r" kind="reply" >
+        <inputs>
+          <variableRef uid="cms_authUser_lambda_81" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_authUser_o3_e1" name="o3_e1"  kind="invoke" service="cms" operation="incrAuthCpt" >
+        <inputs>
+          <variableRef uid="cms_authUser_user" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_authUser_o3_n" />
+        </outputs>
+      </activity>
+      <activity id="cms_authUser_o3_t" name="o3_t" kind="assign" function="isLesserThan" >
+        <inputs>
+          <variableRef uid="cms_authUser_o3_n" />
+          <variableRef uid="cms_authUser_lambda_82" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_authUser_o3_c" />
+        </outputs>
+      </activity>
+      <activity id="cms_authUser_o3_e2" name="o3_e2" kind="throw" >
+        <inputs>
+          <variableRef uid="cms_authUser_lambda_83" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="cms_authUser_o3_e3" name="o3_e3"  kind="invoke" service="cms" operation="authUser" >
+        <inputs>
+          <variableRef uid="cms_authUser_user" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cms_authUser_o3_r" />
+        </outputs>
+      </activity>
+      <activity id="cms_authUser_o3_e4" name="o3_e4" kind="reply" >
+        <inputs>
+          <variableRef uid="cms_authUser_o3_r" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="a1a2" right="a3" kind="waitFor" />
+      <relation left="a0" right="o3_e1" kind="waitFor" />
+      <relation left="o3_e1" right="o3_t" kind="waitFor" />
+      <relation left="o3_e3" right="o3_e4" kind="waitFor" />
+      <relation left="o3_t" right="a1a2" kind="guard" variable="cms_authUser_o3_c" condition="true" />
+      <relation left="a3" right="a4" kind="guard" variable="cms_authUser_isValid" condition="true" />
+      <relation left="o3_t" right="o3_e2" kind="guard" variable="cms_authUser_o3_c" condition="false" />
+      <relation left="a3" right="o3_e3" kind="guard" variable="cms_authUser_isValid" condition="false" />
+      <relation left="a1a2" right="cA_r" kind="fail" error="" />
+    </relations>
+  </process>
+</universe>

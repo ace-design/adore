@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<universe>
+<universe view="metrics">
   <process name="cms_assignIntRes" fragment="false">
     <activities total="21">
       <invoke>11</invoke>
@@ -7,10 +7,10 @@
       <throw>3</throw>
       <misc>4</misc>
     </activities>
-    <relations total="">
-      <wait_for>24</wait_for>
-      <guard>11</guard>
-      <weak_wait>9</weak_wait>
+    <relations total="24">
+      <wait_for>11</wait_for>
+      <guard>9</guard>
+      <weak_wait>2</weak_wait>
       <fail>2</fail>
     </relations>
     <complexity>
@@ -28,17 +28,17 @@
       <throw>1</throw>
       <misc>2</misc>
     </activities>
-    <relations total="">
-      <wait_for>10</wait_for>
-      <guard>5</guard>
-      <weak_wait>4</weak_wait>
-      <fail>0</fail>
+    <relations total="9">
+      <wait_for>4</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
     </relations>
     <complexity>
       <width>2</width>
       <height>7</height>
       <surface>14</surface>
-      <maze>7</maze>
+      <maze>4</maze>
     </complexity>
     <usage />
   </process>
@@ -49,11 +49,11 @@
       <throw>5</throw>
       <misc>1</misc>
     </activities>
-    <relations total="">
-      <wait_for>23</wait_for>
-      <guard>14</guard>
-      <weak_wait>6</weak_wait>
-      <fail>0</fail>
+    <relations total="23">
+      <wait_for>14</wait_for>
+      <guard>6</guard>
+      <weak_wait>0</weak_wait>
+      <fail>3</fail>
     </relations>
     <complexity>
       <width>4</width>
@@ -70,11 +70,11 @@
       <throw>0</throw>
       <misc>2</misc>
     </activities>
-    <relations total="">
-      <wait_for>16</wait_for>
-      <guard>12</guard>
-      <weak_wait>2</weak_wait>
-      <fail>0</fail>
+    <relations total="16">
+      <wait_for>12</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>2</fail>
     </relations>
     <complexity>
       <width>2</width>
@@ -91,9 +91,9 @@
       <throw>0</throw>
       <misc>1</misc>
     </activities>
-    <relations total="">
+    <relations total="5">
       <wait_for>5</wait_for>
-      <guard>5</guard>
+      <guard>0</guard>
       <weak_wait>0</weak_wait>
       <fail>0</fail>
     </relations>
@@ -112,11 +112,11 @@
       <throw>0</throw>
       <misc>5</misc>
     </activities>
-    <relations total="">
-      <wait_for>13</wait_for>
-      <guard>9</guard>
+    <relations total="13">
+      <wait_for>9</wait_for>
+      <guard>2</guard>
       <weak_wait>2</weak_wait>
-      <fail>2</fail>
+      <fail>0</fail>
     </relations>
     <complexity>
       <width>2</width>
@@ -133,11 +133,11 @@
       <throw>0</throw>
       <misc>10</misc>
     </activities>
-    <relations total="">
-      <wait_for>35</wait_for>
-      <guard>26</guard>
-      <weak_wait>2</weak_wait>
-      <fail>4</fail>
+    <relations total="35">
+      <wait_for>26</wait_for>
+      <guard>2</guard>
+      <weak_wait>4</weak_wait>
+      <fail>3</fail>
     </relations>
     <complexity>
       <width>4</width>
@@ -154,11 +154,11 @@
       <throw>0</throw>
       <misc>9</misc>
     </activities>
-    <relations total="">
-      <wait_for>51</wait_for>
-      <guard>27</guard>
-      <weak_wait>8</weak_wait>
-      <fail>14</fail>
+    <relations total="51">
+      <wait_for>27</wait_for>
+      <guard>8</guard>
+      <weak_wait>14</weak_wait>
+      <fail>2</fail>
     </relations>
     <complexity>
       <width>3</width>
@@ -175,11 +175,11 @@
       <throw>0</throw>
       <misc>2</misc>
     </activities>
-    <relations total="">
-      <wait_for>22</wait_for>
-      <guard>12</guard>
-      <weak_wait>8</weak_wait>
-      <fail>2</fail>
+    <relations total="22">
+      <wait_for>12</wait_for>
+      <guard>8</guard>
+      <weak_wait>2</weak_wait>
+      <fail>0</fail>
     </relations>
     <complexity>
       <width>4</width>
@@ -196,11 +196,11 @@
       <throw>1</throw>
       <misc>2</misc>
     </activities>
-    <relations total="">
-      <wait_for>9</wait_for>
-      <guard>6</guard>
-      <weak_wait>2</weak_wait>
-      <fail>0</fail>
+    <relations total="9">
+      <wait_for>6</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
     </relations>
     <complexity>
       <width>2</width>
@@ -217,10 +217,10 @@
       <throw>1</throw>
       <misc>1</misc>
     </activities>
-    <relations total="">
-      <wait_for>10</wait_for>
-      <guard>6</guard>
-      <weak_wait>4</weak_wait>
+    <relations total="10">
+      <wait_for>6</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
       <fail>0</fail>
     </relations>
     <complexity>
@@ -238,7 +238,7 @@
       <throw>0</throw>
       <misc>0</misc>
     </activities>
-    <relations total="">
+    <relations total="0">
       <wait_for>0</wait_for>
       <guard>0</guard>
       <weak_wait>0</weak_wait>
@@ -262,7 +262,7 @@
       <throw>0</throw>
       <misc>0</misc>
     </activities>
-    <relations total="">
+    <relations total="0">
       <wait_for>0</wait_for>
       <guard>0</guard>
       <weak_wait>0</weak_wait>
@@ -286,10 +286,10 @@
       <throw>1</throw>
       <misc>0</misc>
     </activities>
-    <relations total="">
-      <wait_for>7</wait_for>
-      <guard>5</guard>
-      <weak_wait>2</weak_wait>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
       <fail>0</fail>
     </relations>
     <complexity>
