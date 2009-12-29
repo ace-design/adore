@@ -1,0 +1,205 @@
+/** Output of composition engine on the 'benchmark.adore' file
+ * @author Sebastien Mosser <mosser@polytech.unice.fr>
+ */
+
+/******************* 
+ ** Sum Benchmark **
+ *******************/
+
+orchestration complex::sumSwap {
+  variables { 
+    a as integer; b as integer; result as integer;
+    ap as integer; bm as integer; isZero as boolean;
+    swap_tmp as integer; swap_lt as boolean;
+  }
+  activities {
+    a0. (a,b) := receive();
+    a1. isZero := atomic::isZero(b);
+    a2. result := a;
+    a3. ap := atomic::next(n: a);
+    a4. bm := atomic::prev(n: b);
+    a5. result := complex::sum(a: ap,b: bm);
+    a6. reply(result);
+    swap_t. swap_lt := isLesserThan(a,b);
+    swap_e1. swap_tmp := a; 
+    swap_e2. a := b; 
+    swap_e3. b := swap_tmp; 
+  }
+  relations { 
+    a0 < swap_t; 
+    swap_t < a1 when ! swap_lt; swap_t < swap_e1 when swap_lt; 
+    swap_e1 < swap_e2; swap_e2 < swap_e3; swap_e3 < a1;
+    a1 < a2 when isZero; a2 < a6; 
+    a1 < a3 when ! isZero; a1 < a4 when ! isZero; a3 < a5; a4 < a5; a5 < a6; 
+  }
+}
+
+orchestration complex::sumCache {
+  variables { 
+    a as integer; b as integer; result as integer;
+    ap as integer; bm as integer; isZero as boolean;
+    cache_exists as boolean; cache_key as string;
+  }
+  activities {
+    a0. (a,b) := receive();
+    a1. isZero := atomic::isZero(b);
+    a2. result := a;
+    a3. ap := atomic::next(n: a);
+    a4. bm := atomic::prev(n: b);
+    a5. result := complex::sum(a: ap,b: bm);
+    a6. reply(result);
+    cache_e1. cache_key := concat('sum_' as string, a, '_' as string, b);
+    cache_t. cache_exists := cache::exists(cache_key);
+    cache_e2. result := cache::read(cache_key);    
+    cache_e4. cache::store(cache_key, result); 
+  }
+  relations { 
+    a0 < a1;
+    a1 < a2 when isZero; a2 < a6; 
+    a1 < cache_e1 when ! isZero; 
+    cache_e1 < cache_t; cache_t < cache_e2 when cache_exists; 
+    cache_e2 < a6; 
+    cache_t < a3 when ! cache_exists; 
+    cache_t < a4 when ! cache_exists;
+    cache_e4 < a6;
+    a3 < a5; a4 < a5; a5 < cache_e4; 
+  }
+}
+
+orchestration complex::sumComplete {
+  variables { 
+    a as integer; b as integer; result as integer;
+    ap as integer; bm as integer; isZero as boolean;
+    swap_tmp as integer; swap_lt as boolean;
+    cache_exists as boolean; cache_key as string;
+  }
+  activities {
+    a0. (a,b) := receive();
+    a1. isZero := atomic::isZero(b);
+    a2. result := a;
+    a3. ap := atomic::next(n: a);
+    a4. bm := atomic::prev(n: b);
+    a5. result := complex::sum(a: ap,b: bm);
+    a6. reply(result);
+    swap_t. swap_lt := isLesserThan(a,b);
+    swap_e1. swap_tmp := a; 
+    swap_e2. a := b; 
+    swap_e3. b := swap_tmp; 
+    cache_e1. cache_key := concat('sum_' as string, a, '_' as string, b);
+    cache_t. cache_exists := cache::exists(cache_key);
+    cache_e2. result := cache::read(cache_key);    
+    cache_e4. cache::store(cache_key, result); 
+  }
+  relations { 
+    a0 < swap_t; 
+    swap_t < a1 when ! swap_lt; swap_t < swap_e1 when swap_lt; 
+    swap_e1 < swap_e2; swap_e2 < swap_e3; swap_e3 < a1;
+    a1 < a2 when isZero; a2 < a6; 
+    a1 < cache_e1 when ! isZero; 
+    cache_e1 < cache_t; cache_t < cache_e2 when cache_exists; 
+    cache_e2 < a6; 
+    cache_t < a3 when ! cache_exists; 
+    cache_t < a4 when ! cache_exists;
+    cache_e4 < a6;
+    a3 < a5; a4 < a5; a5 < cache_e4; 
+  }
+}
+
+/******************** 
+ ** Mult Benchmark **
+ ********************/
+
+orchestration complex::multSwap {
+  variables {
+    a as integer; b as integer; result as integer;
+    bm as integer; tmp as integer; isZero as boolean;
+    swap_tmp as integer; swap_lt as boolean;
+  }
+  activities {
+    a0. (a,b) := receive();
+    a1. isZero := atomic::isZero(b);
+    a2. result := id('0' as integer);
+    a3. bm := atomic::prev(n: b);
+    a4. tmp := complex::mult(a: a, b: bm);
+    a5. result := complex::sum(a: tmp,b: a);
+    a6. reply(result);
+    swap_t. swap_lt := isLesserThan(a,b);
+    swap_e1. swap_tmp := a; 
+    swap_e2. a := b; 
+    swap_e3. b := swap_tmp; 
+  }
+  relations {
+    a0 < swap_t; swap_t < a1 when ! swap_lt; swap_t < swap_e1 when swap_lt; 
+    swap_e1 < swap_e2; swap_e2 < swap_e3; swap_e3 < a1;
+    a1 < a2 when isZero; a2 < a6;
+    a1 < a3 when ! isZero; a3 < a4; a4 < a5; a5 < a6;
+  }
+} 
+
+orchestration complex::multCache {
+  variables {
+    a as integer; b as integer; result as integer;
+    bm as integer; tmp as integer; isZero as boolean;
+    cache_exists as boolean; cache_key as string;
+  }
+  activities {
+    a0. (a,b) := receive();
+    a1. isZero := atomic::isZero(b);
+    a2. result := id('0' as integer);
+    a3. bm := atomic::prev(n: b);
+    a4. tmp := complex::mult(a: a, b: bm);
+    a5. result := complex::sum(a: tmp,b: a);
+    a6. reply(result);
+    cache_e1. cache_key := concat('mult_' as string, a, '_' as string, b);
+    cache_t. cache_exists := cache::exists(cache_key);
+    cache_e2. result := cache::read(cache_key);    
+    cache_e4. cache::store(cache_key, result); 
+  }
+  relations {
+    a0 < a1;
+    a1 < a2 when isZero; a2 < a6;
+    a3 < a4; a4 < a5; a5 < cache_e4;
+    a1 < cache_e1 when ! isZero; 
+    cache_e1 < cache_t; cache_t < cache_e2 when cache_exists; 
+    cache_e2 < a6; 
+    cache_t < a3 when ! cache_exists; 
+    cache_e4 < a6;
+  }
+} 
+
+orchestration complex::multComplete {
+  variables {
+    a as integer; b as integer; result as integer;
+    bm as integer; tmp as integer; isZero as boolean;
+    swap_tmp as integer; swap_lt as boolean;
+    cache_exists as boolean; cache_key as string;
+  }
+  activities {
+    a0. (a,b) := receive();
+    a1. isZero := atomic::isZero(b);
+    a2. result := id('0' as integer);
+    a3. bm := atomic::prev(n: b);
+    a4. tmp := complex::mult(a: a, b: bm);
+    a5. result := complex::sum(a: tmp,b: a);
+    a6. reply(result);
+    swap_t. swap_lt := isLesserThan(a,b);
+    swap_e1. swap_tmp := a; 
+    swap_e2. a := b; 
+    swap_e3. b := swap_tmp; 
+    cache_e1. cache_key := concat('mult_' as string, a, '_' as string, b);
+    cache_t. cache_exists := cache::exists(cache_key);
+    cache_e2. result := cache::read(cache_key);    
+    cache_e4. cache::store(cache_key, result); 
+  }
+  relations {
+    a0 < swap_t; swap_t < a1 when ! swap_lt; swap_t < swap_e1 when swap_lt; 
+    swap_e1 < swap_e2; swap_e2 < swap_e3; swap_e3 < a1;
+    a1 < a2 when isZero; a2 < a6;
+    a3 < a4; a4 < a5; a5 < cache_e4;
+    a1 < cache_e1 when ! isZero; 
+    cache_e1 < cache_t; cache_t < cache_e2 when cache_exists; 
+    cache_e2 < a6; 
+    cache_t < a3 when ! cache_exists; 
+    cache_e4 < a6;
+  }
+} 

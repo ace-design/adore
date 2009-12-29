@@ -1,0 +1,60 @@
+/** Example extracted from a 'mail-fight' between Mireille and I.
+ * @date 2009-28-12
+ * @author Sebastien (& Mireille ^_^)
+ */
+
+orchestration srv::op { // A dummy orchestration
+  variables  { x as integer; y as integer; }
+  activities { a0. x := receive(); a1. y := function(x); a2. reply(y); }
+  relations  { a0 < a1; a1 < a2; }
+}
+
+fragment f { // a dummy fragment
+  variables  { } 
+  activities { h. hook(); } 
+  relations  { ^ < h; h < $; }
+}
+
+fragment fPrime { // another stupid fragment
+  variables  { } 
+  activities { h. hook(); } 
+  relations  { ^ < h; h < $; }
+}
+
+/******************
+ **  Version #1: **
+ ******************/
+/**
+composition f { apply fPrime => h; }
+composition srv::op { apply f => a0; }
+composition srv::op { apply f => a1; } 
+**/
+
+/******************
+ **  Version #2: **
+ ******************/
+///**
+composition srv::op {
+ apply fPrime => f::h;
+ apply f => a0;
+}
+composition srv::op { apply f => a0; } 
+//**/
+
+/******************
+ **  Version #3: **
+ ******************/
+/**
+composition f  as lambda1 { apply fPrime => h; }
+composition srv::op { apply lambda1 => a0; }
+composition srv::op { apply f => a1; }
+**/
+
+/******************
+ **  Version #4: **
+ ******************/
+/**
+composition f  as lambda2 { apply fPrime => h; }
+composition srv::op { apply lambda2 => a0; }
+composition srv::op { apply lambda2 => a1; } 
+**/

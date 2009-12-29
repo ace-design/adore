@@ -21,6 +21,14 @@
 %%%%
 
 %%%%
+%% Process Existence
+%%%%
+
+isProcess(P) :- process(P),!.
+isProcess(P) :- context(C), contextOutput(C,P),!.
+
+
+%%%%
 %% Relations between activities
 %%%%
 
@@ -95,6 +103,11 @@ getBlockOutputVariable(Block, Vars) :-
 	sort(Tmp,Vars).
 isBlockOutputVariable(Block,V) :- 
 	isLastActivity(Block,A), usesElemAsOutput(A,V).
+
+isWellFormed(Block,P) :- 
+	activityBlock(_,Block,Activities),
+	map(isContainedBy,Activities,Processes),
+	sort(Processes,[P]),!.
 
 %%%%
 %% Process entry and exit points

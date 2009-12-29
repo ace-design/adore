@@ -33,7 +33,7 @@ orchestration complex::mult {
     a2. result := id('0' as integer);
     a3. bm := atomic::prev(n: b);
     a4. tmp := complex::mult(a: a, b: bm);
-    a5. result := complex::sum(a: a,b: tmp);
+    a5. result := complex::sum(a: tmp,b: a);
     a6. reply(result);
   }
   relations {

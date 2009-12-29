@@ -103,6 +103,6 @@ propagateApplyDirMerge(Ctx,NewCtx,Actions) :-
 	           defApply(ApplyId,NewCtx,BlockId,Fragment)].
 
 propagateSetifyMerge(Ctx,NewCtx,Actions) :- 
-	setify(Ctx,VarName),
-	Actions = [retract(setify(Ctx,VarName)),
+	setDirective(Ctx,VarName),
+	Actions = [retract(setDirective(Ctx,VarName)),
 	           defSetify(NewCtx,VarName)].

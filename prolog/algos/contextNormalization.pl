@@ -19,30 +19,7 @@
 %%
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
+:- module(ctxNorm, [doContextNormalization/0]).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Adore Code Execution Framework %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-executeActionSet(Set) :- 
-	elementarize(Set,Actions),
-	execute(Actions).
-
-
-:- dynamic isMacroAction/2.
-shouldBeElementarized(G) :- 
-	functor(G,F,A), Arity is A + 1, isMacroAction(F,Arity).
-
-elementarize([],[]).
-elementarize([H|T],R) :- 
-	shouldBeElementarized(H), !, 
-	dinfo(exec,'#elementarize(~w)',H), call(H,A), 
-	elementarize(T,Tmp), append(A,Tmp,R).
-elementarize([H|T],[H|O]) :- elementarize(T,O).
-
-
-execute([]).
-execute([H|T]) :- dinfo(exec,'#exec(~w)',H), H, execute(T).
-
-
-
+doContextNormalization :- 
+	doApplyRewrite,	doContextMerge.

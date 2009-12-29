@@ -31,7 +31,7 @@
 
 %% createProcess/1: createProcess(P)
 createProcess(P) :- %% \exists p \in Process* => fail
-	process(P), !, 
+	isProcess(P), !, 
 	dfail(create,'Cannot create process \'~w\': it exists!',P).
 createProcess(P) :- 
 	adoreAssert(process(P)), 
@@ -39,7 +39,7 @@ createProcess(P) :-
 
 %% setAsFragment/1: setAsFragment(P)
 setAsFragment(P) :- %% \not \exists p \in Process* => fail
-	\+ process(P), !, 
+	\+ isProcess(P), !, 
 	dfail(set,'setAsFragment/1: Unkown process \'~w\'!',P).
 setAsFragment(P) :-
 	adoreAssert(isFragment(P)), 
@@ -47,7 +47,7 @@ setAsFragment(P) :-
 
 %% setAsFragmentParameter/1: setAsFragmentParameter(P,I)
 setAsFragmentParameter(P,_) :- %% \not \exists p \in Process* => fail
-	\+ process(P), !, 
+	\+ isProcess(P), !, 
 	dfail(set,'setAsFragmentParameter/2: Unkown process \'~w\'!',P).
 setAsFragmentParameter(P,_) :- %% \not isFragment(p) => fail
 	\+ isFragment(P), !, 
@@ -58,14 +58,14 @@ setAsFragmentParameter(P,I) :- %% \not \exists p \in Process* => fail
 
 %% setService/2: setService(P,I).
 setService(P,_) :- %% \not \exists p \in CompositionOutput* => fail
-	\+ process(P), \+ contextOutput(_,P), !,
+	\+ isProcess(P), \+ contextOutput(_,P), !,
 	dfail(set,'setService/2: Unkown process \'~w\'!',P).
 setService(P,I) :- 
 	adoreAssert(hasForSrvName(P,I)).
 
 %% setOperation/2: setOperation(P,I).
 setOperation(P,_) :- %% \not \exists p \in Process* => fail
-	\+ process(P), \+ contextOutput(_,P), !,
+	\+ isProcess(P), \+ contextOutput(_,P), !,
 	dfail(set,'setOperation/2: Unkown process \'~w\'!',P).
 setOperation(P,I) :- 
 	adoreAssert(hasForOpName(P,I)).
@@ -94,7 +94,7 @@ setContainment(A,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(set,'setContainment/2: Unknown activity \'~w\'!',A).
 setContainment(_,P) :- %% \not \exists p \in Process* => fail
-	\+ process(P), !, 
+	\+ isProcess(P), !, 
 	dfail(set,'setContainment/2: Unkown process \'~w\'!',P).
 setContainment(A,P) :- 
 	adoreAssert(isContainedBy(A,P)),
@@ -309,7 +309,7 @@ setCompositionTarget(I,_) :- %% \not \exists i in Context* => fail
 	\+ context(I), !,
 	dfail(set,'setCompositionTarget/2: Unknown context identifier \'~w\'',I).
 setCompositionTarget(_,P) :- %% \not \exists p in Process* => fail
-	\+ process(P), !,
+	\+ isProcess(P), !,
 	dfail(set,'setCompositionTarget/2: Unknown process \'~w\'',P).
 setCompositionTarget(I,P) :- 
 	adoreAssert(contextTarget(I,P)),
@@ -320,7 +320,7 @@ setContextOutput(I,_) :-
 	\+ context(I), !,
 	dfail(set,'setContextOutput/2: Unknown context identifier \'~w\'',I).
 setContextOutput(_,I) :- 
-	process(I), !, 
+	isProcess(I), !, 
 	dfail(def,'setContextOutput/2: Process \'~w\' still exists!',I).
 setContextOutput(I,P) :- 
 	adoreAssert(contextOutput(I,P)),
@@ -337,7 +337,7 @@ defActivityBlock(_,I,_) :-
 defActivityBlock(C,_,L) :- 
 	getAbsoluteNames(C,L,Acts),
 	\+ maplist(activity,Acts), !,
-	dfail(def,'defActivityBlock/3: Some elements in  ~w are not regular activities!',[Acts]).
+	dfail(def,'defActivityBlock/3: At least one activity in ~w doesn\'t exists!',[Acts]).
 defActivityBlock(C,I,L) :- 
 	getAbsoluteNames(C,L,Acts),
 	adoreAssert(activityBlock(C,I,Acts)),
@@ -351,9 +351,11 @@ defApply(_,C,_,_) :- %% \not \exists C \in Context* => fail
 	\+ context(C), !, 
 	dfail(def,'defApply/4: Unkown context \'~w\'!',C).
 defApply(_,_,_,F) :- %% \not \exists p \in Fragment* => fail
-	\+ isFragment(F), 
+	\+ isFragment(F), !,
 	dfail(def,'defApply/4: Unkown fragment \'~w\'!',F).
-
+defApply(_,C,_,F) :- %% Target(Context) \equiv F => Fail
+	context(C), contextTarget(C,F), \+ contextOutput(C,_), !,
+	dfail(def,'defApply/4: Cannot apply \'~w\' into itself without a named output!',[F]).
 defApply(_,C,B,_) :- %% \not \exists a \in Activities(p) => fail
 	activityBlock(C,B,Content),
 	map(isContainedBy,Content,Processes),
@@ -361,6 +363,7 @@ defApply(_,C,B,_) :- %% \not \exists a \in Activities(p) => fail
 	length(Targets, L),
 	\+ L == 1, !,
 	dfail(def,'defApply/4: Activities in ~w come from different processes \'~w\'!',[Content,Targets]).
+
 defApply(I,O,A,F) :- 
 	adoreAssert(applyFragment(I,O,A,F)),
 	dinfo(def,'Directive apply \'~w\' to \'~w\' successfuly created in context \'~w\' with id \'~w\'!',[F,A,O,I]).
@@ -387,7 +390,7 @@ defSetify(C,V) :-
 	dfail(def,'defSetify/2: Unkown variable \'~w\' (from ~w)!',[Name,V]).
 defSetify(C,V) :- 
 	getAbsoluteName(C,V,Name),
-	adoreAssert(setify(C,V)),
+	adoreAssert(setDirective(C,Name)),
 	dinfo(def,'toSet directive stored for variable \'~w\'.',[Name]).
 
 %%%%

@@ -70,7 +70,7 @@
 ;; ELisp function used to run the "adore-wrapper.sh' program in a new buffer
 ;;  @param g the goal to execute trought the ADORE wrapper
 ;;  @param buffer-name the name of the expected buffer
-;;  @shouldKill if true, will kill the buffer is adore-wrapper ends properly
+;;  @shouldKill if true, will kill the buffer if adore-wrapper ends properly
 ;;  @return adore-wrapper exit code (> 0 means error)
 (defun adore-exec-synchronous (g buffer-name shouldKill)
   (let ((f (buffer-file-name)) (current (selected-frame)) 
@@ -240,6 +240,27 @@
 				"Adore Picture" t)
 	(adore-display-picture f)))))
 
+
+;;;;;
+;; Adore algorithm interface
+;;;;;
+
+(defun adore-do-n-show (goal prefix bufName)
+  (let* ((f (make-temp-file prefix nil ".adore"))
+	 (code (adore-exec-synchronous (concat goal "(\'" f "\')") bufName t)))
+    (if (= 0 code)
+	(let ((frame (make-frame)))
+	  (select-frame frame)
+	  (switch-to-buffer (find-file-noselect f))))))
+
+
+(defun adore-normalize-compositions () (interactive)
+  (adore-do-n-show "doContextNormalization,dumpCompositions"
+		   "adore-normalized" "Composition Context Normalization"))
+
+(defun adore-show-universe () (interactive)
+  (adore-do-n-show "dumpUniverse" "adore-universe" "Serialized Universe"))
+
 ;;;;
 ;; Adore IDE reload
 ;;;;
@@ -253,42 +274,54 @@
 ;;;;
 ;; ADORE Keymap
 ;;;;
-(defvar adore-mode-map nil "Keymap for adore-mode")
-(if adore-mode-map  ()
-  (setq adore-mode-map (make-sparse-keymap)) 
-  (define-key adore-mode-map (kbd "C-c C-r") 'adore-run)
-  (define-key adore-mode-map (kbd "C-c C-f") 'adore-facts)
-  (define-key adore-mode-map (kbd "C-c C-k") 'adore-kill)
-  (define-key adore-mode-map (kbd "C-c C-p") 'adore-gen-current-pict)
-  (define-key adore-mode-map (kbd "C-c C-g") 'adore-goal)
-  (define-key adore-mode-map (kbd "C-c C-o") 'adore-navigate-to-required-file)
-  
-  (define-key adore-mode-map [remap comment-dwim] 'adore-comment-dwim)
-  (define-key adore-mode-map [menu-bar] (make-sparse-keymap))
-  (let ((menuMap (make-sparse-keymap "Adore"))) 
-    (define-key adore-mode-map [menu-bar adore] (cons "Adore" menuMap)) 
-    (define-key menuMap [reload] '("Reload Adore Mode" . adore-mode-reload))
-    (define-key menuMap [s5] '("--"))
-    (define-key menuMap [goal] '("Execute goal" . adore-goal))
-    (define-key menuMap [s3] '("--"))
-    (define-key menuMap [metrics] '("Generate Metrics" . adore-metrics))
-    (define-key menuMap [dgraph] '("Gen. Dependencies Graph" . adore-dgraph))
-    (define-key menuMap [complete-dgraph] 
-      '("Gen. Complete Dependencies Graph" . adore-complete-dgraph))
-    (define-key menuMap [s4] '("--"))
-    (define-key menuMap [open-required] 
-      '("Open required file" . adore-navigate-to-required-file))
-    (define-key menuMap [s2] '("--"))
-    (define-key menuMap [silent] '("Toggle silence" . adore-silent))
-    (define-key menuMap [verbose] '("Toggle verbosity" . adore-verbose))
-    (define-key menuMap [s1] '("--"))
-    (define-key menuMap [facts] '("Generate Prolog Facts" . adore-facts))
-    (define-key menuMap [pict] '("Generate Picture" . adore-pict))
-    (define-key menuMap [curr-pict] '("Generate current Picture" . 
-				      adore-gen-current-pict))
-    (define-key menuMap [s0] '("--"))
-    (define-key menuMap [kill] '("Kill the ADORE engine" . adore-kill))
-    (define-key menuMap [run] '("Start the ADORE engine" . adore-run))))
+(defvar adore-map nil "Enhanced keymap for adore-mode")
+(setq adore-map (make-sparse-keymap "Adore KeyMap"))
+;; Keynoard shortcuts
+(define-key adore-map (kbd "C-c C-r") 'adore-run)
+(define-key adore-map (kbd "C-c C-f") 'adore-facts)
+(define-key adore-map (kbd "C-c C-k") 'adore-kill)
+(define-key adore-map (kbd "C-c C-p") 'adore-gen-current-pict)
+(define-key adore-map (kbd "C-c C-g") 'adore-goal)
+(define-key adore-map (kbd "C-c C-o") 'adore-navigate-to-required-file)
+(define-key adore-map (kbd "C-c C-u") 'adore-show-universe)
+;; Menu Bar
+(let ((menuMap (make-sparse-keymap "Adore Menu KeyMap")))
+  (define-key adore-map [menu-bar adore] (cons "Adore" menuMap))
+  (define-key menuMap [reload] '("Reload Adore Major Mode" . adore-mode-reload))
+  (define-key menuMap [s0] '("--")) 
+  (define-key menuMap [universe] '("Show Universe" . adore-show-universe))
+  (define-key menuMap [open-required] '("Naviguate to file" . 
+					adore-navigate-to-required-file))
+  (define-key menuMap [curr-pict] '("Gen. Current Pict." . 
+				    adore-gen-current-pict))
+  (define-key menuMap [s1] '("--"))  
+  (let ((genMap (make-sparse-keymap "ADORE Gen KeyMap")))
+    (define-key menuMap [generate] (cons "Export" genMap))
+    (define-key genMap [metrics] '("Process Metrics ..." . adore-metrics))
+    (define-key genMap [xml] '("As XML ..." . adore-metrics))
+    (define-key genMap [s1] '("--"))
+    (define-key genMap [complete-dgraph] 
+      '("Global Dependencies Graph" . adore-complete-dgraph))
+    (define-key genMap [dgraph] '("Dependencies Graph ..." . adore-dgraph))
+    (define-key genMap [s0] '("--"))
+    (define-key genMap [pict] '("Process Picture ..." . adore-pict)))
+  (let ((algoMap (make-sparse-keymap "ADORE Algo KeyMap")))
+    (define-key menuMap [algo] (cons "Algorithms" algoMap))
+    (define-key algoMap [norm] '("Composition Normalisation" . 
+				 adore-normalize-compositions)))
+  (define-key menuMap [s2] '("--"))
+  (let ((prologMap (make-sparse-keymap "Prolog KeyMap")))
+    (define-key menuMap [prolog] (cons "Prolog" prologMap))
+    (define-key prologMap [goal] '("Perform Goal ..." . adore-goal))
+    (define-key prologMap [facts] '("Show Prolog Facts" . adore-facts)))
+  (let ((engineMap (make-sparse-keymap "ADORE Engine KeyMap")))
+    (define-key menuMap [engine] (cons "Adore Engine" engineMap))
+    (let ((verbMap (make-sparse-keymap "ADORE Verb KeyMap")))
+      (define-key engineMap [verbose] (cons "Verbose Mode" verbMap))
+      (define-key verbMap [silent] '("Disabled" . adore-silent))
+      (define-key verbMap [verbose] '("Enabled" . adore-verbose)))
+    (define-key engineMap [kill] '("Kill Existing Session" . adore-kill))
+    (define-key engineMap [run] '("Run Interactive Session" . adore-run))))
 
 ;;;;
 ;; ADORE Mode
@@ -298,7 +331,7 @@
   "Major mode for editing ADORE textual descriptions"
   (setq mode-name "Adore Editor")
   (setq c-basic-offset 2)
-  (use-local-map adore-mode-map)
+  (use-local-map adore-map)
 
   (defvar adore-keywords 
     '("require" "orchestration" "fragment" "composition" "DISENGAGE" "ENGAGE"))

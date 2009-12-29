@@ -19,24 +19,42 @@
 %%
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
-:- module(adore2dsl,[universe2dsl/1, process2dsl/2]).
+:- module(adore2dsl,
+	  [dumpUniverse/1, dumpCompositions/1, 
+	   universe2dsl/1, process2dsl/2, composition2dsl/2]).
+
+%% TODO: message binding
+%% TODO: fragment parameters
+%% TODO: variable field access
+
+dumpUniverse(FileName) :- 
+	universe2dsl(Code),
+	swritef(CompleteCode,"/** Adore Universe **/\n%w",[Code]),
+	open(FileName,write,Stream), write(Stream,CompleteCode), close(Stream).
+
+dumpCompositions(FileName) :- 
+	findall(C,composition2dsl(_,C),Compositions),
+	concatenate(Compositions,Code),
+	open(FileName,write,Stream), write(Stream,Code), close(Stream).
 
 %% universe2dsl(-Code:string) is det.
 % transform everything in the universe into its concrete syntax representation
 % 
 universe2dsl(Code) :- 
-	findall(C,process2dsl(_,C),Codes),
-	concatenate(Codes,Code).
+	findall(C,process2dsl(_,C),Processes),
+	findall(C,composition2dsl(_,C),Compositions),
+	flatten([Processes,Compositions],Codes), concatenate(Codes,Code).
 
 %% process2dsl(+P:processId, -Code) is det.
 % generate Adore code associated to the process identified by processId
 %
 process2dsl(P,Code) :- 
-	process(P), genProcessLabel(P,Label),
+	process(P), genProcessLabel(P,Label), displayId(P,DId),
 	genVariables(P,Variables),
 	genActivities(P,Activities),
 	genRelations(P,Relations),
-	swritef(Code,'%w {\n%w%w%w}', [Label,Variables,Activities,Relations]).
+	swritef(Code,'%w { %w\n%w%w%w}', 
+                [Label,DId,Variables,Activities,Relations]).
 
 
 genProcessLabel(P,Code) :- 
@@ -44,6 +62,11 @@ genProcessLabel(P,Code) :-
 genProcessLabel(P,Code) :- 
 	hasForSrvName(P,Srv), hasForOpName(P,Op),
 	swritef(Code,'orchestration %w::%w', [Srv,Op]).
+
+genProcessName(P,P) :- isFragment(P), !.
+genProcessName(P,Name) :- 
+	hasForSrvName(P,Srv), hasForOpName(P,Op),
+	swritef(Name,'%w::%w', [Srv,Op]).
 
 %%%%
 %% Variables 
@@ -57,14 +80,14 @@ genVariables(P,Code) :-
 	swritef(Code,'  variables {\n%w\n  }\n',[ValidCode]).
 
 genVariable(V,Code) :-
-	isConstant(V), !, genVarName(V,Name), 
+	isConstant(V), !, genVarName(V,Name), displayId(V,DId),
 	hasForInitValue(V,Value), hasForType(V,Type),
-	swritef(Code,"    %w := '%w' as %w;",[Name,Value,Type]).
+	swritef(Code,"    %w := '%w' as %w; %w",[Name,Value,Type,DId]).
 genVariable(Fid,'') :-
 	fieldAccess(Fid,_,_), !.
 genVariable(V,Code) :-
-	genVarName(V,Name), hasForType(V,Type),
-	swritef(Code,"    %w as %w;",[Name,Type]).
+	genVarName(V,Name), hasForType(V,Type),displayId(V,DId),
+	swritef(Code,"    %w as %w; %w",[Name,Type,DId]).
 
 genVarName(V,Name) :-
 	variable(V), getPreviousName(V,RawName),
@@ -81,12 +104,12 @@ genActivities(P,Code) :-
 
 genActivity(P,Code) :- 
 	activity(A), isContainedBy(A,P), hasForKind(A,K),
-	K \= predecessors, K \= successors,
+	K \= predecessors, K \= successors, displayId(A,DId),
 	getPreviousName(A,Name),
 	genInputs(A,Inputs),
 	genOutputs(A,Outputs),
 	genKind(A,K,Kind),
-	swritef(Code,'    %w. %w%w%w;',[Name,Outputs,Kind,Inputs]).
+	swritef(Code,'    %w. %w%w%w; %w',[Name,Outputs,Kind,Inputs,DId]).
 	
 genKind(A,invoke,Code) :- 
 	hasForService(A,S), hasForOperation(A,O),
@@ -156,3 +179,60 @@ genRelation(P,Code) :-
 genActRelLabel(A,'^') :- hasForKind(A,predecessors),!.
 genActRelLabel(A,'$') :- hasForKind(A,successors),!.
 genActRelLabel(A,N) :- getPreviousName(A,N).
+
+%%%%
+%% Composition
+%%%%
+
+composition2dsl(Ctx,C) :-
+	context(Ctx), displayId(Ctx,DId),
+	contextTarget(Ctx,Target), genProcessName(Target,Name), 
+	genCompositionOutput(Ctx,Out),
+	genDirectives(Ctx,Directives), 
+	swritef(C,'composition %w %w{ %w\n%w\n}\n',
+                [Name,Out,DId,Directives]).
+
+genCompositionOutput(Ctx,'') :- \+ contextOutput(Ctx,_).
+genCompositionOutput(Ctx,C) :- 
+	contextOutput(Ctx,Out), genProcessName(Out,Name),
+	swritef(C,'as %w ',[Name]).
+	
+genDirectives(Ctx,Code) :- 
+	findall(A,genApply(Ctx,A),Applys),
+	findall(S,genSet(Ctx,S),Sets),
+	flatten([Applys,Sets],List),
+	concatenate(List,Code).
+
+genApply(Ctx,Code) :- 
+	context(Ctx), applyFragment(Id,Ctx,Block,Fragment),
+	genActivityBlock(Block,Target),
+	displayId(Id,DId),
+	swritef(Code,'  apply %w => %w; %w',[Fragment,Target,DId]).
+
+genActivityBlock(Block,Code) :- 
+	activityBlock(_,Block,Activities),
+	generateListOfActivities(Activities,ActCode),
+	swritef(Code,'{%w}',[ActCode]).
+
+generateListOfActivities([E],L) :- !, genActLabel(E,L).
+generateListOfActivities([H|T],Code) :- 
+	genActLabel(H,L), generateListOfActivities(T,Others),
+	swritef(Code,'%w,%w',[L,Others]).
+
+genActLabel(A,L) :- 
+	isContainedBy(A,Process), genProcessName(Process,P),
+	getPreviousName(A,Name), swritef(L,'%w::%w',[P,Name]).
+
+
+genSet(Ctx,Code) :- 
+	context(Ctx), setDirective(Ctx,V), getPreviousName(V,Name),
+	swritef(Code,'  toSet %w ;',[Name]).
+
+
+
+%%%%
+%% Identifier displayer
+%%%%
+
+displayId(_,'') :- adore_silent(true), !.
+displayId(I,C) :- adore_silent(false), swritef(C,'\t/** @id: %w **/',[I]).

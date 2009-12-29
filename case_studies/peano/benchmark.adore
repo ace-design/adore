@@ -1,0 +1,47 @@
+/** Benchmarking the machine as a composition of fragments
+ * @author Sebastien Mosser <mosser@polytech.unice.fr>
+ */
+
+// loading the set of complex orchestration (aka the ComplexMachine)
+require 'processes/complex.adore';
+
+// loading defined fragments (aka the Extensions)
+require 'fragments/swap.adore';
+require 'fragments/cache.adore';
+
+/******************* 
+ ** Sum Benchmark **
+ *******************/
+
+composition complex::sum as complex::sumSwap { 
+  apply swap  => a0;
+}
+
+composition complex::sum as complex::sumCache {
+  apply cache(prefix: 'sum_') => {a3, a4, a5};
+} 
+
+composition complex::sum as complex::sumComplete {
+  apply swap                  => a0;
+  apply cache(prefix: 'sum_') => {a3, a4, a5};
+}
+
+/******************** 
+ ** Mult Benchmark **
+ ********************/
+
+composition complex::mult as complex::multSwap {
+  apply swap                   => a0;
+}
+
+composition complex::mult as complex::multCache {
+  apply cache(prefix: 'mult_') => {a3, a4, a5};
+}
+
+composition complex::mult as complex::multComplete {
+  apply swap                   => a0;
+  apply cache(prefix: 'mult_') => {a3, a4, a5};
+}
+
+
+

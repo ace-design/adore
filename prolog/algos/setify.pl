@@ -45,7 +45,7 @@ setify(Process, Variable, Actions) :-
 	buildVectorFromScalar(Variable, VarStarActions), 
 	%% Identifying output variables, and build associated sets
 	getBlockOutputVariable(Core, Outs),
-	map(buildVectorFromScalar, Outs, OutsActions),
+	map(setify:buildVectorFromScalar, Outs, OutsActions),
 	%% Identify variable substitution (v -> v*) outside the dataflow
 	getSetificationSubstitutionSet(Process, [Variable], Core, VarActions), 
 	getSetificationSubstitutionSet(Process, Outs, Core, OutsSubstActions), 

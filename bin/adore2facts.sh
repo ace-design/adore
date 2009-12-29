@@ -20,7 +20,7 @@
 ##
 ## @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 ####
-  
+
 if [ -z $ADORE_HOME ]
     then
     echo "You need to define the ADORE_HOME env. variable"
