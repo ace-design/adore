@@ -320,8 +320,8 @@ setContextOutput(I,_) :-
 	\+ context(I), !,
 	dfail(set,'setContextOutput/2: Unknown context identifier \'~w\'',I).
 setContextOutput(_,I) :- 
-	isProcess(I), !, 
-	dfail(def,'setContextOutput/2: Process \'~w\' still exists!',I).
+	isProcess(I), \+ contextOutput(_,I), !, 
+	dfail(def,'setContextOutput/2: Cannot set as composition output an existing process \'~w\'!',I).
 setContextOutput(I,P) :- 
 	adoreAssert(contextOutput(I,P)),
 	dinfo(set,'Context \'~w\' uses \'~w\' as identified result',[I,P]).

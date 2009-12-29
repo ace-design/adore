@@ -1,0 +1,340 @@
+<?xml version="1.0" ?>
+<universe view="structure" >
+  <process id="complex_sum" name="complex::sum" isFragment="false" service="complex" operation="sum" >
+    <variables>
+      <variable id="complex_sum_a" name="a" isSet="false" type="integer"/>
+      <variable id="complex_sum_ap" name="ap" isSet="false" type="integer"/>
+      <variable id="complex_sum_b" name="b" isSet="false" type="integer"/>
+      <variable id="complex_sum_bm" name="bm" isSet="false" type="integer"/>
+      <variable id="complex_sum_isZero" name="isZero" isSet="false" type="boolean"/>
+      <variable id="complex_sum_result" name="result" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="complex_sum_a0" name="a0" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="complex_sum_a" />
+          <variableRef uid="complex_sum_b" />
+        </outputs>
+      </activity>
+      <activity id="complex_sum_a1" name="a1"  kind="invoke" service="atomic" operation="isZero" >
+        <inputs>
+          <variableRef uid="complex_sum_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sum_isZero" />
+        </outputs>
+      </activity>
+      <activity id="complex_sum_a2" name="a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_sum_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sum_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_sum_a3" name="a3"  kind="invoke" service="atomic" operation="next" >
+        <inputs>
+          <variableRef uid="complex_sum_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sum_ap" />
+        </outputs>
+      </activity>
+      <activity id="complex_sum_a4" name="a4"  kind="invoke" service="atomic" operation="prev" >
+        <inputs>
+          <variableRef uid="complex_sum_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sum_bm" />
+        </outputs>
+      </activity>
+      <activity id="complex_sum_a5" name="a5"  kind="invoke" service="complex" operation="sum" >
+        <inputs>
+          <variableRef uid="complex_sum_ap" />
+          <variableRef uid="complex_sum_bm" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sum_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_sum_a6" name="a6" kind="reply" >
+        <inputs>
+          <variableRef uid="complex_sum_result" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="a0" right="a1" kind="waitFor" />
+      <relation left="a3" right="a5" kind="waitFor" />
+      <relation left="a4" right="a5" kind="waitFor" />
+      <relation left="a2" right="a6" kind="waitFor" />
+      <relation left="a5" right="a6" kind="waitFor" />
+      <relation left="a1" right="a2" kind="guard" variable="complex_sum_isZero" condition="true" />
+      <relation left="a1" right="a3" kind="guard" variable="complex_sum_isZero" condition="false" />
+      <relation left="a1" right="a4" kind="guard" variable="complex_sum_isZero" condition="false" />
+    </relations>
+  </process>
+  <process id="complex_mult" name="complex::mult" isFragment="false" service="complex" operation="mult" >
+    <variables>
+      <variable id="complex_mult_a" name="a" isSet="false" type="integer"/>
+      <variable id="complex_mult_b" name="b" isSet="false" type="integer"/>
+      <variable id="complex_mult_bm" name="bm" isSet="false" type="integer"/>
+      <variable id="complex_mult_isZero" name="isZero" isSet="false" type="boolean"/>
+      <variable id="complex_mult_lambda_0" name="lambda_0" isSet="false" type="integer" value="0" />
+      <variable id="complex_mult_result" name="result" isSet="false" type="integer"/>
+      <variable id="complex_mult_tmp" name="tmp" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="complex_mult_a0" name="a0" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="complex_mult_a" />
+          <variableRef uid="complex_mult_b" />
+        </outputs>
+      </activity>
+      <activity id="complex_mult_a1" name="a1"  kind="invoke" service="atomic" operation="isZero" >
+        <inputs>
+          <variableRef uid="complex_mult_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_mult_isZero" />
+        </outputs>
+      </activity>
+      <activity id="complex_mult_a2" name="a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_mult_lambda_0" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_mult_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_mult_a3" name="a3"  kind="invoke" service="atomic" operation="prev" >
+        <inputs>
+          <variableRef uid="complex_mult_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_mult_bm" />
+        </outputs>
+      </activity>
+      <activity id="complex_mult_a4" name="a4"  kind="invoke" service="complex" operation="mult" >
+        <inputs>
+          <variableRef uid="complex_mult_a" />
+          <variableRef uid="complex_mult_bm" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_mult_tmp" />
+        </outputs>
+      </activity>
+      <activity id="complex_mult_a5" name="a5"  kind="invoke" service="complex" operation="sum" >
+        <inputs>
+          <variableRef uid="complex_mult_tmp" />
+          <variableRef uid="complex_mult_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_mult_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_mult_a6" name="a6" kind="reply" >
+        <inputs>
+          <variableRef uid="complex_mult_result" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="a0" right="a1" kind="waitFor" />
+      <relation left="a3" right="a4" kind="waitFor" />
+      <relation left="a4" right="a5" kind="waitFor" />
+      <relation left="a2" right="a6" kind="waitFor" />
+      <relation left="a5" right="a6" kind="waitFor" />
+      <relation left="a1" right="a2" kind="guard" variable="complex_mult_isZero" condition="true" />
+      <relation left="a1" right="a3" kind="guard" variable="complex_mult_isZero" condition="false" />
+    </relations>
+  </process>
+  <process id="swap" name="swap" isFragment="true" >
+    <variables>
+      <variable id="swap_a" name="a" isSet="false" type="integer"/>
+      <variable id="swap_b" name="b" isSet="false" type="integer"/>
+      <variable id="swap_lt" name="lt" isSet="false" type="boolean"/>
+      <variable id="swap_tmp" name="tmp" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="swap_h" name="h" kind="hook" >
+        <inputs />
+        <outputs>
+          <variableRef uid="swap_a" />
+          <variableRef uid="swap_b" />
+        </outputs>
+      </activity>
+      <activity id="swap_t" name="t" kind="assign" function="isLesserThan" >
+        <inputs>
+          <variableRef uid="swap_a" />
+          <variableRef uid="swap_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="swap_lt" />
+        </outputs>
+      </activity>
+      <activity id="swap_e1" name="e1" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="swap_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="swap_tmp" />
+        </outputs>
+      </activity>
+      <activity id="swap_e2" name="e2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="swap_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="swap_a" />
+        </outputs>
+      </activity>
+      <activity id="swap_e3" name="e3" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="swap_tmp" />
+        </inputs>
+        <outputs>
+          <variableRef uid="swap_b" />
+        </outputs>
+      </activity>
+    </activities>
+    <relations>
+      <relation left="e3" right="swap_succs" kind="waitFor" />
+      <relation left="swap_preds" right="h" kind="waitFor" />
+      <relation left="h" right="t" kind="waitFor" />
+      <relation left="e1" right="e2" kind="waitFor" />
+      <relation left="e2" right="e3" kind="waitFor" />
+      <relation left="t" right="swap_succs" kind="guard" variable="swap_lt" condition="false" />
+      <relation left="t" right="e1" kind="guard" variable="swap_lt" condition="true" />
+    </relations>
+  </process>
+  <process id="cache" name="cache" isFragment="true" >
+    <variables>
+      <variable id="cache_a" name="a" isSet="false" type="integer"/>
+      <variable id="cache_b" name="b" isSet="false" type="integer"/>
+      <variable id="cache_exists" name="exists" isSet="false" type="boolean"/>
+      <variable id="cache_key" name="key" isSet="false" type="string"/>
+      <variable id="cache_lambda_1" name="lambda_1" isSet="false" type="string" value="_" />
+      <variable id="cache_prefix" name="prefix" isSet="false" type="string"/>
+      <variable id="cache_result" name="result" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="cache_e1" name="e1" kind="assign" function="concat" >
+        <inputs>
+          <variableRef uid="cache_prefix" />
+          <variableRef uid="cache_a" />
+          <variableRef uid="cache_lambda_1" />
+          <variableRef uid="cache_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cache_key" />
+        </outputs>
+      </activity>
+      <activity id="cache_t" name="t"  kind="invoke" service="cache" operation="exists" >
+        <inputs>
+          <variableRef uid="cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cache_exists" />
+        </outputs>
+      </activity>
+      <activity id="cache_e2" name="e2"  kind="invoke" service="cache" operation="read" >
+        <inputs>
+          <variableRef uid="cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cache_result" />
+        </outputs>
+      </activity>
+      <activity id="cache_h" name="h" kind="hook" >
+        <inputs>
+          <variableRef uid="cache_a" />
+          <variableRef uid="cache_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cache_result" />
+        </outputs>
+      </activity>
+      <activity id="cache_e4" name="e4"  kind="invoke" service="cache" operation="store" >
+        <inputs>
+          <variableRef uid="cache_key" />
+          <variableRef uid="cache_result" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="e2" right="cache_succs" kind="waitFor" />
+      <relation left="e4" right="cache_succs" kind="waitFor" />
+      <relation left="cache_preds" right="e1" kind="waitFor" />
+      <relation left="e1" right="t" kind="waitFor" />
+      <relation left="h" right="e4" kind="waitFor" />
+      <relation left="t" right="e2" kind="guard" variable="cache_exists" condition="true" />
+      <relation left="t" right="h" kind="guard" variable="cache_exists" condition="false" />
+    </relations>
+  </process>
+  <composition id="context_2" target="complex_sum" output="complex_sumSwap" >
+      <apply id="apply_4" fragment="swap">
+        <block id="block_3" process="complex_sum">
+          <activityRef uid="complex_sum_a0" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_5" target="complex_sum" output="complex_sumCache" >
+      <apply id="apply_7" fragment="cache">
+        <block id="block_6" process="complex_sum">
+          <activityRef uid="complex_sum_a3" />
+          <activityRef uid="complex_sum_a4" />
+          <activityRef uid="complex_sum_a5" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_8" target="complex_sum" output="complex_sumComplete" >
+      <apply id="apply_10" fragment="swap">
+        <block id="block_9" process="complex_sum">
+          <activityRef uid="complex_sum_a0" />
+        </block>
+      </apply>
+      <apply id="apply_12" fragment="cache">
+        <block id="block_11" process="complex_sum">
+          <activityRef uid="complex_sum_a3" />
+          <activityRef uid="complex_sum_a4" />
+          <activityRef uid="complex_sum_a5" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_13" target="complex_mult" output="complex_multSwap" >
+      <apply id="apply_15" fragment="swap">
+        <block id="block_14" process="complex_mult">
+          <activityRef uid="complex_mult_a0" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_16" target="complex_mult" output="complex_multCache" >
+      <apply id="apply_18" fragment="cache">
+        <block id="block_17" process="complex_mult">
+          <activityRef uid="complex_mult_a3" />
+          <activityRef uid="complex_mult_a4" />
+          <activityRef uid="complex_mult_a5" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_19" target="complex_mult" output="complex_multComplete" >
+      <apply id="apply_21" fragment="swap">
+        <block id="block_20" process="complex_mult">
+          <activityRef uid="complex_mult_a0" />
+        </block>
+      </apply>
+      <apply id="apply_23" fragment="cache">
+        <block id="block_22" process="complex_mult">
+          <activityRef uid="complex_mult_a3" />
+          <activityRef uid="complex_mult_a4" />
+          <activityRef uid="complex_mult_a5" />
+        </block>
+      </apply>
+  </composition>
+</universe>

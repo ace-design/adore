@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe view="metrics">
+  <process name="cache" fragment="true">
+    <activities total="4">
+      <invoke>3</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>4</apply>
+      <targets>2</targets>
+    </usage>
+  </process>
+  <process name="complex_mult" fragment="false">
+    <activities total="7">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="complex_sum" fragment="false">
+    <activities total="7">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="8">
+      <wait_for>5</wait_for>
+      <guard>3</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>5</height>
+      <surface>15</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="swap" fragment="true">
+    <activities total="4">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>4</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>7</height>
+      <surface>14</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>4</apply>
+      <targets>2</targets>
+    </usage>
+  </process>
+</universe>

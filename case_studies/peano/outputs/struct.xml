@@ -1,0 +1,794 @@
+<?xml version="1.0" ?>
+<universe view="structure" >
+  <process id="complex_sumSwap" name="complex::sumSwap" isFragment="false" service="complex" operation="sumSwap" >
+    <variables>
+      <variable id="complex_sumSwap_a" name="a" isSet="false" type="integer"/>
+      <variable id="complex_sumSwap_ap" name="ap" isSet="false" type="integer"/>
+      <variable id="complex_sumSwap_b" name="b" isSet="false" type="integer"/>
+      <variable id="complex_sumSwap_bm" name="bm" isSet="false" type="integer"/>
+      <variable id="complex_sumSwap_isZero" name="isZero" isSet="false" type="boolean"/>
+      <variable id="complex_sumSwap_result" name="result" isSet="false" type="integer"/>
+      <variable id="complex_sumSwap_swap_lt" name="swap_lt" isSet="false" type="boolean"/>
+      <variable id="complex_sumSwap_swap_tmp" name="swap_tmp" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="complex_sumSwap_a0" name="a0" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="complex_sumSwap_a" />
+          <variableRef uid="complex_sumSwap_b" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumSwap_a1" name="a1"  kind="invoke" service="atomic" operation="isZero" >
+        <inputs>
+          <variableRef uid="complex_sumSwap_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumSwap_isZero" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumSwap_a2" name="a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_sumSwap_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumSwap_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumSwap_a3" name="a3"  kind="invoke" service="atomic" operation="next" >
+        <inputs>
+          <variableRef uid="complex_sumSwap_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumSwap_ap" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumSwap_a4" name="a4"  kind="invoke" service="atomic" operation="prev" >
+        <inputs>
+          <variableRef uid="complex_sumSwap_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumSwap_bm" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumSwap_a5" name="a5"  kind="invoke" service="complex" operation="sum" >
+        <inputs>
+          <variableRef uid="complex_sumSwap_ap" />
+          <variableRef uid="complex_sumSwap_bm" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumSwap_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumSwap_a6" name="a6" kind="reply" >
+        <inputs>
+          <variableRef uid="complex_sumSwap_result" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="complex_sumSwap_swap_t" name="swap_t" kind="assign" function="isLesserThan" >
+        <inputs>
+          <variableRef uid="complex_sumSwap_a" />
+          <variableRef uid="complex_sumSwap_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumSwap_swap_lt" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumSwap_swap_e1" name="swap_e1" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_sumSwap_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumSwap_swap_tmp" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumSwap_swap_e2" name="swap_e2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_sumSwap_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumSwap_a" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumSwap_swap_e3" name="swap_e3" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_sumSwap_swap_tmp" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumSwap_b" />
+        </outputs>
+      </activity>
+    </activities>
+    <relations>
+      <relation left="swap_e3" right="a1" kind="waitFor" />
+      <relation left="a3" right="a5" kind="waitFor" />
+      <relation left="a4" right="a5" kind="waitFor" />
+      <relation left="a2" right="a6" kind="waitFor" />
+      <relation left="a5" right="a6" kind="waitFor" />
+      <relation left="a0" right="swap_t" kind="waitFor" />
+      <relation left="swap_e1" right="swap_e2" kind="waitFor" />
+      <relation left="swap_e2" right="swap_e3" kind="waitFor" />
+      <relation left="swap_t" right="a1" kind="guard" variable="complex_sumSwap_swap_lt" condition="false" />
+      <relation left="a1" right="a2" kind="guard" variable="complex_sumSwap_isZero" condition="true" />
+      <relation left="a1" right="a3" kind="guard" variable="complex_sumSwap_isZero" condition="false" />
+      <relation left="a1" right="a4" kind="guard" variable="complex_sumSwap_isZero" condition="false" />
+      <relation left="swap_t" right="swap_e1" kind="guard" variable="complex_sumSwap_swap_lt" condition="true" />
+    </relations>
+  </process>
+  <process id="complex_sumCache" name="complex::sumCache" isFragment="false" service="complex" operation="sumCache" >
+    <variables>
+      <variable id="complex_sumCache_a" name="a" isSet="false" type="integer"/>
+      <variable id="complex_sumCache_ap" name="ap" isSet="false" type="integer"/>
+      <variable id="complex_sumCache_b" name="b" isSet="false" type="integer"/>
+      <variable id="complex_sumCache_bm" name="bm" isSet="false" type="integer"/>
+      <variable id="complex_sumCache_cache_exists" name="cache_exists" isSet="false" type="boolean"/>
+      <variable id="complex_sumCache_cache_key" name="cache_key" isSet="false" type="string"/>
+      <variable id="complex_sumCache_isZero" name="isZero" isSet="false" type="boolean"/>
+      <variable id="complex_sumCache_lambda_0" name="lambda_0" isSet="false" type="string" value="sum_" />
+      <variable id="complex_sumCache_lambda_1" name="lambda_1" isSet="false" type="string" value="_" />
+      <variable id="complex_sumCache_result" name="result" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="complex_sumCache_a0" name="a0" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="complex_sumCache_a" />
+          <variableRef uid="complex_sumCache_b" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumCache_a1" name="a1"  kind="invoke" service="atomic" operation="isZero" >
+        <inputs>
+          <variableRef uid="complex_sumCache_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumCache_isZero" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumCache_a2" name="a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_sumCache_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumCache_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumCache_a3" name="a3"  kind="invoke" service="atomic" operation="next" >
+        <inputs>
+          <variableRef uid="complex_sumCache_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumCache_ap" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumCache_a4" name="a4"  kind="invoke" service="atomic" operation="prev" >
+        <inputs>
+          <variableRef uid="complex_sumCache_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumCache_bm" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumCache_a5" name="a5"  kind="invoke" service="complex" operation="sum" >
+        <inputs>
+          <variableRef uid="complex_sumCache_ap" />
+          <variableRef uid="complex_sumCache_bm" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumCache_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumCache_a6" name="a6" kind="reply" >
+        <inputs>
+          <variableRef uid="complex_sumCache_result" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="complex_sumCache_cache_e1" name="cache_e1" kind="assign" function="concat" >
+        <inputs>
+          <variableRef uid="complex_sumCache_lambda_0" />
+          <variableRef uid="complex_sumCache_a" />
+          <variableRef uid="complex_sumCache_lambda_1" />
+          <variableRef uid="complex_sumCache_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumCache_cache_key" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumCache_cache_t" name="cache_t"  kind="invoke" service="cache" operation="exists" >
+        <inputs>
+          <variableRef uid="complex_sumCache_cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumCache_cache_exists" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumCache_cache_e2" name="cache_e2"  kind="invoke" service="cache" operation="read" >
+        <inputs>
+          <variableRef uid="complex_sumCache_cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumCache_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumCache_cache_e4" name="cache_e4"  kind="invoke" service="cache" operation="store" >
+        <inputs>
+          <variableRef uid="complex_sumCache_cache_key" />
+          <variableRef uid="complex_sumCache_result" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="a0" right="a1" kind="waitFor" />
+      <relation left="a3" right="a5" kind="waitFor" />
+      <relation left="a4" right="a5" kind="waitFor" />
+      <relation left="a2" right="a6" kind="waitFor" />
+      <relation left="cache_e2" right="a6" kind="waitFor" />
+      <relation left="cache_e4" right="a6" kind="waitFor" />
+      <relation left="cache_e1" right="cache_t" kind="waitFor" />
+      <relation left="a5" right="cache_e4" kind="waitFor" />
+      <relation left="a1" right="a2" kind="guard" variable="complex_sumCache_isZero" condition="true" />
+      <relation left="cache_t" right="a3" kind="guard" variable="complex_sumCache_cache_exists" condition="false" />
+      <relation left="cache_t" right="a4" kind="guard" variable="complex_sumCache_cache_exists" condition="false" />
+      <relation left="a1" right="cache_e1" kind="guard" variable="complex_sumCache_isZero" condition="false" />
+      <relation left="cache_t" right="cache_e2" kind="guard" variable="complex_sumCache_cache_exists" condition="true" />
+    </relations>
+  </process>
+  <process id="complex_sumComplete" name="complex::sumComplete" isFragment="false" service="complex" operation="sumComplete" >
+    <variables>
+      <variable id="complex_sumComplete_a" name="a" isSet="false" type="integer"/>
+      <variable id="complex_sumComplete_ap" name="ap" isSet="false" type="integer"/>
+      <variable id="complex_sumComplete_b" name="b" isSet="false" type="integer"/>
+      <variable id="complex_sumComplete_bm" name="bm" isSet="false" type="integer"/>
+      <variable id="complex_sumComplete_cache_exists" name="cache_exists" isSet="false" type="boolean"/>
+      <variable id="complex_sumComplete_cache_key" name="cache_key" isSet="false" type="string"/>
+      <variable id="complex_sumComplete_isZero" name="isZero" isSet="false" type="boolean"/>
+      <variable id="complex_sumComplete_lambda_2" name="lambda_2" isSet="false" type="string" value="sum_" />
+      <variable id="complex_sumComplete_lambda_3" name="lambda_3" isSet="false" type="string" value="_" />
+      <variable id="complex_sumComplete_result" name="result" isSet="false" type="integer"/>
+      <variable id="complex_sumComplete_swap_lt" name="swap_lt" isSet="false" type="boolean"/>
+      <variable id="complex_sumComplete_swap_tmp" name="swap_tmp" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="complex_sumComplete_a0" name="a0" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="complex_sumComplete_a" />
+          <variableRef uid="complex_sumComplete_b" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_a1" name="a1"  kind="invoke" service="atomic" operation="isZero" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_isZero" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_a2" name="a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_a3" name="a3"  kind="invoke" service="atomic" operation="next" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_ap" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_a4" name="a4"  kind="invoke" service="atomic" operation="prev" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_bm" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_a5" name="a5"  kind="invoke" service="complex" operation="sum" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_ap" />
+          <variableRef uid="complex_sumComplete_bm" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_a6" name="a6" kind="reply" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_result" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="complex_sumComplete_swap_t" name="swap_t" kind="assign" function="isLesserThan" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_a" />
+          <variableRef uid="complex_sumComplete_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_swap_lt" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_swap_e1" name="swap_e1" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_swap_tmp" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_swap_e2" name="swap_e2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_a" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_swap_e3" name="swap_e3" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_swap_tmp" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_b" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_cache_e1" name="cache_e1" kind="assign" function="concat" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_lambda_2" />
+          <variableRef uid="complex_sumComplete_a" />
+          <variableRef uid="complex_sumComplete_lambda_3" />
+          <variableRef uid="complex_sumComplete_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_cache_key" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_cache_t" name="cache_t"  kind="invoke" service="cache" operation="exists" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_cache_exists" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_cache_e2" name="cache_e2"  kind="invoke" service="cache" operation="read" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_sumComplete_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_sumComplete_cache_e4" name="cache_e4"  kind="invoke" service="cache" operation="store" >
+        <inputs>
+          <variableRef uid="complex_sumComplete_cache_key" />
+          <variableRef uid="complex_sumComplete_result" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="swap_e3" right="a1" kind="waitFor" />
+      <relation left="a3" right="a5" kind="waitFor" />
+      <relation left="a4" right="a5" kind="waitFor" />
+      <relation left="a2" right="a6" kind="waitFor" />
+      <relation left="cache_e2" right="a6" kind="waitFor" />
+      <relation left="cache_e4" right="a6" kind="waitFor" />
+      <relation left="a0" right="swap_t" kind="waitFor" />
+      <relation left="swap_e1" right="swap_e2" kind="waitFor" />
+      <relation left="swap_e2" right="swap_e3" kind="waitFor" />
+      <relation left="cache_e1" right="cache_t" kind="waitFor" />
+      <relation left="a5" right="cache_e4" kind="waitFor" />
+      <relation left="swap_t" right="a1" kind="guard" variable="complex_sumComplete_swap_lt" condition="false" />
+      <relation left="a1" right="a2" kind="guard" variable="complex_sumComplete_isZero" condition="true" />
+      <relation left="cache_t" right="a3" kind="guard" variable="complex_sumComplete_cache_exists" condition="false" />
+      <relation left="cache_t" right="a4" kind="guard" variable="complex_sumComplete_cache_exists" condition="false" />
+      <relation left="swap_t" right="swap_e1" kind="guard" variable="complex_sumComplete_swap_lt" condition="true" />
+      <relation left="a1" right="cache_e1" kind="guard" variable="complex_sumComplete_isZero" condition="false" />
+      <relation left="cache_t" right="cache_e2" kind="guard" variable="complex_sumComplete_cache_exists" condition="true" />
+    </relations>
+  </process>
+  <process id="complex_multSwap" name="complex::multSwap" isFragment="false" service="complex" operation="multSwap" >
+    <variables>
+      <variable id="complex_multSwap_a" name="a" isSet="false" type="integer"/>
+      <variable id="complex_multSwap_b" name="b" isSet="false" type="integer"/>
+      <variable id="complex_multSwap_bm" name="bm" isSet="false" type="integer"/>
+      <variable id="complex_multSwap_isZero" name="isZero" isSet="false" type="boolean"/>
+      <variable id="complex_multSwap_lambda_4" name="lambda_4" isSet="false" type="integer" value="0" />
+      <variable id="complex_multSwap_result" name="result" isSet="false" type="integer"/>
+      <variable id="complex_multSwap_swap_lt" name="swap_lt" isSet="false" type="boolean"/>
+      <variable id="complex_multSwap_swap_tmp" name="swap_tmp" isSet="false" type="integer"/>
+      <variable id="complex_multSwap_tmp" name="tmp" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="complex_multSwap_a0" name="a0" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="complex_multSwap_a" />
+          <variableRef uid="complex_multSwap_b" />
+        </outputs>
+      </activity>
+      <activity id="complex_multSwap_a1" name="a1"  kind="invoke" service="atomic" operation="isZero" >
+        <inputs>
+          <variableRef uid="complex_multSwap_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multSwap_isZero" />
+        </outputs>
+      </activity>
+      <activity id="complex_multSwap_a2" name="a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_multSwap_lambda_4" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multSwap_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_multSwap_a3" name="a3"  kind="invoke" service="atomic" operation="prev" >
+        <inputs>
+          <variableRef uid="complex_multSwap_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multSwap_bm" />
+        </outputs>
+      </activity>
+      <activity id="complex_multSwap_a4" name="a4"  kind="invoke" service="complex" operation="mult" >
+        <inputs>
+          <variableRef uid="complex_multSwap_a" />
+          <variableRef uid="complex_multSwap_bm" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multSwap_tmp" />
+        </outputs>
+      </activity>
+      <activity id="complex_multSwap_a5" name="a5"  kind="invoke" service="complex" operation="sum" >
+        <inputs>
+          <variableRef uid="complex_multSwap_tmp" />
+          <variableRef uid="complex_multSwap_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multSwap_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_multSwap_a6" name="a6" kind="reply" >
+        <inputs>
+          <variableRef uid="complex_multSwap_result" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="complex_multSwap_swap_t" name="swap_t" kind="assign" function="isLesserThan" >
+        <inputs>
+          <variableRef uid="complex_multSwap_a" />
+          <variableRef uid="complex_multSwap_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multSwap_swap_lt" />
+        </outputs>
+      </activity>
+      <activity id="complex_multSwap_swap_e1" name="swap_e1" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_multSwap_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multSwap_swap_tmp" />
+        </outputs>
+      </activity>
+      <activity id="complex_multSwap_swap_e2" name="swap_e2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_multSwap_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multSwap_a" />
+        </outputs>
+      </activity>
+      <activity id="complex_multSwap_swap_e3" name="swap_e3" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_multSwap_swap_tmp" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multSwap_b" />
+        </outputs>
+      </activity>
+    </activities>
+    <relations>
+      <relation left="swap_e3" right="a1" kind="waitFor" />
+      <relation left="a3" right="a4" kind="waitFor" />
+      <relation left="a4" right="a5" kind="waitFor" />
+      <relation left="a2" right="a6" kind="waitFor" />
+      <relation left="a5" right="a6" kind="waitFor" />
+      <relation left="a0" right="swap_t" kind="waitFor" />
+      <relation left="swap_e1" right="swap_e2" kind="waitFor" />
+      <relation left="swap_e2" right="swap_e3" kind="waitFor" />
+      <relation left="swap_t" right="a1" kind="guard" variable="complex_multSwap_swap_lt" condition="false" />
+      <relation left="a1" right="a2" kind="guard" variable="complex_multSwap_isZero" condition="true" />
+      <relation left="a1" right="a3" kind="guard" variable="complex_multSwap_isZero" condition="false" />
+      <relation left="swap_t" right="swap_e1" kind="guard" variable="complex_multSwap_swap_lt" condition="true" />
+    </relations>
+  </process>
+  <process id="complex_multCache" name="complex::multCache" isFragment="false" service="complex" operation="multCache" >
+    <variables>
+      <variable id="complex_multCache_a" name="a" isSet="false" type="integer"/>
+      <variable id="complex_multCache_b" name="b" isSet="false" type="integer"/>
+      <variable id="complex_multCache_bm" name="bm" isSet="false" type="integer"/>
+      <variable id="complex_multCache_cache_exists" name="cache_exists" isSet="false" type="boolean"/>
+      <variable id="complex_multCache_cache_key" name="cache_key" isSet="false" type="string"/>
+      <variable id="complex_multCache_isZero" name="isZero" isSet="false" type="boolean"/>
+      <variable id="complex_multCache_lambda_5" name="lambda_5" isSet="false" type="integer" value="0" />
+      <variable id="complex_multCache_lambda_6" name="lambda_6" isSet="false" type="string" value="mult_" />
+      <variable id="complex_multCache_lambda_7" name="lambda_7" isSet="false" type="string" value="_" />
+      <variable id="complex_multCache_result" name="result" isSet="false" type="integer"/>
+      <variable id="complex_multCache_tmp" name="tmp" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="complex_multCache_a0" name="a0" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="complex_multCache_a" />
+          <variableRef uid="complex_multCache_b" />
+        </outputs>
+      </activity>
+      <activity id="complex_multCache_a1" name="a1"  kind="invoke" service="atomic" operation="isZero" >
+        <inputs>
+          <variableRef uid="complex_multCache_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multCache_isZero" />
+        </outputs>
+      </activity>
+      <activity id="complex_multCache_a2" name="a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_multCache_lambda_5" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multCache_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_multCache_a3" name="a3"  kind="invoke" service="atomic" operation="prev" >
+        <inputs>
+          <variableRef uid="complex_multCache_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multCache_bm" />
+        </outputs>
+      </activity>
+      <activity id="complex_multCache_a4" name="a4"  kind="invoke" service="complex" operation="mult" >
+        <inputs>
+          <variableRef uid="complex_multCache_a" />
+          <variableRef uid="complex_multCache_bm" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multCache_tmp" />
+        </outputs>
+      </activity>
+      <activity id="complex_multCache_a5" name="a5"  kind="invoke" service="complex" operation="sum" >
+        <inputs>
+          <variableRef uid="complex_multCache_tmp" />
+          <variableRef uid="complex_multCache_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multCache_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_multCache_a6" name="a6" kind="reply" >
+        <inputs>
+          <variableRef uid="complex_multCache_result" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="complex_multCache_cache_e1" name="cache_e1" kind="assign" function="concat" >
+        <inputs>
+          <variableRef uid="complex_multCache_lambda_6" />
+          <variableRef uid="complex_multCache_a" />
+          <variableRef uid="complex_multCache_lambda_7" />
+          <variableRef uid="complex_multCache_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multCache_cache_key" />
+        </outputs>
+      </activity>
+      <activity id="complex_multCache_cache_t" name="cache_t"  kind="invoke" service="cache" operation="exists" >
+        <inputs>
+          <variableRef uid="complex_multCache_cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multCache_cache_exists" />
+        </outputs>
+      </activity>
+      <activity id="complex_multCache_cache_e2" name="cache_e2"  kind="invoke" service="cache" operation="read" >
+        <inputs>
+          <variableRef uid="complex_multCache_cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multCache_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_multCache_cache_e4" name="cache_e4"  kind="invoke" service="cache" operation="store" >
+        <inputs>
+          <variableRef uid="complex_multCache_cache_key" />
+          <variableRef uid="complex_multCache_result" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="a0" right="a1" kind="waitFor" />
+      <relation left="a3" right="a4" kind="waitFor" />
+      <relation left="a4" right="a5" kind="waitFor" />
+      <relation left="a2" right="a6" kind="waitFor" />
+      <relation left="cache_e2" right="a6" kind="waitFor" />
+      <relation left="cache_e4" right="a6" kind="waitFor" />
+      <relation left="cache_e1" right="cache_t" kind="waitFor" />
+      <relation left="a5" right="cache_e4" kind="waitFor" />
+      <relation left="a1" right="a2" kind="guard" variable="complex_multCache_isZero" condition="true" />
+      <relation left="cache_t" right="a3" kind="guard" variable="complex_multCache_cache_exists" condition="false" />
+      <relation left="a1" right="cache_e1" kind="guard" variable="complex_multCache_isZero" condition="false" />
+      <relation left="cache_t" right="cache_e2" kind="guard" variable="complex_multCache_cache_exists" condition="true" />
+    </relations>
+  </process>
+  <process id="complex_multComplete" name="complex::multComplete" isFragment="false" service="complex" operation="multComplete" >
+    <variables>
+      <variable id="complex_multComplete_a" name="a" isSet="false" type="integer"/>
+      <variable id="complex_multComplete_b" name="b" isSet="false" type="integer"/>
+      <variable id="complex_multComplete_bm" name="bm" isSet="false" type="integer"/>
+      <variable id="complex_multComplete_cache_exists" name="cache_exists" isSet="false" type="boolean"/>
+      <variable id="complex_multComplete_cache_key" name="cache_key" isSet="false" type="string"/>
+      <variable id="complex_multComplete_isZero" name="isZero" isSet="false" type="boolean"/>
+      <variable id="complex_multComplete_lambda_10" name="lambda_10" isSet="false" type="string" value="_" />
+      <variable id="complex_multComplete_lambda_8" name="lambda_8" isSet="false" type="integer" value="0" />
+      <variable id="complex_multComplete_lambda_9" name="lambda_9" isSet="false" type="string" value="mult_" />
+      <variable id="complex_multComplete_result" name="result" isSet="false" type="integer"/>
+      <variable id="complex_multComplete_swap_lt" name="swap_lt" isSet="false" type="boolean"/>
+      <variable id="complex_multComplete_swap_tmp" name="swap_tmp" isSet="false" type="integer"/>
+      <variable id="complex_multComplete_tmp" name="tmp" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="complex_multComplete_a0" name="a0" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="complex_multComplete_a" />
+          <variableRef uid="complex_multComplete_b" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_a1" name="a1"  kind="invoke" service="atomic" operation="isZero" >
+        <inputs>
+          <variableRef uid="complex_multComplete_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_isZero" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_a2" name="a2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_multComplete_lambda_8" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_a3" name="a3"  kind="invoke" service="atomic" operation="prev" >
+        <inputs>
+          <variableRef uid="complex_multComplete_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_bm" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_a4" name="a4"  kind="invoke" service="complex" operation="mult" >
+        <inputs>
+          <variableRef uid="complex_multComplete_a" />
+          <variableRef uid="complex_multComplete_bm" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_tmp" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_a5" name="a5"  kind="invoke" service="complex" operation="sum" >
+        <inputs>
+          <variableRef uid="complex_multComplete_tmp" />
+          <variableRef uid="complex_multComplete_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_a6" name="a6" kind="reply" >
+        <inputs>
+          <variableRef uid="complex_multComplete_result" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="complex_multComplete_swap_t" name="swap_t" kind="assign" function="isLesserThan" >
+        <inputs>
+          <variableRef uid="complex_multComplete_a" />
+          <variableRef uid="complex_multComplete_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_swap_lt" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_swap_e1" name="swap_e1" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_multComplete_a" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_swap_tmp" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_swap_e2" name="swap_e2" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_multComplete_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_a" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_swap_e3" name="swap_e3" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="complex_multComplete_swap_tmp" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_b" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_cache_e1" name="cache_e1" kind="assign" function="concat" >
+        <inputs>
+          <variableRef uid="complex_multComplete_lambda_9" />
+          <variableRef uid="complex_multComplete_a" />
+          <variableRef uid="complex_multComplete_lambda_10" />
+          <variableRef uid="complex_multComplete_b" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_cache_key" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_cache_t" name="cache_t"  kind="invoke" service="cache" operation="exists" >
+        <inputs>
+          <variableRef uid="complex_multComplete_cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_cache_exists" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_cache_e2" name="cache_e2"  kind="invoke" service="cache" operation="read" >
+        <inputs>
+          <variableRef uid="complex_multComplete_cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="complex_multComplete_result" />
+        </outputs>
+      </activity>
+      <activity id="complex_multComplete_cache_e4" name="cache_e4"  kind="invoke" service="cache" operation="store" >
+        <inputs>
+          <variableRef uid="complex_multComplete_cache_key" />
+          <variableRef uid="complex_multComplete_result" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="swap_e3" right="a1" kind="waitFor" />
+      <relation left="a3" right="a4" kind="waitFor" />
+      <relation left="a4" right="a5" kind="waitFor" />
+      <relation left="a2" right="a6" kind="waitFor" />
+      <relation left="cache_e2" right="a6" kind="waitFor" />
+      <relation left="cache_e4" right="a6" kind="waitFor" />
+      <relation left="a0" right="swap_t" kind="waitFor" />
+      <relation left="swap_e1" right="swap_e2" kind="waitFor" />
+      <relation left="swap_e2" right="swap_e3" kind="waitFor" />
+      <relation left="cache_e1" right="cache_t" kind="waitFor" />
+      <relation left="a5" right="cache_e4" kind="waitFor" />
+      <relation left="swap_t" right="a1" kind="guard" variable="complex_multComplete_swap_lt" condition="false" />
+      <relation left="a1" right="a2" kind="guard" variable="complex_multComplete_isZero" condition="true" />
+      <relation left="cache_t" right="a3" kind="guard" variable="complex_multComplete_cache_exists" condition="false" />
+      <relation left="swap_t" right="swap_e1" kind="guard" variable="complex_multComplete_swap_lt" condition="true" />
+      <relation left="a1" right="cache_e1" kind="guard" variable="complex_multComplete_isZero" condition="false" />
+      <relation left="cache_t" right="cache_e2" kind="guard" variable="complex_multComplete_cache_exists" condition="true" />
+    </relations>
+  </process>
+</universe>

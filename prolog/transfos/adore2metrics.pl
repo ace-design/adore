@@ -29,8 +29,7 @@ writeMetricsIntoFile(F) :-
 computeUniverseMetrics(R) :- 
 	findall(P,process(P),All), sort(All,Processes), 
 	computeMetricsLoop(Processes,Metrics),!,
-	computeCompositionMetrics(CompositionMetrics),!,
-	swritef(R,'<?xml version="1.0" encoding="UTF-8"?>\n<universe>\n%w%w\n</universe>\n',[Metrics,CompositionMetrics]).
+	swritef(R,'<?xml version="1.0" encoding="UTF-8"?>\n<universe view="metrics">\n%w</universe>\n',[Metrics]).
 
 computeMetricsLoop([],'').
 computeMetricsLoop([H|T],R) :- 	
@@ -171,40 +170,6 @@ metrics_fragmentTarget(F,T) :-
 	activityBlock(C,B,Acts), member(A,Acts), 
 	isContainedBy(A,T).
 
-%%%%%%
-%%% Composition
-%%%%%%
 
-computeCompositionMetrics(Xml) :-
-	findall(X,context(X),Contexts),
-	map(metrics:compositionContextMetricAsXml,Contexts, RawData),
-	concatenate(RawData,Xml).
-
-compositionContextMetricAsXml(Ctx, Xml) :- 
-	context(Ctx), contextTarget(Ctx, ProcessId),
-	findall(X,applyFragment(X,Ctx,_,_),Directives),
-	map(metrics:applyDirectiveAsXml,Directives,XmlDirList),
-	compositionOutputAsXml(Ctx,Output), 
-	concatenate(XmlDirList,XmlDir),
-	swritef(Xml,'  <composition id="%w" target=\"%w\">\n%w%w\n  </composition>',[Ctx,ProcessId,Output,XmlDir]).
-
-compositionOutputAsXml(Ctx,Xml) :- 
-	context(Ctx), contextOutput(Ctx,POut),!,
-	swritef(Xml,'    <output>%w</output>\n',[POut]).
-compositionOutputAsXml(_,'').
-
-applyDirectiveAsXml(Id,Xml) :- 
-	applyFragment(Id,_,Block,Fragment),
-	activityBlockAsXml(Block,Targets),
-	swritef(Xml,'    <apply id="%w">\n      <fragment name="%w" />\n      <targets>\n%w      </targets>\n    </apply>',[Id,Fragment,Targets]).
-
-activityBlockAsXml(BlockId,Xml) :-
-	activityBlock(_,BlockId, Targets), 
-	activityListAsXml(Targets,Xml).
-
-activityListAsXml([],'').
-activityListAsXml([H|T],R) :-
-	activityListAsXml(T,Others),
-	swritef(R,'        <act name="%w\" />\n%w',[H,Others]).
 
 

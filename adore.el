@@ -210,10 +210,7 @@
   (let ((g (read-from-minibuffer "Goal: ")))
     (adore-exec-synchronous g "Adore Goal Execution" nil)))
 
-(defun adore-metrics () (interactive)
-  (let* ((p (read-from-minibuffer "Metrics File Name: ")))
-	 (adore-exec-synchronous (concat "writeMetricsIntoFile('" p "')")
-				 "Adore Metrics Data" t)))
+
 (defun adore-dgraph  () (interactive)
   (let* ((p (read-from-minibuffer "Process Id: "))
 	 ;;(f (make-temp-file "adore-dgraph" nil ".png")))
@@ -241,26 +238,43 @@
 	(adore-display-picture f)))))
 
 
+
+;;;; Xml export
+
+
 ;;;;;
-;; Adore algorithm interface
+;; Adore do'n show interface
 ;;;;;
 
-(defun adore-do-n-show (goal prefix bufName)
-  (let* ((f (make-temp-file prefix nil ".adore"))
-	 (code (adore-exec-synchronous (concat goal "(\'" f "\')") bufName t)))
+(defun adore-do-n-show (goal f bufName)
+  (let ((code (adore-exec-synchronous (concat goal "(\'" f "\')") bufName t)))
     (if (= 0 code)
 	(let ((frame (make-frame)))
 	  (select-frame frame)
 	  (switch-to-buffer (find-file-noselect f))))))
 
+(defun adore-do-n-show-temp (goal prefix bufName extension)
+  (let ((f (make-temp-file prefix nil extension)))
+    (adore-do-n-show goal f bufName)))
+	
 
 (defun adore-normalize-compositions () (interactive)
-  (adore-do-n-show "doContextNormalization,dumpCompositions"
-		   "adore-normalized" "Composition Context Normalization"))
+  (adore-do-n-show-temp "doContextNormalization,dumpCompositions"
+		   "adore-normalized" "Composition Context Normalization"
+		   ".adore" ))
 
 (defun adore-show-universe () (interactive)
-  (adore-do-n-show "dumpUniverse" "adore-universe" "Serialized Universe"))
+  (adore-do-n-show-temp "dumpUniverse" "adore-universe" "Serialized Universe"
+			".adore" ))
 
+
+(defun adore-as-xml () (interactive)
+  (let ((f (read-from-minibuffer "XML File Name: ")))
+    (adore-do-n-show "dumpUniverseAsXml" f "XML Serialized Universe")))
+  
+(defun adore-metrics () (interactive)
+  (let ((f (read-from-minibuffer "XML File Name: ")))
+    (adore-do-n-show "writeMetricsIntoFile" f "Universe Metrics")))
 ;;;;
 ;; Adore IDE reload
 ;;;;
@@ -297,14 +311,14 @@
   (define-key menuMap [s1] '("--"))  
   (let ((genMap (make-sparse-keymap "ADORE Gen KeyMap")))
     (define-key menuMap [generate] (cons "Export" genMap))
-    (define-key genMap [metrics] '("Process Metrics ..." . adore-metrics))
-    (define-key genMap [xml] '("As XML ..." . adore-metrics))
-    (define-key genMap [s1] '("--"))
     (define-key genMap [complete-dgraph] 
-      '("Global Dependencies Graph" . adore-complete-dgraph))
+      '("Global Dep. Graph" . adore-complete-dgraph))
     (define-key genMap [dgraph] '("Dependencies Graph ..." . adore-dgraph))
     (define-key genMap [s0] '("--"))
-    (define-key genMap [pict] '("Process Picture ..." . adore-pict)))
+    (define-key genMap [pict] '("Process Picture ..." . adore-pict))
+    (define-key genMap [s1] '("--"))
+    (define-key genMap [metrics] '("Process Metrics ..." . adore-metrics))
+    (define-key genMap [xml] '("As XML ..." . adore-as-xml)))
   (let ((algoMap (make-sparse-keymap "ADORE Algo KeyMap")))
     (define-key menuMap [algo] (cons "Algorithms" algoMap))
     (define-key algoMap [norm] '("Composition Normalisation" . 

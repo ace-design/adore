@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe view="metrics">
+  <process name="complex_multCache" fragment="false">
+    <activities total="11">
+      <invoke>7</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>3</misc>
+    </activities>
+    <relations total="12">
+      <wait_for>8</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>9</height>
+      <surface>18</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="complex_multComplete" fragment="false">
+    <activities total="15">
+      <invoke>7</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>7</misc>
+    </activities>
+    <relations total="17">
+      <wait_for>11</wait_for>
+      <guard>6</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>13</height>
+      <surface>26</surface>
+      <maze>6</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="complex_multSwap" fragment="false">
+    <activities total="11">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>6</misc>
+    </activities>
+    <relations total="12">
+      <wait_for>8</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>10</height>
+      <surface>20</surface>
+      <maze>4</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="complex_sumCache" fragment="false">
+    <activities total="11">
+      <invoke>7</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>3</misc>
+    </activities>
+    <relations total="13">
+      <wait_for>8</wait_for>
+      <guard>5</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>8</height>
+      <surface>24</surface>
+      <maze>4</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="complex_sumComplete" fragment="false">
+    <activities total="15">
+      <invoke>7</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>7</misc>
+    </activities>
+    <relations total="18">
+      <wait_for>11</wait_for>
+      <guard>7</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>12</height>
+      <surface>36</surface>
+      <maze>8</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="complex_sumSwap" fragment="false">
+    <activities total="11">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>6</misc>
+    </activities>
+    <relations total="13">
+      <wait_for>8</wait_for>
+      <guard>5</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>9</height>
+      <surface>27</surface>
+      <maze>6</maze>
+    </complexity>
+    <usage />
+  </process>
+</universe>
