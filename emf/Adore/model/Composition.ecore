@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="core"
+    nsURI="http://www.adore-design.org/xmlns/metamodel/adore/composition/1.0" nsPrefix="core">
+  <eClassifiers xsi:type="ecore:EClass" name="Universe">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="processes" lowerBound="1"
+        upperBound="-1" eType="ecore:EClass Process.ecore#//Process" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="compositions" lowerBound="1"
+        upperBound="-1" eType="#//Composition" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Composition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="target" lowerBound="1"
+        eType="ecore:EClass Process.ecore#//Process"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="directives" lowerBound="1"
+        upperBound="-1" eType="#//Directive" containment="true" eOpposite="#//Directive/owner"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="output" eType="#//CompositionOutput"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Orchestration"/>
+  <eClassifiers xsi:type="ecore:EClass" name="EClass0"/>
+  <eClassifiers xsi:type="ecore:EClass" name="CompositionOutput" eSuperTypes="Process.ecore#//Process"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Directive" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="owner" lowerBound="1" eType="#//Composition"
+        eOpposite="#//Composition/directives"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ApplyFragment" eSuperTypes="#//Directive">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="block" lowerBound="1" upperBound="-1"
+        eType="ecore:EClass Process.ecore#//Activity"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fragment" lowerBound="1"
+        eType="ecore:EClass Process.ecore#//Fragment"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ToSet" eSuperTypes="#//Directive">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="variable" lowerBound="1"
+        eType="ecore:EClass Process.ecore#//Variable"/>
+  </eClassifiers>
+</ecore:EPackage>

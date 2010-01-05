@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="kind"
+    nsURI="http://www.adore-design.org/xmlns/metamodel/adore/kind/1.0" nsPrefix="kind">
+  <eClassifiers xsi:type="ecore:EClass" name="Kind" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="FragmentKind" abstract="true" eSuperTypes="#//Kind"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Hook" eSuperTypes="#//FragmentKind"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Predecessors" eSuperTypes="#//FragmentKind"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Successors" eSuperTypes="#//FragmentKind"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Invoke" eSuperTypes="#//IOKind">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="service" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="operation" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Assign" eSuperTypes="#//GlueKind">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="function" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Receive" eSuperTypes="#//IOKind"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Reply" eSuperTypes="#//IOKind"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Throw" eSuperTypes="#//IOKind"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Nop" eSuperTypes="#//GlueKind"/>
+  <eClassifiers xsi:type="ecore:EClass" name="GlueKind" abstract="true" eSuperTypes="#//Kind"/>
+  <eClassifiers xsi:type="ecore:EClass" name="IOKind" abstract="true" eSuperTypes="#//Kind"/>
+</ecore:EPackage>
