@@ -11,9 +11,9 @@ orchestration complex::sum {
     a0. (a,b) := receive();
     a1. isZero := atomic::isZero(b);
     a2. result := a;
-    a3. ap := atomic::next(n: a);
-    a4. bm := atomic::prev(n: b);
-    a5. result := complex::sum(a: ap,b: bm);
+    a3. ap := atomic::next(a);
+    a4. bm := atomic::prev(b);
+    a5. result := complex::sum(ap,bm);
     a6. reply(result);
   }
   relations { 
@@ -31,9 +31,9 @@ orchestration complex::mult {
     a0. (a,b) := receive();
     a1. isZero := atomic::isZero(b);
     a2. result := id('0' as integer);
-    a3. bm := atomic::prev(n: b);
-    a4. tmp := complex::mult(a: a, b: bm);
-    a5. result := complex::sum(a: tmp,b: a);
+    a3. bm := atomic::prev(b);
+    a4. tmp := complex::mult(a,bm);
+    a5. result := complex::sum(tmp,a);
     a6. reply(result);
   }
   relations {

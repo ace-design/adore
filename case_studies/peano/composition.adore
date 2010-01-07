@@ -60,7 +60,4 @@ composition complex::sum as complex::vectorialsum {
 composition complex::sum as complex::vectorialsum { 
   toSet a; 
   toSet b; 
-} 
-
-
-
+}

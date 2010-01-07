@@ -1,0 +1,163 @@
+/** MDD4DRES Composed processes
+ * @authors Sebastien & Mireille
+ * @date 01/07/10
+ */
+
+
+// hasCertificate fragment, enhanced with isYoungCertificate
+fragment hasCertificate<iYC_delta> {
+  variables {
+    crt as certificate; trace* as trace; info as trace; ok as boolean;
+    /** isYoungCertificate variable unification: void **/
+    iYC_delta as integer; iYC_isYoung as boolean; iYC_now as date;
+    /** isYoungCertificate parametrization: ref -> 'info.logDate' **/
+  }
+  activities {
+    e0. trace* := tracer::filter('authority' as string, 'certify' as string);
+    e1. info := tracer::findInAfter(trace*,crt);
+    e2. ok := isNotNull(info);
+    h. hook(crt);
+    e3. throw('unknown certificate!' as string);
+    /** isYougCertificate enrichment **/
+    iYC_e0. iYC_now := timer::getNow();
+    iYC_e1. iYC_isYoung := timer::compare(info.logDate, iYC_now, iYC_delta);
+    iYC_e2. throw('Out of date certificate!' as string);
+  }
+  relations { 
+    ^ < e0; e0 < e1; e1 < e2; e2 < e3 when !ok; 
+    /** isYoungCertificate: H = h => (^ -> e2; $ -> $) **/
+    e2 < iYC_e0 when ok; iYC_e0 < iYC_e1;  h < $;
+    iYC_e1 < h when iYC_isYoung; iYC_e1 < iYC_e2 when !iYC_isYoung;
+  }
+}
+
+
+// Merge({hasCertificate,timeContract})
+fragment anonymous<hC_iYC_delta,tC_duration> {
+  variables {
+    /** hasCertificate **/
+    hC_crt as certificate; hC_trace* as trace; hC_info as trace; 
+    hC_ok as boolean; hC_iYC_delta as integer; hC_iYC_isYoung as boolean; 
+    hC_iYC_now as date;
+    /** timeContract **/
+    tC_delay as integer; tC_timeout as boolean; tC_duration as integer;
+  }
+  activities {
+    /** unified activity **/
+    h. hook(hC_crt);
+    /** hasCertificate **/
+    hC_e0. hC_trace* := tracer::filter('authority' as string, 
+				       'certify' as string);
+    hC_e1. hC_info := hC_tracer::findInAfter(hC_trace*,hC_crt);
+    hC_e2. hC_ok := isNotNull(hC_info);
+    hC_e3. throw('unknown certificate!' as string);
+    hC_iYC_e0. hC_iYC_now := timer::getNow();
+    hC_iYC_e1. hC_iYC_isYoung := timer::compare(hC_info.logDate, hC_iYC_now, 
+						hC_iYC_delta);
+    hC_iYC_e2. throw('Out of date certificate!' as string);
+    /** timeContract **/
+    tC_e0. tC_delay := id('0' as integer) ;
+    tC_e1. tC_delay := timer::wait(tC_duration) ;
+    tC_e2. tC_timeout := isDifferent(tC_delay,'0' as integer) ;
+    tC_e3. throw('response time violation!' as string) ;
+  }
+  relations { 
+    /** hasCertificate **/
+    ^ < hC_e0; hC_e0 < hC_e1; hC_e1 < hC_e2; hC_e2 < hC_e3 when !hC_ok; 
+    hC_e2 < hC_iYC_e0 when hC_ok; hC_iYC_e0 < hC_iYC_e1;  /** h < $; **/
+    hC_iYC_e1 < h when hC_iYC_isYoung; 
+    hC_iYC_e1 < hC_iYC_e2 when !hC_iYC_isYoung;
+    /** timeContact **/
+    ^ < tC_e0 ; tC_e0 < tC_e1 ; tC_e0 < h ; h << tC_e2; tC_e1 << tC_e2 ;
+    tC_e2 < tC_e3 when tC_timeout ; tC_e2 < $ when  ! tC_timeout ;
+  }
+}
+
+
+// Login business process, enhanced with trace
+orchestration auth::login {
+  variables { 
+    user as string; password as string; isValid as boolean; crt as certificate; 
+    /** trace fragment unification: in -> user; out -> crt**/
+    t_ticket as string; t_c as boolean;
+    /** trace fragment parametrization **/
+    const t_srv := 'authority' as string; const t_op := 'certify' as string;
+  }
+  activities {
+    a0. (user, password) := receive();
+    a1. isValid := auth::check(user,password);
+    a2. crt := authority::certify(user);
+    a3. reply(crt);
+    e. throw('bad user information!' as string);
+    /** trace fragment enrichment**/
+    t_e0. t_ticket := tracer::createEmptyTicket(t_srv,t_op);
+    t_e1. tracer::logBefore(t_ticket,user);
+    t_e2. tracer::logAfter(t_ticket,crt);
+    t_e3. t_c := tracer::isComplete(t_ticket);
+    t_e4. throw('incomplete trace' as string);
+  }
+  relations {
+    a0 < a1 ; a1 < e when ! isValid; 
+    /** trace fragment: H = a2 => (^ -> a1, $ -> a3) **/
+    a1 < t_e0 when isValid; t_e0 < t_e1; t_e1 < a2; a2 < t_e2; t_e2 < t_e3;
+    t_e3 < a3 when t_c; t_e3 < t_e4 when !t_c;
+  }
+}
+
+// GetInformation enhanced with (enhanced) hasCertificate and timeContract
+orchestration infoProvider::getInformation {
+  variables {
+    user as string; c as certificate; tt* as information; 
+    news* as information; info* as information;
+    /** anonymous variable unification: hC_crt -> c **/
+    hC_trace* as trace; hC_info as trace; hC_ok as boolean;
+    hC_iYC_isYoung as boolean; hC_iYC_now as date;
+    tC_delay as integer; tC_timeout as boolean; 
+    /** anonymous parametrization**/
+    const hC_iYC_delta := '30' as integer; const tC_duration := '60' as integer;
+    /** timeContract #2 variable unification: void **/
+    tC2_delay as integer; tC2_timeout as boolean; 
+    /** timecontract #2 parametrization **/
+    const tC2_duration := '120' as integer;
+  }
+  activities {
+    a0. (user,c) := receive();
+    a1. tt* := timetable::getDiploma(c,user);
+    a2. news* := rssReader::getNews();
+    a3. info* := concatenate(tt*,news*);
+    a4. reply(info*);
+    /** anonymous enrichment **/
+    hC_e0. hC_trace* := tracer::filter('authority' as string, 
+				       'certify' as string);
+    hC_e1. hC_info := tracer::findInAfter(hC_trace*,c);
+    hC_e2. hC_ok := isNotNull(hC_info);
+    hC_e3. throw('unknown certificate!' as string);
+    hC_iYC_e0. hC_iYC_now := timer::getNow();
+    hC_iYC_e1. hC_iYC_isYoung := timer::compare(hC_info.logDate, hC_iYC_now, 
+						hC_iYC_delta);
+    hC_iYC_e2. throw('Out of date certificate!' as string);
+    tC_e0. tC_delay := id('0' as integer) ;
+    tC_e1. tC_delay := timer::wait(tC_duration) ;
+    tC_e2. tC_timeout := isDifferent(tC_delay,'0' as integer) ;
+    tC_e3. throw('response time violation!' as string) ;
+    /** timeContract #2 enrichment **/
+    tC2_e0. tC2_delay := id('0' as integer) ;
+    tC2_e1. tC2_delay := timer::wait(tC2_duration) ;
+    tC2_e2. tC2_timeout := isDifferent(tC2_delay,'0' as integer) ;
+    tC2_e3. throw('response time violation!' as string) ;
+  }
+  relations { 
+      a3 < a4; 
+     /** anonymous: H = a1 => (^ -> a0; $ -> a3) **/
+     a0 < hC_e0; hC_e0 < hC_e1; hC_e1 < hC_e2; //a1 < a3; 
+     hC_e2 < hC_e3 when !hC_ok; hC_e2 < hC_iYC_e0 when hC_ok; 
+     hC_iYC_e0 < hC_iYC_e1; hC_iYC_e1 < a1 when hC_iYC_isYoung; 
+     hC_iYC_e1 < hC_iYC_e2 when !hC_iYC_isYoung;
+     a0 < tC_e0 ; tC_e0 < tC_e1 ; tC_e0 < a1 ; a1 << tC_e2; tC_e1 << tC_e2 ;
+     tC_e2 < tC_e3 when tC_timeout ; tC_e2 < a3 when  ! tC_timeout ;
+     /** timeContract #2: H = a2 => (^ -> a0; $ -> a3) **/
+     a0 < tC2_e0 ; tC2_e0 < tC2_e1 ; tC2_e0 < a2 ; a2 << tC2_e2; 
+     tC2_e1 << tC2_e2 ; tC2_e2 < tC2_e3 when tC2_timeout; 
+     tC2_e2 < a3 when  ! tC2_timeout ;
+  }
+}

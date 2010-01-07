@@ -1,0 +1,87 @@
+/** MDD4DRES ADORE Fragments
+ * @authors Sebastien & Mireille
+ * @date 01/07/10
+ */
+
+/** This fragment trace the execution of an invocation (before/after) 
+ ** It uses a 'tracer' partner to store information in a log file
+ * @param srv: the invoked service
+ * @param op:  the invoked operation
+ **/
+fragment trace<srv,op> {
+  variables {
+    in as any; out as any; ticket as string; c as boolean;
+    srv as string; op as string;
+  }
+  activities {
+    e0. ticket := tracer::createEmptyTicket(srv,op);
+    e1. tracer::logBefore(ticket,in);
+    h. out := hook(in);
+    e2. tracer::logAfter(ticket,out);
+    e3. c := tracer::isComplete(ticket);
+    e4. throw('incomplete trace' as string);
+  }
+  relations {
+    ^ < e0; e0 < e1; e1 < h; h < e2; e2 < e3;
+    e3 < $ when c; e3 < e4 when !c;
+  }
+}
+
+/** This fragment implement a 'timeout' constraint for a given 'duration';
+ ** Definitively inspired by the raw 'faros' one.
+ * @param duration: the maximum allowed response time
+ **/
+fragment timeContract<duration>{
+  variables { delay as integer; timeout as boolean; duration as integer; } 
+  activities { 
+    e0. delay := id('0' as integer) ;
+    e1. delay := timer::wait(duration) ;
+    h. hook() ;
+    e2. timeout := isDifferent(delay,'0' as integer) ;
+    e3. throw('response time violation!' as string) ;
+  } 
+  relations { 
+    ^ < e0 ; e0 < e1 ; e0 < h ; h << e2; e1 << e2 ;
+    e2 < e3 when timeout ; e2 < $ when  ! timeout ;
+  } 
+}
+
+/** This fragment checks if an activity returns a 'not null' output
+ **/
+fragment hasCertificate<delta> {
+  variables {
+    crt as certificate; trace* as trace; info as trace; ok as boolean;
+  }
+  activities {
+    e0. trace* := tracer::filter('authority' as string, 'certify' as string);
+    e1. info := tracer::findInAfter(trace*,crt);
+    e2. ok := isNotNull(info);
+    h. hook(crt);
+    e3. throw('unknown certificate!' as string);
+  }
+  relations { 
+    ^ < e0; e0 < e1; e1 < e2; e2 < h when ok; h < $; e2 < e3 when !ok; 
+  }
+}
+
+
+/** This fragment check if a given certificate is 'young enough' to be used
+ * @param ref the reference time to be used as certificatio time
+ * @param delta the allowed delta betwwen the ref. time and 'now'.
+ **/
+fragment isYoungCertificate<ref,delta> {
+  variables {
+    ref as integer; delta as integer; isYoung as boolean; now as date;
+  }
+  activities {
+    e0. now := timer::getNow();
+    h. hook();
+    e1. isYoung := timer::compare(ref, now, delta);
+    e2. throw('Out of date certificate!' as string);
+  }
+  relations { 
+    ^ < e0; e0 < e1; e1 < h when isYoung; e1 < e2 when !isYoung; h < $;
+  }
+} 
+
+

@@ -1,0 +1,26 @@
+/** MDD4DRES ADORE compositions
+ * @authors Sebastien & Mireille
+ * @date 01/07/10
+ */
+
+require 'fragments.adore';
+require 'processes.adore';
+
+composition hasCertificate {
+  apply isYoungCertificate(ref: '@info.logDate') => h;
+}
+
+// Adding a trace concern around the authority certification 
+composition auth::login { 
+  apply trace(srv: 'authority', op: 'certify') => a2; 
+}
+
+// Enhancing the infoProvider business process
+composition infoProvider::getInformation {
+  // Certificate muts be 'young enough' (30 minutes) for 'getDiploma'
+  apply hasCertificate(delta: '30') => a1;
+  // 'getDiploma' must answer in less than a minute
+  apply timeContract(duration: '60') => a1; 
+  // 'getNews' must answer in less than two minutes
+  apply timeContract(duration: '120') => a2; 
+}

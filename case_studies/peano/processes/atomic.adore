@@ -3,31 +3,31 @@
  */
 
 orchestration atomic::isZero {
-  variables { val as integer; result as boolean; }
+  variables { n as integer; result as boolean; }
   activities {
-    a0. (n: val) := receive();
-    a1. result := equals(val,'0' as integer);
-    a2. reply(b: result);
+    a0. n := receive();
+    a1. result := equals(n,'0' as integer);
+    a2. reply(result);
   }
   relations { a0 < a1; a1 < a2; }
 }
 
 orchestration atomic::next {
-  variables { val as integer; }
+  variables { n as integer; result as integer; }
   activities {
-    a0. (n: val) := receive();
-    a1. val := add(val,'1' as integer);
-    a2. reply(r: val);
+    a0. n := receive();
+    a1. result := add(n,'1' as integer);
+    a2. reply(result);
   }
   relations { a0 < a1; a1 < a2; }
 }
 
 orchestration atomic::prev {
-  variables { val as integer; }
+  variables { n as integer; result as integer; }
   activities {
-    a0. (n: val) := receive();
-    a1. val := sub(val,'1' as integer);
-    a2. reply(r: val);
+    a0. n := receive();
+    a1. result := sub(n,'1' as integer);
+    a2. reply(result);
   }
   relations { a0 < a1; a1 < a2; }
 }

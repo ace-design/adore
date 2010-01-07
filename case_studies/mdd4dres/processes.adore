@@ -1,0 +1,38 @@
+/** MDD4DRES ADORE processes
+ * @authors Sebastien & Mireille
+ * @date 01/07/10
+ */
+
+orchestration auth::login {
+  variables { 
+    user as string; password as string; 
+    isValid as boolean; crt as certificate; 
+  }
+  activities {
+    a0. (user, password) := receive();
+    a1. isValid := auth::check(user,password);
+    a2. crt := authority::certify(user);
+    a3. reply(crt);
+    e. throw('bad user information!' as string);
+  }
+  relations {
+    a0 < a1; a1 < a2 when isValid; a1 < e when ! isValid; a2 < a3;
+  }
+}
+
+orchestration infoProvider::getInformation {
+  variables {
+    user as string; c as certificate;
+    tt* as information; news* as information; info* as information;
+  }
+  activities {
+    a0. (user,c) := receive();
+    a1. tt* := timetable::getDiploma(c,user);
+    a2. news* := rssReader::getNews();
+    a3. info* := concatenate(tt*,news*);
+    a4. reply(info*);
+  }
+  relations { a0 < a1; a0 < a2; a1 < a3; a2 < a3; a3 < a4; }
+}
+
+
