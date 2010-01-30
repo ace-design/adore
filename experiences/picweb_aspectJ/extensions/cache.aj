@@ -3,7 +3,7 @@ import picweb.Cache;
 
 public abstract aspect cache extends vX_pointcuts
 {    
-    declare precedence: v1_truncate;
+    declare precedence: v4_shuffle; /** instead of v1_truncate **/
 
     protected abstract int getDelta();
 
