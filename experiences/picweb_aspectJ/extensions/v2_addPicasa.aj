@@ -5,7 +5,7 @@ import picweb.Merge;
 
 public aspect v2_addPicasa extends vX_pointcuts
 {
-    declare precedence: v1_truncate ;
+    declare precedence: v1_truncate, v3_cache_60;
 
     public static Picasa PICASA = new Picasa();
     public static Merge MERGE = new Merge();
