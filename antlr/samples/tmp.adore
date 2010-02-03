@@ -1,21 +1,7 @@
-
-orchestration cms::setNewCrisisInformation{
- 
-  variables {
-    i as crisisInformation;
-    relevant as boolean;
-  }
-  
+fragment f {
+  variables { in as struct; out as struct; }
   activities {
-    a0. (i) := receive();
-    a12. coordinatorSystem::notify('newInfo'  as string,i);
-    a1. relevant := cms::isRelevantInformation(i);
-    a10. ressourceManager::notify(i);
-    r. reply();
+    h. out := hook(in);
   }
-  relations { 
-    a0 < a1; 
-    a1 < a10 when relevant; 
-    a1 < r when !relevant;
-  }
-} 
+  relations { ^ < h; h < $;}
+}

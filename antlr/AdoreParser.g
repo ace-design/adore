@@ -76,9 +76,8 @@ definition
 	|	ORCH s=ID DBL_COL o=ID core 		-> ^(DEF ^(ORCHESTRATION $s $o) core)
 	|	FRAG n=ID params? core 			-> ^(DEF ^(FRAGMENT $n ^(PARAMS params?)) core)
 	|	composition				-> ^(DEF composition)
-	|	DISENGAGE				-> ^(DEF ^(RAW DISENGAGE))
+	|	r=DISENGAGE				-> ^(DEF ^(RAW $r))
 	;
-
 
 composition
 	:	COMPOSITION (s=ID (DBL_COL o=ID)?)? (AS srvOut=ID (DBL_COL opOut=ID)?)? merge_core	

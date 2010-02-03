@@ -45,7 +45,6 @@ APPLY:		'apply';
 TOSET:		'toSet';
 FAILURE	:	'fail';
 
-
 /** PUNCTUATION**/
 STAR:		'*';
 NOT:		'!';
@@ -69,10 +68,10 @@ DOT:		'.';
 ID:		('a'..'z') ('A'..'Z'|'0'..'9'|'a'..'z' | '_')* ;
 
 STR:		'\'' ~'\''* '\'';
-DISENGAGE
-	:	'%%% DISENGAGE %%%' .* '%%% ENGAGE %%%' ;
+DISENGAGE:	'/*%' .* '%*/'	;
+
 /** IGNORED **/
 INLN_COM: 	'//' ~('\r' | '\n')* NL 	{ skip(); };
-COMMENT	:	'/*' .* '*/'			{ skip(); };
+COMMENT	:	'/*' ~('%').*~('%') '*/'	{ skip(); };
 NL: 		('\r'? '\n')+			{ skip(); };
 WSPCE: 		(' '|'\t')+ 			{ skip(); };

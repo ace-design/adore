@@ -61,6 +61,13 @@ import java.io.*;
   	facts.add("setContainment("+process+"_succs,"+process+")");
   }
   
+  private String cleanupDisengage(String raw) {
+	String data = raw.substring(3,raw.length()-3).replaceAll("\n","");
+	return "print('\%\%\% DISENGAGE'), nl, print('\%\% => doing ["+data.trim().substring(0,data.trim().length()-1)+"]'), nl, " + 
+		data.trim() + " print('\%\%\% ENGAGE'), nl, true";
+  }
+  
+  
   private static int ANONYMOUS_CPT = 0;
   private String generateAnonymousId() {
     return "lambda_" + ANONYMOUS_CPT++;
@@ -119,7 +126,7 @@ definition returns [ArrayList<String> facts]
 						}
 						
 	| ^(DEF merge) 				{ safeAdd($facts,$merge.facts); }	
-	| ^(DEF ^(RAW p=DISENGAGE))		{ $facts.add($p.text);      }
+	| ^(DEF ^(RAW p=DISENGAGE))		{ $facts.add(cleanupDisengage($p.text));      }
 	;
 
 param [String cxt]
