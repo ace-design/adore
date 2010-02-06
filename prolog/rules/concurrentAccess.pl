@@ -20,24 +20,17 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%%%%
-%% Debugging ADORE ...
-%%%%
+:- module(concurrentAccess,[]).
 
-%debugSubscription(create).
-%debugSubscription(def).
-%debugSubscription(set).
-
-debugSubscription(exec).
-
-%%%%
-%% Model transformation parameters: 
-%%%%
-
-%% Seb:
-adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
-
-%% Mireille:
-%% adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+run(Pairs) :- 
+	findall([P,R],isConflicting(P,R), Tmp),
+	sort(Tmp,Pairs).
 
 
+isConflicting(Pair,Resource) :- 
+	process(P), 
+	activity:belongsTo(A,P), activity:belongsTo(APrime,P), A \= APrime,
+	usesElemAsOutput(A,Resource), usesElem(APrime, Resource),
+	\+ (existsPath(A,APrime) | existsPath(APrime,A)),!,
+	Tmp = [A,APrime], sort(Tmp, Pair).
+	

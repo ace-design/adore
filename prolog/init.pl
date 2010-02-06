@@ -30,20 +30,27 @@ aw(M) :- adore_silent(false), write(M), nl.
 
 
 loadFiles :- 
-	aw('%%%% Loading Source Core'),
-        loadCore(debug), loadCore(trace), loadCore(metamodel), 
-	loadCore(actions), loadCore(functions), loadCore(helpers), 
-	loadCore(dependencies), loadCore(dataflow), loadCore(engine), 
-	loadCore(substitution),
+	aw('%%%% Loading Prolog Internal Core'), 
+        loadCore('facts_model'), 
+        loadCore('engine'), loadCore('debug'), loadCore('trace'), 
+	loadCore('actions'), loadCore('gensym'), loadCore('helpers'), 
+	%% TODO: followong should be merged in metamodel operationalization
+	loadCore('functions'), loadCore('dependencies'), loadCore('dataflow'), 
+	 loadCore('substitution'),
+	%% end of todo
+	aw('%%%% Loading ADORE Metamodel'),
+        loadMM('universe'), loadMM('activity'), loadMM('context'),
+	loadMM('process'), loadMM('variable'), loadMM('relations'),
 	aw('%%%% Loading Algorithms'),
         loadAlgo('contextMerge'), loadAlgo('applyRewrite'),
 	loadAlgo('contextNormalization'), 
-	loadAlgo('setify'), 
+	loadAlgo('setify'), loadAlgo('clone'),
 	aw('%%%% Loading Transformations'),
         loadTransfo('adore2dsl'), loadTransfo('adore2xml'),
 	loadTransfo('adore2dot'), loadTransfo('adore2metrics'),
 	loadTransfo('adore2png'), loadTransfo('adore2dgraph'),
 	aw('%%%% Loading Detection Rules'), 
+        loadRule('concurrentAccess'),
 	aw('%%%% Loading Local Configuration'), 
         [config].
 
@@ -55,6 +62,12 @@ loadTransfo(Name) :-
 
 loadAlgo(Name) :-  
 	string_concat('algos/',Name,File), use_module(File).
+
+loadRule(Name) :-  
+	string_concat('rules/',Name,File), use_module(File).
+
+loadMM(Name) :- 
+	string_concat('metamodel/',Name,File), use_module(File).
 
 header :- 
 	aw('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'),
@@ -73,6 +86,8 @@ header :-
 :-  header, 
 	aw('%%%%%%%% Loading the ADORE engine ...'),
 	loadFiles, 
-	aw('%%%% Debug Channels Activation'), performDebugSubscription, 
-	aw('%%%% Checking ADORE consistency'), make,
+	aw('%%%% Debug Channels Activation'), 
+        performDebugSubscription, 
+	aw('%%%% Checking ADORE consistency'), 
+        make,
         aw('%%%%%%%% ADORE engine loaded !').

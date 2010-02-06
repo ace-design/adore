@@ -1,0 +1,33 @@
+digraph picweb_getV2 {
+  fontname=Courier;
+  node [shape=record];
+  edge [fontname=Courier];
+label="Orchestration picweb::getV2"
+  picweb_getV2_a0 [label="a0|(tag,threshold) := receive()"];
+  picweb_getV2_a1 [label="a1|(key) := keyRegistry::get('flickr')"];
+  picweb_getV2_a2 [label="a2|(flickr*) := flickrWrapper::exploreFolksonomy(tag,key)"];
+  picweb_getV2_a3 [label="a3|reply(flickr*)"];
+  picweb_getV2_t_e0 [label="t_e0|(flickr*) := truncate::run(flickr*,threshold)",style=filled, fillcolor="bisque3"];
+  picweb_getV2_aP_e0 [label="aP_e0|(picasa*) := picasaBinder::getOnTag(tag)",style=filled, fillcolor="seagreen3"];
+  picweb_getV2_aP_e1 [label="aP_e1|(flickr*) := merge::run(flickr*,picasa*)",style=filled, fillcolor="seagreen3"];
+  picweb_getV2_a0 -> picweb_getV2_a1 ;
+  picweb_getV2_a0 -> picweb_getV2_aP_e0 ;
+  picweb_getV2_a1 -> picweb_getV2_a2 ;
+  picweb_getV2_a2 -> picweb_getV2_t_e0 ;
+  picweb_getV2_t_e0 -> picweb_getV2_a3 ;
+  picweb_getV2_aP_e0 -> picweb_getV2_aP_e1 ;
+  picweb_getV2_a2 -> picweb_getV2_aP_e1 ;
+  picweb_getV2_aP_e1 -> picweb_getV2_a3 ;
+
+subgraph cluster_legend {
+          label = "Legend";
+          ranksep=0.02;
+          orig [label="original process"];
+          t [label="truncate", style=filled, fillcolor="bisque3"];
+	  aP [label="addPicasa", style=filled, fillcolor="seagreen3"];
+          orig -> t [style="invis",arrowsize=0];
+	  orig -> aP [style="invis",arrowsize=0];
+  }
+
+
+} 

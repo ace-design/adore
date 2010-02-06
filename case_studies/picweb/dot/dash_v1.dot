@@ -1,0 +1,25 @@
+digraph picweb_getV1 {
+  fontname=Courier;
+  node [shape=record];
+  edge [fontname=Courier];
+  label="Orchestration picweb::getV1";
+  picweb_getV1_a0 [label="a0"];
+  picweb_getV1_a1 [label="a1"];
+  picweb_getV1_a2 [label="a2"];
+  picweb_getV1_a3 [label="a3"];
+  picweb_getV1_t_e0 [label="e0",style=filled,fillcolor=bisque3];
+  picweb_getV1_a0 -> picweb_getV1_a1 ;
+  picweb_getV1_a1 -> picweb_getV1_a2 ;
+  picweb_getV1_a2 -> picweb_getV1_t_e0 ;
+  picweb_getV1_t_e0 -> picweb_getV1_a3 ;
+
+subgraph cluster_legend {
+          label = "Legend";
+          ranksep=0.02;
+          orig [label="original process"];
+          t [label="truncate", style=filled, fillcolor="bisque3"];
+          orig -> t [style="invis",arrowsize=0];
+  }
+
+
+} 

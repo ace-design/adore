@@ -1,0 +1,24 @@
+digraph anonymous2 {
+  fontname=Courier;
+  node [shape=record];
+  edge [fontname=Courier];
+label="Fragment anonymous2<limit>"
+  anonymous2_preds [label="P", shape=doublecircle, style=filled, fillcolor="bisque3"];
+  anonymous2_succs [label="S", shape=doublecircle, style=filled, fillcolor="bisque3"];
+  anonymous2_s_e0 [label="s_e0|(pict*) := shuffle::run(pict*)",style=filled, fillcolor="darksalmon"];
+  anonymous2_e0 [label="e0|(pict*) := truncate::run(pict*,limit)", style=filled, fillcolor="bisque3"];
+  anonymous2_h [label="h|hook(pict*)", style=filled, fillcolor="bisque3"];
+  anonymous2_preds -> anonymous2_s_e0 ;
+  anonymous2_s_e0 -> anonymous2_e0 ;
+  anonymous2_e0 -> anonymous2_h ;
+  anonymous2_h -> anonymous2_succs ;
+
+subgraph cluster_legend {
+          label = "Legend";
+          ranksep=0.02;
+	  t [label="truncate", style=filled, fillcolor="bisque3"];
+	  s [label="shuffle", style=filled, fillcolor="darksalmon"];
+	  t -> s [style="invis",arrowsize=0];
+  }
+  
+} 

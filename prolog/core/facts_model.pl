@@ -14,8 +14,8 @@
 %% GNU General Public License for more details.
 %%
 %% You should have received a copy of the GNU General Public License
-%% along with jSeduite:DataCache; if not, write to the Free Software
-%% Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+%% along with ADORE; if not, write to the Free Software Foundation,
+%% Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 %%
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
@@ -27,7 +27,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%
-%% Vocabulary
+%% Representation
+%%%%
+
+% :- dynamic factName/arity   %%   atomicAction(Parameters)
+
+% => the execution of 'atomicAction(Parameters)' adds a fact named
+%    'factName' if and only if 'factName' preconditions are verified.
+
+% => For more details about facts preconditions, see 'actions.pl'
+
+%%%%
+%% Parameters Vocabulary
 %%%%
 
 %% P: a valid process identidier
@@ -39,6 +50,7 @@
 %% S: a "string" literal
 %% L: A prolog list
 %% 'valid' means syntactic & existing when needed 
+
 
 %%%%
 %%  Business Processes (Orchestration / Fragment)
@@ -64,7 +76,6 @@
 :- dynamic usesAsBinding/3.    %%  setMessageBinding(A,I,V)
 :- dynamic hasForFunction/2.   %%  setFunction(A,I)  
 
-
 %%%%
 %% Variables 
 %%%%
@@ -77,7 +88,7 @@
 
 :- dynamic usesAsInput/2.      %%  addAsInput(V,A)
 :- dynamic usesAsOutput/2.     %%  addAsOutput(V,A)
-:- dynamic fieldAccess/3.      %%  sFieldAccess(I,V,L).
+:- dynamic fieldAccess/3.      %%  createFieldAccess(I,V,L).
 
 
 %%%%
@@ -90,7 +101,14 @@
 :- dynamic onFailure/3.        %%  defOnFail(A,A,S|'*')
 
 %%%%
-%% Composition directive
+%% Policies
+%%%%
+
+:- dynamic policy/3.           %% defPolicy(I,Formula,Formula)
+:- dynamic iteratesOver/2.     %% setIteration(A,Policy)
+
+%%%%
+%% Composition directives
 %%%%
 
 :- dynamic context/1.          %% defCompositionContext(I)
@@ -99,12 +117,4 @@
 :- dynamic activityBlock/3.    %% defActivityBlock(I,I,L)
 :- dynamic applyFragment/4.    %% defApply(I,P,I,P)
 :- dynamic applyParameter/3.   %% setApplyParam(I,I,S)
-:- dynamic setDirective/2.           %% defSetify(I,V)
-
-
-%%%%
-%% Policies
-%%%%
-
-:- dynamic policy/3.           %% defPolicy(I,Formula,Formula)
-:- dynamic iteratesOver/2.     %% setIteration(A,Policy)
+:- dynamic setDirective/2.     %% defSetify(I,V)

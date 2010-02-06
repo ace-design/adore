@@ -20,24 +20,22 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%%%%
-%% Debugging ADORE ...
-%%%%
+:- module(universe,[]).
 
-%debugSubscription(create).
-%debugSubscription(def).
-%debugSubscription(set).
+%%% Remarks: 
+%  The implementation only deals with one universe at once. As a consequence, 
+%  there is no 'identifier' for a given universe, as it can only exists ONE
+%  universe at the same time in the ADORE engine.
+%%%
 
-debugSubscription(exec).
+%%%
+% Accessors predicates
+%%%
 
-%%%%
-%% Model transformation parameters: 
-%%%%
+processes(Processes) :- 
+	findall(X,process(X), Processes).
 
-%% Seb:
-adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+contexts(Contexts) :- 
+	findall(X,context(X), Contexts).
 
-%% Mireille:
-%% adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
-
-
+knowledge([]).

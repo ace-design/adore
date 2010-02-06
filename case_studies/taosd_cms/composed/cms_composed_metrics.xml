@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<universe view="metrics">
+<universe view="metrics" version="adore4mondrian_1.0">
   <process name="cms_assignIntRes" fragment="false">
     <activities total="21">
       <invoke>11</invoke>

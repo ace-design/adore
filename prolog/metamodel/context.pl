@@ -20,24 +20,34 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%%%%
-%% Debugging ADORE ...
-%%%%
+:- module(context,[]).
 
-%debugSubscription(create).
-%debugSubscription(def).
-%debugSubscription(set).
+%%%
+% Accessors predicates
+%%%
 
-debugSubscription(exec).
+target(C,P) :- 
+	context(C), contextTarget(C,P), process(P).
 
-%%%%
-%% Model transformation parameters: 
-%%%%
+output(C,P) :- 
+	context(C), contextOutput(C,P).
 
-%% Seb:
-adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+directives(C,DirSet) :- 
+	context(C), 
+	findall(applyDir(X),applyFragment(X,C,_,_),Applys),
+	findall(setDir(X), setDirective(C,X), Sets),
+	flatten([Applys,Sets],DirSet).
 
-%% Mireille:
-%% adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+%%%
+% Context Predicates
+%%%
+
+isEquivalent(C1,C2) :- 
+	output(C1,O), output(C2,O), target(C1,T), target(C2,T).
+
+%%%
+% Context Set Predicates
+%%%
+
 
 

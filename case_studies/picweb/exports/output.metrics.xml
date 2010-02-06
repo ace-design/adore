@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe view="metrics" version="adore4mondrian_1.0">
+  <process name="anonymous1" fragment="true">
+    <activities total="5">
+      <invoke>5</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="9">
+      <wait_for>6</wait_for>
+      <guard>3</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>6</height>
+      <surface>18</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage>
+      <apply>0</apply>
+      <targets>0</targets>
+    </usage>
+  </process>
+  <process name="anonymous2" fragment="true">
+    <activities total="2">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="4">
+      <wait_for>4</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>5</height>
+      <surface>5</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage>
+      <apply>0</apply>
+      <targets>0</targets>
+    </usage>
+  </process>
+  <process name="picweb_getV1" fragment="false">
+    <activities total="5">
+      <invoke>3</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="4">
+      <wait_for>4</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>5</height>
+      <surface>5</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="picweb_getV2" fragment="false">
+    <activities total="7">
+      <invoke>5</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>7</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="picweb_getV3" fragment="false">
+    <activities total="10">
+      <invoke>8</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="11">
+      <wait_for>8</wait_for>
+      <guard>3</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>8</height>
+      <surface>24</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="picweb_getV4" fragment="false">
+    <activities total="11">
+      <invoke>9</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="12">
+      <wait_for>9</wait_for>
+      <guard>3</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>9</height>
+      <surface>27</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage />
+  </process>
+</universe>

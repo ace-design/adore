@@ -20,24 +20,24 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%%%%
-%% Debugging ADORE ...
-%%%%
+:- module(variable,[]).
 
-%debugSubscription(create).
-%debugSubscription(def).
-%debugSubscription(set).
+%%%
+% Atomic Activity Predicates
+%%%
 
-debugSubscription(exec).
-
-%%%%
-%% Model transformation parameters: 
-%%%%
-
-%% Seb:
-adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
-
-%% Mireille:
-%% adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+	
+%% get/2: get(+V,-R): retrieve the variable associated to V
+get(F,V) :- fieldAccess(F,V,_). %% as it can be a field access
+get(V,V) :- variable(V).        %% or simply the variable.
 
 
+%% belongsTo/2: belongsTo(?V,?P) ==> V is used in P
+belongsTo(Var,Process) :- 
+	activity:belongsTo(A,Process), 
+	activity:useVariable(A,Var).
+
+getType(Var,T) :- hasForType(Var,T).
+
+
+getInitValue(Var,Val) :- hasForInitValue(Var,Val).

@@ -17,27 +17,5 @@
 %% along with jSeduite:DataCache; if not, write to the Free Software
 %% Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 %%
-%% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
+%% @author      Main SÃ©bastien Mosser          [mosser@polytech.unice.fr]
 %%%%
-
-%%%%
-%% Debugging ADORE ...
-%%%%
-
-%debugSubscription(create).
-%debugSubscription(def).
-%debugSubscription(set).
-
-debugSubscription(exec).
-
-%%%%
-%% Model transformation parameters: 
-%%%%
-
-%% Seb:
-adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
-
-%% Mireille:
-%% adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
-
-

@@ -182,7 +182,7 @@ flagAsSet(V) :- %% \not \exists v \in Variable* => fail
 	\+ variable(V), !, 
 	dfail(set,'flagAsSet/1: Unknown variable \'~w\'!',V).
 flagAsSet(V) :-
-	adoreAssert(isConstant(V)), 
+	adoreAssert(isSet(V)), 
 	dinfo(set,'Variable \'~w\' flagged as a dataset',V).
 
 

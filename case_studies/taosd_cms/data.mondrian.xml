@@ -1,0 +1,1016 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe view="metrics" version="adore4mondrian_1.0">
+  <process name="askedMissionFailure" fragment="true">
+    <activities total="3">
+      <invoke>3</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="6">
+      <wait_for>4</wait_for>
+      <guard>0</guard>
+      <weak_wait>2</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="callDisconnected" fragment="true">
+    <activities total="1">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>2</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>3</height>
+      <surface>6</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>2</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="cancelAuth" fragment="true">
+    <activities total="1">
+      <invoke>0</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>2</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>3</height>
+      <surface>6</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="cms_assignIntRes" fragment="false">
+    <activities total="4">
+      <invoke>2</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>3</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>4</height>
+      <surface>4</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_authUser" fragment="false">
+    <activities total="4">
+      <invoke>2</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>3</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>4</height>
+      <surface>4</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_captureWitnessReport" fragment="false">
+    <activities total="11">
+      <invoke>9</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="11">
+      <wait_for>11</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>7</height>
+      <surface>21</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_execRescMission" fragment="false">
+    <activities total="10">
+      <invoke>8</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="12">
+      <wait_for>10</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>2</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>9</height>
+      <surface>18</surface>
+      <maze>4</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_execSupObsMission" fragment="false">
+    <activities total="6">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>5</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>6</height>
+      <surface>6</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_executeMission" fragment="false">
+    <activities total="10">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>5</misc>
+    </activities>
+    <relations total="12">
+      <wait_for>4</wait_for>
+      <guard>4</guard>
+      <weak_wait>4</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>4</width>
+      <height>4</height>
+      <surface>16</surface>
+      <maze>4</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_handleACrisis" fragment="false">
+    <activities total="5">
+      <invoke>3</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="4">
+      <wait_for>4</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>5</height>
+      <surface>5</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_handleAMission" fragment="false">
+    <activities total="11">
+      <invoke>7</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>3</misc>
+    </activities>
+    <relations total="13">
+      <wait_for>13</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>6</height>
+      <surface>18</surface>
+      <maze>4</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_handleAWorker" fragment="false">
+    <activities total="10">
+      <invoke>8</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="10">
+      <wait_for>10</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>7</height>
+      <surface>21</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_handleSupObsMissions" fragment="false">
+    <activities total="11">
+      <invoke>9</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="12">
+      <wait_for>8</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>9</height>
+      <surface>18</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_requestExtRes" fragment="false">
+    <activities total="4">
+      <invoke>2</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>3</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>4</height>
+      <surface>4</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="cms_resolveCrisis" fragment="false">
+    <activities total="7">
+      <invoke>5</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="6">
+      <wait_for>6</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="degradedRes" fragment="true">
+    <activities total="3">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="6">
+      <wait_for>4</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="employeeRefusal" fragment="true">
+    <activities total="5">
+      <invoke>3</invoke>
+      <reply>1</reply>
+      <throw>1</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>4</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="fakeCrisisDetected" fragment="true">
+    <activities total="2">
+      <invoke>1</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>3</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>3</height>
+      <surface>6</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage>
+      <apply>2</apply>
+      <targets>2</targets>
+    </usage>
+  </process>
+  <process name="fakeWitnessInfo" fragment="true">
+    <activities total="1">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>1</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>3</height>
+      <surface>6</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="ignoreDisconnection" fragment="true">
+    <activities total="0">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>2</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>3</height>
+      <surface>6</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="lostContact" fragment="true">
+    <activities total="3">
+      <invoke>3</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="6">
+      <wait_for>4</wait_for>
+      <guard>0</guard>
+      <weak_wait>2</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>2</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="missingReport" fragment="true">
+    <activities total="1">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="4">
+      <wait_for>1</wait_for>
+      <guard>0</guard>
+      <weak_wait>2</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>4</height>
+      <surface>8</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="missionFailed" fragment="true">
+    <activities total="3">
+      <invoke>2</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>4</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="mustAuthenticate" fragment="true">
+    <activities total="3">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="6">
+      <wait_for>2</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage>
+      <apply>2</apply>
+      <targets>2</targets>
+    </usage>
+  </process>
+  <process name="noAvailableReplacement" fragment="true">
+    <activities total="2">
+      <invoke>1</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>3</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="noExtRes" fragment="true">
+    <activities total="2">
+      <invoke>1</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="4">
+      <wait_for>3</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>4</height>
+      <surface>8</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="only3times" fragment="true">
+    <activities total="5">
+      <invoke>2</invoke>
+      <reply>1</reply>
+      <throw>1</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>3</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="reHandleOnChange" fragment="true">
+    <activities total="6">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>4</misc>
+    </activities>
+    <relations total="11">
+      <wait_for>7</wait_for>
+      <guard>2</guard>
+      <weak_wait>2</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>7</height>
+      <surface>14</surface>
+      <maze>5</maze>
+    </complexity>
+    <usage>
+      <apply>3</apply>
+      <targets>3</targets>
+    </usage>
+  </process>
+  <process name="replaceMission" fragment="true">
+    <activities total="3">
+      <invoke>2</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>3</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="requestVideo" fragment="true">
+    <activities total="3">
+      <invoke>3</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>4</wait_for>
+      <guard>1</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>3</height>
+      <surface>6</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="retrieveVictimHistory" fragment="true">
+    <activities total="3">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="6">
+      <wait_for>4</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="timeout" fragment="true">
+    <activities total="7">
+      <invoke>3</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>3</misc>
+    </activities>
+    <relations total="10">
+      <wait_for>6</wait_for>
+      <guard>2</guard>
+      <weak_wait>2</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>8</height>
+      <surface>16</surface>
+      <maze>4</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="unavailableEmployee" fragment="true">
+    <activities total="9">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>1</throw>
+      <misc>3</misc>
+    </activities>
+    <relations total="12">
+      <wait_for>6</wait_for>
+      <guard>3</guard>
+      <weak_wait>2</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>8</height>
+      <surface>24</surface>
+      <maze>6</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="unavailableExtResource" fragment="true">
+    <activities total="4">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>4</wait_for>
+      <guard>0</guard>
+      <weak_wait>2</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>7</height>
+      <surface>14</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="unavailableIntResource" fragment="true">
+    <activities total="2">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>4</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>1</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="useHelicopter" fragment="true">
+    <activities total="3">
+      <invoke>3</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>3</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+
+  <composition id="context_14" target="cms_handleAMission" >
+      <apply id="apply_16" fragment="unavailableIntResource">
+        <block id="block_15" process="cms_handleAMission">
+          <activityRef uid="a41" />
+        </block>
+      </apply>
+      <apply id="apply_18" fragment="unavailableExtResource">
+        <block id="block_17" process="cms_handleAMission">
+          <activityRef uid="a51" />
+          <activityRef uid="a5x" />
+        </block>
+      </apply>
+      <apply id="apply_20" fragment="reHandleOnChange">
+        <block id="block_19" process="cms_handleAMission">
+          <activityRef uid="a40" />
+          <activityRef uid="a41" />
+          <activityRef uid="a42" />
+          <activityRef uid="a4x" />
+          <activityRef uid="a9" />
+          <activityRef uid="a50" />
+          <activityRef uid="a51" />
+          <activityRef uid="a5x" />
+        </block>
+      </apply>
+      <toSet variable="ir" />
+      <toSet variable="er" />
+  </composition>
+  <composition id="context_35" target="cms_handleAWorker" >
+      <apply id="apply_37" fragment="useHelicopter">
+        <block id="block_36" process="cms_handleAWorker">
+          <activityRef uid="a6" />
+        </block>
+      </apply>
+      <apply id="apply_39" fragment="lostContact">
+        <block id="block_38" process="cms_handleAWorker">
+          <activityRef uid="a6" />
+        </block>
+      </apply>
+      <apply id="apply_41" fragment="timeout">
+        <block id="block_40" process="cms_handleAWorker">
+          <activityRef uid="a6" />
+        </block>
+      </apply>
+      <apply id="apply_43" fragment="reHandleOnChange">
+        <block id="block_42" process="cms_handleAWorker">
+          <activityRef uid="a7" />
+        </block>
+      </apply>
+      <apply id="apply_45" fragment="missionFailed">
+        <block id="block_44" process="cms_handleAWorker">
+          <activityRef uid="a7" />
+        </block>
+      </apply>
+      <apply id="apply_47" fragment="lostContact">
+        <block id="block_46" process="cms_handleAWorker">
+          <activityRef uid="a8" />
+        </block>
+      </apply>
+      <apply id="apply_49" fragment="missingReport">
+        <block id="block_48" process="cms_handleAWorker">
+          <activityRef uid="a11" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_50" target="cms_handleACrisis" >
+      <apply id="apply_52" fragment="reHandleOnChange">
+        <block id="block_51" process="cms_handleACrisis">
+          <activityRef uid="aX" />
+        </block>
+      </apply>
+      <toSet variable="choosen" />
+  </composition>
+  <composition id="context_55" target="cms_resolveCrisis" >
+      <apply id="apply_57" fragment="mustAuthenticate">
+        <block id="block_56" process="cms_resolveCrisis">
+          <activityRef uid="a1" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_66" target="cms_captureWitnessReport" >
+      <apply id="apply_68" fragment="callDisconnected">
+        <block id="block_67" process="cms_captureWitnessReport">
+          <activityRef uid="a10" />
+        </block>
+      </apply>
+      <apply id="apply_70" fragment="callDisconnected">
+        <block id="block_69" process="cms_captureWitnessReport">
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+      <apply id="apply_72" fragment="requestVideo">
+        <block id="block_71" process="cms_captureWitnessReport">
+          <activityRef uid="a3" />
+          <activityRef uid="a4" />
+        </block>
+      </apply>
+      <apply id="apply_74" fragment="ignoreDisconnection">
+        <block id="block_73" process="cms_captureWitnessReport">
+          <activityRef uid="a4" />
+        </block>
+      </apply>
+      <apply id="apply_76" fragment="fakeWitnessInfo">
+        <block id="block_75" process="cms_captureWitnessReport">
+          <activityRef uid="a2a3" />
+        </block>
+      </apply>
+      <apply id="apply_78" fragment="fakeCrisisDetected">
+        <block id="block_77" process="cms_captureWitnessReport">
+          <activityRef uid="a4" />
+        </block>
+      </apply>
+      <apply id="apply_80" fragment="fakeCrisisDetected">
+        <block id="block_79" process="requestVideo">
+          <activityRef uid="a3" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_87" target="cms_assignIntRes" >
+      <apply id="apply_89" fragment="mustAuthenticate">
+        <block id="block_88" process="cms_assignIntRes">
+          <activityRef uid="a1" />
+        </block>
+      </apply>
+      <apply id="apply_91" fragment="unavailableEmployee">
+        <block id="block_90" process="cms_assignIntRes">
+          <activityRef uid="a1" />
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+      <apply id="apply_93" fragment="employeeRefusal">
+        <block id="block_92" process="cms_assignIntRes">
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_99" target="cms_requestExtRes" >
+      <apply id="apply_101" fragment="degradedRes">
+        <block id="block_100" process="cms_requestExtRes">
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+      <apply id="apply_103" fragment="noExtRes">
+        <block id="block_102" process="cms_requestExtRes">
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_119" target="cms_handleSupObsMissions" >
+      <apply id="apply_121" fragment="replaceMission">
+        <block id="block_120" process="cms_handleSupObsMissions">
+          <activityRef uid="a7" />
+        </block>
+      </apply>
+      <apply id="apply_123" fragment="noAvailableReplacement">
+        <block id="block_122" process="replaceMission">
+          <activityRef uid="a1" />
+        </block>
+      </apply>
+      <apply id="apply_125" fragment="askedMissionFailure">
+        <block id="block_124" process="cms_handleSupObsMissions">
+          <activityRef uid="a7" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_133" target="cms_execRescMission" >
+      <apply id="apply_135" fragment="retrieveVictimHistory">
+        <block id="block_134" process="cms_execRescMission">
+          <activityRef uid="a3" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_139" target="cms_authUser" >
+      <apply id="apply_141" fragment="cancelAuth">
+        <block id="block_140" process="cms_authUser">
+          <activityRef uid="a1a2" />
+        </block>
+      </apply>
+      <apply id="apply_143" fragment="only3times">
+        <block id="block_142" process="cms_authUser">
+          <activityRef uid="a1a2" />
+          <activityRef uid="a3" />
+        </block>
+      </apply>
+  </composition>
+</universe>

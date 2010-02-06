@@ -1,0 +1,20 @@
+orchestration picweb::getV2 {
+  variables {
+    tag as string; threshold as integer; flickr* as pictureUrl;
+    key as string;  picasa* as pictureUrl; 
+  }
+  activities {
+    a0. (tag, threshold) := receive();
+    a1. key := keyRegistry::get('flickr' as string);
+    a2. flickr* := flickrWrapper::exploreFolksonomy(tag,key);
+    a3. reply(flickr*);
+    t_e0. flickr* := truncate::run(flickr*,threshold);
+    aP_e0. picasa* := picasaBinder::getOnTag(tag);
+    aP_e1. flickr* := merge::run(flickr*,picasa*);
+  }
+  relations { 
+    a0 < a1; a1 < a2;  t_e0 < a3; 
+    a0 < aP_e0; aP_e0 < aP_e1; a2 < aP_e1;
+    a2 < t_e0; aP_e1 < a3; 
+  }
+}

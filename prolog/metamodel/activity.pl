@@ -20,24 +20,27 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%%%%
-%% Debugging ADORE ...
-%%%%
+:- module(activity,[]).
 
-%debugSubscription(create).
-%debugSubscription(def).
-%debugSubscription(set).
-
-debugSubscription(exec).
-
-%%%%
-%% Model transformation parameters: 
-%%%%
-
-%% Seb:
-adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
-
-%% Mireille:
-%% adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+belongsTo(Act,P) :- 
+	activity(Act), isContainedBy(Act,P), process(P).
 
 
+useVariable(Act,Var) :- 
+	useVariable(Act,Var,_).
+useVariable(Act,Var,in) :- 
+	activity(Act), variable(Var), 
+	( usesAsInput(Act,Var) | usesAsInput(Act,F), fieldAccess(F,Var,_) ).
+useVariable(Act,Var,out) :- 
+	activity(Act), variable(Var), 
+	( usesAsOutput(Act,Var) | usesAsOutput(Act,F), fieldAccess(F,Var,_) ).
+
+%%%
+% Activity Set Predicates
+%%%
+
+areInSameProcess(X,Y) :- belongsTo(X,P), belongsTo(Y,P).
+
+isWellFormed(ActSet) :- 
+	maplist(activity:belongsTo,ActSet,ProcessSet),
+	sort(ProcessSet,[_]).

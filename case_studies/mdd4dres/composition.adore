@@ -24,3 +24,4 @@ composition infoProvider::getInformation {
   // 'getNews' must answer in less than two minutes
   apply timeContract(duration: '120') => a2; 
 }
+

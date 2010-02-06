@@ -1,0 +1,145 @@
+<?xml version="1.0" ?>
+<universe view="structure" >
+  <process id="cache" name="cache" isFragment="true" >
+    <variables>
+      <variable id="cache_data" name="data" isSet="false" type="struct"/>
+      <variable id="cache_delta" name="delta" isSet="false" type="integer"/>
+      <variable id="cache_isValid" name="isValid" isSet="false" type="boolean"/>
+      <variable id="cache_key" name="key" isSet="false" type="string"/>
+    </variables>
+    <activities>
+      <activity id="cache_e0" name="e0"  kind="invoke" service="cache" operation="isValid" >
+        <inputs>
+          <variableRef uid="cache_key" />
+          <variableRef uid="cache_delta" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cache_isValid" />
+        </outputs>
+      </activity>
+      <activity id="cache_e1" name="e1"  kind="invoke" service="cache" operation="getValue" >
+        <inputs>
+          <variableRef uid="cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cache_data" />
+        </outputs>
+      </activity>
+      <activity id="cache_h" name="h" kind="hook" >
+        <inputs>
+          <variableRef uid="cache_key" />
+        </inputs>
+        <outputs>
+          <variableRef uid="cache_data" />
+        </outputs>
+      </activity>
+      <activity id="cache_e2" name="e2"  kind="invoke" service="cache" operation="memorize" >
+        <inputs>
+          <variableRef uid="cache_data" />
+          <variableRef uid="cache_key" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="e1" right="cache_succs" kind="waitFor" />
+      <relation left="e2" right="cache_succs" kind="waitFor" />
+      <relation left="cache_preds" right="e0" kind="waitFor" />
+      <relation left="h" right="e2" kind="waitFor" />
+      <relation left="e0" right="e1" kind="guard" variable="cache_isValid" condition="true" />
+      <relation left="e0" right="h" kind="guard" variable="cache_isValid" condition="false" />
+    </relations>
+  </process>
+  <composition id="context_1" target="picweb_getV0" output="picweb_getV1" >
+      <apply id="apply_3" fragment="truncate">
+        <block id="block_2" process="picweb_getV0">
+          <activityRef uid="picweb_getV0_a3" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_4" target="picweb_getV0" output="picweb_getV2" >
+      <apply id="apply_6" fragment="truncate">
+        <block id="block_5" process="picweb_getV0">
+          <activityRef uid="picweb_getV0_a3" />
+        </block>
+      </apply>
+      <apply id="apply_8" fragment="addPicasa">
+        <block id="block_7" process="picweb_getV0">
+          <activityRef uid="picweb_getV0_a1" />
+          <activityRef uid="picweb_getV0_a2" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_9" target="picweb_getV0" output="picweb_getV3" >
+      <apply id="apply_11" fragment="truncate">
+        <block id="block_10" process="picweb_getV0">
+          <activityRef uid="picweb_getV0_a3" />
+        </block>
+      </apply>
+      <apply id="apply_13" fragment="addPicasa">
+        <block id="block_12" process="picweb_getV0">
+          <activityRef uid="picweb_getV0_a1" />
+          <activityRef uid="picweb_getV0_a2" />
+        </block>
+      </apply>
+      <apply id="apply_15" fragment="cache">
+        <block id="block_14" process="addPicasa">
+          <activityRef uid="addPicasa_h" />
+          <activityRef uid="addPicasa_e0" />
+          <activityRef uid="addPicasa_e1" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_16" target="picweb_getV0" output="picweb_getV4" >
+      <apply id="apply_18" fragment="shuffle">
+        <block id="block_17" process="truncate">
+          <activityRef uid="truncate_e0" />
+        </block>
+      </apply>
+      <apply id="apply_20" fragment="truncate">
+        <block id="block_19" process="picweb_getV0">
+          <activityRef uid="picweb_getV0_a3" />
+        </block>
+      </apply>
+      <apply id="apply_22" fragment="addPicasa">
+        <block id="block_21" process="picweb_getV0">
+          <activityRef uid="picweb_getV0_a2" />
+        </block>
+      </apply>
+      <apply id="apply_24" fragment="cache">
+        <block id="block_23" process="addPicasa">
+          <activityRef uid="addPicasa_h" />
+          <activityRef uid="addPicasa_e0" />
+          <activityRef uid="addPicasa_e1" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_25" target="multiplePicWeb_get" >
+      <toSet variable="tag" />
+  </composition>
+  <composition id="context_26" target="picweb_getV0" output="mulitplePicWeb_internal" >
+      <apply id="apply_28" fragment="shuffle">
+        <block id="block_27" process="truncate">
+          <activityRef uid="truncate_e0" />
+        </block>
+      </apply>
+      <apply id="apply_30" fragment="truncate">
+        <block id="block_29" process="picweb_getV0">
+          <activityRef uid="picweb_getV0_a3" />
+        </block>
+      </apply>
+      <apply id="apply_32" fragment="addPicasa">
+        <block id="block_31" process="picweb_getV0">
+          <activityRef uid="picweb_getV0_a2" />
+        </block>
+      </apply>
+      <apply id="apply_34" fragment="cache">
+        <block id="block_33" process="addPicasa">
+          <activityRef uid="addPicasa_h" />
+          <activityRef uid="addPicasa_e0" />
+          <activityRef uid="addPicasa_e1" />
+        </block>
+      </apply>
+      <toSet variable="tag" />
+  </composition>
+</universe>

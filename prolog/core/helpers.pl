@@ -64,4 +64,31 @@ writeList([H|T]) :-
 adoreAssert(Fact) :- Fact, !.
 adoreAssert(Fact) :- assert(Fact).
 
+%%% Variable label common transformations
+
+genVarLabel(V,Label) :- 
+	getVariable(V,Tmp), %% a variable, not an anonymous field access
+	getPreviousName(Tmp,OldName), %% The REAL name, not the renamed one
+	suffixToStar(OldName, PrettyName), %% '_star' <-> '*'
+	genFields(V,Fields), %% fields as x.y.z
+	swritef(Label,"%w%w",[PrettyName,Fields]). %% that's all folks
+
+genFields(I,'') :- \+ fieldAccess(I,_,_), !.
+genFields(I,R) :- fieldAccess(I,_,L), showAsPoint(L,R).
+
+showAsPoint([],'').
+showAsPoint([H],R) :-  
+	suffixToStar(H,V),swritef(R,'.%w',[V]),!.
+showAsPoint([H|T],R) :- 
+	showAsPoint(T,O),
+	swritef(R,".%w%w",[H,O]).
+
+%% suffix a variable name: '_star' -> '*'
+suffixToStar(V,R) :- 
+	\+ is_list(V), string_to_list(V,L), suffixToStar(L,R).
+suffixToStar([],'') :- !.
+suffixToStar("_star",'*')  :- !.
+suffixToStar([H|T],R) :- 
+	string_to_list(C,[H]), suffixToStar(T,O),
+	swritef(R,"%w%w",[C,O]).
 

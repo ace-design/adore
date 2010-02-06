@@ -6,7 +6,7 @@
 /**************************
  ** Initial Process (v0) **
  **************************/
-orchestration picweb::get {
+orchestration picweb::getV0 {
   variables {
     tag as string; threshold as integer; flickr* as pictureUrl;
     key as string;
@@ -33,7 +33,7 @@ fragment truncate<limit> {
   relations { ^ < e0; e0 < h; h < $; }
 }
 
-composition picweb::get as picweb_v1 {
+composition picweb::getV0 as picweb::getV1 {
   apply truncate(limit: 'threshold') => a3;
 }
 
@@ -53,25 +53,25 @@ fragment addPicasa {
   relations { ^ < h; ^ < e0; h < e1; e0 < e1; e1 < $; }
 }
 
-composition picweb::get as picweb_v2 {
+composition picweb::getV0 as picweb::getV2 {
   apply truncate(limit: 'threshold') => a3;
-  apply addPicasa                    => a2;
+  apply addPicasa                    => {a1,a2};
 }
 
 /*******************************************************
  ** v3: Add a cache mechanism in front of the process **
  *******************************************************/
 
-fragment cache<key,delta> {
+fragment cache<delta> {
   variables {
     isValid as boolean; key as string; 
-    pict* as pictureUrl; delta as integer;
+    data as struct; delta as integer;
   }
   activities {
     e0. isValid := cache::isValid(key,delta);
-    e1. pict* := cache::getValue(key);
-    h. pict* := hook();
-    e2. cache::memorize(pict*, key);
+    e1. data := cache::getValue(key);
+    h. data := hook(key);
+    e2. cache::memorize(data, key);
   }
   relations { 
     ^ < e0; e0 < e1 when isValid; 
@@ -80,10 +80,10 @@ fragment cache<key,delta> {
   }
 }
 
-composition picweb::get as picweb_v3 {
-  apply truncate(limit: 'threshold')    => a3;
-  apply addPicasa                       => a2;
-  apply cache(key: 'tag', delta: '600') => {a1,a2} ;
+composition picweb::getV0 as picweb::getV3 {
+  apply truncate(limit: 'threshold') => a3;
+  apply addPicasa            => {a1,a2};
+  apply cache(delta: '600')  => {addPicasa::h,addPicasa::e0,addPicasa::e1} ;
 }
 
 /**************************************************
@@ -99,11 +99,11 @@ fragment shuffle {
   relations { ^ < e0; e0 < h; h < $; }
 }
 
-composition picweb::get as picweb_v4 {
+composition picweb::getV0 as picweb::getV4 {
   apply shuffle => truncate::e0;
   apply truncate(limit: 'threshold')    => a3;
   apply addPicasa                       => a2;
-  apply cache(key: 'tag', delta: '600') => {a1,a2} ;
+  apply cache(delta: '600')  => {addPicasa::h,addPicasa::e0,addPicasa::e1} ;
 }
 
 /***********************************************
@@ -131,11 +131,11 @@ composition multiplePicWeb::get {
  ** Vectorial implemntation, using an internal enhancement **
  ************************************************************/
 
-composition picweb::get as mulitplePicWeb_internal {
+composition picweb::getV0 as multiplePicWeb::internal {
   apply shuffle => truncate::e0;
   apply truncate(limit: 'threshold')    => a3;
   apply addPicasa                       => a2;
-  apply cache(key: 'tag', delta: '600') => {a1,a2} ;
+  apply cache(delta: '600')  => {addPicasa::h,addPicasa::e0,addPicasa::e1} ;
   toSet tag;
 }
 

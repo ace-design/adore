@@ -27,7 +27,7 @@ orchestration complex::sumSwap {
   }
   relations { 
     a0 < swap_t; 
-    swap_t < a1 when ! swap_lt; swap_t < swap_e1 when swap_lt; 
+    swap_t < a1 when swap_lt; swap_t < swap_e1 when ! swap_lt; 
     swap_e1 < swap_e2; swap_e2 < swap_e3; swap_e3 < a1;
     a1 < a2 when isZero; a2 < a6; 
     a1 < a3 when ! isZero; a1 < a4 when ! isZero; a3 < a5; a4 < a5; a5 < a6; 
@@ -92,7 +92,7 @@ orchestration complex::sumComplete {
   }
   relations { 
     a0 < swap_t; 
-    swap_t < a1 when ! swap_lt; swap_t < swap_e1 when swap_lt; 
+    swap_t < a1 when swap_lt; swap_t < swap_e1 when ! swap_lt; 
     swap_e1 < swap_e2; swap_e2 < swap_e3; swap_e3 < a1;
     a1 < a2 when isZero; a2 < a6; 
     a1 < cache_e1 when ! isZero; 
@@ -129,7 +129,7 @@ orchestration complex::multSwap {
     swap_e3. b := swap_tmp; 
   }
   relations {
-    a0 < swap_t; swap_t < a1 when ! swap_lt; swap_t < swap_e1 when swap_lt; 
+    a0 < swap_t; swap_t < a1 when swap_lt; swap_t < swap_e1 when ! swap_lt; 
     swap_e1 < swap_e2; swap_e2 < swap_e3; swap_e3 < a1;
     a1 < a2 when isZero; a2 < a6;
     a1 < a3 when ! isZero; a3 < a4; a4 < a5; a5 < a6;
@@ -192,7 +192,7 @@ orchestration complex::multComplete {
     cache_e4. cache::store(cache_key, result); 
   }
   relations {
-    a0 < swap_t; swap_t < a1 when ! swap_lt; swap_t < swap_e1 when swap_lt; 
+    a0 < swap_t; swap_t < a1 when swap_lt; swap_t < swap_e1 when ! swap_lt; 
     swap_e1 < swap_e2; swap_e2 < swap_e3; swap_e3 < a1;
     a1 < a2 when isZero; a2 < a6;
     a3 < a4; a4 < a5; a5 < cache_e4;

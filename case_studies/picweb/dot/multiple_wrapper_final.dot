@@ -1,0 +1,14 @@
+digraph multiplePicWeb_get {
+  fontname=Courier;
+  node [shape=record];
+  edge [fontname=Courier];
+label="Orchestration multiplePicWeb::get"
+    subgraph cluster_p1 {
+ label=""; 
+  multiplePicWeb_get_a1 [label="a1|(tmp*) := picWeb::get(tag,threshold)"];    legend_p1 [style=filled, fillcolor=lightgrey,label="{forall tag in   tag*|concatenate tmp* into pict*}"] ;
+}
+
+  multiplePicWeb_get_a0 [label="a0|(threshold,tag*) := receive()"];
+  multiplePicWeb_get_a2 [label="a2|reply(pict*)"];
+  multiplePicWeb_get_a0 -> multiplePicWeb_get_a1 ;
+  multiplePicWeb_get_a1 -> multiplePicWeb_get_a2 ; } 

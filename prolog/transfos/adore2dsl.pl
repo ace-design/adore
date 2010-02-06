@@ -58,7 +58,8 @@ process2dsl(P,Code) :-
 
 
 genProcessLabel(P,Code) :- 
-	isFragment(P), !, swritef(Code,'fragment %w',[P]).
+	isFragment(P), !, genFragmentParameters(P,Params),
+        swritef(Code,'fragment %w%w',[P,Params]).
 genProcessLabel(P,Code) :- 
 	hasForSrvName(P,Srv), hasForOpName(P,Op),
 	swritef(Code,'orchestration %w::%w', [Srv,Op]).
@@ -67,6 +68,14 @@ genProcessName(P,P) :- isFragment(P), !.
 genProcessName(P,Name) :- 
 	hasForSrvName(P,Srv), hasForOpName(P,Op),
 	swritef(Name,'%w::%w', [Srv,Op]).
+
+
+genFragmentParameters(P,'') :- 
+	findall(X, hasForParameter(P,X),[]).
+genFragmentParameters(P,Params) :- 
+	findall(X, hasForParameter(P,X),Raw),
+	concatenate(Raw,List,','), swritef(Params,'<%w>',[List]).
+	
 
 %%%%
 %% Variables 
@@ -82,17 +91,17 @@ genVariables(P,Code) :-
 genVariable(V,Code) :-
 	isConstant(V), !, genVarName(V,Name), displayId(V,DId),
 	hasForInitValue(V,Value), hasForType(V,Type),
-	swritef(Code,"    %w := '%w' as %w; %w",[Name,Value,Type,DId]).
+	swritef(Code,"    const %w := '%w' as %w; %w",[Name,Value,Type,DId]).
 genVariable(Fid,'') :-
-	fieldAccess(Fid,_,_), !.
+	fieldAccess(Fid,_,_), !. %% FIXME
 genVariable(V,Code) :-
 	genVarName(V,Name), hasForType(V,Type),displayId(V,DId),
 	swritef(Code,"    %w as %w; %w",[Name,Type,DId]).
 
 genVarName(V,Name) :-
-	variable(V), getPreviousName(V,RawName),
-	(isSet(V), string_concat(RawName,'*',Name) | Name = RawName).
-	
+	variable(V), getPreviousName(V,RawName), 
+	(isSet(V), suffixToStar(RawName,Name) | Name = RawName),!.
+
 %%%%
 %% Activities 
 %%%%
@@ -227,8 +236,6 @@ genActLabel(A,L) :-
 genSet(Ctx,Code) :- 
 	context(Ctx), setDirective(Ctx,V), getPreviousName(V,Name),
 	swritef(Code,'  toSet %w ;',[Name]).
-
-
 
 %%%%
 %% Identifier displayer

@@ -9,6 +9,8 @@ fragment swap {
     e1. tmp := a; e2. a := b; e3. b := tmp; 
   }
   relations {
-    ^ < h; h < t; t < $ when ! lt; t < e1 when lt; e1 < e2; e2 < e3; e3 < $;
+    ^ < h; h < t; 
+    t < $ when lt; t < e1 when ! lt; 
+    e1 < e2; e2 < e3; e3 < $;
   }
 }

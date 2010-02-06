@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe view="metrics" version="adore4mondrian_1.0">
+  <process name="auth_login" fragment="false">
+    <activities total="5">
+      <invoke>2</invoke>
+      <reply>1</reply>
+      <throw>1</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="4">
+      <wait_for>2</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>4</height>
+      <surface>8</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="hasCertificate" fragment="true">
+    <activities total="4">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="6">
+      <wait_for>4</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="infoProvider_getInformation" fragment="false">
+    <activities total="5">
+      <invoke>2</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>5</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>4</height>
+      <surface>8</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="isYoungCertificate" fragment="true">
+    <activities total="3">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>3</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="timeContract" fragment="true">
+    <activities total="4">
+      <invoke>1</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>3</wait_for>
+      <guard>2</guard>
+      <weak_wait>2</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>4</maze>
+    </complexity>
+    <usage>
+      <apply>2</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="trace" fragment="true">
+    <activities total="5">
+      <invoke>4</invoke>
+      <reply>0</reply>
+      <throw>1</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>7</height>
+      <surface>14</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>1</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <composition id="context_9" target="hasCertificate" >
+      <apply id="apply_11" fragment="isYoungCertificate">
+        <block id="block_10" process="hasCertificate">
+          <activityRef uid="h" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_12" target="auth_login" >
+      <apply id="apply_14" fragment="trace">
+        <block id="block_13" process="auth_login">
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_15" target="infoProvider_getInformation" >
+      <apply id="apply_17" fragment="hasCertificate">
+        <block id="block_16" process="infoProvider_getInformation">
+          <activityRef uid="a1" />
+        </block>
+      </apply>
+      <apply id="apply_19" fragment="timeContract">
+        <block id="block_18" process="infoProvider_getInformation">
+          <activityRef uid="a1" />
+        </block>
+      </apply>
+      <apply id="apply_21" fragment="timeContract">
+        <block id="block_20" process="infoProvider_getInformation">
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+  </composition>
+</universe>

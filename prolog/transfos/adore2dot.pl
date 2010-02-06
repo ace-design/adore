@@ -19,11 +19,14 @@
 %%
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
-:- module(adore2dot,[adore2dot/2]).
+:- module(adore2dot,[adore2dot/2, adore2dotfile/2]).
 
 %%%%
 %% Main interface with the transformation
 %%%%
+adore2dotfile(P,F) :- 
+	adore2dot(P,Code), 
+	open(F,write,Stream), write(Stream,Code), close(Stream).
 
 %% adore2dot(+Process, -Code): generate DOT Code associated with Process
 adore2dot(P,R) :-
@@ -79,7 +82,7 @@ isClusterOf(P,C) :-
 
 genClusters(Process,Code) :- 
 	identifyClusters(Process,Clusters),
-	map(genCluster,Clusters, List),
+	map(adore2dot:genCluster,Clusters, List),
 	concatenate(List,Code).
 
 genCluster(ClusterId,Code) :- 
@@ -187,31 +190,7 @@ genVar(_,V,R) :-
 	genVarLabel(V,R).
 
 %% A var label is it's user readable name
-genVarLabel(V,Label) :- 
-	getVariable(V,Tmp), %% a variable, not an anonymous field access
-	getPreviousName(Tmp,OldName), %% The REAL name, not the renamed one
-	suffixToStar(OldName, PrettyName), %% '_star' <-> '*'
-	genFields(V,Fields), %% fields as x.y.z
-	swritef(Label,"%w%w",[PrettyName,Fields]). %% that's all folks
 
-genFields(I,'') :- \+ fieldAccess(I,_,_), !.
-genFields(I,R) :- fieldAccess(I,_,L), showAsPoint(L,R).
-
-showAsPoint([],'').
-showAsPoint([H],R) :-  
-	suffixToStar(H,V),swritef(R,'.%w',[V]),!.
-showAsPoint([H|T],R) :- 
-	showAsPoint(T,O),
-	swritef(R,".%w%w",[H,O]).
-
-%% transform a "_star" suffix into a '*' label
-suffixToStar(V,R) :- 
-	\+ is_list(V), string_to_list(V,L), suffixToStar(L,R).
-suffixToStar([],'') :- !.
-suffixToStar("_star",'*')  :- !.
-suffixToStar([H|T],R) :- 
-	string_to_list(C,[H]), suffixToStar(T,O),
-	swritef(R,"%w%w",[C,O]).
 
 %%%%
 %% Orders: 

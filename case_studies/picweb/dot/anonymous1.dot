@@ -1,0 +1,32 @@
+digraph anonymous1 {
+  fontname=Courier;
+  node [shape=record];
+  edge [fontname=Courier];
+label="Fragment anonymous1"
+  anonymous1_preds [label="P", shape=doublecircle, style=filled, fillcolor="seagreen3"];
+  anonymous1_succs [label="S", shape=doublecircle, style=filled, fillcolor="seagreen3"];
+  anonymous1_h [label="h|(pict*) := hook(tag)", style=filled, fillcolor="seagreen3"];
+  anonymous1_e0 [label="e0|(picasa*) := picasaBinder::getOnTag(tag)", style=filled, fillcolor="seagreen3"];
+  anonymous1_e1 [label="e1|(pict*) := merge::run(pict*,picasa*)", style=filled, fillcolor="seagreen3"];
+  anonymous1_c_e0 [label="c_e0|(isValid) := cache::isValid(tag,'600')", style=filled, fillcolor="lightskyblue"];
+  anonymous1_c_e1 [label="c_e1|(pict*) := cache::getValue(tag)", style=filled, fillcolor="lightskyblue"];
+  anonymous1_c_e2 [label="c_e2|cache::memorize(pict*,tag)", style=filled, fillcolor="lightskyblue"];
+  anonymous1_preds -> anonymous1_c_e0 ;
+  anonymous1_h -> anonymous1_e1 ;
+  anonymous1_e0 -> anonymous1_e1 ;
+  anonymous1_e1 -> anonymous1_c_e2 ;
+  anonymous1_c_e0 -> anonymous1_h [label="!isValid"];
+  anonymous1_c_e0 -> anonymous1_e0 [label="!isValid"];
+  anonymous1_c_e0 -> anonymous1_c_e1 [label="isValid"];
+  anonymous1_c_e1 -> anonymous1_succs ;
+  anonymous1_c_e2 -> anonymous1_succs ;
+
+subgraph cluster_legend {
+          label = "Legend";
+          ranksep=0.02;
+	  aP [label="addPicasa", style=filled, fillcolor="seagreen3"];
+	  c [label="cache", style=filled, fillcolor="lightskyblue"];
+	  aP -> c [style="invis",arrowsize=0];
+  }
+  
+} 

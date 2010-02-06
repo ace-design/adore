@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe view="metrics">
+  <process name="addPicasa" fragment="true">
+    <activities total="2">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>5</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>1
+      <width>2</width>
+      <height>4</height>
+      <surface>8</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>4</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="cache" fragment="true">
+    <activities total="3">
+      <invoke>3</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="6">
+      <wait_for>4</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>3</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="multiplePicWeb_get" fragment="false">
+    <activities total="3">
+      <invoke>1</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="2">
+      <wait_for>2</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>3</height>
+      <surface>3</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="picweb_getV0" fragment="false">
+    <activities total="4">
+      <invoke>2</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>3</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>4</height>
+      <surface>4</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="shuffle" fragment="true">
+    <activities total="1">
+      <invoke>1</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>3</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>4</height>
+      <surface>4</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage>
+      <apply>2</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="truncate" fragment="true">
+    <activities total="1">
+      <invoke>1</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>3</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>4</height>
+      <surface>4</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage>
+      <apply>5</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+</universe>

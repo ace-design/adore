@@ -1,0 +1,254 @@
+<?xml version="1.0" ?>
+<universe view="structure" >
+  <process id="trace" name="trace" isFragment="true" >
+    <variables>
+      <variable id="trace_c" name="c" isSet="false" type="boolean"/>
+      <variable id="trace_in" name="in" isSet="false" type="any"/>
+      <variable id="trace_lambda_0" name="lambda_0" isSet="false" type="string" value="incomplete trace" />
+      <variable id="trace_op" name="op" isSet="false" type="string"/>
+      <variable id="trace_out" name="out" isSet="false" type="any"/>
+      <variable id="trace_srv" name="srv" isSet="false" type="string"/>
+      <variable id="trace_ticket" name="ticket" isSet="false" type="string"/>
+    </variables>
+    <activities>
+      <activity id="trace_e0" name="e0"  kind="invoke" service="tracer" operation="createEmptyTicket" >
+        <inputs>
+          <variableRef uid="trace_srv" />
+          <variableRef uid="trace_op" />
+        </inputs>
+        <outputs>
+          <variableRef uid="trace_ticket" />
+        </outputs>
+      </activity>
+      <activity id="trace_e1" name="e1"  kind="invoke" service="tracer" operation="logBefore" >
+        <inputs>
+          <variableRef uid="trace_ticket" />
+          <variableRef uid="trace_in" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="trace_h" name="h" kind="hook" >
+        <inputs>
+          <variableRef uid="trace_in" />
+        </inputs>
+        <outputs>
+          <variableRef uid="trace_out" />
+        </outputs>
+      </activity>
+      <activity id="trace_e2" name="e2"  kind="invoke" service="tracer" operation="logAfter" >
+        <inputs>
+          <variableRef uid="trace_ticket" />
+          <variableRef uid="trace_out" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="trace_e3" name="e3"  kind="invoke" service="tracer" operation="isComplete" >
+        <inputs>
+          <variableRef uid="trace_ticket" />
+        </inputs>
+        <outputs>
+          <variableRef uid="trace_c" />
+        </outputs>
+      </activity>
+      <activity id="trace_e4" name="e4" kind="throw" >
+        <inputs>
+          <variableRef uid="trace_lambda_0" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="trace_preds" right="e0" kind="waitFor" />
+      <relation left="e0" right="e1" kind="waitFor" />
+      <relation left="e1" right="h" kind="waitFor" />
+      <relation left="h" right="e2" kind="waitFor" />
+      <relation left="e2" right="e3" kind="waitFor" />
+      <relation left="e3" right="trace_succs" kind="guard" variable="trace_c" condition="true" />
+      <relation left="e3" right="e4" kind="guard" variable="trace_c" condition="false" />
+    </relations>
+  </process>
+  <process id="timeContract" name="timeContract" isFragment="true" >
+    <variables>
+      <variable id="timeContract_delay" name="delay" isSet="false" type="integer"/>
+      <variable id="timeContract_duration" name="duration" isSet="false" type="integer"/>
+      <variable id="timeContract_lambda_1" name="lambda_1" isSet="false" type="integer" value="0" />
+      <variable id="timeContract_lambda_2" name="lambda_2" isSet="false" type="integer" value="0" />
+      <variable id="timeContract_lambda_3" name="lambda_3" isSet="false" type="string" value="response time violation!" />
+      <variable id="timeContract_timeout" name="timeout" isSet="false" type="boolean"/>
+    </variables>
+    <activities>
+      <activity id="timeContract_e0" name="e0" kind="assign" function="id" >
+        <inputs>
+          <variableRef uid="timeContract_lambda_1" />
+        </inputs>
+        <outputs>
+          <variableRef uid="timeContract_delay" />
+        </outputs>
+      </activity>
+      <activity id="timeContract_e1" name="e1"  kind="invoke" service="timer" operation="wait" >
+        <inputs>
+          <variableRef uid="timeContract_duration" />
+        </inputs>
+        <outputs>
+          <variableRef uid="timeContract_delay" />
+        </outputs>
+      </activity>
+      <activity id="timeContract_h" name="h" kind="hook" >
+        <inputs />
+        <outputs />
+      </activity>
+      <activity id="timeContract_e2" name="e2" kind="assign" function="isDifferent" >
+        <inputs>
+          <variableRef uid="timeContract_delay" />
+          <variableRef uid="timeContract_lambda_2" />
+        </inputs>
+        <outputs>
+          <variableRef uid="timeContract_timeout" />
+        </outputs>
+      </activity>
+      <activity id="timeContract_e3" name="e3" kind="throw" >
+        <inputs>
+          <variableRef uid="timeContract_lambda_3" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="timeContract_preds" right="e0" kind="waitFor" />
+      <relation left="e0" right="e1" kind="waitFor" />
+      <relation left="e0" right="h" kind="waitFor" />
+      <relation left="e1" right="e2" kind="weakWait" />
+      <relation left="h" right="e2" kind="weakWait" />
+      <relation left="e2" right="timeContract_succs" kind="guard" variable="timeContract_timeout" condition="false" />
+      <relation left="e2" right="e3" kind="guard" variable="timeContract_timeout" condition="true" />
+    </relations>
+  </process>
+  <process id="isYoungCertificate" name="isYoungCertificate" isFragment="true" >
+    <variables>
+      <variable id="isYoungCertificate_delta" name="delta" isSet="false" type="integer"/>
+      <variable id="isYoungCertificate_isYoung" name="isYoung" isSet="false" type="boolean"/>
+      <variable id="isYoungCertificate_lambda_7" name="lambda_7" isSet="false" type="string" value="Out of date certificate!" />
+      <variable id="isYoungCertificate_now" name="now" isSet="false" type="date"/>
+      <variable id="isYoungCertificate_ref" name="ref" isSet="false" type="integer"/>
+    </variables>
+    <activities>
+      <activity id="isYoungCertificate_e0" name="e0"  kind="invoke" service="timer" operation="getNow" >
+        <inputs />
+        <outputs>
+          <variableRef uid="isYoungCertificate_now" />
+        </outputs>
+      </activity>
+      <activity id="isYoungCertificate_h" name="h" kind="hook" >
+        <inputs />
+        <outputs />
+      </activity>
+      <activity id="isYoungCertificate_e1" name="e1"  kind="invoke" service="timer" operation="compare" >
+        <inputs>
+          <variableRef uid="isYoungCertificate_ref" />
+          <variableRef uid="isYoungCertificate_now" />
+          <variableRef uid="isYoungCertificate_delta" />
+        </inputs>
+        <outputs>
+          <variableRef uid="isYoungCertificate_isYoung" />
+        </outputs>
+      </activity>
+      <activity id="isYoungCertificate_e2" name="e2" kind="throw" >
+        <inputs>
+          <variableRef uid="isYoungCertificate_lambda_7" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="h" right="isYoungCertificate_succs" kind="waitFor" />
+      <relation left="isYoungCertificate_preds" right="e0" kind="waitFor" />
+      <relation left="e0" right="e1" kind="waitFor" />
+      <relation left="e1" right="h" kind="guard" variable="isYoungCertificate_isYoung" condition="true" />
+      <relation left="e1" right="e2" kind="guard" variable="isYoungCertificate_isYoung" condition="false" />
+    </relations>
+  </process>
+  <process id="auth_login" name="auth::login" isFragment="false" service="auth" operation="login" >
+    <variables>
+      <variable id="auth_login_crt" name="crt" isSet="false" type="certificate"/>
+      <variable id="auth_login_isValid" name="isValid" isSet="false" type="boolean"/>
+      <variable id="auth_login_lambda_8" name="lambda_8" isSet="false" type="string" value="bad user information!" />
+      <variable id="auth_login_password" name="password" isSet="false" type="string"/>
+      <variable id="auth_login_user" name="user" isSet="false" type="string"/>
+    </variables>
+    <activities>
+      <activity id="auth_login_a0" name="a0" kind="receive" >
+        <inputs />
+        <outputs>
+          <variableRef uid="auth_login_user" />
+          <variableRef uid="auth_login_password" />
+        </outputs>
+      </activity>
+      <activity id="auth_login_a1" name="a1"  kind="invoke" service="auth" operation="check" >
+        <inputs>
+          <variableRef uid="auth_login_user" />
+          <variableRef uid="auth_login_password" />
+        </inputs>
+        <outputs>
+          <variableRef uid="auth_login_isValid" />
+        </outputs>
+      </activity>
+      <activity id="auth_login_a2" name="a2"  kind="invoke" service="authority" operation="certify" >
+        <inputs>
+          <variableRef uid="auth_login_user" />
+        </inputs>
+        <outputs>
+          <variableRef uid="auth_login_crt" />
+        </outputs>
+      </activity>
+      <activity id="auth_login_a3" name="a3" kind="reply" >
+        <inputs>
+          <variableRef uid="auth_login_crt" />
+        </inputs>
+        <outputs />
+      </activity>
+      <activity id="auth_login_e" name="e" kind="throw" >
+        <inputs>
+          <variableRef uid="auth_login_lambda_8" />
+        </inputs>
+        <outputs />
+      </activity>
+    </activities>
+    <relations>
+      <relation left="a0" right="a1" kind="waitFor" />
+      <relation left="a2" right="a3" kind="waitFor" />
+      <relation left="a1" right="a2" kind="guard" variable="auth_login_isValid" condition="true" />
+      <relation left="a1" right="e" kind="guard" variable="auth_login_isValid" condition="false" />
+    </relations>
+  </process>
+  <composition id="context_9" target="hasCertificate" >
+      <apply id="apply_11" fragment="isYoungCertificate">
+        <block id="block_10" process="hasCertificate">
+          <activityRef uid="hasCertificate_h" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_12" target="auth_login" >
+      <apply id="apply_14" fragment="trace">
+        <block id="block_13" process="auth_login">
+          <activityRef uid="auth_login_a2" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_15" target="infoProvider_getInformation" >
+      <apply id="apply_17" fragment="hasCertificate">
+        <block id="block_16" process="infoProvider_getInformation">
+          <activityRef uid="infoProvider_getInformation_a1" />
+        </block>
+      </apply>
+      <apply id="apply_19" fragment="timeContract">
+        <block id="block_18" process="infoProvider_getInformation">
+          <activityRef uid="infoProvider_getInformation_a1" />
+        </block>
+      </apply>
+      <apply id="apply_21" fragment="timeContract">
+        <block id="block_20" process="infoProvider_getInformation">
+          <activityRef uid="infoProvider_getInformation_a2" />
+        </block>
+      </apply>
+  </composition>
+</universe>

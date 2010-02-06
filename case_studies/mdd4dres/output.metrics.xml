@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe view="metrics" version="adore4mondrian_1.0">
+  <process name="anonymous" fragment="true">
+    <activities total="11">
+      <invoke>5</invoke>
+      <reply>0</reply>
+      <throw>3</throw>
+      <misc>3</misc>
+    </activities>
+    <relations total="15">
+      <wait_for>7</wait_for>
+      <guard>6</guard>
+      <weak_wait>2</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>9</height>
+      <surface>18</surface>
+      <maze>8</maze>
+    </complexity>
+    <usage>
+      <apply>0</apply>
+      <targets>0</targets>
+    </usage>
+  </process>
+  <process name="auth_login" fragment="false">
+    <activities total="10">
+      <invoke>6</invoke>
+      <reply>1</reply>
+      <throw>2</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="9">
+      <wait_for>5</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>8</height>
+      <surface>16</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="hasCertificate" fragment="true">
+    <activities total="7">
+      <invoke>4</invoke>
+      <reply>0</reply>
+      <throw>2</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="9">
+      <wait_for>5</wait_for>
+      <guard>4</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>8</height>
+      <surface>16</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage>
+      <apply>0</apply>
+      <targets>0</targets>
+    </usage>
+  </process>
+  <process name="infoProvider_getInformation" fragment="false">
+    <activities total="20">
+      <invoke>8</invoke>
+      <reply>1</reply>
+      <throw>4</throw>
+      <misc>7</misc>
+    </activities>
+    <relations total="23">
+      <wait_for>11</wait_for>
+      <guard>8</guard>
+      <weak_wait>4</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>10</height>
+      <surface>30</surface>
+      <maze>12</maze>
+    </complexity>
+    <usage />
+  </process>
+</universe>

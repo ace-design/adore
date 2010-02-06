@@ -29,7 +29,7 @@ isProcess(P) :- context(C), contextOutput(C,P),!.
 
 
 %%%%
-%% Relations between activities
+%% Relations between activities (==> deprecated, use 'relations' predicates)
 %%%%
 
 sameProcess(X,Y) :- isContainedBy(X,P), isContainedBy(Y,P).
@@ -51,7 +51,7 @@ extractPath(A,B,[B]) :- path(A,B).
 extractPath(A,B,[X|O]) :- path(A,X), extractPath(X,B,O).
 
 %%%%
-%% Access to variable
+%% Access to variable  (==> deprecated, use 'variables' predicates)
 %%%%
 
 %% getVariable/2: getVariable(+V,-R): retrieve the variable associated to V

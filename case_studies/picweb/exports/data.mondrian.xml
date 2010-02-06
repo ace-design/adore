@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe view="metrics" >
+  <process name="addPicasa" fragment="true">
+    <categories>
+      <isModifier value="true" direction="output" />
+      <isInhibitor value="false" />
+      <isHandler value="false" />
+    </categories>
+    <activities total="2">
+      <invoke>2</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="5">
+      <wait_for>5</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>4</height>
+      <surface>8</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>4</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="cache" fragment="true">
+    <categories>
+      <isModifier value="true" direction="output" />
+      <isInhibitor value="true" />
+      <isHandler value="false" />
+    </categories>
+    <activities total="3">
+      <invoke>3</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="6">
+      <wait_for>4</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>5</height>
+      <surface>10</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>3</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="multiplePicWeb_get" fragment="false">
+    <activities total="3">
+      <invoke>1</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="2">
+      <wait_for>2</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>3</height>
+      <surface>3</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="picweb_getV0" fragment="false">
+    <activities total="4">
+      <invoke>2</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>3</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>4</height>
+      <surface>4</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="shuffle" fragment="true">
+    <categories>
+      <isModifier value="true" direction="input" />
+      <isInhibitor value="false" />
+      <isHandler value="false" />
+    </categories>
+    <activities total="1">
+      <invoke>1</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>3</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>4</height>
+      <surface>4</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage>
+      <apply>2</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <process name="truncate" fragment="true">
+    <categories>
+      <isModifier value="true" direction="input" />
+      <isInhibitor value="false" />
+      <isHandler value="false" />
+    </categories>
+    <activities total="1">
+      <invoke>1</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>0</misc>
+    </activities>
+    <relations total="3">
+      <wait_for>3</wait_for>
+      <guard>0</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>1</width>
+      <height>4</height>
+      <surface>4</surface>
+      <maze>1</maze>
+    </complexity>
+    <usage>
+      <apply>5</apply>
+      <targets>1</targets>
+    </usage>
+  </process>
+  <composition id="context_1" target="picweb_getV0" output="picweb_getV1" >
+      <apply id="apply_3" fragment="truncate">
+        <block id="block_2" process="picweb_getV0">
+          <activityRef uid="a3" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_4" target="picweb_getV0" output="picweb_getV2" >
+      <apply id="apply_6" fragment="truncate">
+        <block id="block_5" process="picweb_getV0">
+          <activityRef uid="a3" />
+        </block>
+      </apply>
+      <apply id="apply_8" fragment="addPicasa">
+        <block id="block_7" process="picweb_getV0">
+          <activityRef uid="a1" />
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_9" target="picweb_getV0" output="picweb_getV3" >
+      <apply id="apply_11" fragment="truncate">
+        <block id="block_10" process="picweb_getV0">
+          <activityRef uid="a3" />
+        </block>
+      </apply>
+      <apply id="apply_13" fragment="addPicasa">
+        <block id="block_12" process="picweb_getV0">
+          <activityRef uid="a1" />
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+      <apply id="apply_15" fragment="cache">
+        <block id="block_14" process="addPicasa">
+          <activityRef uid="h" />
+          <activityRef uid="e0" />
+          <activityRef uid="e1" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_16" target="picweb_getV0" output="picweb_getV4" >
+      <apply id="apply_18" fragment="shuffle">
+        <block id="block_17" process="truncate">
+          <activityRef uid="e0" />
+        </block>
+      </apply>
+      <apply id="apply_20" fragment="truncate">
+        <block id="block_19" process="picweb_getV0">
+          <activityRef uid="a3" />
+        </block>
+      </apply>
+      <apply id="apply_22" fragment="addPicasa">
+        <block id="block_21" process="picweb_getV0">
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+      <apply id="apply_24" fragment="cache">
+        <block id="block_23" process="addPicasa">
+          <activityRef uid="h" />
+          <activityRef uid="e0" />
+          <activityRef uid="e1" />
+        </block>
+      </apply>
+  </composition>
+  <composition id="context_25" target="multiplePicWeb_get" >
+      <toSet variable="tag" />
+  </composition>
+  <composition id="context_26" target="picweb_getV0" output="mulitplePicWeb_internal" >
+      <apply id="apply_28" fragment="shuffle">
+        <block id="block_27" process="truncate">
+          <activityRef uid="e0" />
+        </block>
+      </apply>
+      <apply id="apply_30" fragment="truncate">
+        <block id="block_29" process="picweb_getV0">
+          <activityRef uid="a3" />
+        </block>
+      </apply>
+      <apply id="apply_32" fragment="addPicasa">
+        <block id="block_31" process="picweb_getV0">
+          <activityRef uid="a2" />
+        </block>
+      </apply>
+      <apply id="apply_34" fragment="cache">
+        <block id="block_33" process="addPicasa">
+          <activityRef uid="h" />
+          <activityRef uid="e0" />
+          <activityRef uid="e1" />
+        </block>
+      </apply>
+      <toSet variable="tag" />
+  </composition>
+</universe>

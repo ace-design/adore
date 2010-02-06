@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<universe view="metrics" version="adore4mondrian_1.0">
+  <process name="cache" fragment="true">
+    <categories>
+      <isModifier value="true" direction="output" />
+      <isInhibitor value="true" />
+      <isHandler value="false" />
+    </categories>
+    <activities total="4">
+      <invoke>3</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>1</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>4</apply>
+      <targets>2</targets>
+    </usage>
+  </process>
+  <process name="complex_mult" fragment="false">
+    <activities total="7">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>6</height>
+      <surface>12</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="complex_sum" fragment="false">
+    <activities total="7">
+      <invoke>4</invoke>
+      <reply>1</reply>
+      <throw>0</throw>
+      <misc>2</misc>
+    </activities>
+    <relations total="8">
+      <wait_for>5</wait_for>
+      <guard>3</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>3</width>
+      <height>5</height>
+      <surface>15</surface>
+      <maze>3</maze>
+    </complexity>
+    <usage />
+  </process>
+  <process name="swap" fragment="true">
+    <categories>
+      <isModifier value="true" direction="output" />
+      <isInhibitor value="false" />
+      <isHandler value="false" />
+    </categories>
+    <activities total="4">
+      <invoke>0</invoke>
+      <reply>0</reply>
+      <throw>0</throw>
+      <misc>4</misc>
+    </activities>
+    <relations total="7">
+      <wait_for>5</wait_for>
+      <guard>2</guard>
+      <weak_wait>0</weak_wait>
+      <fail>0</fail>
+    </relations>
+    <complexity>
+      <width>2</width>
+      <height>7</height>
+      <surface>14</surface>
+      <maze>2</maze>
+    </complexity>
+    <usage>
+      <apply>4</apply>
+      <targets>2</targets>
+    </usage>
+  </process>
+  <composition id="context_2" target="complex_sum" output="complex_sumSwap" >
+    <apply id="apply_4" fragment="swap">
+      <block id="block_3" process="complex_sum">
+        <activityRef uid="a0" />
+      </block>
+    </apply>
+  </composition>
+  <composition id="context_5" target="complex_sum" output="complex_sumCache" >
+    <apply id="apply_7" fragment="cache">
+      <block id="block_6" process="complex_sum">
+        <activityRef uid="a3" />
+        <activityRef uid="a4" />
+        <activityRef uid="a5" />
+      </block>
+    </apply>
+  </composition>
+  <composition id="context_8" target="complex_sum" output="complex_sumComplete" >
+    <apply id="apply_10" fragment="swap">
+      <block id="block_9" process="complex_sum">
+        <activityRef uid="a0" />
+      </block>
+    </apply>
+    <apply id="apply_12" fragment="cache">
+      <block id="block_11" process="complex_sum">
+        <activityRef uid="a3" />
+        <activityRef uid="a4" />
+        <activityRef uid="a5" />
+      </block>
+    </apply>
+  </composition>
+  <composition id="context_13" target="complex_mult" output="complex_multSwap" >
+    <apply id="apply_15" fragment="swap">
+      <block id="block_14" process="complex_mult">
+        <activityRef uid="a0" />
+      </block>
+    </apply>
+  </composition>
+  <composition id="context_16" target="complex_mult" output="complex_multCache" >
+    <apply id="apply_18" fragment="cache">
+      <block id="block_17" process="complex_mult">
+        <activityRef uid="a3" />
+        <activityRef uid="a4" />
+        <activityRef uid="a5" />
+      </block>
+    </apply>
+  </composition>
+  <composition id="context_19" target="complex_mult" output="complex_multComplete" >
+    <apply id="apply_21" fragment="swap">
+      <block id="block_20" process="complex_mult">
+        <activityRef uid="a0" />
+      </block>
+    </apply>
+    <apply id="apply_23" fragment="cache">
+      <block id="block_22" process="complex_mult">
+        <activityRef uid="a3" />
+        <activityRef uid="a4" />
+        <activityRef uid="a5" />
+      </block>
+      </apply>
+  </composition>
+</universe>

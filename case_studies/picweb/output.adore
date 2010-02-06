@@ -1,0 +1,193 @@
+/** ADORE composition outputs
+ * author: mosser@polytech.unice.fr
+ * date:   01/10/10
+ */
+
+orchestration picweb::getV1 {
+  variables {
+    tag as string; threshold as integer; flickr* as pictureUrl;
+    key as string;
+    
+  }
+  activities {
+    a0. (tag, threshold) := receive();
+    a1. key := keyRegistry::get('flickr' as string);
+    a2. flickr* := flickrWrapper::exploreFolksonomy(tag,key);
+    a3. reply(flickr*);
+    t_e0. flickr* := truncate::run(flickr*,threshold);
+  }
+  relations { a0 < a1; a1 < a2; a2 < t_e0; t_e0 < a3;}
+}
+
+orchestration picweb::getV2 {
+  variables {
+    tag as string; threshold as integer; flickr* as pictureUrl;
+    key as string;  picasa* as pictureUrl; 
+  }
+  activities {
+    a0. (tag, threshold) := receive();
+    a1. key := keyRegistry::get('flickr' as string);
+    a2. flickr* := flickrWrapper::exploreFolksonomy(tag,key);
+    a3. reply(flickr*);
+    t_e0. flickr* := truncate::run(flickr*,threshold);
+    aP_e0. picasa* := picasaBinder::getOnTag(tag);
+    aP_e1. flickr* := merge::run(flickr*,picasa*);
+  }
+  relations { 
+    a0 < a1; a1 < a2;  t_e0 < a3; 
+    a0 < aP_e0; aP_e0 < aP_e1; a2 < aP_e1;
+    // Removed by normalisation when conflict is solved
+    //a2 < t_e0; aP_e1 < a3; 
+    // CONFLICT: parallel write @flickr* on {t_e0,aP_e1}
+    /** solve: aP_e1 < t_e0; => **/ aP_e1 <t_e0; 
+  }
+}
+
+fragment anonymous1 { // cache => addPicasa::{h,e1,e2}
+  variables { 
+    picasa* as pictureUrl; pict* as pictureUrl; tag as string; 
+    isValid as boolean; const delta := '600' as integer;
+  }
+  activities {
+    h. pict* := hook(tag);
+    e0. picasa* := picasaBinder::getOnTag(tag);
+    e1. pict* := merge::run(pict*,picasa*);
+    c_e0. isValid := cache::isValid(tag,delta);
+    c_e1. pict* := cache::getValue(tag);
+    c_e2. cache::memorize(pict*, tag);
+  }
+  relations { 
+    h < e1; e0 < e1; 
+    ^ < c_e0; c_e0 < c_e1 when isValid; 
+    c_e0 < h when !isValid; c_e0 < e0 when !isValid; 
+    e1 < c_e2; c_e2 < $; c_e1 < $;
+  }
+}
+
+orchestration picweb::getV3 {
+  variables {
+    tag as string; threshold as integer; flickr* as pictureUrl;
+    key as string;  picasa* as pictureUrl;isValid as boolean; 
+    const delta := '600' as integer;
+  }
+  activities {
+    a0. (tag, threshold) := receive();
+    a1. key := keyRegistry::get('flickr' as string);
+    a2. flickr* := flickrWrapper::exploreFolksonomy(tag,key);
+    a3. reply(flickr*);
+    t_e0. flickr* := truncate::run(flickr*,threshold);
+    aP_e0. picasa* := picasaBinder::getOnTag(tag);
+    aP_e1. flickr* := merge::run(flickr*,picasa*);
+    aP_c_e0. isValid := cache::isValid(tag,delta);
+    aP_c_e1. flickr* := cache::getValue(tag);
+    aP_c_e2. cache::memorize(flickr*, tag);
+  }
+  relations { 
+    a1 < a2;  t_e0 < a3;  
+    a2 < aP_e1; aP_e0 < aP_e1; 
+    a0 < aP_c_e0; aP_c_e0 < aP_c_e1 when isValid; 
+    aP_c_e0 < a1 when !isValid; aP_c_e0 < aP_e0 when !isValid; 
+    aP_e1 < aP_c_e2; a2 < aP_e1; 
+    // Removed by normalisation when conflict is solved:
+    /** a2 < t_e0; aP_c_e2 < a3; **/ //aP_c_e1 < a3;
+    // CONFLICT: parallel write @flickr* on {t_e0,aP_e1}
+    /** solve: aP_c_e2 < t_e0 => **/ aP_c_e2 < t_e0; 
+    // Bad smell: \exists orderEquiv(aP_c_e2,cache): aP_c_e1
+    /** solve: aP_c_e1 < t_e0 **/ aP_c_e1 < t_e0;
+  }
+}
+
+fragment anonymous2<limit> { // shuffle => truncate::e0
+  variables { pict* as pictureUrl; limit as integer;}
+  activities {
+    s_e0. pict* := shuffle::run(pict*);
+    e0. pict* := truncate::run(pict*,limit);
+    h. hook(pict*);
+  }
+  relations { ^ < s_e0; s_e0 < e0; e0 < h; h  < $; }
+}
+
+orchestration picweb::getV4 {
+  variables {
+    tag as string; threshold as integer; flickr* as pictureUrl;
+    key as string;  picasa* as pictureUrl;isValid as boolean; 
+    const delta := '600' as integer;
+  }
+  activities {
+    a0. (tag, threshold) := receive();
+    a1. key := keyRegistry::get('flickr' as string);
+    a2. flickr* := flickrWrapper::exploreFolksonomy(tag,key);
+    a3. reply(flickr*);
+    t_e0. flickr* := truncate::run(flickr*,threshold);
+    t_s_e0. flickr* := shuffle::run(flickr*);
+    aP_e0. picasa* := picasaBinder::getOnTag(tag);
+    aP_e1. flickr* := merge::run(flickr*,picasa*);
+    aP_c_e0. isValid := cache::isValid(tag,delta);
+    aP_c_e1. flickr* := cache::getValue(tag);
+    aP_c_e2. cache::memorize(flickr*, tag);
+  }
+  relations { 
+    a1 < a2;  t_s_e0 < t_e0; t_e0 < a3;
+    a2 < aP_e1; aP_e0 < aP_e1; 
+    a0 < aP_c_e0; aP_c_e0 < aP_c_e1 when isValid; 
+    aP_c_e0 < a1 when !isValid; aP_c_e0 < aP_e0 when !isValid; 
+    aP_e1 < aP_c_e2; a2 < aP_e1;
+    // Removed by normalisation when conflict is solved: 
+    /** a2 < t_s_e0; aP_c_e2 < a3;**/ // aP_c_e1 < a3;
+    // CONFLICT: parallel write @flickr* on {t_s_e0,aP_e1}
+    /** solve: aP_c_e2 < t_s_e0 => **/ aP_c_e2 < t_s_e0; 
+    // Bad smell: \exists orderEquiv(aP_c_e2,cache): aP_c_e1
+    /** solve: aP_c_e1 < t_s_e0 **/ aP_c_e1 < t_s_e0;
+  }
+}
+
+
+orchestration multiplePicWeb::get {
+  variables {
+    tag as string; threshold as integer;
+    pict* as pictureUrl;
+  }
+  activities {
+    a0. (tag, threshold) := receive();
+    a1. pict* := picWeb::get(tag, threshold);
+    a2. reply(pict*);
+  }
+  relations { a0 < a1; a1 < a2; }
+}
+
+
+//  doSetify(multiplePicWeb_get,multiplePicWeb_get_tag),
+
+
+orchestration multiplePicWeb::internal {
+  variables {
+    tag as string; threshold as integer; flickr* as pictureUrl;
+    key as string;  picasa* as pictureUrl;isValid as boolean; 
+    const delta := '600' as integer;
+  }
+  activities {
+    a0. (tag, threshold) := receive();
+    a1. key := keyRegistry::get('flickr' as string);
+    a2. flickr* := flickrWrapper::exploreFolksonomy(tag,key);
+    a3. reply(flickr*);
+    t_e0. flickr* := truncate::run(flickr*,threshold);
+    t_s_e0. flickr* := shuffle::run(flickr*);
+    aP_e0. picasa* := picasaBinder::getOnTag(tag);
+    aP_e1. flickr* := merge::run(flickr*,picasa*);
+    aP_c_e0. isValid := cache::isValid(tag,delta);
+    aP_c_e1. flickr* := cache::getValue(tag);
+    aP_c_e2. cache::memorize(flickr*, tag);
+  }
+  relations { 
+    a1 < a2;  t_s_e0 < t_e0; t_e0 < a3;
+    a2 < aP_e1; aP_e0 < aP_e1; 
+    a0 < aP_c_e0; aP_c_e0 < aP_c_e1 when isValid; 
+    aP_c_e0 < a1 when !isValid; aP_c_e0 < aP_e0 when !isValid; 
+    aP_e1 < aP_c_e2; a2 < aP_e1;
+    aP_c_e2 < t_s_e0;  aP_c_e1 < t_s_e0;
+  }
+}
+
+// doSetify(multiplePicWeb_internal,multiplePicWeb_internal_tag),
+
+
