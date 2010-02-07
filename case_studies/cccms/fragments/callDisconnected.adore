@@ -1,0 +1,10 @@
+fragment callDisconnected {
+  variables {}
+  activities { 
+    h. hook(); 
+    thr. throw('lostWitnessContact' as string); 
+  }
+  relations { 
+    ^ < h; h < $; fail(h,'disconnected') < thr; 
+  }
+}

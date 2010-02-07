@@ -25,24 +25,36 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 executeActionSet(Set) :- 
-	elementarize(Set,Actions),
-	execute(Actions).
+	execute(Set,'').
 
 
 :- dynamic isMacroAction/2.
 shouldBeElementarized(G) :- 
 	functor(G,F,A), Arity is A + 1, isMacroAction(F,Arity).
 
-elementarize([],[]).
-elementarize([H|T],R) :- 
+
+
+execute([],_).
+execute([H|T],Space) :- 
 	shouldBeElementarized(H), !, 
-	dinfo(exec,'#elementarize(~w)',H), call(H,A), 
-	elementarize(T,Tmp), append(A,Tmp,R).
-elementarize([H|T],[H|O]) :- elementarize(T,O).
+	dinfo(exec,'~w#elementarize(~w)',[Space,H]), call(H,A),
+	swritef(NewSpace,'  %w',[Space]), 
+        execute(A,NewSpace), execute(T,Space).
+execute([H|T],Space) :- 
+	dinfo(exec,'~w#exec: ~w',[Space,H]), H, execute(T,Space).
+	
 
 
-execute([]).
-execute([H|T]) :- dinfo(exec,'#exec(~w)',H), H, execute(T).
+%% elementarize([],[]).
+%% elementarize([H|T],R) :- 
+%% 	shouldBeElementarized(H), !, 
+%% 	dinfo(exec,'#elementarize(~w)',H), call(H,A), 
+%% 	elementarize(T,Tmp), append(A,Tmp,R).
+%% elementarize([H|T],[H|O]) :- elementarize(T,O).
+
+
+%% execute([]).
+%% execute([H|T]) :- dinfo(exec,'#exec(~w)',H), H, execute(T).
 
 
 

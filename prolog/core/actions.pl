@@ -70,6 +70,13 @@ setOperation(P,_) :- %% \not \exists p \in Process* => fail
 setOperation(P,I) :- 
 	adoreAssert(hasForOpName(P,I)).
 
+
+defColor(P,_) :- %% \not \exists p \in Process* => fail
+	\+ isProcess(P), \+ contextOutput(_,P), !,
+	dfail(set,'defColor/2: Unkown process \'~w\'!',P).
+defColor(P,I) :- 
+	adoreAssert(hasForColor(P,I)).
+
 %%%%
 %% Activities
 %%%%

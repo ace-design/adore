@@ -71,7 +71,7 @@ genProcessName(P,Name) :-
 
 
 genFragmentParameters(P,'') :- 
-	findall(X, hasForParameter(P,X),[]).
+	findall(X, hasForParameter(P,X),[]),!.
 genFragmentParameters(P,Params) :- 
 	findall(X, hasForParameter(P,X),Raw),
 	concatenate(Raw,List,','), swritef(Params,'<%w>',[List]).
@@ -182,7 +182,7 @@ genRelation(P,Code) :-
 	onFailure(A,B,Cond),
 	genActRelLabel(A,Alabel), 
 	genActRelLabel(B,Blabel), 
-	swritef(Code,'    fail(%w,\'%w\') < %w',[Alabel,Cond,Blabel]).
+	swritef(Code,'    fail(%w,\'%w\') < %w;',[Blabel,Cond,Alabel]).
 
 
 genActRelLabel(A,'^') :- hasForKind(A,predecessors),!.

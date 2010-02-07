@@ -31,8 +31,8 @@ doClone(Orig,Output) :-
 
 buildActions(Orig,Output,Dirs) :- 
 	process:exists(Orig), \+ process:exists(Output),
-	gensym(clone_ctx,CtxId),
-	cloneProcess(clone(Orig,CtxId),Orig,Output,Dirs).
+	declareContext(clone(Orig),Ctx),
+	cloneProcess(Ctx,Orig,Output,Dirs).
 
 %%%%
 %% Process

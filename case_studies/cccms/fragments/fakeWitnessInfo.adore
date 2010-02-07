@@ -1,0 +1,13 @@
+fragment fakeWitnessInfo {
+  variables {
+    witInfo as witness; phInfo as phoneInformation;
+    isValid as boolean;
+  }
+  activities {
+    h. isValid := hook(witInfo,phInfo); 
+    thr. throw('fakeWitnessInformation' as string);
+  }
+  relations {
+    ^ < h; h < $ when isValid; h < thr when ! isValid;
+  }
+}

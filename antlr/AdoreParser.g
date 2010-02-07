@@ -64,6 +64,8 @@ tokens {
 	SETIFY;
 	ON_FAIL;
 	RAW;
+	KNOWLEDGE;
+	COLOR;
 }
 
 @header { package fr.unice.i3s.modalis.adore.language; }
@@ -73,10 +75,12 @@ definitions
 
 definition
 	:	REQU f=STR SEMI				-> ^(DEF ^(REQUIRE $f))
+	|	KNOWLEDGE f=STR SEMI			-> ^(DEF ^(KNOWLEDGE $f))
 	|	ORCH s=ID DBL_COL o=ID core 		-> ^(DEF ^(ORCHESTRATION $s $o) core)
 	|	FRAG n=ID params? core 			-> ^(DEF ^(FRAGMENT $n ^(PARAMS params?)) core)
 	|	composition				-> ^(DEF composition)
 	|	r=DISENGAGE				-> ^(DEF ^(RAW $r))
+	|	DEPICT p=ID IN s=STR SEMI		-> ^(DEF ^(COLOR $p $s))
 	;
 
 composition

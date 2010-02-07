@@ -63,6 +63,8 @@
 :- dynamic hasForSrvName/2.    %%  setService(P,I)
 :- dynamic hasForOpName/2.     %%  setOperation(P,I) 
 
+:- dynamic hasForColor/2.      %%  defColor(P,I)
+
 %%%%
 %% Activities
 %%%%

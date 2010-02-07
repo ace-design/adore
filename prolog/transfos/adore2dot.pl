@@ -135,8 +135,16 @@ drawActivity(A,C) :-
 	getPreviousName(A,Id),
 	genOutputs(A,Outs),
 	genLabel(A,Label),
-	genInputs(A,Ins),
-	swritef(C,'  %w [label="%w|%w%w%w"];',[A,Id,Outs,Label,Ins]).
+	genInputs(A,Ins), genActColor(A,Color),
+	swritef(C,'  %w [label="%w|%w%w%w"%w];',[A,Id,Outs,Label,Ins,Color]).
+
+genActColor(Act,Color) :- 
+	\+ hasForKind(Act,hook), findRoot(Act,Root), 
+	activity:belongsTo(Root,P), hasForColor(P,ColorName), !, 
+	swritef(Color,',style=filled,fillcolor="%w"',[ColorName]).
+genActColor(_,'').
+	
+	
 
 genOutputs(A,'') :- 
 	findall(V,usesAsOutput(A,V),[]),!.

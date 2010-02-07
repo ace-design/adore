@@ -34,7 +34,7 @@ loadFiles :-
         loadCore('facts_model'), 
         loadCore('engine'), loadCore('debug'), loadCore('trace'), 
 	loadCore('actions'), loadCore('gensym'), loadCore('helpers'), 
-	%% TODO: followong should be merged in metamodel operationalization
+	%% TODO: following should be merged in metamodel operationalization
 	loadCore('functions'), loadCore('dependencies'), loadCore('dataflow'), 
 	 loadCore('substitution'),
 	%% end of todo
@@ -43,8 +43,8 @@ loadFiles :-
 	loadMM('process'), loadMM('variable'), loadMM('relations'),
 	aw('%%%% Loading Algorithms'),
         loadAlgo('contextMerge'), loadAlgo('applyRewrite'),
-	loadAlgo('contextNormalization'), 
-	loadAlgo('setify'), loadAlgo('clone'),
+	loadAlgo('contextNormalization'), loadAlgo('setify'), 
+	loadAlgo('clone'), loadAlgo('merge'),
 	aw('%%%% Loading Transformations'),
         loadTransfo('adore2dsl'), loadTransfo('adore2xml'),
 	loadTransfo('adore2dot'), loadTransfo('adore2metrics'),

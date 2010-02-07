@@ -1,0 +1,13 @@
+fragment requestVideo<user> {
+  variables {
+    c as boolean; info as preliminaryInformation;
+    user as cmsEmployee; feedId as videoFeedIdentifier;
+  }
+  activities {
+    t. c := survSys::canCover(info.loc);
+    h. hook(info);
+    a12. feedId := survSys::activateVideo(info.loc);
+    a3. ui::displayVideoFeed(user, feedId); 
+  }
+  relations { ^ < h; h < $; ^ < t; t < a12 when c; a12 < a3; }
+}

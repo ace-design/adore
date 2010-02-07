@@ -1,0 +1,9 @@
+fragment ignoreDisconnection {
+  variables {}
+  activities { 
+    h. hook(); 
+  }
+  relations { 
+    ^ < h; h < $; fail(h,'disconnected') < $; 
+  }
+}

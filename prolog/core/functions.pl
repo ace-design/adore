@@ -20,8 +20,24 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+
+
+
+
+
+
+%%%% DEPRECATED FILE, DO NOT IMPROVE !!!!!
+
+
+
+
+
+
+
+
+
 %%%%
-%% Process Existence
+%% Process Existence  (==> deprecated, use 'relations' predicates)
 %%%%
 
 isProcess(P) :- process(P),!.

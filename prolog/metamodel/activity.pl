@@ -35,12 +35,27 @@ useVariable(Act,Var,out) :-
 	activity(Act), variable(Var), 
 	( usesAsOutput(Act,Var) | usesAsOutput(Act,F), fieldAccess(F,Var,_) ).
 
+areInSameProcess(X,Y) :- belongsTo(X,P), belongsTo(Y,P).
+
 %%%
 % Activity Set Predicates
 %%%
 
-areInSameProcess(X,Y) :- belongsTo(X,P), belongsTo(Y,P).
 
-isWellFormed(ActSet) :- 
+isWellFormed(ActSet) :- isWellFormed(ActSet,_).
+isWellFormed(ActSet,P) :- 
 	maplist(activity:belongsTo,ActSet,ProcessSet),
-	sort(ProcessSet,[_]).
+	sort(ProcessSet,[P]).
+
+hasSameKind(ActSet) :- hasSameKind(ActSet,_).
+hasSameKind(ActSet,Kind) :- 
+	maplist(hasForKind,ActSet,Kinds), sort(Kinds,[Kind]).
+
+filterByKind([],_,[]).
+filterByKind([H|T],K,[H|O]) :- 
+	hasForKind(H,K), !, filterByKind(T,K,O).
+filterByKind([_|T],K,O) :- 
+	filterByKind(T,K,O).
+
+areUnifiable(ActSet,Kind,Process) :- 
+	isWellFormed(ActSet,Process), hasSameKind(ActSet,Kind).

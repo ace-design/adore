@@ -355,7 +355,8 @@
   (use-local-map adore-map)
 
   (defvar adore-keywords 
-    '("require" "orchestration" "fragment" "composition" "DISENGAGE" "ENGAGE"))
+    '("require" "orchestration" "fragment" "composition" "knowledge" 
+      "depict" "using"))
   (defvar adore-keywords-regexp (regexp-opt adore-keywords 'words))
 
   (defvar adore-activities

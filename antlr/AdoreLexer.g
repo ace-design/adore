@@ -39,11 +39,14 @@ VARS:		'variables';
 AS:		'as';
 CONST:		'const';
 REQU:		'require';
+KNOWLEDGE:	'knowledge';	
 WHEN:		'when';
 COMPOSITION:	'composition';
 APPLY:		'apply';
 TOSET:		'toSet';
 FAILURE	:	'fail';
+DEPICT	:	'depict';
+IN	:	'using';
 
 /** PUNCTUATION**/
 STAR:		'*';

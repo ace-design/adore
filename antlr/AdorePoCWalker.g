@@ -110,6 +110,9 @@ definition returns [ArrayList<String> facts]
 		 				     System.err.println("\%\% " + e);
 		 				   }
 						} 
+	| ^(DEF ^(KNOWLEDGE f=STR))		{ 
+						  $facts.add("["+ $f.text +"]"); 
+						}
 	| ^(DEF ^(ORCHESTRATION s=ID o=ID) core[$s+"_"+$o])	
 						{ String name = $s.text + "_" + $o.text;
 						  $facts.add("createProcess("+name+")");
@@ -127,6 +130,9 @@ definition returns [ArrayList<String> facts]
 						
 	| ^(DEF merge) 				{ safeAdd($facts,$merge.facts); }	
 	| ^(DEF ^(RAW p=DISENGAGE))		{ $facts.add(cleanupDisengage($p.text));      }
+	| ^(DEF ^(COLOR p=ID s=STR))		{ String colorName = $s.text.substring(1,$s.text.length()-1);
+						  $facts.add("defColor("+$p.text+","+colorName+")");
+						}
 	;
 
 param [String cxt]

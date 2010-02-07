@@ -23,6 +23,12 @@
 %% We leave 'pebbles' after us (cf 'Le petit poucet' and his 'petits cailloux').
 :- dynamic pebble/4.
 
+%% Short name for context
+:- dynamic adoreContext/2.
+
+
+declareContext(Ctx,Id) :- 
+	gensym(ctx_,Id), assert(adoreContext(Id,Ctx)).
 
 %%%%%% traceRename/4: traceRename(K,O,N,C)
 %%  -> K: pick one from  activity|variable|constant
@@ -33,7 +39,17 @@
 traceRename(Kind, Old, New, Context) :-
 	assert(pebble(rename(Kind), Old, New, Context)).
 
-traceDerivation(Algo,Old,New) :- assert(pebble(derivation,Old,New,Algo)).
+traceDerivation(Ctx,Old,New) :- 
+	assert(pebble(derivation, Old, New, Ctx)).
+
+traceVanishment(Ctx,Element,Kind) :- 
+	assert(pebble(vanishment, Element, Kind, Ctx)).
+
+traceUnification(_,[],_).
+traceUnification(Ctx, [Old|T], New) :- 
+	assert(pebble(unification,Old,New,Ctx)),
+	traceUnification(Ctx,T,New).
+
 
 getPreviousName(New,Old) :- pebble(rename(_),Old,New,_),!.
 getPreviousName(New,New). %% i.e. there is no pebble to lead us (no renaming).
@@ -41,3 +57,8 @@ getPreviousName(New,New). %% i.e. there is no pebble to lead us (no renaming).
 
 getImmediateDerivation(Ctx,Old,New) :- 
 	pebble(derivation,Old,New,Ctx).
+
+findRoot(Elem,Root) :- 
+	pebble(Ctx,Ancestor,Elem,_), \+ Ctx = rename(_), 
+	findRoot(Ancestor,Root),!.
+findRoot(Elem,Elem).

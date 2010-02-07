@@ -1,0 +1,6 @@
+/** Color Scheme to identify graphically fragments and processes 
+ * @author: Sebastien Mosser, Mireille Blay-Fornarino & Robert France
+ * submitted to the TAOSD special issue dedicated to AOM
+ **/
+
+depict fakeCrisisDetected using 'darkseagreen3' ;
