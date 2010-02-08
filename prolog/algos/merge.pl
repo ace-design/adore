@@ -33,8 +33,6 @@
 %%  http://rainbow.polytech.unice.fr/publis/mosser-blay-fornarino-etal:2008b.pdf
 %%%%%%
 
-%% to do: port old algorithm into the new formalism
-
 %%
 % end user interface
 %%
@@ -102,6 +100,7 @@ unifyActivities(Ctx, Activities, Actions) :-
 	flatten([CreateActs, RelActs, VarActs, DelActs],Actions).
 
 
+%% Absorb relation between "Old \in Olds" and the others, using "New".
 absorbRelation(Olds,New,Actions) :- 
 	member(Old,Olds), waitFor(Old,X), 
 	Actions = [retract(waitFor(Old,X)), defWaitFor(New,X)].
@@ -130,6 +129,7 @@ absorbRelation(Olds,New,Actions) :-
 	member(Old,Olds), onFailure(Old,X,E), 
 	Actions= [retract(onFailure(Old,X,E)), defOnFail(New,X,E)].
 
+%% Absorb Variables
 absorbVariables(Olds,New,Actions) :- 
 	member(Old,Olds), usesAsInput(Old,V), 
 	Actions = [ retract(usesAsInput(Old,V)), addAsInput(V,New)].
@@ -137,6 +137,7 @@ absorbVariables(Olds,New,Actions) :-
 	member(Old,Olds), usesAsOutput(Old,V), 
 	Actions = [ retract(usesAsOutput(Old,V)), addAsOutput(V,New)].
 
+%% Delete old activities
 delActivities(Olds,Actions) :- 
 	member(Old,Olds), 
 	activity(Old), hasForKind(Old,K), isContainedBy(Old,P),

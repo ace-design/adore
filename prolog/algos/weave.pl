@@ -20,27 +20,20 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%% Weave Algorithm
+:- module(weave,[doWeave/2]).
+
+%%%%%%
+%% Related publication: 
+%%  Sébastien Mosser, Mireille Blay-Fornarino, Michel Riveill. 
+%%  "Web Services Orchestration Evolution : 
+%%   A Merge Process For Behavioral Evolution" (long paper ) 
+%%  in Proceedings of the 2nd European Conference on 
+%%     Software Architecture (ECSA'08), Acceptation Rate: 14 %, 
+%%  Springer LNCS, Paphos, Cyprus, 29 sep - 1 oct 2008
+%%  http://rainbow.polytech.unice.fr/publis/mosser-blay-fornarino-etal:2008b.pdf
+%%%%%%
 
 
-%doWeave(P,V,B) :- 
-%	weave(P,V,B,Actions),
-%	executeActionSet(Actions).
-
-
-%%%%
-%% Weave Algorithm
-%%%%
-
-%% weave(Fragment, Process, Binding, Actions) :- 
-%% 	process(Process), isFragment(Fragment), 
-%% 	flatten([],Actions).
-
-
-%% addVariables(F,Actions) :- 
-%% 	usedByProcess(F,V),
-%% 	gensym(v,Name),
-	
 
 
 

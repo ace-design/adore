@@ -135,15 +135,19 @@ drawActivity(A,C) :-
 	getPreviousName(A,Id),
 	genOutputs(A,Outs),
 	genLabel(A,Label),
-	genInputs(A,Ins), genActColor(A,Color),
+	genInputs(A,Ins), genActColor(A, Color), 
 	swritef(C,'  %w [label="%w|%w%w%w"%w];',[A,Id,Outs,Label,Ins,Color]).
 
+genActColor(Act,'') :- hasForKind(Act,hook),!.
 genActColor(Act,Color) :- 
-	\+ hasForKind(Act,hook), findRoot(Act,Root), 
-	activity:belongsTo(Root,P), hasForColor(P,ColorName), !, 
+	findRoot(Act,Root), activity:belongsTo(Root,P), 
+	getProcessColor(P,Color).
+
+getProcessColor(P,Color) :- 
+	hasForColor(P,ColorName),!,
 	swritef(Color,',style=filled,fillcolor="%w"',[ColorName]).
-genActColor(_,'').
-	
+getProcessColor(_,'').
+
 	
 
 genOutputs(A,'') :- 

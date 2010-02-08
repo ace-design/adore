@@ -32,13 +32,6 @@ composition cms::captureWitnessReport{
   apply fakeCrisisDetected          => requestVideo::a3; 
 }
 
-/** ... Translation should be done automatically by an algorithm ... **/
-/*% doClone(ignoreDisconnection,iD_1),  %*/ 
-/*% doClone(fakeCrisisDetected, fCD_1), %*/
-/*% doMerge([iD_1,fCD_1], iD_fCD_1),    %*/
-///*% adore2png(iD_fCD_1,tmp),      %*/
-///*% merge:buildActions([iD_1,fCD_1],iD_fCD_1,Actions), writeList(Actions), %*/
-
 /*********************
  *** Use Case #2.3 ***
  *********************/ 
@@ -72,9 +65,9 @@ composition cms::captureWitnessReport{
  **********************/ 
 
 
-/***************************** 
- *** Glamorizing artifacts ***
- *****************************/
+/************************** 
+ *** Cosmetic Artifacts ***
+ **************************/
 require 'color_scheme.adore' ; // depict directive to colorize fragments
-
+require 'doCompo.adore';       // Manual declaration of composition directives
 

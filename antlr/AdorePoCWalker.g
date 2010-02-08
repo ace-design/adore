@@ -63,7 +63,9 @@ import java.io.*;
   
   private String cleanupDisengage(String raw) {
 	String data = raw.substring(3,raw.length()-3).replaceAll("\n","");
-	return "print('\%\%\% DISENGAGE'), nl, print('\%\% => doing ["+data.trim().substring(0,data.trim().length()-1)+"]'), nl, " + 
+	String escapedData = data.trim().substring(0,data.trim().length()-1);
+	escapedData = data.replaceAll("\'","\\\\'").trim();
+	return "print('\%\%\% DISENGAGE'), nl, print('\%\% => doing ["+escapedData+"]'), nl, " + 
 		data.trim() + " print('\%\%\% ENGAGE'), nl, true";
   }
   
