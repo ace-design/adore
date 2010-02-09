@@ -49,22 +49,3 @@ variableSubstitutionAction(Old,New,Act,Actions) :-
 	usesElem(Act,Field), fieldAccess(Field,Old,Path),
 	Actions = [retract(fieldAccess(Field,Old,Path)), 
 	           setFieldAccess(Field,New,Path)].
-
-
-
-
-%% substituteVariable(+O,+N,+Acts,-Actions)
-%%  substitute variable Old with variable New when used by an activity in Acts
-%% substituteVariable(Old,New,Acts,Actions) :- 
-%% 	member(A,Acts), activity(A), usesAsInput(A,Old), 
-%% 	
-%% substituteVariable(Old,New,Acts,Actions) :- 
-%% 	member(A,Acts), activity(A), fieldAccess(I,Old,Path), usesAsInput(A,I),
-%% 	Actions = [retract(fieldAccess(I,Old,Path)), setFieldAcces(I,New,Path)].
-%% substituteVariable(Old,New,Acts,Actions) :- 
-%% 	member(A,Acts), activity(A), usesAsOutput(A,Old), 
-%% 	Actions = [retract(usesAsOutput(A,Old)), addAsOutput(New,A)].
-%% substituteVariable(Old,New,Acts,Actions) :- 
-%% 	member(A,Acts), activity(A), fieldAccess(I,Old,Path), usesAsOutput(A,I),
-%% 	Actions = [retract(fieldAccess(I,Old,Path)), setFieldAcces(I,New,Path)].
-

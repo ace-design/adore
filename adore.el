@@ -183,7 +183,7 @@
   (save-excursion
     (beginning-of-line)
     (let ((fileName (adore-extract 
-		     "\\([a-zA-Z0-9]+/\\)*[a-zA-Z0-9]+.adore" 
+		     "\\([a-zA-Z0-9_]+/\\)*[a-zA-Z0-9_]+.adore" 
 		     (adore-read-line))))
       (if (equal nil fileName)
 	  (message "Adore: Unable to guess file name")

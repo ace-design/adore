@@ -44,7 +44,7 @@ loadFiles :-
 	aw('%%%% Loading Algorithms'),
         loadAlgo('contextMerge'), loadAlgo('applyRewrite'),
 	loadAlgo('contextNormalization'), loadAlgo('setify'), 
-	loadAlgo('clone'), loadAlgo('merge'),
+	loadAlgo('clone'), loadAlgo('merge'), loadAlgo('weave'),
 	aw('%%%% Loading Transformations'),
         loadTransfo('adore2dsl'), loadTransfo('adore2xml'),
 	loadTransfo('adore2dot'), loadTransfo('adore2metrics'),

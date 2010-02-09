@@ -26,7 +26,6 @@
 %% Short name for context
 :- dynamic adoreContext/2.
 
-
 declareContext(Ctx,Id) :- 
 	gensym(ctx_,Id), assert(adoreContext(Id,Ctx)).
 

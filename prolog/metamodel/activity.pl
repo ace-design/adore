@@ -37,10 +37,16 @@ useVariable(Act,Var,out) :-
 
 areInSameProcess(X,Y) :- belongsTo(X,P), belongsTo(Y,P).
 
+
+getPredecessors(A,Preds) :- 
+	findall(X,path(X,A),Preds).
+
+getSuccessors(A,Succs) :- 
+	findall(X,path(A,X),Succs).
+
 %%%
 % Activity Set Predicates
 %%%
-
 
 isWellFormed(ActSet) :- isWellFormed(ActSet,_).
 isWellFormed(ActSet,P) :- 
@@ -59,3 +65,41 @@ filterByKind([_|T],K,O) :-
 
 areUnifiable(ActSet,Kind,Process) :- 
 	isWellFormed(ActSet,Process), hasSameKind(ActSet,Kind).
+
+
+getFirsts(Block,Activities) :- 
+	findall(A,activity:isFirst(Block,A),Tmp), sort(Tmp,Activities).
+isFirst(Block,Activity) :- 
+	member(Activity,Block), \+ path(_,Activity).
+isFirst(Block,Activity) :- 
+	member(Activity,Block), path(APrime,Activity), \+ member(APrime,Block).
+
+getLasts(Block,Activities) :- 
+	findall(A,activity:isLast(Block,A),Tmp), sort(Tmp,Activities).
+isLast(Block,Activity) :- 
+	member(Activity,Block),	\+ path(Activity,_).
+isLast(Block,Activity) :- 
+	member(Activity,Block), path(Activity,APrime),
+	\+ member(APrime,Block). 
+
+
+isBlockInterfaceVariable(Block,V,in) :- 
+	isFirstActivity(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
+isBlockInterfaceVariable(Block,V,out) :- 
+	isLastActivity(Block,A), usesElemAsOutput(A,V).
+
+%% TO DO: harmonize with isBliockInterface predicates.
+getBlockInputVariables(Block, Vars) :-
+	findall(V,activity:isBlockInputVariable(Block,V),Tmp),
+	sort(Tmp,Vars).
+isBlockInputVariable(Block,V) :- 
+	isFirstActivity(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
+
+getBlockOutputVariable(Block, Vars) :-
+	findall(V,activity:isBlockOutputVariable(Block,V),Tmp),
+	sort(Tmp,Vars).
+isBlockOutputVariable(Block,V) :- 
+	isLastActivity(Block,A), usesElemAsOutput(A,V).
+
+
+

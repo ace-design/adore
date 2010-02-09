@@ -1,0 +1,43 @@
+orchestration sandbox::tmp {
+  variables {
+    x as integer; y as integer; result as integer;
+    xP as integer; yP as integer;
+    const one := '1' as integer;
+  }
+  activities {
+    act0. (x,y) := receive();
+    act1. xP := minus(x, one);
+    act2. yP := plus(y,one);
+    act3. reply(xP, yP);
+    act4. log::write(xP);
+    act5. log::write(yP);
+  }
+  relations {
+    act0 < act1; act0 < act2; 
+    act1 < act3; act2 < act3;
+    act1 < act4; act2 < act5;
+  }
+}
+
+fragment foo {
+  variables {}
+  activities {
+    h. hook();
+    e1. log::write('BEFORE' as string);
+    e2. log::write('AFTER' as string);
+  }
+  relations {
+    ^ < e1; e1 < h; h < e2; e2 < $;
+  }
+}
+depict foo using 'darkseagreen3';
+
+/*% doClone(foo,aClone), %*/
+
+///*% doWeave([weave(aClone,[sandbox_tmp_act1])]), %*/
+///*% doWeave([weave(aClone,[sandbox_tmp_act2])]), %*/
+/*% doWeave([weave(aClone,[sandbox_tmp_act1,sandbox_tmp_act2])]), %*/
+
+
+/*% adore2png(sandbox_tmp,'weave.png'), %*/
+

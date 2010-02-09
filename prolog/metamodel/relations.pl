@@ -37,3 +37,9 @@ existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).
 getPath(A,B,[A|O]) :- extractPath(A,B,O). 
 extractPath(A,B,[B]) :- path(A,B).
 extractPath(A,B,[X|O]) :- path(A,X), extractPath(X,B,O).
+
+
+
+
+
+

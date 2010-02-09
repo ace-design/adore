@@ -8,12 +8,25 @@
  *** Use Case #2.2 ***
  *********************/ 
 
-/*% 
-  doClone(ignoreDisconnection,iD_1), 
-  doClone(fakeCrisisDetected, fCD_1),
-  doMerge([iD_1,fCD_1], iD_fCD),
-  adore2png(iD_fCD,'output/pictures/iD_fCD.png'),
+
+/*%
+  doClone(callDisconnected, cD_1), 
+  doClone(callDisconnected, cD_2),
+  doClone(fakeCrisisDetected,fCD_1),
+  doClone(fakeWitnessInfo,fWI_1),
+  doClone(requestVideo,rV1),
+  doClone(ignoreDisconnection,iD_1), doClone(fakeCrisisDetected, fCD_2),
+  doMerge([iD_1,fCD_2], iD_fCD_1),
+  doWeave([ weave(cD_1,[cms_captureWitnessReport_a10]),
+            weave(cD_2,[cms_captureWitnessReport_a2]),
+	    weave(rV1,[cms_captureWitnessReport_a3,
+	                cms_captureWitnessReport_a4]),
+            weave(iD_fCD_1,[cms_captureWitnessReport_a4])]),
 %*/
+
+
+
+
 
 /*********************
  *** Use Case #2.3 ***

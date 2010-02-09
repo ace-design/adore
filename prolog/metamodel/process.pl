@@ -30,6 +30,15 @@
 exists(P) :- process(P),!.
 exists(P) :- context(C), contextOutput(C,P), !.
 
+getPreds(P,A) :- 
+	isFragment(P), getActivities(P,Acts), 
+	member(A,Acts), hasForKind(A,predecessors).
+
+getSuccs(P,A) :- 
+	isFragment(P), activity:belongsTo(A,P), hasForKind(A,successors).
+
+getHook(P,A) :- 
+	isFragment(P), activity:belongsTo(A,P), hasForKind(A,hook).
 
 %%
 % Associated entities
@@ -43,8 +52,10 @@ getActivities(P,Activities) :-
 	findall(V,activity:belongsTo(V,P),Tmp),
 	sort(Tmp,Activities). 
 
-
 bindsFragmentParameterToVariable(Process,Param,Var) :- 
 	process(Process), isFragment(Process),
 	hasForParameter(Process,Param), 
 	getPreviousName(Var,Param), variable(Var).
+
+
+

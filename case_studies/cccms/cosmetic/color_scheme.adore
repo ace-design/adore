@@ -4,4 +4,6 @@
  **/
 
 depict fakeCrisisDetected using 'darkseagreen3' ;
-
+depict requestVideo       using 'skyblue';
+depict callDisconnected   using 'gold';
+depict fakeWitnessInfo    using 'burlywood';

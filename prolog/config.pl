@@ -24,10 +24,11 @@
 %% Debugging ADORE ...
 %%%%
 
-%debugSubscription(create).
-%debugSubscription(def).
-%debugSubscription(set).
+debugSubscription(create).
+debugSubscription(def).
+debugSubscription(set).
 
+debugSubscription(weave).
 debugSubscription(exec).
 
 %%%%

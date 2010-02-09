@@ -122,7 +122,7 @@ absorbRelation(Olds,New,Actions) :-
 	member(Old,Olds), isGuardedBy(Old,X,V,C), 
 	Actions= [retract(isGuardedBy(Old,X,V,C)), defGuard(New,X,V,C)].
 
-absorbRelation(Olds,New,Actions) :- 
+absorbRelation(Olds,New,Actions) :-
 	member(Old,Olds), onFailure(X,Old,E), 
 	Actions= [retract(onFailure(X,Old,E)), defOnFail(X,New,E)].
 absorbRelation(Olds,New,Actions) :- 

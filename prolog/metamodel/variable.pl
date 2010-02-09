@@ -41,3 +41,16 @@ getType(Var,T) :- hasForType(Var,T).
 
 
 getInitValue(Var,Val) :- hasForInitValue(Var,Val).
+
+
+findEquivalentInBlock(Activity,V,Block,Candidate) :- 
+	activity:useVariable(Activity,V,Direction),
+	activity:isBlockInterfaceVariable(Block,Candidate,Direction),
+	hasForType(V,T), hasForType(Candidate,T), 
+	\+ isConstant(Candidate).
+
+areEquivalent(Activity,V,Target,Candidate) :- 
+	activity:useVariable(Activity,V,Direction),
+	activity:useVariable(Target,Candidate, Direction),
+	hasForType(V,T), hasForType(Candidate,T), 
+	\+ isConstant(Candidate).
