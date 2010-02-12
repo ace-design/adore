@@ -1,4 +1,4 @@
-%%consult('/Users/mireilleblay-fornarino/Documents/ADORE/adore/adore/prolog/core/pointcutsHelper.pl').
+%%consult('/Users/mireilleblay-fornarino/Documents/ADORE/adore/adore/prolog/sandbox/pointcutsHelper.pl').
 
 findInvokeActivity(A,Service,Operation,InputVariable,InputVariableType,OutputVariable,OutputVariableType) :-
 hasForKind(A,invoke),
@@ -26,15 +26,18 @@ prepareWeaving(Activity,Fragment,Context, NewContext) :-
     member(weave(ExistingFragment,[Activity]),Context),!,
     dealWithMergeOnActivity(ExistingFragment, Context,Activity,Fragment,NewContext).
 prepareWeaving(Activity,Fragment,Context, NewContext) :-
+    gensym(fragment,NF),
     Actions = [doClone(Fragment,NF),
     		   weave(NF, [Activity])],
     append(Context,Actions,NewContext).
     		
 dealWithMergeOnActivity(ExistingFragment,Context,_Activity,Fragment,NewContext) :-    
     select(doMerge(Fragments,ExistingFragment),Context,Rest),!,
+    gensym(fragment,NF),
     NewContext=[doClone(Fragment,NF),doMerge([NF|Fragments],ExistingFragment)|Rest].
 dealWithMergeOnActivity(ExistingFragment,Context,Activity,Fragment,NewContext) :-    
     select(weave(ExistingFragment,[Activity]),Context,Rest),
+    gensym(fragment,NF),
     NewContext=[doClone(Fragment,NF),
                 doMerge([NF, ExistingFragment],NewMergeFragment),
                 weave(NewMergeFragment,[Activity])|Rest].
@@ -48,10 +51,10 @@ dealWithMergeOnActivity(ExistingFragment,Context,Activity,Fragment,NewContext) :
 %%
 
 introducePersistence(Context,NewContext) :-
-    findall(A, findInvokeActivity(A,_S,_OP,_I,cmsEmployee,_O,_OT), L), sort(L,LRInputEmployee),
-    findall(A, findInvokeActivity(A,_S,_OP,_I,externalWorker,_O,_OT), L), sort(L,LRInputExternalWorker),
-    findall(A, findInvokeActivity(A,_S,_OP,_I,_IT,_O,cmsEmployee), L), sort(L,LROutputEmployee),
-    findall(A, findInvokeActivity(A,_S,_OP,_I,_IT,_O,externalWorker), L), sort(L,LROutputExternalWorker),   
+    (findall(A, findInvokeActivity(A,_S,_OP,_I,cmsEmployee,_O,_OT), L), sort(L,LRInputEmployee);LRInputEmployee=[]),
+    (findall(A, findInvokeActivity(A,_S,_OP,_I,externalWorker,_O,_OT), L), sort(L,LRInputExternalWorker);LRInputExternalWorker=[]),
+    (findall(A, findInvokeActivity(A,_S,_OP,_I,_IT,_O,cmsEmployee), L), sort(L,LROutputEmployee);LROutputEmployee=[]),
+    (findall(A, findInvokeActivity(A,_S,_OP,_I,_IT,_O,externalWorker), L), sort(L,LROutputExternalWorker);LROutputExternalWorker=[]),   
     instanciateFragment(logCreate,[cmsEmployee],LCCEFragment),
     instanciateFragment(logCreate,[externalWorker],LCEWFragment),
     instanciateFragment(logUpdate,[cmsEmployee],LUCEFragment),
@@ -68,6 +71,7 @@ introduceSecurity(Context,NewContext) :-
           prepareWeavingOnActivityList(LRInputEmployee,authentifyWhenIdle,Context, NewContext).
           
           
-      
+%%introducePersistence([],NewContext),introduceSecurity(NewContext,N),print(N),length(N,R).
+%%105 ...
         
-instanciateFragment(GenericFragment,ParameterList,NewNonGenericFragment).
+instanciateFragment(GenericFragment,ParameterList,[GenericFragment,ParameterList]).
