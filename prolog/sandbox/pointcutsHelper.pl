@@ -73,5 +73,9 @@ introduceSecurity(Context,NewContext) :-
           
 %%introducePersistence([],NewContext),introduceSecurity(NewContext,N),print(N),length(N,R).
 %%105 ...
-        
+%introducePersistence([],NewContext),introduceSecurity(NewContext,N),print(N),length(N,R), 
+%findall(X, (member(doMerge(X,Z),N)),LMerge),length(LMerge,LM),
+%findall(X, (member(weave(X,Z),N)),LWeave),length(LWeave,LW).
+
+
 instanciateFragment(GenericFragment,ParameterList,[GenericFragment,ParameterList]).
