@@ -1,0 +1,17 @@
+fragment useHelicopter<m,coord> {
+  variables {
+    w as worker;  
+    r as boolean;   m as mission; ok as boolean;
+    coord as cmsEmployee;
+  }
+  activities {
+    a1. r := cms::helicopterRequired(m);
+    h. hook(w);
+    a2. ok := ui::ask4Helicopter(coord,w,m);
+    a3. cms::transportByHelicopter(w,m.loc);
+  }
+  relations {
+    ^ < a1; a1 < h when ! r;  a1 < a2 when r;
+    a2 < a3 when ok; a2 < h when !ok; a3 < h; h < $;
+  }
+}

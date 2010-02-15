@@ -1,0 +1,12 @@
+fragment missionFailed {
+  variables {
+    m as mission; crisis as crisisIdentifier;
+  }
+  activities { 
+    h. hook(crisis,m);
+    a1. msgBus::send('status' as string, 'failed' as string, m);
+    a2. cms::handleCrisis(crisis);
+    a3. reply();
+  }
+  relations { ^ < h; h < $; fail(h,'failed') < a1; a1 < a2; a2 < a3; }
+}

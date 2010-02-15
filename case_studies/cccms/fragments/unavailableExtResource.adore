@@ -1,0 +1,20 @@
+fragment unavailableExtResource {
+  variables {
+    res as resource; 
+    crisis as crisisIdentifier; m as mission;
+    erep as report;
+    token as string;
+  }
+  activities {
+    h.  erep := hook(res,crisis,m);
+    a0. erep := id('null' as report);
+    ac. token := concat('unavailable' as string,res);
+    a1. msgBus::send('status' as string, token , m);
+    a2. cms::handleCrisis(crisis);
+
+  }
+  relations { 
+    ^ < h; h << $; h << $; fail(h,'unavailable') < a0; a0<ac; ac<a1; 
+    a1 < a2; a2<< $; 
+  }
+}

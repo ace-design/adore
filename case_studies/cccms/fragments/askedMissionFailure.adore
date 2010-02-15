@@ -1,0 +1,17 @@
+fragment askedMissionFailure<crisis> {
+  variables {
+    mi as mission; subst* as mission; 
+    crisis as crisisIdentifier;
+   
+  }
+  activities {
+    h. hook(mi);
+    a1. msgBus::wait4Msg('status' as string, 'fail' as string, mi);
+    a2. subst* := cms::recommendSupObsMission(crisis);
+    a3. self::self(subst*); 
+  }
+  relations {
+    ^ < h; h << $;  
+    ^ < a1 ; a1 < a2; a2 < a3; a3 << $; 
+  }
+} 

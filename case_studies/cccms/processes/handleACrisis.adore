@@ -1,0 +1,17 @@
+orchestration cms::handleACrisis {
+  variables {
+    id as crisisIdentifier; coord as cmsEmployee;
+    m* as mission; choosen as mission;
+  }
+  activities {
+    rcv. (coord, id) := receive();
+    a2. m* := cms::recommendMission(id);
+    a3. choosen := ui::selectMission(coord,m*);
+    aX. cms::handleAMission(coord,id, choosen);
+    rpl. reply();
+  }
+  relations { 
+    rcv < a2; a2 < a3;  
+    a3 < aX; aX < rpl;
+  }
+}

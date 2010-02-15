@@ -1,0 +1,12 @@
+orchestration cms::assignIntRes {
+  variables {
+    e as cmsEmployee; m as mission; accept as boolean;
+  }
+  activities {
+    rcv. (e,m) := receive();
+    a1. ui::sendMissionInfo(e,m);
+    a2. accept := ui::wait4Acceptance(e,m);
+    rpl. reply();
+  }
+  relations { rcv < a1; a1 < a2; a2 < rpl; }
+}

@@ -1,0 +1,27 @@
+orchestration cms::handleAMission {
+  variables {
+    crisis as crisisIdentifier;
+    m as mission;      coord as cmsEmployee;
+    ir as resource; er as resource;
+    iw as cmsEmployee; ew as externalWorker;
+    irep as report; erep as report;
+  }
+  activities {
+    rcv. (coord,crisis, m) := receive();
+    a9. ui::actListener(coord,m,'status' as string); 
+    a40. ir := get(m,'intResource' as string);
+    a41. iw := cms::findRelevantEmployee(ir,crisis,m);
+    a42. cms::assignIntRes(iw,m);
+    a4x. irep := cms::handleAWorker(crisis,iw, m,coord);
+    a50. er := get(m,'extResource' as string);
+    a51. ew := cms::requestExtRes(er,crisis,m);
+    a5x. erep := cms::handleAWorker(crisis, ew, m,coord);
+    rpl. reply();
+    a9bis. ui::stopListener(coord, m, 'status' as string); 
+  }
+  relations { 
+    rcv < a40; a40 < a41; a41 < a42; a42 < a4x; a4x < rpl;
+    rcv < a50; a50 < a51; a51 < a5x; a5x < rpl;
+    rcv < a9; a9 < a51; a9 < a41; rpl < a9bis; 
+  }
+}

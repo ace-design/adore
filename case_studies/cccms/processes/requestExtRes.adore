@@ -1,0 +1,14 @@
+orchestration cms::requestExtRes {
+  variables {
+    res as resource; w as worker;
+    m as mission; 
+    cx as ersConnexion;
+  }
+  activities {
+    rcv. (res,m) := receive();
+    a1. cx := ers::submitMissionDetails(m);
+    a2. w := ers::providesWorker(cx,res);
+    rpl. reply(w);
+  }
+  relations { rcv < a1; a1 < a2; a2 < rpl; }
+}

@@ -1,0 +1,12 @@
+fragment noAvailableReplacement<user> {
+  variables {
+    m* as mission;
+    user as cmsEmployee; c as boolean;
+  }
+  activities {
+    h. m* := hook();
+    t. c := isEmptySet(m*);
+    a1. ui::promptNotifyNtlCrisisCtr(user);
+  }
+  relations { ^ < h; h < t; t < $ when !c; t < a1 when c; a1 < $; }
+} 

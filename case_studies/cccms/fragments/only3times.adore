@@ -1,0 +1,20 @@
+fragment only3times {
+  variables { 
+    user as cmsEmployee; n as integer;
+    c as boolean; v as boolean; r as boolean;
+  }
+  activities {
+    e1. n := cms::incrAuthCpt(user);
+    t. c := isLesserThan(n,'3' as string);
+    e2. throw('TooManyLoginAttempts' as string);
+    h. v := hook(user) ;
+    e3. r := self::self(user);
+    e4. reply(r);
+  }
+  relations {
+    ^ < e1; e1 < t; 
+    t < h when c; t < e2 when ! c;
+    h < $ when v; h < e3 when ! v;
+    e3 < e4;
+  } 
+}

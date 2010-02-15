@@ -3,7 +3,45 @@
  * submitted to the TAOSD special issue dedicated to AOM
  **/
 
+// Non functional entities
+// TODO
+
+// Shared Entities
+depict mustAuthenticate using 'lightpink';
+depict reHandleOnChange using 'lemonchiffon';
+ 
+// Use Case 2.1
+depict unavailableIntResource using 'darkslategray3';
+depict unavailableExtResource using 'skyblue';
+
+depict useHelicopter using 'palegoldenrod';
+depict lostContact   using 'navajowhite';
+depict timeout       using 'mistyrose';
+depict missionFailed using 'thistle';
+depict missingReport using 'yellow2';
+
+// Use Case 2.2
 depict fakeCrisisDetected using 'darkseagreen3' ;
 depict requestVideo       using 'skyblue';
 depict callDisconnected   using 'gold';
 depict fakeWitnessInfo    using 'burlywood';
+
+// Use Case 2.3
+depict unavailableEmployee using 'tomato';
+depict employeeRefusal     using 'firebrick';
+
+// Use Case 2.4
+depict degradedRes using 'palevioletred';
+depict noExtRes    using 'lightsalmon';
+
+// Use Case 2.6
+depict replaceMission         using 'lightblue';
+depict noAvailableReplacement using 'darkseagreen';
+depict askedMissionFailure    using 'tomato';
+
+// Use Case 2.7
+depict retrieveVictimHistory using 'chocolate';
+
+// Use Case 2.10
+depict cancelAuth using 'coral';
+depict only3times using 'lavenderblush';

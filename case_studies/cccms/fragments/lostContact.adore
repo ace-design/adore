@@ -1,0 +1,13 @@
+fragment lostContact<action,c> {
+  variables {
+    c as crisisIdentifier; w as worker;
+    super as cmsEmployee;
+  }
+  activities {
+    a1. msg::wait4Msg('info' as string, 'lost' as string, w);
+    a2. super := cms::getSuperObserver(c);
+    a3. ui::action(super,w);
+    h. hook(w,c);
+  }
+  relations { ^ < a1; ^ < h; h << $; a1 < a2; a2 < a3; a3 << $; }
+}

@@ -1,0 +1,8 @@
+fragment missingReport {
+  variables { r as report; w as worker; }
+  activities {
+    h. r := hook(w);
+    a1. r := id('null' as report);
+  }
+  relations { ^ < h; fail(h) < a1; h << $; a1 << $; }
+}

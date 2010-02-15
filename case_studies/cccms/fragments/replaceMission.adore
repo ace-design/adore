@@ -1,0 +1,13 @@
+fragment replaceMission {
+  variables {
+    mi as missionInformation; ack as boolean;
+    subst* as mission;
+  }
+  activities {
+    h. ack := hook(mi);
+    a1. subst* := cms::findEquivalentMissions(mi);
+    a2. self::self(subst*); 
+    a3. reply();
+  }
+  relations { ^ < h; h < $ when ack; h < a1 when !ack; a1 < a2; a2 < a3; }
+}

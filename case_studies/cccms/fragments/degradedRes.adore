@@ -1,0 +1,13 @@
+fragment degradedRes<treshold> {
+  variables { 
+    deg as boolean; cx as ersConnexion;
+    w as worker; lvl as integer; threshold as integer;
+  }
+  activities {
+    h. w := hook(cx);
+    a1. lvl := ers::getLoadLevel(cx);
+    t. deg := isGreaterThan(lvl,threshold);
+    a2. msgBus::send('info' as string, 'degraded' as string,w);
+  }
+  relations { ^ < h;  h < a1; a1 < t; t < a2 when deg; t<$ when !deg; a2<$; }
+} 

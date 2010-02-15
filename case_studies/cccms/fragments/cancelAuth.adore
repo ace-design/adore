@@ -1,0 +1,8 @@
+fragment cancelAuth {
+  variables { }
+  activities {
+    h. hook();
+    r. reply('false' as boolean);
+  }
+  relations { ^ < h; fail(h,'cancel') < r; h < $; }
+}

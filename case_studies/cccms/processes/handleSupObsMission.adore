@@ -1,0 +1,25 @@
+orchestration cms::handleSupObsMissions {
+  variables {
+    so as cmsEmployee; crisis as crisisIdentifier; m* as mission; 
+    choosen as mission; mr as misisonRequest; mi as missionInformation;
+    ack as boolean; quit as boolean;
+  }
+  activities {
+    rcv. (m*, so, crisis) := receive();
+    a4. choosen := ui::selectMission(so,m*);
+    a5. mr := cms::buildMissionRequest(choosen);
+    a6. mi := ui::promptMissionRequest(mr);
+    a7. ack := cms::submitMission(mi);
+    a8. msgBus::wait4Msg('status' as string, 'success' as string, mi);
+    t. quit := ui::prompt4departure(so);
+    a91. m* := cms::recommendSupObsMission(crisis);
+    a92. cms::handleSupObsMissions(m*, so, crisis);
+    rpl. reply();
+    a93. msgBus::send('info' as string, 'leaving' as string,so);
+  }
+  relations {
+    rcv < a4; a4 < a5; a5 < a6; a6 < a7; a7 < a8 when ack; a7 < t when ack ;
+    t < rpl when quit; t < a91 when ! quit; a91 < a92; a92 < rpl;
+    rpl < a93; a8 < rpl;
+  }
+}

@@ -1,0 +1,16 @@
+fragment retrieveVictimHistory<wrk> {
+  variables {
+   id as idRef; history as medicalHistory; 
+    c as boolean; 
+    wrk as worker;
+  }
+  activities {
+    h. hook(id);
+    a1. history := hospitals::guessHistory(id);
+    t. c := isNotNull(history);
+    a2. ui::displayHistory(wrk, history);
+  }
+  relations { 
+    ^ < h; h < a1; a1 < t; t < a2 when c; a2 < $; t < $ when !c;
+  }
+}

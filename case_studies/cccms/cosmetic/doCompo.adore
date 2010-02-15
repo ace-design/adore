@@ -3,59 +3,193 @@
  *** Use Case #2.1 ***
  *********************/ 
 
+/**%
+  doClone(mustAuthenticate,uc21_mA_1),
+  doWeave([ weave(uc21_mA_1, [ cms_resolveCrisis_a1 ]) ]),
+  doProcessSimplification(cms_resolveCrisis),
+  cccms_draw(cms_resolveCrisis,'2.1.resolveCrisis'),
+%**/
+
+/**%
+  doInstantiate(reHandleOnChange, cms_handleACrisis, uc21_rHOC_1,
+                [bind(cxt,id), bind(crisis,id)]),
+  doWeave([weave(uc21_rHOC_1,[cms_handleACrisis_aX])]),
+  doProcessSimplification(cms_handleACrisis),
+  doSetify(cms_handleACrisis,cms_handleACrisis_choosen),
+  cccms_draw(cms_handleACrisis,'2.1_handleACrisis'), 
+%**/
+
+/*%
+  doClone(unavailableIntResource,uc21_uIR_1),
+  doClone(unavailableExtResource,uc21_uER_1),
+  doInstantiate(reHandleOnChange, cms_handleAMission, uc21_rHOC_2,
+                [bind(cxt,m), bind(crisis,crisis)]),
+  doWeave([ weave(uc21_uIR_1, [cms_handleAMission_a41]),
+            weave(uc21_uER_1, [cms_handleAMission_a51,cms_handleAMission_a5x]),
+	    weave(uc21_rHOC_2,[cms_handleAMission_a40,cms_handleAMission_a41,
+	                       cms_handleAMission_a42, cms_handleAMission_a4x,
+			       cms_handleAMission_a9, cms_handleAMission_a50,
+			       cms_handleAMission_a51,cms_handleAMission_a5x])
+	  ]),
+  doProcessSimplification(cms_handleAMission),
+  doSetify(cms_handleAMission,cms_handleAMission_er), 
+  cccms_draw(cms_handleAMission,'2.1_handleAMission'),
+%*/
+
+/** WTF ??
+    doSetify(cms_handleAMission,cms_handleAMission_ir),   
+**/
+
+
+// Generic Fragment instantiation is not complete 4 now (action)
+/**%
+  doInstantiate(useHelicopter, cms_handleAWorker, uc21_uH_1, [bind(m,m)]),
+  doInstantiate(lostContact, cms_handleAWorker, uc21_lC_1, [bind(c,crisis)]),
+  doInstantiate(timeout, cms_handleAWorker, uc21_t_1, [bind(delay,m)]),
+  doMerge([uc21_uH_1,uc21_lC_1,uc21_t_1], uc21_uH_lC_t_1),
+  doProcessSimplification(uc21_uH_lC_t_1),
+  cccms_draw(uc21_uH_lC_t_1,'2.1_handleAWorker_mergedOnA6'),
+  doInstantiate(reHandleOnChange, cms_handleAWorker, uc21_rHOC_3,
+                [bind(cxt,m), bind(crisis,crisis)]),
+  doClone(missionFailed,uc21_mF_1),
+  doMerge([uc21_rHOC_3,uc21_mF_1], uc21_rHOC_mF_1),
+  doProcessSimplification(uc21_rHOC_mF_1),
+  cccms_draw(uc21_rHOC_mF_1,'2.1_handleAWorker_mergedOnA7'),
+  doInstantiate(lostContact, cms_handleAWorker, uc21_lC_2, [bind(c,crisis)]),
+  doClone(missingReport,uc21_mR_1),
+  doWeave([ weave(uc21_uH_lC_t_1, [cms_handleAWorker_a7]),
+             weave(uc21_rHOC_mF_1, [cms_handleAWorker_a7]),
+	     weave(uc21_lC_2, [cms_handleAWorker_a8]),
+	     weave(uc21_mR_1, [cms_handleAWorker_a11])
+          ]),
+  doProcessSimplification(cms_handleAWorker),
+  cccms_draw(cms_handleAWorker,'2.1_handleAWorker'),
+%**/
+
 
 /*********************
  *** Use Case #2.2 ***
  *********************/ 
 
-
-/*%
-  doClone(callDisconnected, cD_1), 
-  doClone(callDisconnected, cD_2),
-  doClone(fakeCrisisDetected,fCD_1),
-  doClone(fakeWitnessInfo,fWI_1),
-  doClone(requestVideo,rV1),
-  doClone(ignoreDisconnection,iD_1), doClone(fakeCrisisDetected, fCD_2),
-  doMerge([iD_1,fCD_2], iD_fCD_1),
-  doWeave([ weave(cD_1,[cms_captureWitnessReport_a10]),
-            weave(cD_2,[cms_captureWitnessReport_a2]),
-	    weave(rV1,[cms_captureWitnessReport_a3,
-	                cms_captureWitnessReport_a4]),
-            weave(iD_fCD_1,[cms_captureWitnessReport_a4])]),
-%*/
-
-
-
-
+/**%
+  doInstantiate(requestVideo, cms_captureWitnessReport, uc22_rV_1,
+                [bind(user,coord)]),
+  doClone(fakeCrisisDetected,uc22_fCD_1),
+  identifyClone(requestVideo_a3,uc22_rV_1,UC22_rva3), 
+  doWeave([weave(uc22_fCD_1,[UC22_rva3])]),
+  doProcessSimplification(uc22_rV_1),
+  cccms_draw(uc22_rV_1,'2.2_requestVideoEnhanced'),  
+  doClone(callDisconnected, uc22_cD_1), 
+  doClone(callDisconnected, uc22_cD_2),
+  doClone(fakeWitnessInfo,uc22_fWI_1),
+  doClone(ignoreDisconnection,uc22_iD_1), 
+  doClone(fakeCrisisDetected, uc22_fCD_2),
+  doMerge([uc22_iD_1,uc22_fCD_2], uc22_iD_fCD_1),
+  cccms_draw(uc22_iD_fCD_1,'2.2_mergedOnA4'),
+  doWeave([ weave(uc22_cD_1,     [ cms_captureWitnessReport_a10  ]),
+            weave(uc22_cD_2,     [ cms_captureWitnessReport_a2   ]),
+	    weave(uc22_rV_1,     [ cms_captureWitnessReport_a3,
+	                           cms_captureWitnessReport_a4   ]),
+            weave(uc22_iD_fCD_1, [ cms_captureWitnessReport_a4   ]),
+	    weave(uc22_fWI_1,    [ cms_captureWitnessReport_a2a3 ])]),
+  doProcessSimplification(cms_captureWitnessReport),
+  cccms_draw(cms_captureWitnessReport,'2.2.captureWitnessReport'),
+%**/
 
 /*********************
  *** Use Case #2.3 ***
  *********************/ 
 
+/**%
+  doClone(mustAuthenticate,uc23_mA_1),
+  doInstantiate(unavailableEmployee,cms_assignIntRes, uc23_uE_1,
+                [bind(delta,10)]),
+  doClone(employeeRefusal,uc23_uR_1),
+  doWeave([ weave(uc23_mA_1,     [ cms_assignIntRes_a1  ]),
+            weave(uc23_uE_1,     [ cms_assignIntRes_a1, cms_assignIntRes_a2 ]),
+	    weave(uc23_uR_1,     [ cms_assignIntRes_a2  ])]),
+  doProcessSimplification(cms_assignIntRes),
+  cccms_draw(cms_assignIntRes,'2.3.assignIntRes'),
+%**/
+
 /*********************
  *** Use Case #2.4 ***
  *********************/ 
+
+/**%
+   doInstantiate(degradedRes,cms_requestExtRes,uc24_dR_1,[bind(threshold,80)]),
+   doClone(noExtRes,uc24_nER_1),
+   doMerge([uc24_dR_1,uc24_nER_1],uc24_dR_nER),
+   doProcessSimplification(uc24_dR_nER),
+   cccms_draw(uc24_dR_nER,'2.4.mergedOnA2'),
+   doWeave([weave(uc24_dR_nER,[cms_requestExtRes_a2])]),
+   doProcessSimplification(cms_requestExtRes),
+   cccms_draw(cms_requestExtRes,'2.4.requestExtRes'),
+%**/
 
 /*********************
  *** Use Case #2.5 ***
  *********************/ 
 
+// nothing to do!
+
 /*********************
  *** Use Case #2.6 ***
  *********************/ 
+
+/**%
+  doInstantiate(noAvailableReplacement, cms_handleSupObsMissions,
+                uc26_nAR_1,[bind(user,so)]),
+  doClone(replaceMission,uc26_rM_1),
+  identifyClone(replaceMission_a1,uc26_rM_1,UC26_rm_a1), 
+  doWeave([weave(uc26_nAR_1,[UC26_rm_a1])]),
+  doProcessSimplification(uc26_rM_1),
+  cccms_draw(uc26_rM_1,'2.6.replaceMissionEnhanced'),
+  doInstantiate(askedMissionFailure, cms_handleSupObsMissions,
+                uc26_aMF_1,[bind(crisis,crisis)]),
+  doMerge([uc26_rM_1,uc26_aMF_1],uc26_rM_aMF),
+  doProcessSimplification(uc26_rM_aMF),
+  cccms_draw(uc26_rM_aMF,'2.6.mergedOnA7'),
+  doWeave([weave(uc26_rM_aMF,[cms_handleSupObsMissions_a7])]),
+  doProcessSimplification(cms_handleSupObsMissions),
+  cccms_draw(cms_handleSupObsMissions,'2.6.handleSupObsMissions'),
+%**/
 
 /*********************
  *** Use Case #2.7 ***
  *********************/ 
 
+/**%
+  doInstantiate(retrieveVictimHistory, cms_execRescMission, 
+                uc27_rVH_1, [bind(wrk,wrk)]),
+  doWeave([weave(uc27_rVH_1,[cms_execRescMission_a3])]),
+  doProcessSimplification(cms_execRescMission),
+  cccms_draw(cms_execRescMission,'2.7.execRescMission'),
+%**/
+
 /*********************
  *** Use Case #2.8 ***
  *********************/ 
+
+// nothing to do!
 
 /*********************
  *** Use Case #2.9 ***
  *********************/ 
 
+// nothing to do!
+
 /**********************
  *** Use Case #2.10 ***
  **********************/ 
+
+/**%
+  doClone(cancelAuth, uc210_cA_1), doClone(only3times, uc210_o3t_1),
+  doWeave([ weave(uc210_cA_1,[cms_authUser_a1a2]),
+            weave(uc210_o3t_1,[cms_authUser_a1a2,cms_authUser_a3]) ]),
+  doProcessSimplification(cms_authUser),
+  cccms_draw(cms_authUser,'2.10.authUser'),
+%**/
+
+
+

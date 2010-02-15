@@ -1,0 +1,54 @@
+
+/****************************************
+ *** Business Fragments Normalization ***
+ ****************************************/
+
+/*%
+  doProcessNormalization(mustAuthenticate),
+  doProcessNormalization(reHandleOnChange),
+  doProcessNormalization(unavailableIntResource),
+  doProcessNormalization(unavailableExtResource),
+  doProcessNormalization(cms_handleAWorker),
+  doProcessNormalization(useHelicopter),
+  doProcessNormalization(lostContact),
+  doProcessNormalization(timeout),
+  doProcessNormalization(missionFailed),
+  doProcessNormalization(missingReport),
+  doProcessNormalization(callDisconnected),
+  doProcessNormalization(fakeCrisisDetected),
+  doProcessNormalization(fakeWitnessInfo),
+  doProcessNormalization(ignoreDisconnection),
+  doProcessNormalization(requestVideo),
+  doProcessNormalization(unavailableEmployee),
+  doProcessNormalization(employeeRefusal),
+  doProcessNormalization(degradedRes),
+  doProcessNormalization(noExtRes),
+  doProcessNormalization(noAvailableReplacement),
+  doProcessNormalization(replaceMission),
+  doProcessNormalization(askedMissionFailure),
+  doProcessNormalization(retrieveVictimHistory),
+  doProcessNormalization(cancelAuth),
+  doProcessNormalization(only3times),
+%*/
+
+/*******************************
+ *** Processes Normalization ***
+ *******************************/
+
+/*%
+  doProcessNormalization(cms_resolveCrisis),
+  doProcessNormalization(cms_handleACrisis),
+  doProcessNormalization(cms_handleAMission),
+  doProcessNormalization(cms_captureWitnessReport),
+  doProcessNormalization(cms_assignIntRes),
+  doProcessNormalization(cms_requestExtRes),
+  doProcessNormalization(cms_executeMission),
+  doProcessNormalization(cms_execSupObsMission),
+  doProcessNormalization(cms_handleSupObsMissions),
+  doProcessNormalization(cms_execRescMission),
+  doProcessNormalization(cms_authUser),
+%*/
+
+
+
+

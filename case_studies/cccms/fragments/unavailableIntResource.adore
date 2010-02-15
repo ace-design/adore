@@ -1,0 +1,12 @@
+fragment unavailableIntResource {
+  variables {
+    res as resource; worker as cmsEmployee;
+    crisis as crisisIdentifier; m as mission;
+  }
+  activities {
+    h. worker := hook(res,crisis,m);
+    a1. msgBus::send('status' as string,'unavailable' as string, res);
+    a2. worker := cms::requestExtRes(res,crisis,m);
+  }
+  relations { ^ < h; h << $; fail(h,'unavailable') < a1; a1 < a2; a2 << $; }
+}

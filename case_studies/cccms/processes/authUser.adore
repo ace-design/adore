@@ -1,0 +1,14 @@
+orchestration cms::authUser {
+  variables {
+    user as cmsEmployee;
+    log as string; pwd as string; 
+    isValid as boolean;
+  }
+  activities {
+    a0. user := receive();
+    a1a2. (log, pwd) := ui::promptPass(user);
+    a3. isValid := cms::checkPass(user,log,pwd);
+    a4. reply(isValid);
+  }
+  relations { a0 < a1a2; a1a2 < a3; a3 < a4; }
+}

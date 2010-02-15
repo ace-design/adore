@@ -1,0 +1,24 @@
+fragment unavailableEmployee<delta> {
+  variables {
+    const true := 'true' as boolean; const false := 'false' as boolean;
+    delta as integer; expired as boolean; c as boolean;
+    e as cmsEmployee; subst as cmsEmployee; r as boolean; m as mission;
+  }
+  activities {
+    a0. expired := false;
+    h. hook(e,m);
+    a1. stopwatch::sleep(delta);
+    a2. expired := true ;
+    a3. c := isTrue(expired);
+    a4. msgBus::send('status' as string, 'unresponsive' as string,e); 
+    a5. subst := cms::findSubstitute(e);
+    a6. r := self::self(subst,m);
+    rpl. reply();
+    thr. throw('unavailable' as string);
+  }
+  relations {
+    ^ < a0; a0 < h; h << a3; a0 < a1; a1 < a2; a2 << a3;
+    a3 < a4 when c; a3 < a5 when c; a3 < $ when !c;
+    a5 < a6; a6 < rpl; fail(a5,'noSubstituteFound') < thr;
+  }
+}

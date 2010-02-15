@@ -1,0 +1,23 @@
+fragment timeout<delay,action> {
+  variables {
+    w as worker; delay as integer;
+    const true := 'true' as boolean;
+    const false := 'false' as boolean;    
+    c as boolean; expired as boolean;
+    r as report;
+  }
+  activities {
+    a0. expired := false;
+    h. hook(w);
+    a1. stopwatch::sleep(delay);
+    a2. expired := true;
+    a3. c := isTrue(expired);
+    a4. ui::action(w);
+    a5. r := self::self();
+    a6. reply(r);
+  }
+  relations {
+    ^ < a0; a0 < h; a0 < a1; a1 < a2; h << a3; a2 << a3;
+    a3 < a4 when c; a4 < a5; a5 < a6; a3 < $ when !c;
+  }
+}

@@ -1,0 +1,18 @@
+orchestration cms::resolveCrisis {
+  variables {
+    id as crisisIdentifier; coord as cmsEmployee;
+    m* as mission; choosen as mission;
+  }
+  activities {
+    rcv. (coord, id) := receive();
+    a1. cms::captureWitnessReport(coord,id);
+    a12. ui::actListener(coord, id, 'info' as string);
+    aX. cms::handleACrisis(coord,id);
+    a13. ui::validateClose(coord,id);
+    rpl. reply();
+    a12bis. ui::stopListener(coord, id, 'info' as string);
+  }
+  relations { 
+    rcv < a1; a1 < a12; a12 < aX; aX < a13; a13 < rpl; a13 < a12bis;
+  }
+}

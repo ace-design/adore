@@ -1,0 +1,15 @@
+orchestration cms::execSupObsMission {
+  variables {
+    so as cmsEmployee; crisis as crisisIdentifier; m* as mission; 
+    ccl as crisisCheckList;
+  }
+  activities {
+    rcv. (so,crisis) := receive();
+    a1. ccl := cms::buildCrisisCheckList(crisis);
+    a2. ui::promptCheckList(so,ccl);
+    a3. m* := cms::recommendSupObsMission(crisis);
+    aX. cms::handleSupObsMissions(m*,so,crisis);
+    rpl. reply();
+  }
+  relations { rcv < a1; a1 < a2; a2 < a3; a3 < aX; aX < rpl; }
+}

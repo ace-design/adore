@@ -1,0 +1,9 @@
+fragment noExtRes {
+  variables { res as resource; }
+  activities {
+    h. hook(res);
+    a1. msgBus::send('info' as string, 'noSuchResource' as string,res);
+    thr. throw('unavailable' as string);
+  }
+  relations { ^ < h; h < $; fail(h,'noResource') < a1; a1 < thr; }
+}

@@ -1,0 +1,19 @@
+fragment employeeRefusal {
+  variables {
+    e as cmsEmployee; subst as cmsEmployee; m as mission;
+    ok as boolean; r as boolean;
+  }
+  activities {
+    h. ok := hook(e,m);
+    a1. msgBus::send('info' as string, 'refusal' as string,e); 
+    a2. subst := cms::findSubstitute(e);
+    a3. r := self::self(subst,m);
+    rpl. reply();
+    thr. throw('unavailable' as string);
+  }
+  relations {
+    ^ < h; h < $ when ok;
+    h < a1 when ! ok; a1 < a2; a2 < a3; a3 < rpl; 
+    fail(a2,'noSubstituteFound') < thr;
+  }
+}

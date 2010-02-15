@@ -1,0 +1,7 @@
+/** Realizing the CCCMS using ADORE 
+ * @author: Sebastien Mosser, Mireille Blay-Fornarino & Robert France
+ * submitted to the TAOSD special issue dedicated to AOM
+ **/
+knowledge 'system.pl';
+
+require 'cosmetic/doCompo.adore';       // Composition manual triggering

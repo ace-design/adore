@@ -1,0 +1,23 @@
+orchestration cms::handleAWorker {
+  variables {
+    crisis as crisisIdentifier;
+    w as worker; r as report; m as mission; coord as cmsEmployee;
+  }
+  activities {
+    rcv. (crisis,w,m,coord) := receive();
+    a100. ui::actListener(w, crisis, 'info' as string);
+    a101. ui::actListener(w, m, 'info' as string);
+    a6. msgBus::wait4Msg('info' as string, 'arrived' as string, w);
+    a7. cms::executeMission(m,w,crisis,coord);
+    a8. msgBus::wait4Msg('info' as string, 'leaving' as string, w);
+    a11. r := ui::askForReport(w);
+    rpl. reply(r);
+    a100bis. ui::stopListener(w,crisis, 'info' as string);
+    a101bis. ui::stopListener(w, m, 'info' as string);
+  }
+  relations {
+    rcv < a100; rcv < a101; a100 < a6; a101 < a6; 
+    a6 < a7; a7 < a8; a8 < a11 ; a11 < rpl;
+    a8 < a100bis; a8 < a101bis;
+  }
+}
