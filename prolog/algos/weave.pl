@@ -20,7 +20,7 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-:- module(weave,[doWeave/1, substVariable/3, delActivity/2, simplifyProcess/2]).
+:- module(weave,[doWeave/1, substVariable/3, delActivity/2]).
 
 %%%%%%
 %% Related publication: 
@@ -38,12 +38,20 @@
 %%
 
 doWeave(Directives) :- 
-	buildActions(Directives, Actions), executeActionSet(Actions),!.
-
+	dinfo(algo,'Running doWeave(...)',[]),
+	dinfo(algo,'  Computing action set',[]),
+	myTimer(weave:buildActions(Directives, Actions)), 
+	dinfo(weave,'Actions: ~w' , [Actions]),
+	length(Actions,LActions), 
+	dinfo(algo,'  => Result: ~w actions',[LActions]),
+	dinfo(algo,'  Executing action set',[]),
+	myTimer(executeActionSet(Actions)),
+	dinfo(algo,'doWeave(...) ended with success!',[]).
+	
 buildActions(Directives, Actions) :- 
 	declareContext(weave(Directives),Ctx),
 	findall(A, weave:applyDir(Ctx, Directives,A), Raw),
-	flatten(Raw,Actions).
+	flatten([Raw],Actions).
 
 %%%
 % Internal algorithm
@@ -52,6 +60,7 @@ buildActions(Directives, Actions) :-
 
 applyDir(_,Directives,Actions) :- 
 	member(weave(Frag,Block),Directives), 
+	dinfo(algo,'  weave(~w,~w)',[Frag,Block]),
  	activity:isWellFormed(Block,Output),
 	%% Shifting fragment content into the targeted process
 	findall(shiftActivity(A,Output), activity:belongsTo(A,Frag), ShiftActs),
@@ -59,17 +68,15 @@ applyDir(_,Directives,Actions) :-
 	bindsArtifacts(Frag,Block, BindingActs),
 	%% Deleting Fragments Artifacts
 	delFragmentArtifacts(Frag,DelActs),
-	flatten([ShiftActs, BindingActs, DelActs, simplifyProcess(Output)],Actions).
+	SimplActs = [], %[simplifyProcess(Output)],
+	flatten([ ShiftActs, BindingActs, DelActs, SimplActs],
+	        Actions).
 	
-	
-
-
 bindsArtifacts(Frag,Targets,Actions) :- 
+	bindsHook(Frag, Targets, HookActions),
 	bindsPredecessors(Frag, Targets, PredsActions),
 	bindsSuccessors(Frag, Targets, SuccsActions),
-	bindsHook(Frag, Targets, HookActions),
-	flatten([PredsActions,SuccsActions, HookActions], Raw),
-	sort(Raw,Actions).
+	flatten([PredsActions,SuccsActions,HookActions], Actions).
 
 bindsPredecessors(Frag,Targets,Actions) :- 
 	process:getPreds(Frag,Pred), activity:getFirsts(Targets,Firsts),
@@ -83,18 +90,18 @@ bindsSuccessors(Frag,Targets,Actions) :-
 	flatten(RawSuccs,Succs),
 	findall(A,weave:shiftRelation(Succ,Succs,A),Actions).
 
+
 %bindsHook(_,_,[]) :- !.
 bindsHook(Frag,Targets,Actions) :- 
 	process:getHook(Frag,Hook), 
 	unifyVariables(Hook, Targets, VarActs),
-	findall(A,weave:adaptRelation(Hook,Targets,A),AdaptActs),
 	findall(A,weave:shiftRelation(Hook,Targets,A),ShiftActs),
-	flatten([VarActs,ShiftActs,AdaptActs],Actions).
-
+	findall(A,weave:adaptRelation(Hook,Targets,A),AdaptActs),
+	flatten([VarActs, AdaptActs, ShiftActs],Actions).
 
 delFragmentArtifacts(Frag, Actions) :- 
 	process:getPreds(Frag,Pred), process:getSuccs(Frag,Succ), 
-	process:getHook(Frag,Hook), 
+	process:getHook(Frag,Hook), !,
 	Actions = [delActivity(Pred), delActivity(Succ), delActivity(Hook)].
 
 
@@ -110,8 +117,10 @@ unifyVariables(Hook,TargetBlock,Substitutions) :-
 identifyVariableUnification(_,_,[],[]).
 identifyVariableUnification(Hook, Block, [Var|Tail],Actions) :- 
 	findall(Equiv,variable:findEquivalentInBlock(Hook,Var,Block,Equiv),
-	        Candidates),
+	        RawCandidates),
+	sort(RawCandidates,Candidates),
 	validateCandidates(Var,Candidates,Selected),
+	traceSubstitution(Var,Selected),
  	identifyVariableUnification(Hook,Block,Tail,Others),
 	flatten([substVariable(Var,Selected),Others],Actions).
 
@@ -130,67 +139,58 @@ validateCandidates(V,L,_) :-
 :- assert(user:isMacroAction(delActivity,2)).
 delActivity(Old,Actions) :- 
 	activity(Old), hasForKind(Old,K), isContainedBy(Old,P),
-	RetractActs = [ retract(activity(Old)), retract(hasForKind(Old,K)), 
-	                retract(isContainedBy(Old,P))],
-	findall(A, weave:delAPath(Old,A), RelActions),
+	RetractActs = [ myRetract(activity(Old)), myRetract(hasForKind(Old,K)), 
+	                myRetract(isContainedBy(Old,P))],
+	findall(A, relations:delAPath(Old,A), RelActions),
 	flatten([RetractActs,RelActions],Actions).
 
 :- assert(user:isMacroAction(substVariable,3)).
 substVariable(Old,New, Actions) :- 
-	findall( [retract(usesAsInput(Act,Old)), addAsInput(New,Act)],
-	         activity:useVariable(Act,Old,in),Inputs),
-        findall( [retract(usesAsOutput(Act,Old)), addAsOutput(New,Act)],
-	         activity:useVariable(Act,Old,out),Outputs),
-	flatten([Inputs,Outputs],Actions).
+	findall(A,doVarSubst(Old,New,A), Raw), flatten(Raw,Actions).
 
-
-:- assert(user:isMacroAction(simplifyProcess,2)).
-simplifyProcess(P,Actions) :- 
-	findall(A, performSimplification(P,A), Actions).
-
-performSimplification(P, Action) :- 
-	process:getActivities(P,Activities),
-	member(X, Activities), member(Y, Activities),
-	path(X,Y), relations:getPath(X,Y,L), \+ L = [X,Y], 
-	weave:delAPath(X,Y,Action).
-
+doVarSubst(Old,New,Actions) :- 
+	usesAsInput(Act,Old), \+ fieldAccess(Old,_,_), 
+	Actions = [retract(usesAsInput(Act,Old)), addAsInput(New,Act)].
+doVarSubst(Old,New,Actions) :- 
+	usesAsOutput(Act,Old), \+ fieldAccess(Old,_,_), 
+	Actions = [retract(usesAsOutput(Act,Old)), addAsOutput(New,Act)].
+doVarSubst(Old,New,Actions) :- 
+	(usesAsInput(Act,F)| usesAsOutput(Act,F)), fieldAccess(F,Old,L), 
+	Actions = [ retract(fieldAccess(F,Old,L)), 
+	            createFieldAccess(F,New,L)].
 %%%
 % Technical Stuff
 %%%
 
-
-%% Deleting Path
-
-delAPath(Act,A) :- delAPath(Act,_,A).
-
-delAPath(Act,X,retract(waitFor(Act,X))) :- waitFor(Act,X).
-delAPath(Act,X,retract(waitFor(X,Act))) :- waitFor(X,Act).
-delAPath(Act,X,retract(weakWait(Act,X))) :- weakWait(Act,X).
-delAPath(Act,X,retract(weakWait(X,Act))) :- weakWait(X,Act).
-delAPath(Act,X,retract(isGuardedBy(Act,X,V,C))) :- isGuardedBy(Act,X,V,C).
-delAPath(Act,X,retract(isGuardedBy(X,Act,V,C))) :- isGuardedBy(X,Act,V,C).
-delAPath(Act,X,retract(onFailure(Act,X,E))) :- onFailure(Act,X,E).
-delAPath(Act,X,retract(onFailure(X,Act,E))) :- onFailure(X,Act,E).
-
-
-
 shiftRelation(Activity, Block, defWaitFor(X,F)) :- 
-	waitFor(X,Activity), activity:isFirst(Block,F).
+	waitFor(X,Activity), activity:isLast(Block,F).
 shiftRelation(Activity, Block, defWeakWait(X,F)) :- 
-	weakWait(X,Activity), activity:isFirst(Block,F).
-shiftRelation(Activity, Block, defGuard(X,F,C,V)) :- 
-	isGuardedBy(X,Activity,C,V), activity:isFirst(Block,F).
+	weakWait(X,Activity), activity:getLasts(Block,[F]).
+shiftRelation(Activity, Block, Actions) :- 
+	weakWait(X,Activity), activity:getLasts(Block,Lasts),
+	length(Lasts,Length), Length > 1, 
+	Block = [B|_], activity:belongsTo(B,Process),
+	genActivityId(NopId), 
+	findall(defWaitFor(NopId,L),member(L,Lasts),ReOrderActs),
+	CreateActions=[createActivity(NopId), setActivityKind(NopId,nop), 
+	         setContainment(NopId,Process)], 
+	flatten([CreateActions, defWeakWait(X,NopId), ReOrderActs],Actions).
+
+shiftRelation(Activity, Block, defGuard(X,F,VUnif,C)) :- 
+	isGuardedBy(X,Activity,V,C), resolveUnifiedVariable(X,V,VUnif),
+	activity:isLast(Block,F).
 shiftRelation(Activity, Block, defOnFail(X,F,E)) :- 
-	onFailure(X,Activity,E), activity:isFirst(Block,F).
+	onFailure(X,Activity,E), activity:isLast(Block,F).
 
 shiftRelation(Activity, Block, defWaitFor(L,X)) :- 
-	waitFor(Activity,X), activity:isLast(Block,L).
+	waitFor(Activity,X), activity:isFirst(Block,L).
 shiftRelation(Activity, Block, defWeakWait(L,X)) :- 
-	weakWait(Activity,X), activity:isLast(Block,L).
-shiftRelation(Activity, Block, defGuard(L,X,C,V)) :- 
-	isGuardedBy(Activity,X,C,V), activity:isLast(Block,L).
+	weakWait(Activity,X), activity:isFirst(Block,L).
+shiftRelation(Activity, Block, defGuard(L,X,VUnif,C)) :- 
+	isGuardedBy(Activity,X,V,C), resolveUnifiedVariable(X,V,VUnif),
+	activity:isFirst(Block,L).
 shiftRelation(Activity, Block, defOnFail(L,X,E)) :- 
-	onFailure(Activity,X,E), activity:isLast(Block,L).
+	onFailure(Activity,X,E), activity:isFirst(Block,L).
 
 
 %%WARNING: waitFor(a,b) ==> path(b,a) !!!!! 
@@ -200,9 +200,10 @@ adaptRelation(Hook, Block, defWaitFor(F,Y)) :-
 adaptRelation(Hook, Block, defWeakWait(F,Y)) :- 
 	weakWait(Hook,X), hasForKind(X,predecessors), 
 	activity:isFirst(Block, F), path(Y,F).
-adaptRelation(Hook, Block, defGuard(F,Y,V,C)) :- 
+adaptRelation(Hook, Block, defGuard(F,Y,VUnif,C)) :- 
 	isGuardedBy(Hook,X,V,C), hasForKind(X,predecessors), 
-	activity:isFirst(Block, F), path(Y,F).
+	activity:isFirst(Block, F), path(Y,F),
+	resolveUnifiedVariable(Y,V,VUnif).
 adaptRelation(Hook, Block, defOnFail(F,Y,E)) :- 
 	onFailure(Hook,X,E), hasForKind(X,predecessors),
 	activity:isFirst(Block, F), path(Y,F).
@@ -213,95 +214,10 @@ adaptRelation(Hook, Block, defWaitFor(Y,L)) :-
 adaptRelation(Hook, Block, defWeakWait(Y,L)) :- 
 	weakWait(X,Hook), hasForKind(X,successors), 
 	activity:isLast(Block, L), path(L,Y).
-adaptRelation(Hook, Block, defGuard(Y,L,V,C)) :- 
+adaptRelation(Hook, Block, defGuard(Y,L,VUnif,C)) :- 
 	isGuardedBy(X,Hook,V,C), hasForKind(X,successors), 
-	activity:isLast(Block, L), path(L,Y).
+	activity:isLast(Block, L), path(L,Y),
+	resolveUnifiedVariable(Y, V,VUnif).
 adaptRelation(Hook, Block, defOnFail(Y,L,E)) :- 
-	onFailure(X,Hook,E), hasForKind(X,successors), write(bar),
+	onFailure(X,Hook,E), hasForKind(X,successors),
 	activity:isLast(Block, L), path(L,Y).
-
-
-%%%
-% Old Stuff
-%%%
-
-
-
-
-
-
-
-
-%% %% Relation retract
-
-%% retractRelation(Act,retract(waitFor(Act,X))) :- waitFor(Act,X).
-%% retractRelation(Act,retract(waitFor(X,Act))) :- waitFor(X,Act).
-%% retractRelation(Act,retract(weakWait(Act,X))) :- weakWait(Act,X).
-%% retractRelation(Act,retract(weakWait(X,Act))) :- weakWait(X,Act).
-%% retractRelation(Act,retract(isGuardedBy(Act,X,V,C))) :- isGuardedBy(Act,X,V,C).
-%% retractRelation(Act,retract(isGuardedBy(X,Act,V,C))) :- isGuardedBy(X,Act,V,C).
-%% retractRelation(Act,retract(onFailure(Act,X,E))) :- onFailure(Act,X,E).
-%% retractRelation(Act,retract(onFailure(X,Act,E))) :- onFailure(X,Act,E).
-
-%% propagateHookBeforeRelation(Hook, Acts,defWaitFor(Act,A)) :- 
-%% 	member(Act,Acts), waitFor(Hook,A).
-%% propagateHookBeforeRelation(Hook, Acts,defWeakWait(Act,A)) :- 
-%% 	member(Act,Acts), weakWait(Hook,A).
-%% propagateHookBeforeRelation(Hook, Acts,defGuard(Act,A,V,C)) :- 
-%% 	member(Act,Acts), isGuardedBy(Hook,A,V,C).
-%% propagateHookBeforeRelation(Hook, Acts,defOnFail(Act,A,E)) :- 
-%% 	member(Act,Acts), onFailure(Hook,A,E).
-
-%% propagateHookAfterRelation(Hook, Acts,defWaitFor(A,Act)) :- 
-%% 	member(Act,Acts), waitFor(A,Hook).
-%% propagateHookAfterRelation(Hook, Acts,defWeakWait(A,Act)) :- 
-%% 	member(Act,Acts), weakWait(A,Hook).
-%% propagateHookAfterRelation(Hook, Acts,defGuard(A,Act,V,C)) :- 
-%% 	member(Act,Acts), isGuardedBy(A,Hook,V,C).
-%% propagateHookAfterRelation(Hook, Acts,defOnFail(A,Act,E)) :-
-%% 	member(Act,Acts), onFailure(A,Hook,E).
-
-
-%% applyDir(_,Directives, Actions) :- 
-%% 	member(weave(Frag,Targets),Directives), 
-%% 	activity:isWellFormed(Targets,P),
-%% 	%% Shifting fragment content into the targeted process
-%% 	findall(shiftActivity(A,P), activity:belongsTo(A,Frag), ShiftActs),
-%% 	%% Concretizing Preds & Succs
-%% 	concretize(Frag, Targets, PredsSuccsActs),
-%% 	%% Unifiying Hook
-%% 	unifyHook(Frag, Targets, HookActs),
-%% 	%% Deleting Fragment artifact (P,S & Hook)
-%% 	delFragmentArtifacts(Frag, DelActs),
-%%         %% Building final result
-%% 	flatten([ ShiftActs, PredsSuccsActs, HookActs, DelActs, 
-%% 	          simplifyProcess(P)], Actions).
-
-
-
-
-
-%%%
-% Hook
-%%%
-
-%% unifyHook(Frag, Block, Actions) :- 
-%% 	process:getHook(Frag,Hook), 
-%% 	unifyVariables(Hook, Block, VarActs),
-%% 	propagateHookRelations(Hook, Block, RelActs),
-%% 	flatten([VarActs,RelActs], Actions).
-
-%propagateHookRelations(_,_,[]) :- !.
-%% propagateHookRelations(Hook, Block, Actions) :- 
-%% 	activity:getFirsts(Block, Firsts),
-%% 	activity:getLasts(Block, Lasts),
-%% 	findall( A, weave:propagateHookBeforeRelation(Hook,Firsts,A),
-%% 	         FirstsActions),
-%% 	findall( A, weave:propagateHookAfterRelation(Hook,Lasts,A), 
-%% 		 LastsActions),
-%% 	writeList([FirstsActions, LastsActions]),
-%% 	flatten([FirstsActions, LastsActions],Tmp),
-%% 	sort(Tmp,Actions).
-
-
-

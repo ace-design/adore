@@ -211,7 +211,7 @@ genApply(Ctx,Code) :-
 
 genActivityBlock(Block,Code) :- 
 	activityBlock(_,Block,Activities),
-	isWellFormed(Block,Process),
+	activity:isWellFormed(Block,Process),
 	generateListOfActivities(Activities,ActCode),
 	swritef(Code,'        <block id="%w" process="%w">\n%w\n        </block>',[Block,Process,ActCode]).
 

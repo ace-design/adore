@@ -32,8 +32,6 @@ executeActionSet(Set) :-
 shouldBeElementarized(G) :- 
 	functor(G,F,A), Arity is A + 1, isMacroAction(F,Arity).
 
-
-
 execute([],_).
 execute([H|T],Space) :- 
 	shouldBeElementarized(H), !, 
@@ -41,20 +39,14 @@ execute([H|T],Space) :-
 	swritef(NewSpace,'  %w',[Space]), 
         execute(A,NewSpace), execute(T,Space).
 execute([H|T],Space) :- 
-	dinfo(exec,'~w#exec: ~w',[Space,H]), H, execute(T,Space).
+	dinfo(exec,'~w#exec: ~w',[Space,H]), H, !, execute(T,Space).
 	
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Adore Facts Self Deletion Framework %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% elementarize([],[]).
-%% elementarize([H|T],R) :- 
-%% 	shouldBeElementarized(H), !, 
-%% 	dinfo(exec,'#elementarize(~w)',H), call(H,A), 
-%% 	elementarize(T,Tmp), append(A,Tmp,R).
-%% elementarize([H|T],[H|O]) :- elementarize(T,O).
-
-
-%% execute([]).
-%% execute([H|T]) :- dinfo(exec,'#exec(~w)',H), H, execute(T).
-
-
-
+myRetract(F) :- 
+	F, retract(F).
+myRetract(F) :- 
+	\+ F, !.%dinfo(exec,'fact [~w] does not exists!',[F]).

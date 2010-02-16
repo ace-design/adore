@@ -54,3 +54,4 @@ areEquivalent(Activity,V,Target,Candidate) :-
 	activity:useVariable(Target,Candidate, Direction),
 	hasForType(V,T), hasForType(Candidate,T), 
 	\+ isConstant(Candidate).
+

@@ -36,7 +36,7 @@ loadFiles :-
 	loadCore('actions'), loadCore('gensym'), loadCore('helpers'), 
 	%% TODO: following should be merged in metamodel operationalization
 	loadCore('functions'), loadCore('dependencies'), loadCore('dataflow'), 
-	 loadCore('substitution'),
+	loadCore('substitution'),
 	%% end of todo
 	aw('%%%% Loading ADORE Metamodel'),
         loadMM('universe'), loadMM('activity'), loadMM('context'),
@@ -45,6 +45,8 @@ loadFiles :-
         loadAlgo('contextMerge'), loadAlgo('applyRewrite'),
 	loadAlgo('contextNormalization'), loadAlgo('setify'), 
 	loadAlgo('clone'), loadAlgo('merge'), loadAlgo('weave'),
+	loadAlgo('instantiateFragment'), loadAlgo('processNormalization'),
+	loadAlgo('processSimplification'),
 	aw('%%%% Loading Transformations'),
         loadTransfo('adore2dsl'), loadTransfo('adore2xml'),
 	loadTransfo('adore2dot'), loadTransfo('adore2metrics'),

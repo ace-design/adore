@@ -38,8 +38,14 @@
 %%
 
 doMerge(Fragments,Output) :- 
-	buildActions(Fragments,Output,Directives),
-	executeActionSet(Directives),!.
+	dinfo(algo,'Running doMerge(~w,~w)',[Fragments,Output]),
+	dinfo(algo,'  Computing action set',[]),
+	myTimer(merge:buildActions(Fragments,Output,Directives)),
+	length(Directives, LActions), 
+	dinfo(algo,'  => Result: ~w actions',[LActions]),
+	dinfo(algo,'  Executing action set',[]),
+	myTimer(executeActionSet(Directives)),
+	dinfo(algo,'doMerge(~w,~w) ended with success!',[Fragments,Output]).
 
 buildActions(Fragments,Output,Dirs) :- 
 	\+ process:exists(Output), 
@@ -58,8 +64,9 @@ mergeFragments(Ctx,Frags,Out,Actions) :-
 	findFragActsUnification(Ctx,predecessors,Frags,PredsActs),
 	findFragActsUnification(Ctx,successors,Frags,SuccActs),
 	findFragActsUnification(Ctx,hook,Frags,HookActs),
+	findVariableDeclaredUnification(Ctx,Frags,VarUnifActs),
 	flatten([CreateActs, FragUnionActs, FragRemovalActs,
-	         PredsActs, SuccActs, HookActs],Actions).
+	         PredsActs, SuccActs, HookActs,VarUnifActs],Actions).
 %%%
 % Fragments unions
 %%%
@@ -97,7 +104,7 @@ unifyActivities(Ctx, Activities, Actions) :-
 	findall(A, merge:absorbRelation(Activities,Unified,A), RelActs),
 	findall(A, merge:absorbVariables(Activities,Unified,A), VarActs),
 	findall(A, merge:delActivities(Activities,A), DelActs),
-	flatten([CreateActs, RelActs, VarActs, DelActs],Actions).
+	flatten([CreateActs, VarActs, RelActs, DelActs],Actions).
 
 
 %% Absorb relation between "Old \in Olds" and the others, using "New".
@@ -143,4 +150,47 @@ delActivities(Olds,Actions) :-
 	activity(Old), hasForKind(Old,K), isContainedBy(Old,P),
 	Actions = [ retract(activity(Old)), retract(hasForKind(Old,K)), 
 	            retract(isContainedBy(Old,P))].
+%%%%
+%% Variable unification declared using 'adoreEquivalence' facts
+%%%%
 
+findVariableDeclaredUnification(_,Fragments,Actions) :- 
+	findall(V,(member(F,Fragments), process:getVariables(F,V)), RawVars),
+	flatten(RawVars,Variables), map(findRoot,Variables,RootVariables),
+	findall(V,merge:extractVariableUnifications(RootVariables,V),Unifiable),
+	computeVariableUnifications(Fragments,Unifiable,Actions).
+
+extractVariableUnifications(RootVariables, RV) :- 
+	member(RV,RootVariables), adoreEquivalence(variable,EquivList),
+	member([Process, Variable], EquivList), 
+	pebble(rename(variable),Variable,RV,compile(Process)).
+
+
+computeVariableUnifications(_,[],[]) :- !. %% Nothing to unify
+computeVariableUnifications(_,[_],[]) :- !. %% a single entity
+computeVariableUnifications(Fragments,VarList,Actions) :- %% Here is fun
+	member(AVariable,VarList), 
+	cloneVariable(AVariable,CloneActs,CloneId),
+	findall(Act,buildVarSubstList(Fragments,VarList,CloneId,Act),SubstActs),
+	sort(SubstActs, SortedSubstActs),
+	flatten([CloneActs,SortedSubstActs], Actions).
+
+buildVarSubstList(Fragments,VarList,CloneId, Action) :- 
+	member(V, VarList), variable:belongsTo(V,RealFragment), 
+	member(ClonedFragment,Fragments), 
+	(  adoreContext(CtxId,clone(RealFragment,ClonedFragment))
+         | adoreContext(CtxId,instantiate(RealFragment,_,ClonedFragment)) ),
+	getImmediateDerivation(CtxId,V,RealVariable), 
+	Action = [substVariable(RealVariable,CloneId)].
+	
+cloneVariable(V,Actions,CloneId) :- 
+	genVariableId(CloneId),
+	findall(A,merge:varAdditionalAction(V,CloneId,A),AddVar),
+	flatten([createVariable(CloneId),AddVar],Actions).
+
+varAdditionalAction(V,Clone,setVariableType(Clone,Type)) :-
+	hasForType(V,Type).
+varAdditionalAction(V,Clone,setInitValue(Clone,RawVal)) :- 
+	hasForInitValue(V,RawVal).
+varAdditionalAction(V,Clone,setConstancy(Clone)) :- isConstant(V).
+varAdditionalAction(V,Clone,flagAsSet(Clone)) :- isSet(V).

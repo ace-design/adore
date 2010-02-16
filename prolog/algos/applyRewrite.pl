@@ -43,7 +43,7 @@ buildApplyRewriteActions(Actions) :-
 shouldBeRewritten(Id) :-
 	applyFragment(Id,Ctx,Block,_), 
 	context(Ctx), contextTarget(Ctx,Target),
-	isWellFormed(Block,Process), isFragment(Process),
+	activity:isWellFormed(Block,Process), isFragment(Process),
 	\+ Target = Process.
 
 generateRewriteAction(Id,rewriteApply(Id)).
@@ -57,7 +57,7 @@ generateRewriteAction(Id,rewriteApply(Id)).
 rewriteApply(Id,Actions) :- 
 	applyFragment(Id,Ctx,Block,Fragment),
 	activityBlock(Ctx,Block,Activities),
-	isWellFormed(Block,TargetedFragment),
+	activity:isWellFormed(Block,TargetedFragment),
 	gensym(rewrittenContext_,NewCtx),
 	gensym(anonymous_,Lambda),
 	Deletion  = [ retract(activityBlock(Ctx,Block,Activities)),

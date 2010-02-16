@@ -69,6 +69,7 @@ adoreAssert(Fact) :- assert(Fact).
 genVarLabel(V,Label) :- 
 	getVariable(V,Tmp), %% a variable, not an anonymous field access
 	getPreviousName(Tmp,OldName), %% The REAL name, not the renamed one
+%	\+ Tmp = OldName, 
 	suffixToStar(OldName, PrettyName), %% '_star' <-> '*'
 	genFields(V,Fields), %% fields as x.y.z
 	swritef(Label,"%w%w",[PrettyName,Fields]). %% that's all folks

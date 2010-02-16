@@ -120,3 +120,10 @@
 :- dynamic applyFragment/4.    %% defApply(I,P,I,P)
 :- dynamic applyParameter/3.   %% setApplyParam(I,I,S)
 :- dynamic setDirective/2.     %% defSetify(I,V)
+
+
+%%%%
+%% Knowledge
+%%%%
+
+:- dynamic adoreEquivalence/2.

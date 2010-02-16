@@ -93,37 +93,37 @@ usedByProcess(P,V) :-
 %% Block Handling
 %%%%
 
-getFirstActivitiesOfBlock(Block,Activities) :- 
-	findall(A,isFirstActivity(Block,A),Tmp), sort(Tmp,Activities).
-isFirstActivity(Block,Activity) :- 
-	member(Activity,Block), \+ path(_,Activity).
-isFirstActivity(Block,Activity) :- 
-	member(Activity,Block), path(APrime,Activity), \+ member(APrime,Block).
+%% getFirstActivitiesOfBlock(Block,Activities) :- 
+%% 	findall(A,isFirstActivity(Block,A),Tmp), sort(Tmp,Activities).
+%% isFirstActivity(Block,Activity) :- 
+%% 	member(Activity,Block), \+ path(_,Activity).
+%% isFirstActivity(Block,Activity) :- 
+%% 	member(Activity,Block), path(APrime,Activity), \+ member(APrime,Block).
 
-getLastActivitiesOfBlock(Block,Activities) :- 
-	findall(A,isLastActivity(Block,A),Tmp), sort(Tmp,Activities).
-isLastActivity(Block,Activity) :- 
-	member(Activity,Block),	\+ path(Activity,_).
-isLastActivity(Block,Activity) :- 
-	member(Activity,Block), path(Activity,APrime),
-	\+ member(APrime,Block). 
+%% getLastActivitiesOfBlock(Block,Activities) :- 
+%% 	findall(A,isLastActivity(Block,A),Tmp), sort(Tmp,Activities).
+%% isLastActivity(Block,Activity) :- 
+%% 	member(Activity,Block),	\+ path(Activity,_).
+%% isLastActivity(Block,Activity) :- 
+%% 	member(Activity,Block), path(Activity,APrime),
+%% 	\+ member(APrime,Block). 
 
-getBlockInputVariable(Block, Vars) :-
-	findall(V,isBlockInputVariable(Block,V),Tmp),
-	sort(Tmp,Vars).
-isBlockInputVariable(Block,V) :- 
-	isFirstActivity(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
+%% getBlockInputVariable(Block, Vars) :-
+%% 	findall(V,isBlockInputVariable(Block,V),Tmp),
+%% 	sort(Tmp,Vars).
+%% isBlockInputVariable(Block,V) :- 
+%% 	isFirstActivity(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
 
-getBlockOutputVariable(Block, Vars) :-
-	findall(V,isBlockOutputVariable(Block,V),Tmp),
-	sort(Tmp,Vars).
-isBlockOutputVariable(Block,V) :- 
-	isLastActivity(Block,A), usesElemAsOutput(A,V).
+%% getBlockOutputVariable(Block, Vars) :-
+%% 	findall(V,isBlockOutputVariable(Block,V),Tmp),
+%% 	sort(Tmp,Vars).
+%% isBlockOutputVariable(Block,V) :- 
+%% 	isLastActivity(Block,A), usesElemAsOutput(A,V).
 
-isWellFormed(Block,P) :- 
-	activityBlock(_,Block,Activities),
-	map(isContainedBy,Activities,Processes),
-	sort(Processes,[P]),!.
+%% isWellFormed(Block,P) :- 
+%% 	activityBlock(_,Block,Activities),
+%% 	map(isContainedBy,Activities,Processes),
+%% 	sort(Processes,[P]),!.
 
 %%%%
 %% Process entry and exit points

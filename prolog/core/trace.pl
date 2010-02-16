@@ -50,8 +50,20 @@ traceUnification(Ctx, [Old|T], New) :-
 	traceUnification(Ctx,T,New).
 
 
+traceSubstitution(Old,New) :- 
+	assert(pebble(substitution,Old,New,_)).
+getSubstitute(Old,New) :- 
+	pebble(substitution,Old,New,_).
+
+resolveUnifiedVariable(Act,Var, Var) :- hasForKind(Act,hook),!.
+resolveUnifiedVariable(_,Var, Unified) :- getSubstitute(Var,Unified),!.
+resolveUnifiedVariable(_,Var,Var).
+
+
 getPreviousName(New,Old) :- pebble(rename(_),Old,New,_),!.
 getPreviousName(New,New). %% i.e. there is no pebble to lead us (no renaming).
+
+	
 
 
 getImmediateDerivation(Ctx,Old,New) :- 
@@ -61,3 +73,11 @@ findRoot(Elem,Root) :-
 	pebble(Ctx,Ancestor,Elem,_), \+ Ctx = rename(_), 
 	findRoot(Ancestor,Root),!.
 findRoot(Elem,Elem).
+
+
+identifyClone(Act,Process,ClonedAct) :- 
+	activity:belongsTo(Act,Origin),
+	(  adoreContext(CtxId,clone(Origin,Process)) 
+         | adoreContext(CtxId,instantiate(Origin,_,Process)) ),
+	getImmediateDerivation(CtxId,Act,ClonedAct).
+

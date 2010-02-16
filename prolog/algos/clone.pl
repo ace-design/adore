@@ -26,18 +26,24 @@
 %%%%%%
 
 doClone(Orig,Output) :- 
-	buildActions(Orig,Output,Directives),
-	executeActionSet(Directives),!.
+	dinfo(algo,'Running doClone(~w,~w)',[Orig,Output]),
+	dinfo(algo,'  Computing action set',[]),
+	myTimer(clone:buildActions(Orig,Output,Directives)),
+	length(Directives,LActions), 
+	dinfo(algo,'  => Result: ~w actions',[LActions]),
+	dinfo(algo,'  Executing action set',[]),
+	myTimer(executeActionSet(Directives)),!,
+	dinfo(algo,'doClone(~w,~w) ended with success!',[Orig,Output]).
 
 buildActions(Orig,Output,Dirs) :- 
 	process:exists(Orig), \+ process:exists(Output),
-	declareContext(clone(Orig),Ctx),
+	declareContext(clone(Orig,Output),Ctx),
 	cloneProcess(Ctx,Orig,Output,Dirs).
 
 %%%%
 %% Process
 %%%%
-cloneProcess(Ctx, In,Out, Actions) :- 
+cloneProcess(Ctx, In,Out, Actions) :-  %% /!\ Used by 'doInstantiate'
 	traceDerivation(Ctx, In, Out),
 	cloneAllVariables(Ctx,In, VarActions),
 	findall(A,clone:processAdditionalAction(Ctx,In,Out,A),AddProcess),
@@ -105,14 +111,22 @@ actAdditionalAction(_,Act,Clone,setFunction(Clone,Fct)) :-
 	hasForFunction(Act,Fct).
 
 %% Context dependent actions
-actAdditionalAction(Ctx,Act,Clone,setContainment(Clone,Process)) :-
+actAdditionalAction(Ctx,Act,Clone,[setContainment(Clone,Process)]) :-
 	activity:belongsTo(Act,P), getImmediateDerivation(Ctx,P,Process).
-actAdditionalAction(Ctx,Act,Clone,addAsInput(Var,Clone)) :-
-	usesAsInput(Act,OldVar), getImmediateDerivation(Ctx,OldVar,Var).
-actAdditionalAction(Ctx,Act,Clone,addAsOutput(Var,Clone)) :-
-	usesAsOutput(Act,OldVar), getImmediateDerivation(Ctx,OldVar,Var).
-actAdditionalAction(Ctx,Act,Clone,setMessageBinding(Clone,Msg,Var)) :-
+actAdditionalAction(Ctx,Act,Clone,[setMessageBinding(Clone,Msg,Var)]) :-
 	usesAsBinding(Act,Msg,OldVar), getImmediateDerivation(Ctx,OldVar,Var).
+actAdditionalAction(Ctx,Act,Clone,[addAsInput(Var,Clone)]) :-
+	usesAsInput(Act,OldVar), getImmediateDerivation(Ctx,OldVar,Var).
+actAdditionalAction(Ctx,Act,Clone,[addAsOutput(Var,Clone)]) :-
+	usesAsOutput(Act,OldVar), getImmediateDerivation(Ctx,OldVar,Var).
+actAdditionalAction(Ctx,Act,Clone,Actions) :-
+	usesAsInput(Act,OldField), fieldAccess(OldField,OldVar,List),
+	genFieldId(Field), getImmediateDerivation(Ctx,OldVar,Var),
+	Actions = [createFieldAccess(Field,Var,List), addAsInput(Field,Clone)].
+actAdditionalAction(Ctx,Act,Clone,Actions) :-
+	usesAsOutput(Act,OldField), fieldAccess(OldField,OldVar,List),
+	genFieldId(Field), getImmediateDerivation(Ctx,OldVar,Var),
+	Actions = [createFieldAccess(Field,Var,List),addAsOutput(Field,Clone)].
 
 %%%%
 %% Relations

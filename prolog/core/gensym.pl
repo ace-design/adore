@@ -24,3 +24,5 @@
 genVariableId(V) :- gensym(v,V).
 
 genActivityId(A) :- gensym(a,A).
+
+genFieldId(F) :- gensym(f,F).

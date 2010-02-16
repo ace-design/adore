@@ -20,7 +20,7 @@
 %% @author      Main Sebastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-:- module(relations,[]).
+:- module(relations,[shiftAPath/4]).
 
 %% path/2: path(+A,+B) => a direct path exists between A and B
 %path(X,X) :- fail.
@@ -28,6 +28,9 @@ path(X,Y) :- activity:sameProcess(X,Y), waitFor(Y,X).
 path(X,Y) :- activity:sameProcess(X,Y), isGuardedBy(Y,X,_,_).
 path(X,Y) :- activity:sameProcess(X,Y), weakWait(Y,X).
 path(X,Y) :- activity:sameProcess(X,Y), onFailure(Y,X,_).
+
+%% controlPath (not error handling).
+controlPath(X,Y) :- path(X,Y), \+ onFailure(Y,X,_).
 
 %% existsPath/2: existsPath(+A,+B) => transitive closure for path
 existsPath(X,Y) :- path(X,Y).
@@ -39,7 +42,39 @@ extractPath(A,B,[B]) :- path(A,B).
 extractPath(A,B,[X|O]) :- path(A,X), extractPath(X,B,O).
 
 
+getControlPath(A,B,[A|O]) :- extractControlPath(A,B,O). 
+extractControlPath(A,B,[B]) :- controlPath(A,B).
+extractControlPath(A,B,[X|O]) :- controlPath(A,X), extractPath(X,B,O).
 
 
 
+delAPath(Act,A) :- delAPath(Act,_,A).
+delAPath(Act,X,myRetract(waitFor(Act,X))) :- waitFor(Act,X).
+delAPath(Act,X,myRetract(waitFor(X,Act))) :- waitFor(X,Act).
+delAPath(Act,X,myRetract(weakWait(Act,X))) :- weakWait(Act,X).
+delAPath(Act,X,myRetract(weakWait(X,Act))) :- weakWait(X,Act).
+delAPath(Act,X,myRetract(isGuardedBy(Act,X,V,C))) :- isGuardedBy(Act,X,V,C).
+delAPath(Act,X,myRetract(isGuardedBy(X,Act,V,C))) :- isGuardedBy(X,Act,V,C).
+delAPath(Act,X,myRetract(onFailure(Act,X,E))) :- onFailure(Act,X,E).
+delAPath(Act,X,myRetract(onFailure(X,Act,E))) :- onFailure(X,Act,E).
 
+:- assert(user:isMacroAction(shiftAPath,4)).
+shiftAPath(Act,NAct,A) :- shiftAPath(Act,NAct,_,A).
+shiftAPath(Act,NAct,X,[myRetract(waitFor(Act,X)), defWaitFor(NAct,X)]) :- 
+	waitFor(Act,X).
+shiftAPath(Act,NAct,X,[myRetract(waitFor(X,Act)), defWaitFor(X,NAct)]) :- 
+	waitFor(X,Act).
+shiftAPath(Act,NAct,X,[myRetract(weakWait(Act,X)), defWeakWait(NAct,X)]) :- 
+	weakWait(Act,X).
+shiftAPath(Act,NAct,X,[myRetract(weakWait(X,Act)), defWeakWait(X,NAct)]) :- 
+	weakWait(X,Act).
+shiftAPath(Act,NAct,X,Actions) :- 
+	isGuardedBy(Act,X,V,C),
+	Actions = [myRetract(isGuardedBy(Act,X,V,C)),defGuard(NAct,X,V,C)].
+shiftAPath(Act,NAct,X,Actions) :- 
+	isGuardedBy(X,Act,V,C),
+	Actions = [myRetract(isGuardedBy(X,Act,V,C)),defGuard(X,NAct,V,C)].
+shiftAPath(Act,NAct,X,[myRetract(onFailure(Act,X,E)),defOnFail(NAct,X,E)]) :- 
+	onFailure(Act,X,E).
+shiftAPath(Act,NAct,X,[myRetract(onFailure(X,Act,E)),defOnFail(X,NAct,E)]) :- 
+	onFailure(X,Act,E).

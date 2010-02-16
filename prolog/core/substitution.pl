@@ -20,6 +20,24 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+
+%%%%
+%% Deprecated
+%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Adore Substitution Rules %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

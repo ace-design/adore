@@ -72,34 +72,39 @@ getFirsts(Block,Activities) :-
 isFirst(Block,Activity) :- 
 	member(Activity,Block), \+ path(_,Activity).
 isFirst(Block,Activity) :- 
-	member(Activity,Block), path(APrime,Activity), \+ member(APrime,Block).
+	member(Activity,Block), path(APrime,Activity), \+ member(APrime,Block),
+%	member(Other,Block), \+ path(Other,Activity).
+	findall(X,(member(X,Block), path(X,Activity)),[]).
 
 getLasts(Block,Activities) :- 
 	findall(A,activity:isLast(Block,A),Tmp), sort(Tmp,Activities).
 isLast(Block,Activity) :- 
 	member(Activity,Block),	\+ path(Activity,_).
 isLast(Block,Activity) :- 
-	member(Activity,Block), path(Activity,APrime),
-	\+ member(APrime,Block). 
+	member(Activity,Block), path(Activity,APrime), \+ member(APrime,Block),
+	% member(Other,Block), \+ path(Activity,Other),
+	findall(X,(member(X,Block), path(Activity,X)),[]).
 
-
+getBlockInterfaceVariable(Block,Vars,Dir) :- 
+	findall(X,activity:isBlockInterfaceVariable(Block,X,Dir),Raws),
+	sort(Raws,Vars).
 isBlockInterfaceVariable(Block,V,in) :- 
-	isFirstActivity(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
+	isFirst(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
 isBlockInterfaceVariable(Block,V,out) :- 
-	isLastActivity(Block,A), usesElemAsOutput(A,V).
+	isLast(Block,A), usesElemAsOutput(A,V).
 
 %% TO DO: harmonize with isBliockInterface predicates.
-getBlockInputVariables(Block, Vars) :-
-	findall(V,activity:isBlockInputVariable(Block,V),Tmp),
-	sort(Tmp,Vars).
-isBlockInputVariable(Block,V) :- 
-	isFirstActivity(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
+%% getBlockInputVariables(Block, Vars) :-
+%% 	findall(V,activity:isBlockInputVariable(Block,V),Tmp),
+%% 	sort(Tmp,Vars).
+%% isBlockInputVariable(Block,V) :- 
+%% 	isFirst(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
 
-getBlockOutputVariable(Block, Vars) :-
-	findall(V,activity:isBlockOutputVariable(Block,V),Tmp),
-	sort(Tmp,Vars).
-isBlockOutputVariable(Block,V) :- 
-	isLastActivity(Block,A), usesElemAsOutput(A,V).
+%% getBlockOutputVariables(Block, Vars) :-
+%% 	findall(V,activity:isBlockOutputVariable(Block,V),Tmp),
+%% 	sort(Tmp,Vars).
+%% isBlockOutputVariable(Block,V) :- 
+%% 	isLast(Block,A), usesElemAsOutput(A,V).
 
 
 

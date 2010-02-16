@@ -24,12 +24,25 @@
 %% Debugging ADORE ...
 %%%%
 
-debugSubscription(create).
-debugSubscription(def).
-debugSubscription(set).
+%debugSubscription(compiler).
 
-debugSubscription(weave).
-debugSubscription(exec).
+%% Atomic Actions
+%debugSubscription(create).
+%debugSubscription(def).
+%debugSubscription(set).
+
+%% Algorithms
+debugSubscription(algo).
+%debugSubscription(timer).
+
+%debugSubscription(clone).
+%debugSubscription(setify).
+%debugSubscription(merge).
+%debugSubscription(weave).
+%debugSubscription(instantiate).
+
+%% Execution framework
+%debugSubscription(exec).
 
 %%%%
 %% Model transformation parameters: 

@@ -21,6 +21,7 @@
 %%%%
 
 
+:- dynamic dataLink/3.
 %% Based on the article published in ICIW'09
 
 %%%%
@@ -32,19 +33,31 @@ dataflow(V,Acts) :-
 	findall(A,variableUsageClosure(V,A),L), sort(L,Acts).
 
 %% variableUsageClosure(+V,-A): Activity A uses V as input, or a 'descendant'
+%variableUsageClosure(V,A) :- 
+	
 variableUsageClosure(V,A) :- 
 	isDfActivity(A), usesElemAsInput(A,V).
 variableUsageClosure(V,A) :- 
+	isContainedBy(APrime,P), isContainedBy(A,P),
 	isDfActivity(A), isDfActivity(APrime), \+ A == APrime, 
-	isContainedBy(APrime,P), isContainedBy(A,P), existsPath(APrime,A), 
 	usesElemAsInput(A,Vin), usesElemAsOutput(APrime,Vin), 
+	existsPath(APrime,A), 
 	variableUsageClosure(V,APrime).
-
 variableUsageClosure(V,A) :- 
 	isDfActivity(A), isDfActivity(APrime), \+ A == APrime, 
-	isContainedBy(APrime,P), isContainedBy(A,P), existsPath(APrime,A), 
+	isContainedBy(APrime,P), isContainedBy(A,P), 
 	usesElemAsOutput(A,Vout), usesElemAsOutput(APrime,Vout), 
+	existsPath(APrime,A), 
 	variableUsageClosure(V,APrime).
+variableUsageClosure(V,A) :- %% to take care of user's datalink
+	variable:belongsTo(V,P),! , activity:belongsTo(A,P), 
+	findRoot(A,RootA), activity:belongsTo(RootA,RootProcess), 
+	getPreviousName(RootA,NameA), dataLink(RootProcess,NameVar,NameA), 
+	pebble(substitution,LambdaVar,V,_), 
+	pebble(derivation,LambdaAncestor,LambdaVar,_), %% TODO: fixe implem!
+	variable:belongsTo(LambdaAncestor,RootProcess),
+	getPreviousName(LambdaAncestor,NameVar).
+
 
 %% isDfActivity(+A): an activity inside a dataflow can't be of any kind.
 isDfActivity(A) :- activity(A), hasForKind(A,assign).

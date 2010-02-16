@@ -110,7 +110,7 @@ function run() {
     if [ "$FILE" != '' ]; then G="['$TMP']"; else G="[]"; fi;
     if [ "$GOAL" != '' ]; then G="$G,$GOAL"; fi;
     if [ "$VERBOSE" = 'false' ]; then G="adore_silence(true),$G"; fi;
-    $SWIPL_HOME/swipl -s $ADORE_HOME/prolog/init.pl -g "$G"
+    $SWIPL_HOME/swipl -s $ADORE_HOME/prolog/init.pl -g "$G" 
 }
 
 function main() {

@@ -6,6 +6,9 @@ shouldDraw(true).    %% Draw resulting process as PNG file
 %%% Variable Equivalences
 adoreEquivalence(variable,[[replaceMission, mi], [askedMissionFailure, mi]]).
 
+%%% Dataflow semantic relations
+dataLink(unavailableExtResource,res,a2).
+
 %%%%
 %% Prolog Predicate to 'decorate' the demonstration
 %%%%

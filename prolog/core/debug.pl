@@ -40,12 +40,20 @@ performDebugSubscription :-
 	Channels == [], !.
 
 performDebugSubscription :- 
-	findall(X, debugSubscription(X), Channels),
-	maplist(adore_debug,Channels).
+	findall(X, debugSubscription(X), Channels), 
+	maplist(adore_debug,Channels). 
 
 adore_debug(C) :- 
 	swritef(Tmp,'% Listening debug channel %w',[C]),
 	aw(Tmp), debug(C).
+
+%%%%%%%%%%%%%%%%%%%%%
+%% Timer framework %%
+%%%%%%%%%%%%%%%%%%%%%
+
+myTimer(G) :- debugSubscription(timer), !, time(G).
+myTimer(G) :- G.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% Debugging framework %%

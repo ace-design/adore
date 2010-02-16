@@ -65,8 +65,9 @@ import java.io.*;
 	String data = raw.substring(3,raw.length()-3).replaceAll("\n","");
 	String escapedData = data.trim().substring(0,data.trim().length()-1);
 	escapedData = data.replaceAll("\'","\\\\'").trim();
-	return "print('\%\%\% DISENGAGE'), nl, print('\%\% => doing ["+escapedData+"]'), nl, " + 
-		data.trim() + " print('\%\%\% ENGAGE'), nl, true";
+	return data.trim() + (data.trim().endsWith(",")?"":",") + "dinfo(compiler,'\n',[]),true";
+	//return "print('\%\%\% DISENGAGE'), nl, print('\%\% => doing ["+escapedData+"]'), nl, " + 
+	//	data.trim() + " print('\%\%\% ENGAGE'), nl, true";
   }
   
   

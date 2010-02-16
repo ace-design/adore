@@ -1,3 +1,39 @@
+/*********************************
+ ** Fragments: foo, foo2 & foo3 **
+ *********************************/
+fragment foo {
+  variables {}
+  activities {
+    h. hook(); e1. log::write('BEFORE' as string); 
+    e2. log::write('AFTER' as string);
+  }
+  relations { ^ < e1; e1 < h; h < e2; e2 < $; }
+}
+depict foo using 'darkseagreen3';
+
+fragment foo2 {
+  variables {}
+  activities {
+    h. hook(); e1. log::write('BEFORE' as string);
+    e2. log::write('AFTER' as string);
+  }
+  relations { ^ < e1; e1 < h; h < e2; e2 < $; }
+}
+depict foo2 using 'darkslategray2';
+
+fragment foo3 {
+  variables {}
+  activities { 
+    h. hook(); e1. log::write('BEFORE' as string);
+    e2. log::write('AFTER' as string);
+  }
+  relations { ^ < e1; e1 < h; h < e2; e2 < $; }
+}
+depict foo3 using 'gainsboro';
+
+/**********************************
+ ** Orchestration used as target **
+ **********************************/
 orchestration sandbox::tmp {
   variables {
     x as integer; y as integer; result as integer;
@@ -19,25 +55,63 @@ orchestration sandbox::tmp {
   }
 }
 
-fragment foo {
-  variables {}
-  activities {
-    h. hook();
-    e1. log::write('BEFORE' as string);
-    e2. log::write('AFTER' as string);
-  }
-  relations {
-    ^ < e1; e1 < h; h < e2; e2 < $;
-  }
-}
-depict foo using 'darkseagreen3';
+/*% doClone(foo,c1), doClone(foo2,c2), doClone(foo3,c3), %*/
 
-/*% doClone(foo,aClone), %*/
+/*********************************************
+ ** Composing using Orders: 6 possibilities **
+ *********************************************/
 
-///*% doWeave([weave(aClone,[sandbox_tmp_act1])]), %*/
-///*% doWeave([weave(aClone,[sandbox_tmp_act2])]), %*/
-/*% doWeave([weave(aClone,[sandbox_tmp_act1,sandbox_tmp_act2])]), %*/
+// foo, foo2, foo3
+/**%
+  doWeave([weave(c1,[sandbox_tmp_act1])]), 
+  doWeave([weave(c2,[sandbox_tmp_act2])]), 
+  doWeave([weave(c3,[sandbox_tmp_act1,sandbox_tmp_act2])]),
+%**/
+
+// foo, foo3, foo2
+/**%
+  doWeave([weave(c1,[sandbox_tmp_act1])]), 
+  doWeave([weave(c3,[sandbox_tmp_act1,sandbox_tmp_act2])]),
+  doWeave([weave(c2,[sandbox_tmp_act2])]), 
+%**/
+
+// foo2, foo, foo3
+/**%
+  doWeave([weave(c2,[sandbox_tmp_act2])]), 
+  doWeave([weave(c1,[sandbox_tmp_act1])]), 
+  doWeave([weave(c3,[sandbox_tmp_act1,sandbox_tmp_act2])]),
+%**/
+
+// foo2, foo3, foo
+/*%
+  doWeave([weave(c2,[sandbox_tmp_act2])]), 
+  doWeave([weave(c3,[sandbox_tmp_act1,sandbox_tmp_act2])]),
+  doWeave([weave(c1,[sandbox_tmp_act1])]), 
+%*/
+
+// foo3, foo, foo2
+/**%
+  doWeave([weave(c3,[sandbox_tmp_act1,sandbox_tmp_act2])]),
+  doWeave([weave(c1,[sandbox_tmp_act1])]), 
+  doWeave([weave(c2,[sandbox_tmp_act2])]), 
+%**/
+
+// foo3, foo2, foo
+/**%
+  doWeave([weave(c3,[sandbox_tmp_act1,sandbox_tmp_act2])]),
+  doWeave([weave(c2,[sandbox_tmp_act2])]), 
+  doWeave([weave(c1,[sandbox_tmp_act1])]), 
+%**/
 
 
-/*% adore2png(sandbox_tmp,'weave.png'), %*/
+/********************************
+ ** Composition Withour Orders **
+ ********************************/
+
+/**%
+  doWeave([ weave(c1,[sandbox_tmp_act1]),
+            weave(c2,[sandbox_tmp_act2]),
+            weave(c3,[sandbox_tmp_act1,sandbox_tmp_act2])]),
+%**/
+
 
