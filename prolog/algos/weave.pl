@@ -41,7 +41,6 @@ doWeave(Directives) :-
 	dinfo(algo,'Running doWeave(...)',[]),
 	dinfo(algo,'  Computing action set',[]),
 	myTimer(weave:buildActions(Directives, Actions)), 
-	dinfo(weave,'Actions: ~w' , [Actions]),
 	length(Actions,LActions), 
 	dinfo(algo,'  => Result: ~w actions',[LActions]),
 	dinfo(algo,'  Executing action set',[]),
@@ -64,18 +63,20 @@ applyDir(_,Directives,Actions) :-
  	activity:isWellFormed(Block,Output),
 	%% Shifting fragment content into the targeted process
 	findall(shiftActivity(A,Output), activity:belongsTo(A,Frag), ShiftActs),
+	dinfo(weave,'ShiftActs: ~w' , [ShiftActs]),
 	%% Binding Fragment Artifacts: Hook, P & S
 	bindsArtifacts(Frag,Block, BindingActs),
 	%% Deleting Fragments Artifacts
 	delFragmentArtifacts(Frag,DelActs),
-	SimplActs = [], %[simplifyProcess(Output)],
-	flatten([ ShiftActs, BindingActs, DelActs, SimplActs],
-	        Actions).
+	dinfo(weave,'DelActs: ~w' , [DelActs]),
+	flatten([ ShiftActs, BindingActs, DelActs], Actions).
 	
 bindsArtifacts(Frag,Targets,Actions) :- 
 	bindsHook(Frag, Targets, HookActions),
 	bindsPredecessors(Frag, Targets, PredsActions),
+	dinfo(weave,'PredsActions: ~w' , [PredsActions]),
 	bindsSuccessors(Frag, Targets, SuccsActions),
+	dinfo(weave,'SuccsActions: ~w' , [SuccsActions]),
 	flatten([PredsActions,SuccsActions,HookActions], Actions).
 
 bindsPredecessors(Frag,Targets,Actions) :- 
@@ -95,8 +96,11 @@ bindsSuccessors(Frag,Targets,Actions) :-
 bindsHook(Frag,Targets,Actions) :- 
 	process:getHook(Frag,Hook), 
 	unifyVariables(Hook, Targets, VarActs),
+	dinfo(weave,'VarActs: ~w' , [VarActs]),
 	findall(A,weave:shiftRelation(Hook,Targets,A),ShiftActs),
+	dinfo(weave,'ShiftActs: ~w' , [ShiftActs]),	
 	findall(A,weave:adaptRelation(Hook,Targets,A),AdaptActs),
+	dinfo(weave,'AdaptActs: ~w' , [AdaptActs]),	
 	flatten([VarActs, AdaptActs, ShiftActs],Actions).
 
 delFragmentArtifacts(Frag, Actions) :- 
@@ -196,28 +200,28 @@ shiftRelation(Activity, Block, defOnFail(L,X,E)) :-
 %%WARNING: waitFor(a,b) ==> path(b,a) !!!!! 
 adaptRelation(Hook, Block, defWaitFor(F,Y)) :- 
 	waitFor(Hook,X), hasForKind(X,predecessors), 
-	activity:isFirst(Block, F), path(Y,F).
+	activity:isFirst(Block, F), relations:controlPath(Y,F). %% was Path
 adaptRelation(Hook, Block, defWeakWait(F,Y)) :- 
 	weakWait(Hook,X), hasForKind(X,predecessors), 
-	activity:isFirst(Block, F), path(Y,F).
+	activity:isFirst(Block, F), relations:controlPath(Y,F).%% was Path
 adaptRelation(Hook, Block, defGuard(F,Y,VUnif,C)) :- 
 	isGuardedBy(Hook,X,V,C), hasForKind(X,predecessors), 
-	activity:isFirst(Block, F), path(Y,F),
+	activity:isFirst(Block, F), relations:controlPath(Y,F),%% was Path
 	resolveUnifiedVariable(Y,V,VUnif).
 adaptRelation(Hook, Block, defOnFail(F,Y,E)) :- 
 	onFailure(Hook,X,E), hasForKind(X,predecessors),
-	activity:isFirst(Block, F), path(Y,F).
+	activity:isFirst(Block, F), relations:controlPath(Y,F).%% was Path
 
 adaptRelation(Hook, Block, defWaitFor(Y,L)) :- 
 	waitFor(X,Hook), hasForKind(X,successors), 
-	activity:isLast(Block, L), path(L,Y).
+	activity:isLast(Block, L), relations:controlPath(L,Y).
 adaptRelation(Hook, Block, defWeakWait(Y,L)) :- 
 	weakWait(X,Hook), hasForKind(X,successors), 
-	activity:isLast(Block, L), path(L,Y).
+	activity:isLast(Block, L), relations:controlPath(L,Y).
 adaptRelation(Hook, Block, defGuard(Y,L,VUnif,C)) :- 
 	isGuardedBy(X,Hook,V,C), hasForKind(X,successors), 
-	activity:isLast(Block, L), path(L,Y),
+	activity:isLast(Block, L), relations:controlPath(L,Y),
 	resolveUnifiedVariable(Y, V,VUnif).
 adaptRelation(Hook, Block, defOnFail(Y,L,E)) :- 
 	onFailure(X,Hook,E), hasForKind(X,successors),
-	activity:isLast(Block, L), path(L,Y).
+	activity:isLast(Block, L), relations:controlPath(L,Y).

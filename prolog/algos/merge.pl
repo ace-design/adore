@@ -59,12 +59,20 @@ buildActions(Fragments,Output,Dirs) :-
 
 mergeFragments(Ctx,Frags,Out,Actions) :- 
 	CreateActs = [createProcess(Out), setAsFragment(Out)],
+	dinfo(merge,'CreateActs: ~w',[CreateActs]),
 	findall(A,merge:pourFragmentIntoOutput(Frags,Out,A),FragUnionActs),
+	dinfo(merge,'FragUnionActs: ~w',[FragUnionActs]),
 	findall(A,merge:removeOldFragments(Ctx,Frags,A),FragRemovalActs),
+	dinfo(merge,'FragRemovalActs: ~w',[FragRemovalActs]),
 	findFragActsUnification(Ctx,predecessors,Frags,PredsActs),
+	dinfo(merge,'PredsActs: ~w',[PredsActs]),
 	findFragActsUnification(Ctx,successors,Frags,SuccActs),
+	dinfo(merge,'SuccActs: ~w',[SuccActs]),
 	findFragActsUnification(Ctx,hook,Frags,HookActs),
+	dinfo(merge,'HookActs: ~w',[HookActs]),
+%	trace,
 	findVariableDeclaredUnification(Ctx,Frags,VarUnifActs),
+	dinfo(merge,'VarUnifActs: ~w',[VarUnifActs]),
 	flatten([CreateActs, FragUnionActs, FragRemovalActs,
 	         PredsActs, SuccActs, HookActs,VarUnifActs],Actions).
 %%%
@@ -156,8 +164,10 @@ delActivities(Olds,Actions) :-
 
 findVariableDeclaredUnification(_,Fragments,Actions) :- 
 	findall(V,(member(F,Fragments), process:getVariables(F,V)), RawVars),
-	flatten(RawVars,Variables), map(findRoot,Variables,RootVariables),
-	findall(V,merge:extractVariableUnifications(RootVariables,V),Unifiable),
+	flatten(RawVars,FlatRaw),sort(FlatRaw,Variables),
+	map(findUserRoot,Variables,RootVariables),
+	findall(V,merge:extractVariableUnifications(RootVariables,V),RawUnif),
+	sort(RawUnif,Unifiable),
 	computeVariableUnifications(Fragments,Unifiable,Actions).
 
 extractVariableUnifications(RootVariables, RV) :- 
@@ -168,6 +178,7 @@ extractVariableUnifications(RootVariables, RV) :-
 
 computeVariableUnifications(_,[],[]) :- !. %% Nothing to unify
 computeVariableUnifications(_,[_],[]) :- !. %% a single entity
+%% TODO: should take care of multiple unification (a,b->a'), (c,d) -> c'
 computeVariableUnifications(Fragments,VarList,Actions) :- %% Here is fun
 	member(AVariable,VarList), 
 	cloneVariable(AVariable,CloneActs,CloneId),

@@ -39,10 +39,29 @@ areInSameProcess(X,Y) :- belongsTo(X,P), belongsTo(Y,P).
 
 
 getPredecessors(A,Preds) :- 
-	findall(X,path(X,A),Preds).
+	findall(X,relations:controlPath(X,A),Preds). %% was 'path'
 
 getSuccessors(A,Succs) :- 
-	findall(X,path(A,X),Succs).
+	findall(X,relations:controlPath(A,X),Succs). %% was 'path'
+
+
+getTransitiveGuards(A,Guards) :- 
+	activity:belongsTo(A,Process), process:getActivities(Process,Acts),
+	findall(G,(member(X,Acts),relations:getGuardPath(X,A,G)),RawGuards),
+	flatten(RawGuards,FlattenGuards), sort(FlattenGuards, GuardSet), 
+	simplifyGuardSet(GuardSet,Guards).
+
+invertGuard(guard(V,true),guard(V,false)).
+invertGuard(guard(V,false),guard(V,true)).
+
+simplifyGuardSet([],[]).
+simplifyGuardSet([G|Others],Result) :- 
+	invertGuard(G,InvertedG), member(InvertedG,Others), 
+	remove(InvertedG,Others,RemovedSet), 
+	simplifyGuardSet(RemovedSet,Result).
+simplifyGuardSet([G|Others],[G|Result]) :- 
+	invertGuard(G,InvertedG), \+ member(InvertedG,Others), 
+	simplifyGuardSet(Others,Result).
 
 %%%
 % Activity Set Predicates
@@ -73,7 +92,6 @@ isFirst(Block,Activity) :-
 	member(Activity,Block), \+ path(_,Activity).
 isFirst(Block,Activity) :- 
 	member(Activity,Block), path(APrime,Activity), \+ member(APrime,Block),
-%	member(Other,Block), \+ path(Other,Activity).
 	findall(X,(member(X,Block), path(X,Activity)),[]).
 
 getLasts(Block,Activities) :- 
@@ -82,7 +100,6 @@ isLast(Block,Activity) :-
 	member(Activity,Block),	\+ path(Activity,_).
 isLast(Block,Activity) :- 
 	member(Activity,Block), path(Activity,APrime), \+ member(APrime,Block),
-	% member(Other,Block), \+ path(Activity,Other),
 	findall(X,(member(X,Block), path(Activity,X)),[]).
 
 getBlockInterfaceVariable(Block,Vars,Dir) :- 
@@ -92,19 +109,4 @@ isBlockInterfaceVariable(Block,V,in) :-
 	isFirst(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
 isBlockInterfaceVariable(Block,V,out) :- 
 	isLast(Block,A), usesElemAsOutput(A,V).
-
-%% TO DO: harmonize with isBliockInterface predicates.
-%% getBlockInputVariables(Block, Vars) :-
-%% 	findall(V,activity:isBlockInputVariable(Block,V),Tmp),
-%% 	sort(Tmp,Vars).
-%% isBlockInputVariable(Block,V) :- 
-%% 	isFirst(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
-
-%% getBlockOutputVariables(Block, Vars) :-
-%% 	findall(V,activity:isBlockOutputVariable(Block,V),Tmp),
-%% 	sort(Tmp,Vars).
-%% isBlockOutputVariable(Block,V) :- 
-%% 	isLast(Block,A), usesElemAsOutput(A,V).
-
-
 

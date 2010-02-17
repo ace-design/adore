@@ -37,6 +37,15 @@ filter(_,[],[]).
 filter(P,[H|T],[H|O]) :- call(P,H), filter(P,T,O).
 filter(P,[H|T],O) :- \+ call(P,H), filter(P,T,O).
 
+%% writeList => display a List on the terminal
+writeList([]).
+writeList([H|T]) :- 
+	write(H), nl, writeList(T).
+
+remove(_,[],[]).
+remove(E,[E|T],O) :- remove(E,T,O).
+remove(E,[X|T],[X|O]) :- \+ E = X, remove(E,T,O).
+
 %% getAbsoluteName: retrieve a named element from a context
 getAbsoluteName(_,absoluteReference(S,O,E),R) :-
 	swritef(Str,"%w_%w_%w",[S,O,E]),
@@ -55,14 +64,13 @@ getAbsoluteNames(_,[],[]).
 getAbsoluteNames(Cxt,[H|T],[R|O]) :- 
 	getAbsoluteName(Cxt,H,R), getAbsoluteNames(Cxt,T,O).
 
-%% writeList => display a List on the terminal
-writeList([]).
-writeList([H|T]) :- 
-	write(H), nl, writeList(T).
-
 %% assertWithoutDuplication
 adoreAssert(Fact) :- Fact, !.
 adoreAssert(Fact) :- assert(Fact).
+
+
+
+
 
 %%% Variable label common transformations
 
@@ -93,3 +101,10 @@ suffixToStar([H|T],R) :-
 	string_to_list(C,[H]), suffixToStar(T,O),
 	swritef(R,"%w%w",[C,O]).
 
+
+
+
+%%%%%%%%%%% TMP %%%%%%%%%%%
+
+matchJoinPoints(F,PointCut,Actions) :- 
+	findall(weave(F,Matched),call(PointCut,Matched),Actions).

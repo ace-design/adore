@@ -20,21 +20,18 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 :- module( processSimplification, 
-	   [ doProcessSimplification/1, delTransitivePaths/2]).
+	   [ doProcessSimplification/1, delTransitivePaths/2 ]).
 
 %%%%%%
 %%% end user interface
 %%%%%%
 
 doProcessSimplification(Process) :- 
-%	dinfo(algo,'Running doProcessSimplification(~w)',[Process]),
-%	dinfo(algo,'  Computing action set',[]),
+	dinfo(algo,'doProcessSimplification(~w) ...',[Process]),
 	myTimer(processSimplification:buildActions(Process,Actions)),
-%	length(Actions,LActions), 
-%	dinfo(algo,'  => Result: ~w actions',[LActions]),
-%	dinfo(algo,'  Executing action set',[]),
-	myTimer(executeActionSet(Actions)),!.
-%	dinfo(algo,'doProcessSimplification(~w) ended with success!',[Process]).
+	myTimer(executeActionSet(Actions)),!,
+	length(Actions,LActs),
+	dinfo(algo,'... done (~w actions).',[LActs]).
 
 buildActions(Process, Actions) :- 
  	process:exists(Process), process:getActivities(Process,Acts),
@@ -51,6 +48,20 @@ simplify(Activities,[myRetract(weakWait(X,Y)),defWaitFor(X,Y)]) :-
 	member(X, Activities), 
 	findall(P,weakWait(X,P),[Y]). 
 
+simplify(Activities, Actions) :- %% Use self as invoked service, in a process
+	member(X,Activities), activity:belongsTo(X,Process), 
+	\+ isFragment(Process), hasForKind(X,invoke),
+	hasForService(X,self), hasForSrvName(Process,Service),
+	Actions = [ retract(hasForService(X,self)), 
+	            setInvokedService(X,Service)].
+
+simplify(Activities, Actions) :- %% Use self as invoked operation, in a process
+	member(X,Activities), activity:belongsTo(X,Process), 
+	\+ isFragment(Process), hasForKind(X,invoke),
+	hasForOperation(X,self), hasForOpName(Process,Operation),
+	Actions = [ retract(hasForOperation(X,self)), 
+	            setInvokedOperation(X,Operation)], writeList(Actions).
+
 %%%%%
 %% Macro Actions
 %%%%%
@@ -58,7 +69,7 @@ simplify(Activities,[myRetract(weakWait(X,Y)),defWaitFor(X,Y)]) :-
 :- assert(user:isMacroAction(delTransitivePaths,2)).
 delTransitivePaths(Process,Actions) :-
 	findall(A, processSimplification:delATransitivePath(Process,A),Raw),
-	flatten(Raw,Actions).
+	flatten(Raw,Actions), cleanup.
 
 delATransitivePath(Process,Action) :- 
 	%% a < b  AND a < ... < b (< : wait, weak or guard) => retract a < b
@@ -66,4 +77,15 @@ delATransitivePath(Process,Action) :-
  	member(X, Activities), member(Y, Activities),
  	waitFor(Y,X), % old: |weakWait(Y,X)  TODO: is that ALWAYS true?
  	relations:getControlPath(X,Y,L), \+ L = [X,Y], 
+	getLazyGuards(X,GuardsX), getLazyGuards(Y,GuardsY),
+	GuardsX = GuardsY, % X and Y under the same conditions (only)
  	relations:delAPath(X,Y,Action).
+
+:-dynamic simplifyTmpGuards/2. %% To improve performance!!!!
+cleanup :- 
+	retractall(simplifyTmpGuards(_,_)).
+getLazyGuards(Act,Guards) :- simplifyTmpGuards(Act,Guards),!.
+getLazyGuards(Act,Guards) :- 
+	activity:getTransitiveGuards(Act,Guards), !,
+	assert(simplifyTmpGuards(Act,Guards)).
+

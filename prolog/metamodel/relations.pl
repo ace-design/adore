@@ -41,13 +41,20 @@ getPath(A,B,[A|O]) :- extractPath(A,B,O).
 extractPath(A,B,[B]) :- path(A,B).
 extractPath(A,B,[X|O]) :- path(A,X), extractPath(X,B,O).
 
-
+%% contreol path (not onFail)
 getControlPath(A,B,[A|O]) :- extractControlPath(A,B,O). 
 extractControlPath(A,B,[B]) :- controlPath(A,B).
 extractControlPath(A,B,[X|O]) :- controlPath(A,X), extractPath(X,B,O).
 
+getGuardPath(A,X,[guard(V,C)]) :- 
+	activity:sameProcess(X,A), isGuardedBy(X,A,V,C).
+getGuardPath(A,X,[]) :- path(A,X), \+ isGuardedBy(X,A,_,_).
+getGuardPath(A,X,Guards) :- 
+	path(A,Tmp), \+ isGuardedBy(Tmp,A,_,_), getGuardPath(Tmp,X,Guards).
+getGuardPath(A,X,[guard(V,C)|Others]) :- 
+	path(A,Tmp), isGuardedBy(Tmp,A,V,C), getGuardPath(Tmp,X,Others).
 
-
+%% deleting a path
 delAPath(Act,A) :- delAPath(Act,_,A).
 delAPath(Act,X,myRetract(waitFor(Act,X))) :- waitFor(Act,X).
 delAPath(Act,X,myRetract(waitFor(X,Act))) :- waitFor(X,Act).
@@ -58,6 +65,7 @@ delAPath(Act,X,myRetract(isGuardedBy(X,Act,V,C))) :- isGuardedBy(X,Act,V,C).
 delAPath(Act,X,myRetract(onFailure(Act,X,E))) :- onFailure(Act,X,E).
 delAPath(Act,X,myRetract(onFailure(X,Act,E))) :- onFailure(X,Act,E).
 
+%% shifting a path from an activity to another one
 :- assert(user:isMacroAction(shiftAPath,4)).
 shiftAPath(Act,NAct,A) :- shiftAPath(Act,NAct,_,A).
 shiftAPath(Act,NAct,X,[myRetract(waitFor(Act,X)), defWaitFor(NAct,X)]) :- 

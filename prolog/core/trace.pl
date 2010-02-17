@@ -63,8 +63,6 @@ resolveUnifiedVariable(_,Var,Var).
 getPreviousName(New,Old) :- pebble(rename(_),Old,New,_),!.
 getPreviousName(New,New). %% i.e. there is no pebble to lead us (no renaming).
 
-	
-
 
 getImmediateDerivation(Ctx,Old,New) :- 
 	pebble(derivation,Old,New,Ctx).
@@ -75,9 +73,25 @@ findRoot(Elem,Root) :-
 findRoot(Elem,Elem).
 
 
+findUserRoot(Elem,Root) :- 
+	pebble(_,Root,Elem,_), pebble(rename(_),_,Root,_),!.
+findUserRoot(Elem,Root) :- 
+	pebble(_,Ancestor,Elem,_), findUserRoot(Ancestor,Root),!.
+findUserRoot(Elem,Elem).
+
 identifyClone(Act,Process,ClonedAct) :- 
 	activity:belongsTo(Act,Origin),
 	(  adoreContext(CtxId,clone(Origin,Process)) 
          | adoreContext(CtxId,instantiate(Origin,_,Process)) ),
 	getImmediateDerivation(CtxId,Act,ClonedAct).
+
+identifyVarClone(V,Process,Clone) :- 
+	variable:belongsTo(V,Origin),
+	(  adoreContext(CtxId,clone(Origin,Process)) 
+         | adoreContext(CtxId,instantiate(Origin,_,Process)) ),
+	getImmediateDerivation(CtxId,V,Clone).
+traceListing(Elem) :- 
+	findall( pebble(A,B,Elem,Ctx), pebble(A,B,Elem,Ctx), Rights),
+	findall( pebble(A,Elem,B,Ctx), pebble(A,Elem,B,Ctx), Lefts),
+	flatten([Rights,Lefts],Listing), writeList(Listing).
 
