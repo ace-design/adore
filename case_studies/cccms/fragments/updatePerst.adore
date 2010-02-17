@@ -1,0 +1,12 @@
+fragment logUpdate<vType, op> {
+  variables { v as vType;  op as string;  }
+  activities {
+    h.  hook(v);
+    a2. crud::update(v, op);
+  }
+  relations {
+   ^<h ; h <a2; h< $; 
+  }
+}
+
+depict logUpdate using 'lavender';

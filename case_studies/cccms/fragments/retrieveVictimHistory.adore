@@ -12,5 +12,6 @@ fragment retrieveVictimHistory<wrk> {
   }
   relations { 
     ^ < h; h < a1; a1 < t; t < a2 when c; a2 < $; t < $ when !c;
+    fail(a1,'fail') < $;
   }
 }

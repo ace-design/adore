@@ -5,6 +5,8 @@ shouldDraw(true).    %% Draw resulting process as PNG file
 
 %%% Variable Equivalences
 adoreEquivalence(variable,[[replaceMission, mi], [askedMissionFailure, mi]]).
+adoreEquivalence(variable,[[authentifyWhenIdle, u], [updatePersistence, u]]).
+
 
 %%% Dataflow semantic relations
 dataLink(unavailableExtResource,res,a2).

@@ -1,0 +1,12 @@
+fragment logError<exc, msg, op>{
+  variables { msg as string; op as var; }
+  activities {
+    h.  hook();
+    a0. database::storeError(msg,op);
+  }
+  relations {
+     ^<h; fail(h,'exc')<a0; h<$;
+  }
+}
+
+depict logError using 'tomato2';

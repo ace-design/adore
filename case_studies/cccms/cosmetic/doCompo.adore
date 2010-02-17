@@ -39,14 +39,13 @@
   cccms_draw(cms_handleAMission,'2.1__handleAMission'),
 %*/
 
-
-
-
 // Generic Fragment instantiation is not complete 4 now (action)
 /*%
   doInstantiate(useHelicopter, cms_handleAWorker, uc21_uH_1, [bind(m,m)]),
-  doInstantiate(lostContact, cms_handleAWorker, uc21_lC_1, [bind(c,crisis)]),
-  doInstantiate(timeout, cms_handleAWorker, uc21_t_1, [bind(delay,m)]),
+  doInstantiate(lostContact, cms_handleAWorker, uc21_lC_1, 
+                [bind(c, crisis), bind(action, requestForArrival)]),
+  doInstantiate(timeout, cms_handleAWorker, uc21_t_1, 
+                [bind(delay, m),bind(action, updateLocation)]),
   doMerge([uc21_uH_1,uc21_lC_1,uc21_t_1], uc21_uH_lC_t_1),
   doProcessSimplification(uc21_uH_lC_t_1),
   cccms_draw(uc21_uH_lC_t_1,'2.1____handleAWorker_mergedOnA6'),
@@ -56,7 +55,8 @@
   doMerge([uc21_rHOC_3,uc21_mF_1], uc21_rHOC_mF_1),
   doProcessSimplification(uc21_rHOC_mF_1),
   cccms_draw(uc21_rHOC_mF_1,'2.1____handleAWorker_mergedOnA7'),
-  doInstantiate(lostContact, cms_handleAWorker, uc21_lC_2, [bind(c,crisis)]),
+  doInstantiate(lostContact, cms_handleAWorker, uc21_lC_2, 
+                [bind(c,crisis), bind(action,requestForDeparture)]),
   doClone(missingReport,uc21_mR_1),
   doWeave([ weave(uc21_uH_lC_t_1, [cms_handleAWorker_a7]),
              weave(uc21_rHOC_mF_1, [cms_handleAWorker_a7]),

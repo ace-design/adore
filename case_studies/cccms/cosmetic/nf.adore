@@ -1,0 +1,38 @@
+/*%
+  doClone(logTime,lT_1),
+  doClone(logError,lE_1),
+  doMerge([lT_1,lE_1],lT_lE_1),
+  doProcessSimplification(lT_lE_1),
+  cccms_draw(lT_lE_1,'logTimeAndError'),
+%*/
+
+/**%
+  doClone(logTime,lT_2),
+  doClone(logError,lE_2),
+  doClone(authentifyWhenIdle,aWI_1),
+  doMerge([lT_2,lE_2,aWI_1],lT_lE_aWI_1),
+  doProcessSimplification(lT_lE_aWI_1),
+  cccms_draw(lT_lE_aWI_1,'logTimeAndErrorAndAuth'),
+%**/
+
+/*%
+  doInstantiate(updatePersistence,authentifyWhenIdle, uP_1,
+                [bind(msg,'cms::notIdle')]),
+  doClone(updatePersistence,uP_2),
+  doClone(updatePersistence,uP_3),
+  doWeave([weave(uP_1,[authentifyWhenIdle_a1]),
+           weave(uP_2,[authentifyWhenIdle_a2]),
+	   weave(uP_3,[authentifyWhenIdle_a21])]),
+
+  cccms_draw(authentifyWhenIdle,'authentifyWhenIdleEnhanced'),
+%*/
+//  doProcessSimplification(authentifyWhenIdle),
+/**%
+  doClone(authentifyWhenIdle,aWI_1),
+  cccms_draw(aWI_1,'tuto'),
+  doClone(updatePersistence,uP_4),
+  doMerge([aWI_1,uP_4],aWI_uP_1),
+  doProcessSimplification(aWI_uP_1),
+  cccms_draw(aWI_uP_1,'toto'),
+%**/
+

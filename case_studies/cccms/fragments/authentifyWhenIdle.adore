@@ -1,0 +1,16 @@
+fragment authentifyWhenIdle {
+  variables { u as cmsEmployee; still as boolean; auth as boolean; }
+  activities {
+    a1. still :=  cms::notIdle(u);
+    h. hook(u);
+    a21. cms::killAuthentification(u);
+    a2. auth := cms::authUser(u);
+    t. throw('BadAuthentification' as string);
+  }
+  relations {
+    ^ < a1; a1 < h when still; h < $; a1 < a21 when ! still; a21<a2;
+    a2 < h when auth; a2 < t when ! auth;
+  }
+}
+
+depict authentifyWhenIdle using 'tan3';

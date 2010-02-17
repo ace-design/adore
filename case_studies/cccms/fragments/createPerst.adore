@@ -1,0 +1,12 @@
+fragment logCreate<vType> {
+  variables { v as vType; }
+  activities {
+    h. v := hook();
+    a1. crud::create(v);
+  }
+  relations {
+    ^<h; h<a1 ; a1<$; 
+  }
+}
+ 
+depict logCreate using 'lemonchiffon2';

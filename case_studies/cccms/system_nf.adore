@@ -1,0 +1,56 @@
+/** Realizing the CCCMS using ADORE to integrate NF properties
+ * @author: Sebastien Mosser, Mireille Blay-Fornarino & Robert France
+ * submitted to the TAOSD special issue dedicated to AOM
+ **/
+
+// The raw precompiled system (no composition were executed)
+knowledge 'system.pl'; 
+
+/********************************
+ ** Non functional Fragemments **
+ ********************************/
+
+/** Statistical logging **/
+require 'fragments/logTime.adore';
+require 'fragments/logError.adore';
+
+/** Peristence **/
+require 'fragments/updatePerst.adore';
+require 'fragments/createPerst.adore';
+
+/** User Inactivity **/
+require 'fragments/authentifyWhenIdle.adore';
+
+
+
+/*************
+ ** SandBox **
+ *************/
+
+// apply logTime(keyType: 'worker', op: 'arrived') => {cms::handleAWorker::a6};
+/*%
+  doInstantiate(logTime,cms_handleAWorker,lT_1,
+                [bind(keyType,worker), bind(op,arrived)]),
+  doWeave([weave(lT_1,[cms_handleAWorker_a6])]),
+  doProcessSimplification(cms_handleAWorker),
+  cccms_draw(cms_handleAWorker,'nf__handleAWorker'),
+%*/
+
+// apply logError(exc: 'unavailable', msg: 'unavailable')
+//                 => unavailableIntResource::h
+/*%
+  doInstantiate(logError, unavailableIntResource, lE_1,
+                [bind(exc,unavailable), bind(msg, unavailable)]),
+  doWeave([weave(lE_1,[unavailableIntResource_h])]),
+  doProcessSimplification(unavailableIntResource),
+  cccms_draw(unavailableIntResource,'nf__unavailableIntResource'),
+%*/
+/*%
+  doInstantiate(unavailableIntResource,cms_handleAMission,uIR_1,
+                [bind(op,findRelevantEmployee)]),
+  doProcessSimplification(uIR_1),
+  doWeave([weave(uIR_1,[cms_handleAMission_a41])]),
+  doProcessSimplification(cms_handleAMission),
+  cccms_draw(cms_handleAMission,'nf__cms_handleAMission'),
+%*/
+

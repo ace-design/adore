@@ -14,10 +14,6 @@ knowledge 'cccms_knowledge.pl' ;
 require 'fragments/mustAuthenticate.adore';
 require 'fragments/reHandleOnChange.adore';
 
-// Non-functional driven fragments
-
-// TODO
-
 /*********************
  *** Use Case #2.1 ***
  *********************/ 
@@ -51,13 +47,17 @@ require 'fragments/timeout.adore';
 require 'fragments/missionFailed.adore';
 require 'fragments/missingReport.adore';
 composition cms::handleAWorker {
-  apply useHelicopter(m: 'm')                                    => a6; 
-  apply lostContact(action: 'requestForArrival', c : 'crisis')   => a6; 
-  apply timeout(delay: 'm.delay',action: 'updateLocation')       => a6; 
-  apply reHandleOnChange(cxt: 'm', crisis: 'crisis')             => a7;
-  apply missionFailed                                            => a7;
-  apply lostContact(action: 'requestForDeparture', c : 'crisis') => a8; 
-  apply missingReport                                            => a11;  
+  apply useHelicopter(m: 'm')  => a6; 
+  apply lostContact(action: 'requestForArrival', c : 'crisis')   
+                               => a6; 
+  apply timeout(delay: 'm.delay', action: 'updateLocation')
+                               => a6; 
+  apply reHandleOnChange(cxt: 'm', crisis: 'crisis') 
+                               => a7;
+  apply missionFailed          => a7;
+  apply lostContact(action: 'requestForDeparture', c : 'crisis') 
+                               => a8; 
+  apply missingReport          => a11;  
 }
 
 /*********************

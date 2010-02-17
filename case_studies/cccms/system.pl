@@ -2609,6 +2609,7 @@
 	defGuard(retrieveVictimHistory_a2,retrieveVictimHistory_t,retrieveVictimHistory_c,true),
 	defWaitFor(retrieveVictimHistory_succs,retrieveVictimHistory_a2),
 	defGuard(retrieveVictimHistory_succs,retrieveVictimHistory_t,retrieveVictimHistory_c,false),
+	defOnFail(retrieveVictimHistory_succs,retrieveVictimHistory_a1,'fail'),
 	setAsFragmentParameter(retrieveVictimHistory,wrk),
 	defCompositionContext(context_133),
 	setCompositionTarget(context_133,cms_execRescMission),
