@@ -56,7 +56,7 @@ introduceTimer(Context,NewContext) :-
 	
 %% ALready implemented.. to be improved
 createWeavingsOnFragments([],[]).
-createWeavingsOnFragments([(E,X)|LEX],[weave(log_error,[X],[[errorle(E)],[onOplu]])|Other]) :-
+createWeavingsOnFragments([(E,X)|LEX],[weave(logError,[X],[[errorle(E)],[onOplu]])|Other]) :-
 	createWeavingsOnFragments(LEX,Other) .
 	
 	
