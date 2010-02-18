@@ -42,9 +42,10 @@ public class Main {
     }
 
     public static String toProlog(ArrayList<String> facts) {
-	String r = ":- \n\t";
+	StringBuffer result = new StringBuffer();
+	result.append(":- \n\t");
 	for(String s: facts)
-	    r += s + ",\n\t";
-	return r.substring(0,r.length()-3)+".\n";
+	    result.append(s + ",\n\t");
+	return result.substring(0,result.length()-3)+".\n";
     }
 }
