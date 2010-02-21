@@ -6,7 +6,7 @@ fragment askedMissionFailure<crisis> {
   }
   activities {
     h. hook(mi);
-    a1. msgBus::wait4Msg('status' as string, 'fail' as string, mi);
+    a1. msgBus::wait4msg('status' as string, 'fail' as string, mi);
     a2. subst* := cms::recommendSupObsMission(crisis);
     a3. self::self(subst*); 
   }

@@ -7,8 +7,10 @@ testAll(R,LErreur,_CorrectedContext,ErreurPaires,LMO,LMF,LWO,LWF) :-
 	introducePersistence(NewContextS,NewContextP),
 	introduceTimer(NewContextP,NewContextT),
 	introduceSecurity(NewContextT,N),
-	print(N),length(N,R), 
+	%print(N),
+	length(N,R), 
 	simpleLook4reflexivity(N,LErreur,NCorrectedContext),!,
+	writeList(NCorrectedContext),
 	simpleLook4nonConvergentPairs(NCorrectedContext,ErreurPaires),
 	sortWeaving(NCorrectedContext,OnOrchestration,OnFragments),
 	getMerges(OnOrchestration,LMergeOnOrchestration),length(LMergeOnOrchestration,LMO),
@@ -17,7 +19,19 @@ testAll(R,LErreur,_CorrectedContext,ErreurPaires,LMO,LMF,LWO,LWF) :-
 	findall(X, (member(weave(X,Z,_),OnFragments)),LWeaveOnFragments),length(LWeaveOnFragments,LWF).
 	
 	
-	
+getList4Seb(NCorrectedContext) :- 
+	introduceStatistic([],NewContextS),
+	introducePersistence(NewContextS,NewContextP),
+	introduceTimer(NewContextP,NewContextT),
+	introduceSecurity(NewContextT,N),
+	length(N,R), 
+	simpleLook4reflexivity(N,LErreur,NCorrectedContext),!,
+	simpleLook4nonConvergentPairs(NCorrectedContext,ErreurPaires),
+	sortWeaving(NCorrectedContext,OnOrchestration,OnFragments),
+	getMerges(OnOrchestration,LMergeOnOrchestration),length(LMergeOnOrchestration,LMO),
+	getMerges(OnFragments,LMergeOnFragments),length(LMergeOnFragments,LMF),
+	findall(X, (member(weave(X,Z,_),OnOrchestration)),LWeaveOnOrchestration),length(LWeaveOnOrchestration,LWO),
+	findall(X, (member(weave(X,Z,_),OnFragments)),LWeaveOnFragments),length(LWeaveOnFragments,LWF),!.
      
  %%Attention je ne sais pas pourquoi mais pour l'instant je ne cherche que sur cmsEMplyee ce qui est pas logique
 introduceSecurity(Context,NewContext) :-

@@ -88,7 +88,7 @@ bindsPredecessors(Frag,Targets,Actions) :-
 bindsSuccessors(Frag,Targets,Actions) :- 
 	process:getSuccs(Frag,Succ), activity:getLasts(Targets,Lasts),
 	maplist(activity:getSuccessors,Lasts,RawSuccs), 
-	flatten(RawSuccs,Succs),
+	flatten(RawSuccs,Succs), 
 	findall(A,weave:shiftRelation(Succ,Succs,A),Actions).
 
 
@@ -98,10 +98,12 @@ bindsHook(Frag,Targets,Actions) :-
 	unifyVariables(Hook, Targets, VarActs),
 	dinfo(weave,'VarActs: ~w' , [VarActs]),
 	findall(A,weave:shiftRelation(Hook,Targets,A),ShiftActs),
-	dinfo(weave,'ShiftActs: ~w' , [ShiftActs]),	
+	dinfo(weave,'ShiftRelations: ~w' , [ShiftActs]),	
 	findall(A,weave:adaptRelation(Hook,Targets,A),AdaptActs),
-	dinfo(weave,'AdaptActs: ~w' , [AdaptActs]),	
+	dinfo(weave,'AdaptRelations: ~w' , [AdaptActs]),
 	flatten([VarActs, AdaptActs, ShiftActs],Actions).
+
+
 
 delFragmentArtifacts(Frag, Actions) :- 
 	process:getPreds(Frag,Pred), process:getSuccs(Frag,Succ), 
@@ -113,12 +115,17 @@ delFragmentArtifacts(Frag, Actions) :-
 % Hook variables unification
 %%
 
+:- dynamic weave_consumed/1.
 unifyVariables(Hook,TargetBlock,Substitutions) :- 
 	findall(V,activity:useVariable(Hook,V),HookVariables),
 	identifyVariableUnification(Hook, TargetBlock, 
-	                            HookVariables,Substitutions).
+	                            HookVariables,Substitutions),
+	retractall(weave_consumed(_)).
 
 identifyVariableUnification(_,_,[],[]).
+identifyVariableUnification(Hook,Block,[Var|Tail],Actions) :- 
+	member(A,Block), activity:belongsTo(A,P), variable:belongsTo(Var,P),!,	
+	identifyVariableUnification(Hook,Block,Tail,Actions).
 identifyVariableUnification(Hook, Block, [Var|Tail],Actions) :- 
 	findall(Equiv,variable:findEquivalentInBlock(Hook,Var,Block,Equiv),
 	        RawCandidates),
@@ -131,6 +138,10 @@ identifyVariableUnification(Hook, Block, [Var|Tail],Actions) :-
 validateCandidates(V,[],_) :- 
 	dfail(weave,'Cannot unify \'~w\' with existing variable!',[V]),!.
 validateCandidates(_,[C],C) :- !.
+validateCandidates(V,L,C) :-
+	member(C,L), variable:belongsTo(C,P), variableBinding(P,Bindings),
+	findUserRoot(V,Target), member([C,Target],Bindings),
+	\+ weave_consumed([C,Target]), assert(weave_consumed([C,Target])),!.
 validateCandidates(V,L,_) :- 
 	dfail(weave,
 	      'There is multiple candidates to be unified with \'~w\': ~w',
@@ -218,6 +229,7 @@ adaptRelation(Hook, Block, defWaitFor(Y,L)) :-
 adaptRelation(Hook, Block, defWeakWait(Y,L)) :- 
 	weakWait(X,Hook), hasForKind(X,successors), 
 	activity:isLast(Block, L), relations:controlPath(L,Y).
+
 adaptRelation(Hook, Block, defGuard(Y,L,VUnif,C)) :- 
 	isGuardedBy(X,Hook,V,C), hasForKind(X,successors), 
 	activity:isLast(Block, L), relations:controlPath(L,Y),

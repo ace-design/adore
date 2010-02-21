@@ -1,0 +1,17 @@
+// Instantiating generic fragments according to pointcuts-used types
+/*%
+  doInstantiate(logTime,_,lT_cmsEmployee,[bind(keyType,cmsEmployee)]),
+  doInstantiate(logTime,_,lT_worker,[bind(keyType,worker)]),
+  doInstantiate(logTime,_,lT_resource,[bind(keyType,resource)]),
+  doInstantiate(logUpdate,_,lU_cmsEmployee,[bind(vType,cmsEmployee)]),
+  doInstantiate(logUpdate,_,lU_worker,[bind(vType,worker)]),
+  doInstantiate(logCreate,_,lC_cmsEmployee,[bind(vType,cmsEmployee)]),
+  doInstantiate(logCreate,_,lC_worker,[bind(vType,worker)]),
+%*/
+
+// Specifiying knowledge
+/**%
+  identifyVarClone(logUpdate_v,lU_cmsEmployee,LU_CE_V),
+  assert(adoreEquivalence(variable,[[lU_cmsEmployee, LU_CE_V],
+                                     [authentifyWhenIdle, u]])),
+%**/

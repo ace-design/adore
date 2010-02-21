@@ -1,6 +1,6 @@
 fragment replaceMission {
   variables {
-    mi as missionInformation; ack as boolean;
+    mi as mission; ack as boolean;
     subst* as mission;
   }
   activities {

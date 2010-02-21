@@ -27,7 +27,7 @@ depict callDisconnected   using 'gold';
 depict fakeWitnessInfo    using 'burlywood';
 
 // Use Case 2.3
-depict unavailableEmployee using 'tomato';
+depict unavailableEmployee using 'tomato3';
 depict employeeRefusal     using 'firebrick';
 
 // Use Case 2.4

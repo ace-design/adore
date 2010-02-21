@@ -87,9 +87,16 @@ identifyClone(Act,Process,ClonedAct) :-
 
 identifyVarClone(V,Process,Clone) :- 
 	variable:belongsTo(V,Origin),
-	(  adoreContext(CtxId,clone(Origin,Process)) 
-         | adoreContext(CtxId,instantiate(Origin,_,Process)) ),
+	(  adoreContext(CtxId,clone(Origin,Process)),! 
+         | adoreContext(CtxId,instantiate(Origin,_,Process)),! ),
 	getImmediateDerivation(CtxId,V,Clone).
+identifyVarClone(V,P,C) :- %% should now be transitive!!
+ 	variable:belongsTo(V,Origin),
+ 	(  adoreContext(CtxId,clone(Origin,Tmp)) 
+          | adoreContext(CtxId,instantiate(Origin,_,Tmp)) ),
+	getImmediateDerivation(CtxId,V,TmpV),
+ 	identifyVarClone(TmpV,P,C).
+
 traceListing(Elem) :- 
 	findall( pebble(A,B,Elem,Ctx), pebble(A,B,Elem,Ctx), Rights),
 	findall( pebble(A,Elem,B,Ctx), pebble(A,Elem,B,Ctx), Lefts),

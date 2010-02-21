@@ -1,0 +1,591 @@
+
+
+/*********************
+ *** Use Case #2.1 ***
+ *********************/ 
+
+// composition cms::resolveCrisis { apply mustAuthenticate => a1; }
+// weave([logUpdate], [cms_resolveCrisis_a1])
+// weave([logUpdate, authentifyWhenIdle], [cms_resolveCrisis_a12])
+// weave([logUpdate, authentifyWhenIdle], [cms_resolveCrisis_a12bis])
+// weave([logUpdate, authentifyWhenIdle], [cms_resolveCrisis_a13])
+
+// weave([logUpdate], [cms_resolveCrisis_aX])
+/**%
+  doClone(mustAuthenticate,nf_uc21_mA_1),
+  doInstantiate(lU_cmsEmployee,cms_resolveCrisis,nf_lU_cE_20,
+                [bind(op,'cms::captureWitnessReport')]),
+  doMerge([nf_uc21_mA_1,nf_lU_cE_20],nf_mA_lU_cE_1),
+  doProcessSimplification(nf_mA_lU_cE_1),
+  cccms_draw(nf_mA_lU_cE_1,'with-nf/2.1.resolveCrisis_MergedOnA1'),
+
+  doClone(authentifyWhenIdle, nf_aWI_6),
+  doInstantiate(lU_cmsEmployee, requestVideo,nf_lU_cE_20,
+                [bind(op,'ui::actListener')]),
+  doMerge([nf_aWI_6, nf_lU_cE_20],nf_aWI_lU_cE_4),
+  doProcessSimplification(nf_aWI_lU_cE_4),
+  cccms_draw(nf_aWI_lU_cE_4,'with-nf/2.1.resolveCrisis_MergedOnA12'),
+
+  doClone(authentifyWhenIdle, nf_aWI_7),
+  doInstantiate(lU_cmsEmployee, requestVideo,nf_lU_cE_21,
+                [bind(op,'ui::stopListener')]),
+  doMerge([nf_aWI_7, nf_lU_cE_21],nf_aWI_lU_cE_5),
+  doProcessSimplification(nf_aWI_lU_cE_5),
+  cccms_draw(nf_aWI_lU_cE_5,'with-nf/2.1.resolveCrisis_MergedOnA12Bis'),
+
+  doClone(authentifyWhenIdle, nf_aWI_8),
+  doInstantiate(lU_cmsEmployee, requestVideo,nf_lU_cE_22,
+                [bind(op,'ui::validateClose')]),
+  doMerge([nf_aWI_8, nf_lU_cE_22],nf_aWI_lU_cE_6),
+  doProcessSimplification(nf_aWI_lU_cE_6),
+  cccms_draw(nf_aWI_lU_cE_6,'with-nf/2.1.resolveCrisis_MergedOnA13'),
+
+  doInstantiate(lU_cmsEmployee, requestVideo,nf_lU_cE_HACKED_21,
+                 [bind(op,'cms::handleACrisis')]),
+  doWeave([ weave(nf_mA_lU_cE_1, [ cms_resolveCrisis_a1 ]),
+            weave(nf_aWI_lU_cE_4, [ cms_resolveCrisis_a12 ]),
+	    weave(nf_aWI_lU_cE_5, [ cms_resolveCrisis_a12bis ]),
+	    weave(nf_aWI_lU_cE_6, [ cms_resolveCrisis_a13 ]),
+	    weave(nf_lU_cE_HACKED_21, [ cms_resolveCrisis_aX ])]),
+  doProcessSimplification(cms_resolveCrisis),
+  cccms_draw(cms_resolveCrisis,'with-nf/2.1.resolveCrisis'),
+%**/
+
+
+// composition cms::handleACrisis { toSet choosen; 
+//   apply reHandleOnChange(cxt: 'id', crisis: 'id') => aX; }
+// weave([logUpdate], [cms_handleACrisis_aX])
+// weave([logUpdate, authentifyWhenIdle], [cms_handleACrisis_a3])
+/**%
+  doInstantiate(reHandleOnChange, cms_handleACrisis, nf_uc21_rHOC_1,
+                [bind(cxt,id), bind(crisis,id)]),
+  doInstantiate(lU_cmsEmployee, cms_handleACrisis, nf_lU_cE_23,
+                [bind(op,'cms::handleAMission')]),
+  doMerge([nf_uc21_rHOC_1, nf_lU_cE_23], nf_rHOC_lU_cE_1),
+  doProcessSimplification(nf_rHOC_lU_cE_1),
+  cccms_draw(nf_rHOC_lU_cE_1,'with-nf/2.1.handleACrisis_MergedOnAX'),
+
+  doClone(authentifyWhenIdle, nf_aWI_9),
+  doInstantiate(lU_cmsEmployee, cms_handleACrisis,nf_lU_cE_23,
+                [bind(op,'ui:selectMission')]),
+  doMerge([nf_aWI_9, nf_lU_cE_23],nf_aWI_lU_cE_7),
+  doProcessSimplification(nf_aWI_lU_cE_7),
+  cccms_draw(nf_aWI_lU_cE_7,'with-nf/2.1.handleACrisis_MergedOnA3'),
+
+  doWeave([ weave(nf_rHOC_lU_cE_1,[cms_handleACrisis_aX]),
+            weave(nf_aWI_lU_cE_7,[cms_handleACrisis_a3])]),
+  doProcessSimplification(cms_handleACrisis),
+  cccms_draw(cms_handleACrisis,'with-nf/2.1_handleACrisis'), 
+%**/
+
+// composition cms::handleAMission {  toSet ir; toSet er;               
+//   apply unavailableIntResource  => a41; 
+//   apply unavailableExtResource  =>  {a51,a5x};
+//   apply reHandleOnChange(cxt: 'm', crisis: 'crisis') 
+//                                => {a40,a41,a42,a4x,a9,a50,a51,a5x};
+// }
+// weave([logCreate], [cms_handleAMission_a41])
+// weave([logTime, logUpdate], [cms_handleAMission_a42])
+// weave([logTime, logCreate], [cms_handleAMission_a51])
+// weave([logUpdate, logUpdate], [cms_handleAMission_a4x])
+// weave([logUpdate, logUpdate], [cms_handleAMission_a5x])
+
+// weave([logUpdate, authentifyWhenIdle], [cms_handleAMission_a9])
+// weave([logUpdate, authentifyWhenIdle], [cms_handleAMission_a9bis])
+
+/**%
+  doInstantiate(unavailableIntResource,cms_handleAMission,uc21_uIR_1,
+                [bind(op,'cms::findRelevantEmployee')]),         
+  doClone(lC_cmsEmployee, nf_lC_cE_5),
+  doMerge([uc21_uIR_1,nf_lC_cE_5], nf_uIR_lC_1),
+  doProcessSimplification(nf_uIR_lC_1),
+  cccms_draw(nf_uIR_lC_1,'with-nf/2.1.handleAMission_MergedOnA41'),
+
+  doInstantiate(unavailableExtResource,cms_handleAMission,uc21_uER_1,
+                [bind(op,'cms::requestExtResource')]),
+  doInstantiate(reHandleOnChange, cms_handleAMission, uc21_rHOC_2,
+                [bind(cxt,m), bind(crisis,crisis)]),		
+
+  doInstantiate(lU_cmsEmployee, cms_handleAMission, nf_lU_cE_24,
+                [bind(op,'cms::assignIntRes')]),
+  doInstantiate(lT_cmsEmployee, cms_handleAMission, nf_lT_cE_1,
+                [bind(op,'cms::assignIntRes')]),
+  doMerge([nf_lU_cE_24,nf_lT_cE_1], nf_lU_cE_lT_cE_1),
+  doProcessSimplification(nf_lU_cE_lT_cE_1),
+  cccms_draw(nf_lU_cE_lT_cE_1,'with-nf/2.1.handleAMission_MergedOnA42'),
+
+  doInstantiate(lT_resource,cms_handleAMission, nf_lT_r_2,
+                [bind(op,'cms::requestExtRes')]),
+  doClone(lC_worker,nf_lC_w_1),
+  doMerge([nf_lT_r_2,nf_lC_w_1], nf_lT_r_lC_w_1),
+  doProcessSimplification(nf_lT_r_lC_w_1),
+  cccms_draw(nf_lT_r_lC_w_1,'with-nf/2.1.handleAMission_MergedOnA51'),
+
+  doInstantiate(lU_cmsEmployee,cms_handleAMission, nf_lU_cE_24,
+                [bind(op,'cms::handleAWorker')]),
+  doInstantiate(lU_cmsEmployee,cms_handleAMission, nf_lU_cE_25,
+                [bind(op,'cms::handleAWorker')]),
+  doMerge([nf_lU_cE_24,nf_lU_cE_25], nf_lU_cE_lU_cE_1),
+  doProcessSimplification(nf_lU_cE_lU_cE_1),
+  cccms_draw(nf_lU_cE_lU_cE_1,'with-nf/2.1.handleAMission_MergedOnA4X'),
+
+  doInstantiate(lU_cmsEmployee,cms_handleAMission, nf_lU_cE_26,
+                [bind(op,'cms::handleAWorker')]),
+  doInstantiate(lU_worker,cms_handleAMission, nf_lU_w_8,
+                [bind(op,'cms::handleAWorker')]),
+  doMerge([nf_lU_cE_26,nf_lU_w_8], nf_lU_cE_lU_w_1),
+  doProcessSimplification(nf_lU_cE_lU_w_1),
+  cccms_draw(nf_lU_cE_lU_w_1,'with-nf/2.1.handleAMission_MergedOnA5X'),
+
+  doClone(authentifyWhenIdle, nf_aWI_10),
+  doInstantiate(lU_cmsEmployee,cms_handleAMission, nf_lU_cE_27,
+                [bind(op,'ui::actListener')]),
+  doMerge([nf_aWI_10, nf_lU_cE_27], nf_aWI_lU_cE_8),
+  doProcessSimplification(nf_aWI_lU_cE_8),
+  cccms_draw(nf_aWI_lU_cE_8,'with-nf/2.1.handleAMission_MergedOnA9'),
+
+  doClone(authentifyWhenIdle, nf_aWI_11),
+  doInstantiate(lU_cmsEmployee,cms_handleAMission, nf_lU_cE_28,
+                [bind(op,'ui::stopListener')]),
+  doMerge([nf_aWI_11, nf_lU_cE_28], nf_aWI_lU_cE_9),
+  doProcessSimplification(nf_aWI_lU_cE_9),
+  cccms_draw(nf_aWI_lU_cE_9,'with-nf/2.1.handleAMission_MergedOnA9Bis'),
+
+  doWeave([ weave(nf_uIR_lC_1, [cms_handleAMission_a41]),
+            weave(uc21_uER_1, [cms_handleAMission_a51,cms_handleAMission_a5x]),
+	    weave(uc21_rHOC_2,[cms_handleAMission_a40,cms_handleAMission_a41,
+	                       cms_handleAMission_a42, cms_handleAMission_a4x,
+			       cms_handleAMission_a9, cms_handleAMission_a50,
+			       cms_handleAMission_a51,cms_handleAMission_a5x]),
+	    weave(nf_lU_cE_lT_cE_1, [cms_handleAMission_a42]),
+	    weave(nf_lT_r_lC_w_1, [cms_handleAMission_a51]),
+	    weave(nf_lU_cE_lU_cE_1, [cms_handleAMission_a4x]),
+	    weave(nf_lU_cE_lU_w_1, [cms_handleAMission_a5x]),
+	    weave(nf_aWI_lU_cE_8, [cms_handleAMission_a9]),
+	    weave(nf_aWI_lU_cE_9, [cms_handleAMission_a9bis])
+	  ]),
+  doProcessSimplification(cms_handleAMission),
+  cccms_draw(cms_handleAMission,'with-nf/2.1__handleAMission'),
+%**/
+   
+
+// composition cms::handleAWorker { 
+//   apply useHelicopter(m: 'm')  => a6; 
+//   apply lostContact(action: 'requestForArrival', c : 'crisis')   
+//                               => a6; 
+//   apply timeout(delay: 'm.delay', action: 'updateLocation')
+//                               => a6; 
+//   apply reHandleOnChange(cxt: 'm', crisis: 'crisis') 
+//                               => a7;
+//   apply missionFailed          => a7;
+//   apply lostContact(action: 'requestForDeparture', c : 'crisis') 
+//                               => a8; 
+//   apply missingReport          => a11;  
+// }
+// weave([logTime, logUpdate], [cms_handleAWorker_a6])
+// weave([logUpdate, logUpdate], [cms_handleAWorker_a7])
+
+// weave([logTime, logUpdate], [cms_handleAWorker_a8])
+// weave([logUpdate], [cms_handleAWorker_a11])
+
+// weave([logUpdate], [cms_handleAWorker_a100])
+// weave([logUpdate], [cms_handleAWorker_a100bis])
+// weave([logUpdate], [cms_handleAWorker_a101])
+// weave([logUpdate], [cms_handleAWorker_a101bis])
+
+
+/**%
+  doInstantiate(useHelicopter, cms_handleAWorker, uc21_uH_1, [bind(m,m)]),
+  doInstantiate(lostContact, cms_handleAWorker, uc21_lC_1, 
+                [bind(c, crisis), bind(action, requestForArrival)]),
+  doInstantiate(timeout, cms_handleAWorker, uc21_t_1, 
+                [bind(delay, m),bind(action, updateLocation)]),
+  doInstantiate(lT_worker, cms_handleAWorker, nf_lT_w_2,
+                [bind(op,'msgBus::wait4msg(info,arrived)')]),
+  doInstantiate(lU_worker, cms_handleAWorker, nf_lU_w_9,
+                [bind(op,'msgBus::wait4msg(info,arrived)')]),
+  doMerge([uc21_uH_1,uc21_lC_1,uc21_t_1, nf_lT_w_2, nf_lU_w_9], 
+          nf_uc21_uH_lC_t_1),
+  doProcessSimplification(nf_uc21_uH_lC_t_1),
+  cccms_draw(nf_uc21_uH_lC_t_1,'with-nf/2.1.handleAWorker_MergedOnA6'),
+
+  doInstantiate(reHandleOnChange, cms_handleAWorker, uc21_rHOC_3,
+                [bind(cxt,m), bind(crisis,crisis)]),
+  doClone(missionFailed,uc21_mF_1),
+  doInstantiate(lU_worker, cms_handleAWorker, nf_lU_w_10,
+                [bind(op,'msgBus::executeMission')]),
+  doInstantiate(lU_cmsEmployee, cms_handleAWorker, nf_lU_cE_29,
+                [bind(op,'msgBus::executeMission')]),
+  doMerge([uc21_rHOC_3,uc21_mF_1,nf_lU_w_10,nf_lU_cE_29], nf_uc21_rHOC_mF_1),
+  doProcessSimplification(nf_uc21_rHOC_mF_1),
+  cccms_draw(nf_uc21_rHOC_mF_1,'with-nf/2.1.handleAWorker_MergedOnA7'),
+
+  doInstantiate(lostContact, cms_handleAWorker, uc21_lC_2, 
+                [bind(c,crisis), bind(action,requestForDeparture)]),
+
+  doInstantiate(lU_worker, cms_handleAWorker, nf_lU_w_10,
+                [bind(op,'ui::actListener')]),
+  doInstantiate(lU_worker, cms_handleAWorker, nf_lU_w_11,
+                [bind(op,'ui::actListener')]),
+  doInstantiate(lU_worker, cms_handleAWorker, nf_lU_w_12,
+                [bind(op,'ui::actListener')]),
+  doInstantiate(lU_worker, cms_handleAWorker, nf_lU_w_13,
+                [bind(op,'ui::actListener')]),
+
+  doClone(missingReport,uc21_mR_1),
+
+  doWeave([ weave(nf_uc21_uH_lC_t_1, [cms_handleAWorker_a6]),
+             weave(nf_uc21_rHOC_mF_1, [cms_handleAWorker_a7]),
+	     weave(uc21_lC_2, [cms_handleAWorker_a8]),
+	     weave(uc21_mR_1, [cms_handleAWorker_a11]),
+	     weave(nf_lU_w_10,[cms_handleAWorker_a100]),
+	     weave(nf_lU_w_11,[cms_handleAWorker_a101]),
+	     weave(nf_lU_w_12,[cms_handleAWorker_a100bis]),
+	     weave(nf_lU_w_13,[cms_handleAWorker_a101bis])
+          ]),
+  cccms_draw(cms_handleAWorker,'with-nf/2.1_handleAWorker'), 
+%**/   
+// doProcessSimplification(cms_handleAWorker), // IMPOSSIBLE, TOO LONG!!! :'(
+/*********************
+ *** Use Case #2.2 ***
+ *********************/ 
+
+// composition cms::captureWitnessReport{
+//   apply requestVideo(user: 'coord') => {a3,a4}; 
+//   apply fakeCrisisDetected          => requestVideo::a3; 
+//   apply callDisconnected            => a10;     
+//   apply callDisconnected            => a2;        
+//   apply ignoreDisconnection         => a4;      
+//   apply fakeCrisisDetected          => a4;      
+//   apply fakeWitnessInfo             => a2a3;  
+
+// }
+// weave([logUpdate, authentifyWhenIdle], [cms_captureWitnessReport_a10])
+// weave([logUpdate, authentifyWhenIdle], [cms_captureWitnessReport_a2])
+// weave([logUpdate, authentifyWhenIdle], [cms_captureWitnessReport_a4])
+
+/**%
+  doInstantiate(requestVideo, cms_captureWitnessReport, uc22_rV_1,
+                [bind(user,coord)]),
+  doClone(fakeCrisisDetected,uc22_fCD_1),
+  identifyClone(requestVideo_a3,uc22_rV_1,UC22_rva3), 
+  doWeave([weave(uc22_fCD_1,[UC22_rva3])]),
+  doProcessSimplification(uc22_rV_1),
+  cccms_draw(uc22_rV_1,'with-nf/2.2_requestVideoEnhanced'),  
+
+  doInstantiate(callDisconnected, cms_captureWitnessReport, uc22_cD_1,
+                [bind(op,'ui::promptWitnessInfo')]), 
+  doInstantiate(lU_cmsEmployee,  cms_captureWitnessReport, lU_cE_30,
+                [bind(op,'ui::promptWitnessInfo')]), 
+  doClone(authentifyWhenIdle,aWI_12),
+  doMerge([uc22_cD_1,lU_cE_30, aWI_12], uc22_cD_lU_aWI),
+  doProcessSimplification(uc22_cD_lU_aWI),
+  cccms_draw(uc22_cD_lU_aWI,'with-nf/2.2_MergedOnA10'),
+
+  doInstantiate(callDisconnected, cms_captureWitnessReport, uc22_cD_2,
+                [bind(op,'ui::promptPrelimInfo')]),
+  doInstantiate(lU_cmsEmployee,  cms_captureWitnessReport, lU_cE_31,
+                [bind(op,'ui::promptPrelimInfo')]), 
+  doClone(authentifyWhenIdle,aWI_13),
+  doMerge([uc22_cD_2, lU_cE_31,aWI_13], nf_uc22_cD_cE_aWI_1),
+  doProcessSimplification(nf_uc22_cD_cE_aWI_1),
+  cccms_draw(nf_uc22_cD_cE_aWI_1,'with-nf/2.2_MergedOnA2'),
+
+  doClone(fakeWitnessInfo,uc22_fWI_1),
+  doInstantiate(ignoreDisconnection,cms_captureWitnessReport,uc22_iD_1,
+                [bind(op,'ui::promptCheckList')]), 
+  doClone(fakeCrisisDetected, uc22_fCD_2),
+  doInstantiate(lU_cmsEmployee,  cms_captureWitnessReport, lU_cE_32,
+                [bind(op,'ui::promptCheckList')]), 
+  doClone(authentifyWhenIdle,aWI_14),
+  doMerge([uc22_iD_1,uc22_fCD_2,lU_cE_32,aWI_14], uc22_iD_fCD_1),
+  doProcessSimplification(uc22_iD_fCD_1),
+  cccms_draw(uc22_iD_fCD_1,'with-nf/2.2_MergedOnA4'),
+
+  doWeave([ weave(uc22_cD_lU_aWI,      [ cms_captureWitnessReport_a10  ]),
+            weave(nf_uc22_cD_cE_aWI_1, [ cms_captureWitnessReport_a2   ]),
+            weave(uc22_iD_fCD_1, [ cms_captureWitnessReport_a4   ]),
+	    weave(uc22_rV_1,     [ cms_captureWitnessReport_a3,
+	                           cms_captureWitnessReport_a4   ]),
+	    weave(uc22_fWI_1,    [ cms_captureWitnessReport_a2a3 ])]),
+  cccms_draw(cms_captureWitnessReport,'with-nf/2.2.captureWitnessReport'),
+%**/
+//   doProcessSimplification(cms_captureWitnessReport),
+
+/*********************
+ *** Use Case #2.3 ***
+ *********************/ 
+
+// composition cms::assignIntRes {
+//   apply mustAuthenticate      => a1;      
+//   apply unavailableEmployee(delta : '10') => {a1,a2}; 
+//   apply employeeRefusal       => a2;
+// }
+// weave([logUpdate, authentifyWhenIdle], [cms_assignIntRes_a1])
+// weave([logUpdate, authentifyWhenIdle], [cms_assignIntRes_a2])
+
+
+/**%
+  doClone(mustAuthenticate,uc23_mA_1),
+  doInstantiate(lU_cmsEmployee,  cms_captureWitnessReport, lU_cE_33,
+                [bind(op,'ui::promptCheckList')]), 
+  doClone(authentifyWhenIdle,aWI_15),
+  doMerge([uc23_mA_1, lU_cE_33,aWI_15], nf_lU_cE_aWI_1),
+  doProcessSimplification(nf_lU_cE_aWI_1),
+  cccms_draw(nf_lU_cE_aWI_1,'with-nf/2.3_MergedOnA1'),
+
+  doInstantiate(unavailableEmployee,cms_assignIntRes, uc23_uE_1,
+                [bind(delta,10), bind(op,'cms::assignIntRes')]),
+   
+  doInstantiate(employeeRefusal,cms_assignIntRes, uc23_uR_1,
+                [bind(op,'ui::wait4acceptance')]),
+  doInstantiate(lU_cmsEmployee,  cms_captureWitnessReport, lU_cE_34,
+                [bind(op,'ui::promptCheckList')]), 
+  doClone(authentifyWhenIdle,aWI_16),
+  doMerge([uc23_uR_1, lU_cE_34, aWI_16], nf_eR_lU_cE_aWI_1),
+  doProcessSimplification(nf_eR_lU_cE_aWI_1),
+  cccms_draw(nf_eR_lU_cE_aWI_1,'with-nf/2.3_MergedOnA2'),
+
+  doWeave([ weave(nf_lU_cE_aWI_1,     [ cms_assignIntRes_a1  ]),
+            weave(uc23_uE_1,     [ cms_assignIntRes_a1, cms_assignIntRes_a2 ]),
+	    weave(nf_eR_lU_cE_aWI_1,     [ cms_assignIntRes_a2  ])]),
+  doProcessSimplification(cms_assignIntRes),
+  cccms_draw(cms_assignIntRes,'with-nf/2.3.assignIntRes'), 
+%**/
+
+
+/*********************
+ *** Use Case #2.4 ***
+ *********************/ 
+
+// composition cms::requestExtRes {
+//  apply degradedRes(treshold: '80') => a2; 
+//  apply noExtRes                    => a2; 
+// }
+// weave([logCreate], [cms_requestExtRes_a2])
+
+/**%
+   doInstantiate(degradedRes,cms_requestExtRes,uc24_dR_1,[bind(threshold,80)]),
+   doInstantiate(noExtRes,cms_requestExtRes,uc24_nER_1,
+                 [bind(op,'ers::providesWorker')]),
+   doClone(lC_worker,lC_w_2),
+   doMerge([uc24_dR_1,uc24_nER_1,lC_w_2],uc24_dR_nER),
+   doProcessSimplification(uc24_dR_nER),
+   cccms_draw(uc24_dR_nER,'with-nf/2.4_MergedOnA2'),
+
+   doWeave([weave(uc24_dR_nER,[cms_requestExtRes_a2])]),
+   doProcessSimplification(cms_requestExtRes),
+   cccms_draw(cms_requestExtRes,'with-nf/2.4.requestExtRes'),
+%**/
+
+
+/*********************
+ *** Use Case #2.5 ***
+ *********************/ 
+
+// weave([logUpdate], [cms_executeMission_a1])
+// weave([logUpdate], [cms_executeMission_a2])
+// weave([logUpdate], [cms_executeMission_a3])
+// weave([logUpdate], [cms_executeMission_a4])
+/**%
+  doInstantiate(lU_worker,cms_executeMission, lU_w_14,
+                [bind(op,'cms::execSupObsMission')]),
+  doInstantiate(lU_worker,cms_executeMission, lU_w_15,
+                [bind(op,'cms::execSupObsMission')]),
+  doInstantiate(lU_worker,cms_executeMission, lU_w_16,
+                [bind(op,'cms::transportByHelicopter')]),
+  doInstantiate(lU_worker,cms_executeMission, lU_w_17,
+                [bind(op,'cms::performTow')]),
+  doWeave([weave(lU_w_14,[cms_executeMission_a1]), 
+           weave(lU_w_15,[cms_executeMission_a2]), 
+	   weave(lU_w_16,[cms_executeMission_a3]), 
+	   weave(lU_w_17,[cms_executeMission_a4])]),
+  doProcessSimplification(cms_executeMission),
+  cccms_draw(cms_executeMission,'with-nf/2.5.cms_executeMission'), 
+%**/
+
+/*********************
+ *** Use Case #2.6 ***
+ *********************/ 
+
+// weave([logUpdate, authentifyWhenIdle], [cms_execSupObsMission_a2])
+// weave([logUpdate], [cms_execSupObsMission_aX])
+/**%
+  doInstantiate(lU_cmsEmployee, cms_execSupObsMission, lU_cE_35,
+                [bind(op,'ui::promptCheckList')]),
+  doClone(authentifyWhenIdle,aWI_17),
+  doMerge([lU_cE_35,aWI_17], lU_cE_aWI_2),
+  doProcessSimplification(lU_cE_aWI_2),
+  cccms_draw(lU_cE_aWI_2, 'with-nf/2.6_execSupObsMission_MergedOnA2'),
+  doInstantiate(lU_cmsEmployee, cms_execSupObsMission, lU_cE_36,
+                [bind(op,'cms::handleSupObsMission')]),
+  doWeave([weave(lU_cE_aWI_2,[cms_execSupObsMission_a2]),
+           weave(lU_cE_36,[cms_execSupObsMission_a4x])]),
+  doProcessSimplification(cms_execSupObsMission),
+  cccms_draw(cms_execSupObsMission,'with-nf/2.6.execSupObsMissions'), 
+%**/
+
+// composition cms::handleSupObsMissions {
+//   apply replaceMission         => a7;
+//   apply noAvailableReplacement(user : 'so') => replaceMission::a1;
+//   apply askedMissionFailure (crisis : 'crisis')  => a7;
+// }
+// weave([logUpdate, authentifyWhenIdle], [cms_handleSupObsMissions_a4])
+// weave([logUpdate, authentifyWhenIdle], [cms_handleSupObsMissions_t])
+// weave([logUpdate], [cms_handleSupObsMissions_a92])
+// weave([logUpdate], [cms_handleSupObsMissions_a93])
+
+/**%
+  doInstantiate(noAvailableReplacement, cms_handleSupObsMissions,
+                uc26_nAR_1,[bind(user,so)]),
+  doClone(replaceMission,uc26_rM_1),
+  identifyClone(replaceMission_a1,uc26_rM_1,UC26_rm_a1), 
+  doWeave([weave(uc26_nAR_1,[UC26_rm_a1])]),
+  doProcessSimplification(uc26_rM_1),
+  cccms_draw(uc26_rM_1,
+             'with-nf/2.6_handleSupObsMissions_replaceMissionEnhanced'),
+
+  doInstantiate(askedMissionFailure, cms_handleSupObsMissions,
+                uc26_aMF_1,[bind(crisis,crisis)]),
+  doMerge([uc26_rM_1,uc26_aMF_1],uc26_rM_aMF),
+  doProcessSimplification(uc26_rM_aMF),
+  cccms_draw(uc26_rM_aMF,'with-nf/2.6_handleSupObsMissions_MergedOnA7'),
+
+  doInstantiate(lU_cmsEmployee, cms_handleSupObsMissions, lU_cE_37,
+                [bind(op,'ui::selectMission')]),
+  doClone(authentifyWhenIdle,aWI_18),
+  doMerge([lU_cE_37,aWI_18], lU_cE_aWI_3),
+  doProcessSimplification(lU_cE_aWI_3),
+  cccms_draw(lU_cE_aWI_3,'with-nf/2.6_handleSupObsMissions_MergedOnAA'),
+
+  doInstantiate(lU_cmsEmployee, cms_handleSupObsMissions, lU_cE_38,
+                [bind(op,'ui::prompt4departure')]),
+  doClone(authentifyWhenIdle,aWI_19),
+  doMerge([lU_cE_38,aWI_19], lU_cE_aWI_4),
+  doProcessSimplification(lU_cE_aWI_4),
+  cccms_draw(lU_cE_aWI_4,'with-nf/2.6_handleSupObsMissions_MergedOnT'),
+
+  doInstantiate(lU_cmsEmployee, cms_handleSupObsMissions, lU_cE_39,
+                [bind(op,'cms::handleSupObsMission')]),
+
+  doInstantiate(lU_cmsEmployee, cms_handleSupObsMissions, lU_cE_40,
+                [bind(op,'msgBus::send(info,leaving)')]),
+
+  doWeave([weave(uc26_rM_aMF,[cms_handleSupObsMissions_a7]),
+           weave(lU_cE_aWI_3,[cms_handleSupObsMissions_a4]),
+           weave(lU_cE_aWI_4,[cms_handleSupObsMissions_t]),
+	   weave(lU_cE_39,[cms_handleSupObsMissions_a92]),
+	   weave(lU_cE_40,[cms_handleSupObsMissions_a93])
+          ]),
+  doProcessSimplification(cms_handleSupObsMissions),
+  cccms_draw(cms_handleSupObsMissions,'with-nf/2.6.handleSupObsMissions'), halt,
+%**/
+
+/*********************
+ *** Use Case #2.7 ***
+ *********************/ 
+
+// composition cms::execRescMission {
+//   apply retrieveVictimHistory(wrk: 'wrk') => a3; 
+// }
+// weave([logError], [cms_execRescMission_a3])
+
+// weave([logUpdate], [cms_execRescMission_a1])
+// weave([logUpdate], [cms_execRescMission_a41])
+
+// weave([logError, logUpdate], [cms_execRescMission_a2])
+
+// weave([logTime, logUpdate], [cms_execRescMission_a5])
+// weave([logTime, logUpdate], [cms_execRescMission_a6])
+
+/**%
+  doInstantiate(retrieveVictimHistory, cms_execRescMission, 
+                uc27_rVH_1, [bind(wrk,wrk), bind(op,'guessHistory')]),
+  doInstantiate(logError, cms_execRescMission, lE_1,
+                [bind(op,'hospital::requestHistory'), bind(msg,'fail'), 
+		 bind(exc,'fail')]),
+  doMerge([uc27_rVH_1,lE_1 ],nf_rVH_lE_1),
+  doProcessSimplification(nf_rVH_lE_1),
+  cccms_draw(nf_rVH_lE_1,'with-nf/2.7_MergedOnA3'),
+
+  doInstantiate(lU_worker, cms_execRescMission, lU_w_18,
+                [bind(op,'ui::promptVictimDescription')]),
+
+  doInstantiate(lU_worker, cms_execRescMission, lU_w_19,
+                [bind(op,'ui::displayDestination')]),
+
+  doInstantiate(logError,  cms_execRescMission, lE_2,
+                [bind(op,'ui::promptVictimIdentity'), bind(exc,'cancel'), 
+		 bind(msg,'cancel')]),
+  doInstantiate(lU_worker, cms_execRescMission, lU_w_20,
+                [bind(op,'ui::promptVictimIdentity')]),
+  doMerge([lE_2, lU_w_20], lE_lU_w_1),
+  doProcessSimplification(lE_lU_w_1),
+  cccms_draw(lE_lU_w_1,'with-nf/2.7_MergedOnA2'),
+
+  doInstantiate(lU_worker, cms_execRescMission, lU_w_21,
+                [bind(op,'msgBus::wait4msg(info,leaving)')]),
+  doInstantiate(lT_worker, cms_execRescMission, lT_w_3,
+                [bind(op,'msgBus::wait4msg(info,leaving)')]),
+  doMerge([lU_w_21, lT_w_3],lU_w_lT_w_1),
+  doProcessSimplification(lU_w_lT_w_1),
+  cccms_draw(lU_w_lT_w_1,'with-nf/2.7_MergedOnA5'),
+
+  doInstantiate(lU_worker, cms_execRescMission, lU_w_22,
+                [bind(op,'msgBus::wait4msg(info,dropped)')]),
+  doInstantiate(lT_worker, cms_execRescMission, lT_w_4,
+                [bind(op,'msgBus::wait4msg(info,dropped)')]),
+  doMerge([lU_w_22, lT_w_4],lU_w_lT_w_2),
+  doProcessSimplification(lU_w_lT_w_2),
+  cccms_draw(lU_w_lT_w_2,'with-nf/2.7_MergedOnA6'),
+
+  doWeave([weave(nf_rVH_lE_1,[cms_execRescMission_a3]),
+           weave(lU_w_18,[cms_execRescMission_a1]),
+	   weave(lU_w_19,[cms_execRescMission_a41]),
+	   weave(lE_lU_w_1,[cms_execRescMission_a2]),
+	   weave(lU_w_lT_w_1,[cms_execRescMission_a5]),
+	   weave(lU_w_lT_w_2,[cms_execRescMission_a6])]),
+  doProcessSimplification(cms_execRescMission),
+  cccms_draw(cms_execRescMission,'with-nf/2.7.execRescMission'), 
+%**/
+
+/*********************
+ *** Use Case #2.8 ***
+ *********************/ 
+// nothing to do!
+
+/*********************
+ *** Use Case #2.9 ***
+ *********************/ 
+// nothing to do!
+
+/**********************
+ *** Use Case #2.10 ***
+ **********************/ 
+// composition cms::authUser {
+//  apply cancelAuth => a1a2 ;
+//  apply only3times => {a1a2,a3} ;
+// }
+// weave([logUpdate], [cms_authUser_a1a2])
+// weave([logUpdate], [cms_authUser_a3])
+
+/*%
+  doInstantiate(cancelAuth, cms_authUser, uc210_cA_1, 
+                [bind(op,'ui::promptPass')]), 
+  doInstantiate(lU_cmsEmployee, cms_authUser, lU_cE_41,
+                [bind(op,'ui::promptPass')]),
+  doMerge([ uc210_cA_1,lU_cE_41], nf_cA_lU_cE_1),
+  doProcessSimplification(nf_cA_lU_cE_1),
+  cccms_draw(nf_cA_lU_cE_1, 'with-nf/2.10_MergedOnA1A2'),
+
+  doClone(only3times, uc210_o3t_1),
+
+  doInstantiate(lU_cmsEmployee, cms_authUser, lU_cE_42,
+                [bind(op,'cms::checkPass')]),
+
+  doWeave([ weave(nf_cA_lU_cE_1,[cms_authUser_a1a2]),
+            weave(uc210_o3t_1,[cms_authUser_a1a2,cms_authUser_a3]),
+	    weave(lU_cE_42,[cms_authUser_a3])]),
+  doProcessSimplification(cms_authUser),
+  cccms_draw(cms_authUser,'with-nf/2.10.authUser'),
+%*/

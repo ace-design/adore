@@ -4,7 +4,7 @@ fragment lostContact<action,c> {
     super as cmsEmployee;
   }
   activities {
-    a1. msg::wait4Msg('info' as string, 'lost' as string, w);
+    a1. msgBus::wait4msg('info' as string, 'lost' as string, w);
     a2. super := cms::getSuperObserver(c);
     a3. ui::action(super,w);
     h. hook(w,c);

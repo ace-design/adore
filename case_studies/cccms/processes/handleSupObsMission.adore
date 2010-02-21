@@ -1,7 +1,7 @@
 orchestration cms::handleSupObsMissions {
   variables {
     so as cmsEmployee; crisis as crisisIdentifier; m* as mission; 
-    choosen as mission; mr as misisonRequest; mi as missionInformation;
+    choosen as mission; mr as misisonRequest; mi as mission;
     ack as boolean; quit as boolean;
   }
   activities {
@@ -10,7 +10,7 @@ orchestration cms::handleSupObsMissions {
     a5. mr := cms::buildMissionRequest(choosen);
     a6. mi := ui::promptMissionRequest(mr);
     a7. ack := cms::submitMission(mi);
-    a8. msgBus::wait4Msg('status' as string, 'success' as string, mi);
+    a8. msgBus::wait4msg('status' as string, 'success' as string, mi);
     t. quit := ui::prompt4departure(so);
     a91. m* := cms::recommendSupObsMission(crisis);
     a92. cms::handleSupObsMissions(m*, so, crisis);

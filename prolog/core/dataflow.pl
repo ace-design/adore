@@ -50,13 +50,32 @@ variableUsageClosure(V,A) :-
 	existsPath(APrime,A), 
 	variableUsageClosure(V,APrime).
 variableUsageClosure(V,A) :- %% to take care of user's datalink
-	variable:belongsTo(V,P),! , activity:belongsTo(A,P), 
-	findRoot(A,RootA), activity:belongsTo(RootA,RootProcess), 
-	getPreviousName(RootA,NameA), dataLink(RootProcess,NameVar,NameA), 
-	pebble(substitution,LambdaVar,V,_), 
-	pebble(derivation,LambdaAncestor,LambdaVar,_), %% TODO: fixe implem!
-	variable:belongsTo(LambdaAncestor,RootProcess),
-	getPreviousName(LambdaAncestor,NameVar).
+	dataLink(DLProcess,DLVar,DLAct),
+	variable:belongsTo(V,RealProcess), 
+	findRoot(V,VarRoot),
+	variable:belongsTo(VarRoot,DLProcess),
+	getPreviousName(VarRoot,DLVar), activity:belongsTo(ActRoot,DLProcess),
+	process:getActivities(RealProcess,Activities), member(A,Activities),
+	findRoot(A,ActRoot), getPreviousName(ActRoot,DLAct).
+
+variableUsageClosure(V,A) :- %% to take care of user's datalink
+	dataLink(DLProcess,DLVar,DLAct),
+	variable:belongsTo(V,RealProcess), 
+	findUserRoot(V,Tmp),getPreviousName(VarRoot,Tmp),
+	variable:belongsTo(VarRoot,DLProcess),
+	getPreviousName(VarRoot,DLVar), activity:belongsTo(ActRoot,DLProcess),
+	process:getActivities(RealProcess,Activities), member(A,Activities),
+	findRoot(A,ActRoot), getPreviousName(ActRoot,DLAct).
+
+%% variableUsageClosure(V,A) :- %% to take care of user's datalink
+%% 	variable:belongsTo(V,P),! , activity:belongsTo(A,P), 
+%% 	findRoot(A,RootA), activity:belongsTo(RootA,RootProcess), 
+%% 	writef('%w --> %w\n',[A,RootA]),nl,
+%% 	getPreviousName(RootA,NameA), dataLink(RootProcess,NameVar,NameA), 
+%% 	pebble(substitution,LambdaVar,V,_), 
+%% 	pebble(derivation,LambdaAncestor,LambdaVar,_), %% TODO: fixe implem!
+%% 	variable:belongsTo(LambdaAncestor,RootProcess),
+%% 	getPreviousName(LambdaAncestor,NameVar).
 
 
 %% isDfActivity(+A): an activity inside a dataflow can't be of any kind.

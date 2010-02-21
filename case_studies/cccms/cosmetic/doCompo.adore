@@ -7,7 +7,7 @@
   doClone(mustAuthenticate,uc21_mA_1),
   doWeave([ weave(uc21_mA_1, [ cms_resolveCrisis_a1 ]) ]),
   doProcessSimplification(cms_resolveCrisis),
-  cccms_draw(cms_resolveCrisis,'2.1.resolveCrisis'),
+  cccms_draw(cms_resolveCrisis,'business-only/2.1.resolveCrisis'),
 %*/
 
 /*%
@@ -15,8 +15,7 @@
                 [bind(cxt,id), bind(crisis,id)]),
   doWeave([weave(uc21_rHOC_1,[cms_handleACrisis_aX])]),
   doProcessSimplification(cms_handleACrisis),
-  doSetify(cms_handleACrisis,cms_handleACrisis_choosen),
-  cccms_draw(cms_handleACrisis,'2.1_handleACrisis'), 
+  cccms_draw(cms_handleACrisis,'business-only/2.1.handleACrisis'), 
 %*/
 
 /*%
@@ -31,15 +30,11 @@
 			       cms_handleAMission_a9, cms_handleAMission_a50,
 			       cms_handleAMission_a51,cms_handleAMission_a5x])
 	  ]),
-
   doProcessSimplification(cms_handleAMission),
-  doSetify(cms_handleAMission,cms_handleAMission_er), 
-  doSetify(cms_handleAMission,cms_handleAMission_ir),
-  doProcessSimplification(cms_handleAMission),
-  cccms_draw(cms_handleAMission,'2.1__handleAMission'),
+  cccms_draw(cms_handleAMission,'business-only/2.1.handleAMission'),
 %*/
 
-// Generic Fragment instantiation is not complete 4 now (action)
+
 /*%
   doInstantiate(useHelicopter, cms_handleAWorker, uc21_uH_1, [bind(m,m)]),
   doInstantiate(lostContact, cms_handleAWorker, uc21_lC_1, 
@@ -48,25 +43,24 @@
                 [bind(delay, m),bind(action, updateLocation)]),
   doMerge([uc21_uH_1,uc21_lC_1,uc21_t_1], uc21_uH_lC_t_1),
   doProcessSimplification(uc21_uH_lC_t_1),
-  cccms_draw(uc21_uH_lC_t_1,'2.1____handleAWorker_mergedOnA6'),
+  cccms_draw(uc21_uH_lC_t_1,'business-only/2.1__handleAWorker_mergedOnA6'),
   doInstantiate(reHandleOnChange, cms_handleAWorker, uc21_rHOC_3,
                 [bind(cxt,m), bind(crisis,crisis)]),
   doClone(missionFailed,uc21_mF_1),
   doMerge([uc21_rHOC_3,uc21_mF_1], uc21_rHOC_mF_1),
   doProcessSimplification(uc21_rHOC_mF_1),
-  cccms_draw(uc21_rHOC_mF_1,'2.1____handleAWorker_mergedOnA7'),
+  cccms_draw(uc21_rHOC_mF_1,'business-only/2.1__handleAWorker_mergedOnA7'),
   doInstantiate(lostContact, cms_handleAWorker, uc21_lC_2, 
                 [bind(c,crisis), bind(action,requestForDeparture)]),
   doClone(missingReport,uc21_mR_1),
-  doWeave([ weave(uc21_uH_lC_t_1, [cms_handleAWorker_a7]),
-             weave(uc21_rHOC_mF_1, [cms_handleAWorker_a7]),
-	     weave(uc21_lC_2, [cms_handleAWorker_a8]),
-	     weave(uc21_mR_1, [cms_handleAWorker_a11])
+  doWeave([ weave(uc21_uH_lC_t_1, [cms_handleAWorker_a6]),
+            weave(uc21_rHOC_mF_1, [cms_handleAWorker_a7]),	     
+            weave(uc21_lC_2, [cms_handleAWorker_a8]),
+	    weave(uc21_mR_1, [cms_handleAWorker_a11])
           ]),
   doProcessSimplification(cms_handleAWorker),
-  cccms_draw(cms_handleAWorker,'2.1___handleAWorker'),
+  cccms_draw(cms_handleAWorker,'business-only/2.1.handleAWorker'),
 %*/
-
 
 /*********************
  *** Use Case #2.2 ***
@@ -79,14 +73,16 @@
   identifyClone(requestVideo_a3,uc22_rV_1,UC22_rva3), 
   doWeave([weave(uc22_fCD_1,[UC22_rva3])]),
   doProcessSimplification(uc22_rV_1),
-  cccms_draw(uc22_rV_1,'2.2_requestVideoEnhanced'),  
+  cccms_draw(uc22_rV_1,'business-only/2.2_requestVideoEnhanced'),  
+
   doClone(callDisconnected, uc22_cD_1), 
   doClone(callDisconnected, uc22_cD_2),
   doClone(fakeWitnessInfo,uc22_fWI_1),
   doClone(ignoreDisconnection,uc22_iD_1), 
   doClone(fakeCrisisDetected, uc22_fCD_2),
   doMerge([uc22_iD_1,uc22_fCD_2], uc22_iD_fCD_1),
-  cccms_draw(uc22_iD_fCD_1,'2.2_mergedOnA4'),
+  cccms_draw(uc22_iD_fCD_1,'business-only/2.2_mergedOnA4'),
+
   doWeave([ weave(uc22_cD_1,     [ cms_captureWitnessReport_a10  ]),
             weave(uc22_cD_2,     [ cms_captureWitnessReport_a2   ]),
 	    weave(uc22_rV_1,     [ cms_captureWitnessReport_a3,
@@ -94,7 +90,7 @@
             weave(uc22_iD_fCD_1, [ cms_captureWitnessReport_a4   ]),
 	    weave(uc22_fWI_1,    [ cms_captureWitnessReport_a2a3 ])]),
   doProcessSimplification(cms_captureWitnessReport),
-  cccms_draw(cms_captureWitnessReport,'2.2.captureWitnessReport'),
+  cccms_draw(cms_captureWitnessReport,'business-only/2.2.captureWitnessReport'),
 %*/
 
 /*********************
@@ -110,7 +106,7 @@
             weave(uc23_uE_1,     [ cms_assignIntRes_a1, cms_assignIntRes_a2 ]),
 	    weave(uc23_uR_1,     [ cms_assignIntRes_a2  ])]),
   doProcessSimplification(cms_assignIntRes),
-  cccms_draw(cms_assignIntRes,'2.3.assignIntRes'),
+  cccms_draw(cms_assignIntRes,'business-only/2.3.assignIntRes'),
 %*/
 
 /*********************
@@ -122,10 +118,10 @@
    doClone(noExtRes,uc24_nER_1),
    doMerge([uc24_dR_1,uc24_nER_1],uc24_dR_nER),
    doProcessSimplification(uc24_dR_nER),
-   cccms_draw(uc24_dR_nER,'2.4_mergedOnA2'),
+   cccms_draw(uc24_dR_nER,'business-only/2.4_mergedOnA2'),
    doWeave([weave(uc24_dR_nER,[cms_requestExtRes_a2])]),
    doProcessSimplification(cms_requestExtRes),
-   cccms_draw(cms_requestExtRes,'2.4.requestExtRes'),
+   cccms_draw(cms_requestExtRes,'business-only/2.4.requestExtRes'),
 %*/
 
 /*********************
@@ -145,15 +141,15 @@
   identifyClone(replaceMission_a1,uc26_rM_1,UC26_rm_a1), 
   doWeave([weave(uc26_nAR_1,[UC26_rm_a1])]),
   doProcessSimplification(uc26_rM_1),
-  cccms_draw(uc26_rM_1,'2.6_replaceMissionEnhanced'),
+  cccms_draw(uc26_rM_1,'business-only/2.6_replaceMissionEnhanced'),
   doInstantiate(askedMissionFailure, cms_handleSupObsMissions,
                 uc26_aMF_1,[bind(crisis,crisis)]),
   doMerge([uc26_rM_1,uc26_aMF_1],uc26_rM_aMF),
   doProcessSimplification(uc26_rM_aMF),
-  cccms_draw(uc26_rM_aMF,'2.6_mergedOnA7'),
+  cccms_draw(uc26_rM_aMF,'business-only/2.6_mergedOnA7'),
   doWeave([weave(uc26_rM_aMF,[cms_handleSupObsMissions_a7])]),
   doProcessSimplification(cms_handleSupObsMissions),
-  cccms_draw(cms_handleSupObsMissions,'2.6.handleSupObsMissions'),
+  cccms_draw(cms_handleSupObsMissions,'business-only/2.6.handleSupObsMissions'),
 %*/
 
 /*********************
@@ -165,7 +161,7 @@
                 uc27_rVH_1, [bind(wrk,wrk)]),
   doWeave([weave(uc27_rVH_1,[cms_execRescMission_a3])]),
   doProcessSimplification(cms_execRescMission),
-  cccms_draw(cms_execRescMission,'2.7.execRescMission'),
+  cccms_draw(cms_execRescMission,'business-only/2.7.execRescMission'),
 %*/
 
 /*********************
@@ -185,11 +181,12 @@
  **********************/ 
 
 /*%
-  doClone(cancelAuth, uc210_cA_1), doClone(only3times, uc210_o3t_1),
+  doClone(cancelAuth, uc210_cA_1), 
+  doClone(only3times, uc210_o3t_1),
   doWeave([ weave(uc210_cA_1,[cms_authUser_a1a2]),
             weave(uc210_o3t_1,[cms_authUser_a1a2,cms_authUser_a3]) ]),
   doProcessSimplification(cms_authUser),
-  cccms_draw(cms_authUser,'2.10.authUser'),
+  cccms_draw(cms_authUser,'business-only/2.10.authUser'),
 %*/
 
 

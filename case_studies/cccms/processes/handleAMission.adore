@@ -3,7 +3,7 @@ orchestration cms::handleAMission {
     crisis as crisisIdentifier;
     m as mission;      coord as cmsEmployee;
     ir as resource; er as resource;
-    iw as cmsEmployee; ew as externalWorker;
+    iw as cmsEmployee; ew as worker;
     irep as report; erep as report;
   }
   activities {

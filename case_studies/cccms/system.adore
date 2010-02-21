@@ -3,177 +3,30 @@
  * submitted to the TAOSD special issue dedicated to AOM
  **/
 
-/***********************
- *** Shared Entities ***
- ***********************/ 
+/********************************************************
+ ** Initial System: Orchestration & Business Fragments **
+ ********************************************************/
 
-// Business Knowledge
-knowledge 'cccms_knowledge.pl' ; 
+require 'user_given.adore'; // Processes and Extensions definitions
 
-// Business-driven shared fragments
-require 'fragments/mustAuthenticate.adore';
-require 'fragments/reHandleOnChange.adore';
+/******************
+ ** Compositions **
+ ******************/
 
-/*********************
- *** Use Case #2.1 ***
- *********************/ 
-
-require 'processes/resolveCrisis.adore';
-composition cms::resolveCrisis {
-  apply mustAuthenticate => a1 ; 
-}
-
-require 'processes/handleACrisis.adore';
-composition cms::handleACrisis {
-  toSet choosen; 
-  apply reHandleOnChange(cxt: 'id', crisis: 'id') => aX;
-}
-
-require 'processes/handleAMission.adore';
-require 'fragments/unavailableIntResource.adore';
-require 'fragments/unavailableExtResource.adore';
-composition cms::handleAMission {
-  toSet ir; toSet er;               
-  apply unavailableIntResource  => a41; 
-  apply unavailableExtResource  =>  {a51,a5x};
-  apply reHandleOnChange(cxt: 'm', crisis: 'crisis') 
-                                => {a40,a41,a42,a4x,a9,a50,a51,a5x};
-}
-
-require 'processes/handleAWorker.adore';
-require 'fragments/useHelicopter.adore';
-require 'fragments/lostContact.adore';
-require 'fragments/timeout.adore';
-require 'fragments/missionFailed.adore';
-require 'fragments/missingReport.adore';
-composition cms::handleAWorker {
-  apply useHelicopter(m: 'm')  => a6; 
-  apply lostContact(action: 'requestForArrival', c : 'crisis')   
-                               => a6; 
-  apply timeout(delay: 'm.delay', action: 'updateLocation')
-                               => a6; 
-  apply reHandleOnChange(cxt: 'm', crisis: 'crisis') 
-                               => a7;
-  apply missionFailed          => a7;
-  apply lostContact(action: 'requestForDeparture', c : 'crisis') 
-                               => a8; 
-  apply missingReport          => a11;  
-}
-
-/*********************
- *** Use Case #2.2 ***
- *********************/ 
-
-require 'processes/captureWitnessReport.adore';
-require 'fragments/callDisconnected.adore'; 
-require 'fragments/fakeCrisisDetected.adore';
-require 'fragments/fakeWitnessInfo.adore';
-require 'fragments/ignoreDisconnection.adore';
-require 'fragments/requestVideo.adore';
-
-composition cms::captureWitnessReport{
-  apply callDisconnected            => a10;     
-  apply callDisconnected            => a2;      
-  apply requestVideo(user: 'coord') => {a3,a4}; 
-  apply fakeWitnessInfo             => a2a3;    
-  apply ignoreDisconnection         => a4;      
-  apply fakeCrisisDetected          => a4;      
-  apply fakeCrisisDetected          => requestVideo::a3; 
-}
-
-/*********************
- *** Use Case #2.3 ***
- *********************/ 
-
-require 'processes/assignIntRes.adore';
-require 'fragments/unavailableEmployee.adore';
-require 'fragments/employeeRefusal.adore';
-
-composition cms::assignIntRes {
-  apply mustAuthenticate      => a1;      // Ext 1a.
-  apply unavailableEmployee(delta : '10') => {a1,a2}; // Ext 1b.
-  apply employeeRefusal       => a2;      // Ext 2a.
-}
-
-/*********************
- *** Use Case #2.4 ***
- *********************/ 
-
-require 'processes/requestExtRes.adore';
-require 'fragments/degradedRes.adore';
-require 'fragments/noExtRes.adore';
-
-composition cms::requestExtRes {
-  apply degradedRes(treshold: '80') => a2; 
-  apply noExtRes                    => a2; 
-}
-
-/*********************
- *** Use Case #2.5 ***
- *********************/ 
-
-require 'processes/executeMission.adore';
-
-/*********************
- *** Use Case #2.6 ***
- *********************/ 
-
-require 'processes/execSupObsMission.adore';
-require 'processes/handleSupObsMission.adore';
-require 'fragments/replaceMission.adore';
-require 'fragments/noAvailableReplacement.adore';
-require 'fragments/askedMissionFailure.adore';
-
-composition cms::handleSupObsMissions {
-  apply replaceMission         => a7;
-  apply noAvailableReplacement(user : 'so') => replaceMission::a1;
-  apply askedMissionFailure (crisis : 'crisis')  => a7;
-}
+require 'cosmetic/normalize.adore';    // normalize processes
+require 'cosmetic/doCompo.adore';      // do compositions 
 
 
-/*********************
- *** Use Case #2.7 ***
- *********************/ 
-require 'processes/execRescMission.adore';
-require 'fragments/retrieveVictimHistory.adore';
+/*******************************************
+ ** Using dataflow introduction algorithm **
+ *******************************************/
 
-composition cms::execRescMission {
-  apply retrieveVictimHistory(wrk: 'wrk') => a3; 
-}
-
-// Normalisation ended here
-
-/*********************
- *** Use Case #2.8 ***
- *********************/ 
-
-// No available description in requirements
-
-/*********************
- *** Use Case #2.9 ***
- *********************/ 
-
-// No available description in requirements
-
-/**********************
- *** Use Case #2.10 ***
- **********************/ 
-
-require 'processes/authUser.adore';
-require 'fragments/cancelAuth.adore';
-require 'fragments/only3times.adore';
-
-composition cms::authUser {
-  apply cancelAuth => a1a2 ;
-  apply only3times => {a1a2,a3} ;
-}
-
-/************************** 
- *** Cosmetic Artifacts ***
- **************************/
-
-require 'cosmetic/color_scheme.adore';  // colorize fragments
-require 'cosmetic/normalize.adore';     // normalize processes
-
+/**%
+  doSetify(cms_handleACrisis, cms_handleACrisis_choosen),  
+  cccms_draw(cms_handleACrisis, '2.1_handleACrisis_loops'), 
+  doSetify(cms_handleAMission, cms_handleAMission_er),
+  doSetify(cms_handleAMission, cms_handleAMission_ir),
+  cccms_draw(cms_handleAMission, '2.1__handleAMission_loops')
+%**/
 
 

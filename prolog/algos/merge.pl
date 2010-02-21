@@ -162,40 +162,56 @@ delActivities(Olds,Actions) :-
 %% Variable unification declared using 'adoreEquivalence' facts
 %%%%
 
-findVariableDeclaredUnification(_,Fragments,Actions) :- 
-	findall(V,(member(F,Fragments), process:getVariables(F,V)), RawVars),
-	flatten(RawVars,FlatRaw),sort(FlatRaw,Variables),
-	map(findUserRoot,Variables,RootVariables),
-	findall(V,merge:extractVariableUnifications(RootVariables,V),RawUnif),
-	sort(RawUnif,Unifiable),
-	computeVariableUnifications(Fragments,Unifiable,Actions).
+findVariableDeclaredUnification(_,Fragments,Actions):- 
+	map(process:getHook,Fragments,Hooks), %% only Hook variables 
+	%% Input unification
+	extractActsVariables(in,Hooks,VarsIn),
+	partitionVarsByType(VarsIn,PartVarsIn),
+	computeVarUnification(PartVarsIn,InUnifActs),
+	%% Output unification
+	extractActsVariables(out,Hooks,VarsOut),
+	partitionVarsByType(VarsOut,PartVarsOut),
+	findall(A,merge:computeVarUnification(PartVarsOut,A),OutUnifActs),	
+	%% Final Concatenation
+	flatten([InUnifActs,OutUnifActs],Actions).
 
-extractVariableUnifications(RootVariables, RV) :- 
-	member(RV,RootVariables), adoreEquivalence(variable,EquivList),
-	member([Process, Variable], EquivList), 
-	pebble(rename(variable),Variable,RV,compile(Process)).
+extractActsVariables(_,[],[]).
+extractActsVariables(Direction,[H|T],Result) :- 
+	findall(V,activity:useVariable(H,V,Direction),Vars),
+	extractActsVariables(Direction,T,Tmp),
+	flatten([Vars,Tmp],Result).
 
-
-computeVariableUnifications(_,[],[]) :- !. %% Nothing to unify
-computeVariableUnifications(_,[_],[]) :- !. %% a single entity
-%% TODO: should take care of multiple unification (a,b->a'), (c,d) -> c'
-computeVariableUnifications(Fragments,VarList,Actions) :- %% Here is fun
-	member(AVariable,VarList), 
-	cloneVariable(AVariable,CloneActs,CloneId),
-	findall(Act,buildVarSubstList(Fragments,VarList,CloneId,Act),SubstActs),
-	sort(SubstActs, SortedSubstActs),
-	flatten([CloneActs,SortedSubstActs], Actions).
-
-buildVarSubstList(Fragments,VarList,CloneId, Action) :- 
-	member(V, VarList), variable:belongsTo(V,RealFragment), 
-	member(ClonedFragment,Fragments), 
-	(  adoreContext(CtxId,clone(RealFragment,ClonedFragment))
-         | adoreContext(CtxId,instantiate(RealFragment,_,ClonedFragment)) ),
-	getImmediateDerivation(CtxId,V,RealVariable), 
-	Action = [substVariable(RealVariable,CloneId)].
+partitionVarsByType([],[]).
+partitionVarsByType([H|T],[[H|SameTyped]|Others]) :- 
+	hasForType(H,Type),
+	findall(X,(member(X,T), hasForType(X,Type)),SameTyped),
+	removeList(SameTyped,T,Restricted),
+	partitionVarsByType(Restricted,Others).
 	
-cloneVariable(V,Actions,CloneId) :- 
-	genVariableId(CloneId),
+computeVarUnification(LVars,Result) :- 
+	findall(L,merge:getEquivalentRootPartition(L),EquivLists),
+	findall(L,merge:buildVarUnification(LVars,EquivLists,L),Tmp),
+	sort(Tmp,Result).
+
+getEquivalentRootPartition(L) :- 
+	adoreEquivalence(variable,Bindings),
+	findall(X,(member([P, V],Bindings), 
+	           pebble(rename(variable),V,X,compile(P))),L).
+
+buildVarUnification(Partitions, Candidates, Actions) :- 
+	member(Partition,Partitions), member(Candidate,Candidates),
+	map(findUserRoot,Partition,RootSet),
+	intersection(RootSet,Candidate,Candidate), %% MATCH!!
+	genVariableId(CId), member(V,Partition), cloneVariable(V,CId,CloneActs),
+	findall(substVariable(P,CId),
+	        (member(X,Candidate),member(P,Partition),findUserRoot(P,X)),
+		SubstActs),
+	sort(SubstActs,Tmp),
+	flatten([CloneActs,Tmp],Actions).
+	
+
+	
+cloneVariable(V,CloneId,Actions) :- 
 	findall(A,merge:varAdditionalAction(V,CloneId,A),AddVar),
 	flatten([createVariable(CloneId),AddVar],Actions).
 

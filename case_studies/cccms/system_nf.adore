@@ -3,12 +3,16 @@
  * submitted to the TAOSD special issue dedicated to AOM
  **/
 
-// The raw precompiled system (no composition were executed)
-knowledge 'system.pl'; 
+/********************************************************
+ ** Initial System: Orchestration & Business Fragments **
+ ********************************************************/
 
-/********************************
- ** Non functional Fragemments **
- ********************************/
+require 'user_given.adore'; 
+require 'cosmetic/normalize.adore';    
+
+/******************************
+ ** Non functional Fragments **
+ ******************************/
 
 /** Statistical logging **/
 require 'fragments/logTime.adore';
@@ -21,36 +25,29 @@ require 'fragments/createPerst.adore';
 /** User Inactivity **/
 require 'fragments/authentifyWhenIdle.adore';
 
+/***********************************************
+ ** Logical Predicates to deal with Pointcuts **
+ ***********************************************/
+
+knowledge 'pointcuts.pl';
+
+/******************
+ ** Compositions **
+ ******************/
+
+require 'cosmetic/predirectives.adore';
+require 'cosmetic/doCompo_nf_FoF.adore';
+require 'cosmetic/doCompo_nf.adore';
 
 
-/*************
- ** SandBox **
- *************/
+/***********************
+ ** Loop Introduction **
+ ***********************/
 
-// apply logTime(keyType: 'worker', op: 'arrived') => {cms::handleAWorker::a6};
-/*%
-  doInstantiate(logTime,cms_handleAWorker,lT_1,
-                [bind(keyType,worker), bind(op,arrived)]),
-  doWeave([weave(lT_1,[cms_handleAWorker_a6])]),
-  doProcessSimplification(cms_handleAWorker),
-  cccms_draw(cms_handleAWorker,'nf__handleAWorker'),
-%*/
-
-// apply logError(exc: 'unavailable', msg: 'unavailable')
-//                 => unavailableIntResource::h
-/*%
-  doInstantiate(logError, unavailableIntResource, lE_1,
-                [bind(exc,unavailable), bind(msg, unavailable)]),
-  doWeave([weave(lE_1,[unavailableIntResource_h])]),
-  doProcessSimplification(unavailableIntResource),
-  cccms_draw(unavailableIntResource,'nf__unavailableIntResource'),
-%*/
-/*%
-  doInstantiate(unavailableIntResource,cms_handleAMission,uIR_1,
-                [bind(op,findRelevantEmployee)]),
-  doProcessSimplification(uIR_1),
-  doWeave([weave(uIR_1,[cms_handleAMission_a41])]),
-  doProcessSimplification(cms_handleAMission),
-  cccms_draw(cms_handleAMission,'nf__cms_handleAMission'),
-%*/
-
+/**%
+  doSetify(cms_handleACrisis, cms_handleACrisis_choosen),  
+  cccms_draw(cms_handleACrisis, 'nf_2.1_handleACrisis_loops'), 
+  doSetify(cms_handleAMission, cms_handleAMission_er),
+  doSetify(cms_handleAMission, cms_handleAMission_ir),
+  cccms_draw(cms_handleAMission, 'nf_2.1__handleAMission_loops')
+%**/

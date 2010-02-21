@@ -1,0 +1,307 @@
+/*********************************
+ ** displayCuts Execution Trace **
+ *********************************/
+
+/** Deleted entities 
+   weave([logUpdate], [a24])   %% ==> DELETED (self)
+   weave([logUpdate], [a28])   %% ==> DELETED (self)
+   weave([logUpdate], [a32])   %% ==> DELETED (no sense)
+   weave([logUpdate], [a36])   %% ==> DELETED (no sense)
+   weave([logUpdate], [a13])   %% ==> DELETED (no sense)
+   weave([logUpdate], [a20])   %% ==> DELETED (no sense)
+**/
+
+/********************************
+ ** Fragments weaved on others **
+ ********************************/
+
+//weave([logUpdate], [authentifyWhenIdle_a1])
+//weave([logUpdate], [authentifyWhenIdle_a2])
+//weave([logUpdate], [authentifyWhenIdle_a21])
+/*%
+  doInstantiate(lU_cmsEmployee, authentifyWhenIdle, nf_lU_cE_1, 
+                [bind(op,'cms::notIdle')]),
+  doInstantiate(lU_cmsEmployee, authentifyWhenIdle, nf_lU_cE_2, 
+                [bind(op,'cms::killAuthentication')]),
+  doInstantiate(lU_cmsEmployee, authentifyWhenIdle, nf_lU_cE_3, 
+                [bind(op,'cms::authUser')]),
+  doWeave([ weave(nf_lU_cE_1,[authentifyWhenIdle_a1]), 
+            weave(nf_lU_cE_2,[authentifyWhenIdle_a21]),
+	    weave(nf_lU_cE_3,[authentifyWhenIdle_a2])]),
+  doProcessSimplification(authentifyWhenIdle),
+  cccms_draw(authentifyWhenIdle,'with-nf/f_authentifyWhenIdle_enhanced'),
+%*/
+
+// weave([logError], [unavailableIntResource_h])
+// weave([logTime, logCreate], [unavailableIntResource_a2])
+/*%
+  doInstantiate(logError,unavailableIntResource,nf_lE_1,
+                [bind(exc,unavailable),bind(msg,unavailable)]),
+  doInstantiate(lT_resource,unavailableIntResource, nf_lT_r_1,
+                [bind(op,'cms::requestExtRes')]),
+  doClone(lC_cmsEmployee,nf_lC_cE_1),
+  doMerge([nf_lT_r_1,nf_lC_cE_1], nf_lT_r_lC_cE_1),
+  doProcessSimplification(nf_lT_r_lC_cE_1),
+  cccms_draw(nf_lT_r_lC_cE_1,'with-nf/f_unavailableIntResource_MergedOnA2'),
+  doWeave([weave(nf_lE_1,[unavailableIntResource_h]),
+           weave(nf_lT_r_lC_cE_1,[unavailableIntResource_a2])]),
+  doProcessSimplification(unavailableIntResource),
+  cccms_draw(unavailableIntResource,'with-nf/f_unavailableIntResource'),
+%*/
+
+//weave([logError], [callDisconnected_h])
+/*%
+  doInstantiate(logError,callDisconnected,nf_lE_2,
+                [bind(exc,disconnected),bind(msg,disconnected)]),
+  doWeave([weave(nf_lE_2,[callDisconnected_h])]),
+  doProcessSimplification(callDisconnected),
+  cccms_draw(callDisconnected,'with-nf/f_callDisconnected'),
+%*/
+
+// weave([logError], [cancelAuth_h])
+/*%
+  doInstantiate(logError,cancelAuth,nf_lE_3,
+                [bind(exc,cancel), bind(msg,cancel)]),
+  doWeave([weave(nf_lE_3,[cancelAuth_h])]),
+  doProcessSimplification(cancelAuth),
+  cccms_draw(cancelAuth,'with-nf/f_cancelAuth'),
+%*/
+
+// weave([logUpdate], [employeeRefusal_a1])
+// weave([logError, logUpdate, logCreate], [employeeRefusal_a2])
+// weave([logUpdate], [employeeRefusal_a3])
+/*%
+  doInstantiate(lU_cmsEmployee,employeeRefusal,nf_lU_cE_4,
+                 [bind(op,'msgBus::send(info,refusal)')]),
+  doInstantiate(lU_cmsEmployee,employeeRefusal,nf_lU_cE_5,
+                 [bind(op,'cms::findSubstitute')]),
+  doInstantiate(logError,employeeRefusal, nf_lE_4,
+                [bind(exc,noSubstituteFound), bind(msg,noSubstituteFound)]),
+  doClone(lC_cmsEmployee,nf_lC_cE_2),
+  doMerge([nf_lU_cE_5, nf_lE_4,nf_lC_cE_2],nf_lU_cE_lE_lC_cE_1),
+  doProcessSimplification(nf_lU_cE_lE_lC_cE_1),
+  cccms_draw(nf_lU_cE_lE_lC_cE_1,'with-nf/f_employeeRefusal_MergedOnA2'),
+  doClone(lU_cmsEmployee,nf_lU_cE_6),
+  doWeave([weave(nf_lU_cE_4,[employeeRefusal_a1]),
+           weave(nf_lU_cE_lE_lC_cE_1,[employeeRefusal_a2]),
+	   weave(nf_lU_cE_6,[employeeRefusal_a3])]),
+  doProcessSimplification(employeeRefusal),
+  cccms_draw(employeeRefusal,'with-nf/f_employeeRefusal'),
+%*/
+
+// weave([logError], [ignoreDisconnection_h])
+/*%
+  doInstantiate(logError,ignoreDisconnection,nf_lE_5,
+                [bind(exc,disconnected), bind(msg,disconnected)]),
+  doWeave([weave(nf_lE_5,[ignoreDisconnection_h])]),
+  doProcessSimplification(ignoreDisconnection),
+  cccms_draw(ignoreDisconnection,'with-nf/f_ignoreDisconnection'),
+%*/
+
+// weave([logError], [missingReport_h])
+/*%
+  doInstantiate(logError,missingReport,nf_lE_6,
+                [bind(exc,'*'), bind(msg,'*')]),
+  doWeave([weave(nf_lE_6,[missingReport_h])]),
+  doProcessSimplification(missingReport),
+  cccms_draw(missingReport,'with-nf/f_missingReport'),
+%*/
+
+// weave([logError], [missionFailed_h])
+/*%
+  doInstantiate(logError,missionFailed,nf_lE_7,
+                [bind(exc,failed), bind(msg,failed)]),
+  doWeave([weave(nf_lE_7,[missionFailed_h])]),
+  doProcessSimplification(missionFailed),
+  cccms_draw(missionFailed,'with-nf/f_missionFailed'),
+%*/
+
+// weave([logError], [noExtRes_h])
+/*%
+  doInstantiate(logError,noExtRes,nf_lE_8,
+                [bind(exc,noResource), bind(msg,noResource)]),
+  doWeave([weave(nf_lE_8,[noExtRes_h])]),
+  doProcessSimplification(noExtRes),
+  cccms_draw(noExtRes,'with-nf/f_noExtRes'),
+%*/
+
+// weave([logError], [retrieveVictimHistory_a1])
+// weave([logUpdate], [retrieveVictimHistory_a2])
+/*%
+  doInstantiate(logError,noExtRes,nf_lE_9, [bind(exc,fail), bind(msg,fail)]),
+  doInstantiate(lU_worker,noExtRes,nf_lU_w_1,
+                 [bind(op,'ui::displayHistory')]),
+  doWeave([weave(nf_lE_9,[retrieveVictimHistory_a1]),
+           weave(nf_lU_w_1,[retrieveVictimHistory_a2])]),
+  doProcessSimplification(retrieveVictimHistory),
+  cccms_draw(retrieveVictimHistory,'with-nf/f_retrieveVictimHistory'),
+%*/
+
+// weave([logUpdate], [unavailableEmployee_a4])
+// weave([logError, logUpdate, logCreate], [unavailableEmployee_a5])
+// weave([logUpdate], [unavailableEmployee_a6])
+/*%
+  doInstantiate(lU_cmsEmployee,unavailableEmployee,nf_lU_cE_7,
+                [bind(op,'msgBus::send(status,unresponsive)')]),
+  doInstantiate(logError,unavailableEmployee,nf_lE_10,
+                [bind(exc,noSubstituteFound), bind(msg,noSubstituteFound)]),
+  doInstantiate(lU_cmsEmployee,unavailableEmployee,nf_lU_cE_8,
+                [bind(op,'cms::findSubstitute')]),
+  doClone(lC_cmsEmployee,nf_lC_cE_3),
+  doMerge([nf_lC_cE_3,nf_lU_cE_8,nf_lE_10],nf_lC_cE_lU_cE_lE_2),
+  doProcessSimplification(nf_lC_cE_lU_cE_lE_2),
+  cccms_draw(nf_lC_cE_lU_cE_lE_2,'with-nf/f_unavailableEmployee_MergedOnA5'),
+
+  doClone(lU_cmsEmployee,nf_lU_cE_9),
+  doWeave([weave(nf_lU_cE_7,[unavailableEmployee_a4]),
+           weave(nf_lC_cE_lU_cE_lE_2,[unavailableEmployee_a5]),
+	   weave(nf_lU_cE_9,[unavailableEmployee_a6])]),
+  doProcessSimplification(unavailableEmployee),
+  cccms_draw(unavailableEmployee,'with-nf/f_unavailableEmployee'),
+%*/
+
+// weave([logError], [unavailableExtResource_h])
+/*%
+  doInstantiate(logError,unavailableExtResource,nf_lE_11,
+                [bind(exc,unavailable), bind(msg,unavailable)]),
+  doWeave([weave(nf_lE_11,[unavailableExtResource_h])]),
+  doProcessSimplification(unavailableExtResource),
+  cccms_draw(unavailableExtResource,'with-nf/f_unavailableExtResource'),
+%*/
+
+// weave([logUpdate], [degradedRes_a2])
+/*%
+  doInstantiate(lU_worker, degradedRes, nf_lU_w_2, 
+                [bind(op,'msgBus::send(info,degraded)')]),
+  doWeave([weave(nf_lU_w_2,[degradedRes_a2])]),
+  doProcessSimplification(degradedRes),
+  cccms_draw(degradedRes,'with-nf/f_degradedRes'),
+%*/
+
+// weave([logUpdate], [only3times_e1])
+// weave([logUpdate], [only3times_e3])
+// weave([logUpdate], [only3times_e5]) // A posteriori added
+/*%
+  doInstantiate(lU_cmsEmployee, only3times, nf_lU_cE_10, 
+                [bind(op,'cms::incrAuthCpt')]),
+  doClone(lU_cmsEmployee, nf_lU_cE_11),
+  doInstantiate(lU_cmsEmployee, only3times, nf_lU_cE_12, 
+                [bind(op,'cms::resetAuthCpt')]),
+  doWeave([weave(nf_lU_cE_10,[only3times_e1]),
+           weave(nf_lU_cE_11,[only3times_e3]),
+	   weave(nf_lU_cE_12,[only3times_e5])]),
+  doProcessSimplification(only3times),
+  cccms_draw(only3times,'with-nf/f_only3times'),
+%*/
+
+// weave([logUpdate], [mustAuthenticate_a1])
+// weave([logUpdate], [mustAuthenticate_a2])
+/*%
+  doInstantiate(lU_cmsEmployee, only3times, nf_lU_cE_13, 
+                [bind(op,'cms::isAuthentified')]),
+  doInstantiate(lU_cmsEmployee, only3times, nf_lU_cE_14, 
+                [bind(op,'cms::authUser')]),
+  doWeave([weave(nf_lU_cE_13,[mustAuthenticate_a1]),
+           weave(nf_lU_cE_14,[mustAuthenticate_a2])]),
+  doProcessSimplification(mustAuthenticate),
+  cccms_draw(mustAuthenticate,'with-nf/f_mustAuthenticate'),
+%*/
+
+// weave([logUpdate], [timeout_a4])
+/*%
+  doClone(lU_worker, nf_lU_w_3),
+  doWeave([weave(nf_lU_w_3,[timeout_a4])]),
+  doProcessSimplification(timeout),
+  cccms_draw(timeout,'with-nf/f_timeout'),
+%*/
+
+
+// weave([logUpdate], [useHelicopter_a3])
+/*%
+  doInstantiate(lU_worker, useHelicopter, nf_lU_w_4,
+                [bind(op,'cms::transportByHelicopter')]),
+  doWeave([weave(nf_lU_w_4,[useHelicopter_a3])]),
+  doProcessSimplification(useHelicopter),
+  cccms_draw(useHelicopter,'with-nf/f_useHelicopter'),
+%*/
+
+// weave([logUpdate, logTime], [lostContact_a1])  
+// weave([logCreate], [lostContact_a2])
+// weave([logUpdate, logUpdate, authentifyWhenIdle], [lostContact_a3])
+/*%
+  doInstantiate(lU_worker, lostContact, nf_lU_w_5,
+                [bind(op,'msgBus::wait4msg(info,lost)')]),
+   doInstantiate(lT_worker, lostContact, nf_lT_w_1,
+                [bind(op,'msgBus::wait4msg(info,lost)')]),
+   doMerge([nf_lU_w_5,nf_lT_w_1], nf_lU_w_lT_w_1),
+   doProcessSimplification(nf_lU_w_lT_w_1),
+   cccms_draw(nf_lU_w_lT_w_1, 'with-nf/f_lostContact_MergedOnA1'),
+
+   doClone(lC_cmsEmployee,nf_lC_cE_4),
+
+   doClone(authentifyWhenIdle, nf_aWI_1),
+   doClone(lU_worker,nf_lU_w_6),
+   doClone(lU_cmsEmployee,nf_lU_cE_15),
+   doMerge([nf_aWI_1,nf_lU_w_6,nf_lU_cE_15],nf_aWI_lU_w_lU_cE_1),
+   doProcessSimplification(nf_aWI_lU_w_lU_cE_1),
+   cccms_draw(nf_aWI_lU_w_lU_cE_1, 'with-nf/f_lostContact_MergedOnA3'),
+
+   doWeave([weave(nf_lU_w_lT_w_1, [lostContact_a1]),
+            weave(nf_lC_cE_4, [lostContact_a2]),
+	    weave(nf_aWI_lU_w_lU_cE_1,[lostContact_a3])]),
+   doProcessSimplification(lostContact),
+   cccms_draw(lostContact,'with-nf/f_lostContact'),
+%*/
+
+// weave([logUpdate, authentifyWhenIdle], [fakeCrisisDetected_t])
+/*%
+  doClone(authentifyWhenIdle, nf_aWI_2),
+  doInstantiate(lU_cmsEmployee,fakeCrisisDetected,nf_lU_cE_16,
+                 [bind(op,'ui::prompt4RealCrisis')]),
+  doMerge([nf_aWI_2, nf_lU_cE_16],nf_aWI_lU_cE_1),
+  doProcessSimplification(nf_aWI_lU_cE_1),
+  cccms_draw(nf_aWI_lU_cE_1,'with-nf/f_fakeCrisisDetected_MergedOnT'),
+  doWeave([weave(nf_aWI_lU_cE_1,[fakeCrisisDetected_t])]),
+  doProcessSimplification(fakeCrisisDetected),
+  cccms_draw(fakeCrisisDetected,'with-nf/f_fakeCrisisDetected'),
+%*/
+
+// weave([logUpdate, authentifyWhenIdle], [noAvailableReplacement_a1])
+/*%
+  doClone(authentifyWhenIdle, nf_aWI_3),
+  doInstantiate(lU_cmsEmployee, noAvailableReplacement,nf_lU_cE_17,
+                 [bind(op,'ui::promptNotifyNtlCrisisCtr')]),
+  doMerge([nf_aWI_3, nf_lU_cE_17],nf_aWI_lU_cE_2),
+  doProcessSimplification(nf_aWI_lU_cE_2),
+  
+  doWeave([weave(nf_aWI_lU_cE_2,[noAvailableReplacement_a1])]),
+  doProcessSimplification(noAvailableReplacement),
+  cccms_draw(noAvailableReplacement,'with-nf/f_noAvailableReplacement'),
+%*/
+
+// weave([logUpdate, authentifyWhenIdle], [requestVideo_a3])
+/*%
+  doClone(authentifyWhenIdle, nf_aWI_4),
+  doInstantiate(lU_cmsEmployee, requestVideo,nf_lU_cE_18,
+                [bind(op,'ui::displayVideoFeed')]),
+  doMerge([nf_aWI_4, nf_lU_cE_18],nf_aWI_lU_cE_3),
+  cccms_draw(nf_aWI_lU_cE_3,'with-nf/f_requestVideo_MergedOnA3'),
+  doProcessSimplification(nf_aWI_lU_cE_3),
+  doWeave([weave(nf_aWI_lU_cE_3,[requestVideo_a3])]),
+  doProcessSimplification(requestVideo),
+  cccms_draw(requestVideo,'with-nf/f_requestVideo'),
+%*/
+
+// weave([logUpdate, logUpdate, authentifyWhenIdle], [useHelicopter_a2])
+/*%
+  doClone(authentifyWhenIdle, nf_aWI_5),
+  doInstantiate(lU_worker,useHelicopter,nf_lU_w_7,
+                [bind(op,'ui::ask4Helicopter')]),
+  doInstantiate(lU_cmsEmployee,useHelicopter,nf_lU_cE_19,
+                [bind(op,'ui::ask4Helicopter')]),
+  doMerge([nf_aWI_5, nf_lU_w_7 ,nf_lU_cE_19], nf_aWI_lU_w_lU_cE_2),
+  cccms_draw(nf_aWI_lU_w_lU_cE_2, 'with-nf/f_useHelicopter_MergedOnA2'),
+  doWeave([weave(nf_aWI_lU_w_lU_cE_2, [useHelicopter_a2])]),
+  doProcessSimplification(useHelicopter),
+  cccms_draw(useHelicopter,'with-nf/f_useHelicopter'),
+%*/

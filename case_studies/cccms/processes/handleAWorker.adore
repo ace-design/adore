@@ -7,9 +7,9 @@ orchestration cms::handleAWorker {
     rcv. (crisis,w,m,coord) := receive();
     a100. ui::actListener(w, crisis, 'info' as string);
     a101. ui::actListener(w, m, 'info' as string);
-    a6. msgBus::wait4Msg('info' as string, 'arrived' as string, w);
+    a6. msgBus::wait4msg('info' as string, 'arrived' as string, w);
     a7. cms::executeMission(m,w,crisis,coord);
-    a8. msgBus::wait4Msg('info' as string, 'leaving' as string, w);
+    a8. msgBus::wait4msg('info' as string, 'leaving' as string, w);
     a11. r := ui::askForReport(w);
     rpl. reply(r);
     a100bis. ui::stopListener(w,crisis, 'info' as string);

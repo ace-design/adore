@@ -127,3 +127,4 @@
 %%%%
 
 :- dynamic adoreEquivalence/2.
+:- dynamic variableBinding/2.

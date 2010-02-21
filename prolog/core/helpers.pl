@@ -46,6 +46,10 @@ remove(_,[],[]).
 remove(E,[E|T],O) :- remove(E,T,O).
 remove(E,[X|T],[X|O]) :- \+ E = X, remove(E,T,O).
 
+removeList([],L,L).
+removeList([H|T],L,Result) :- 
+	remove(H,L,Tmp), removeList(T,Tmp,Result).
+
 %% getAbsoluteName: retrieve a named element from a context
 getAbsoluteName(_,absoluteReference(S,O,E),R) :-
 	swritef(Str,"%w_%w_%w",[S,O,E]),
@@ -100,11 +104,3 @@ suffixToStar("_star",'*')  :- !.
 suffixToStar([H|T],R) :- 
 	string_to_list(C,[H]), suffixToStar(T,O),
 	swritef(R,"%w%w",[C,O]).
-
-
-
-
-%%%%%%%%%%% TMP %%%%%%%%%%%
-
-matchJoinPoints(F,PointCut,Actions) :- 
-	findall(weave(F,Matched),call(PointCut,Matched),Actions).

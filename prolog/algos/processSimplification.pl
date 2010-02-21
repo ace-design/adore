@@ -60,7 +60,7 @@ simplify(Activities, Actions) :- %% Use self as invoked operation, in a process
 	\+ isFragment(Process), hasForKind(X,invoke),
 	hasForOperation(X,self), hasForOpName(Process,Operation),
 	Actions = [ retract(hasForOperation(X,self)), 
-	            setInvokedOperation(X,Operation)], writeList(Actions).
+	            setInvokedOperation(X,Operation)].
 
 %%%%%
 %% Macro Actions

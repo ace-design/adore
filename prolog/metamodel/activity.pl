@@ -25,7 +25,6 @@
 belongsTo(Act,P) :- 
 	activity(Act), isContainedBy(Act,P), process(P).
 
-
 useVariable(Act,Var) :- 
 	useVariable(Act,Var,_).
 useVariable(Act,Var,in) :- 
