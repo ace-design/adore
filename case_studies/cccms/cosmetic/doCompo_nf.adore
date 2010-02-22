@@ -11,7 +11,7 @@
 // weave([logUpdate, authentifyWhenIdle], [cms_resolveCrisis_a13])
 
 // weave([logUpdate], [cms_resolveCrisis_aX])
-/**%
+/*%
   doClone(mustAuthenticate,nf_uc21_mA_1),
   doInstantiate(lU_cmsEmployee,cms_resolveCrisis,nf_lU_cE_20,
                 [bind(op,'cms::captureWitnessReport')]),
@@ -49,14 +49,14 @@
 	    weave(nf_lU_cE_HACKED_21, [ cms_resolveCrisis_aX ])]),
   doProcessSimplification(cms_resolveCrisis),
   cccms_draw(cms_resolveCrisis,'with-nf/2.1.resolveCrisis'),
-%**/
+%*/
 
 
 // composition cms::handleACrisis { toSet choosen; 
 //   apply reHandleOnChange(cxt: 'id', crisis: 'id') => aX; }
 // weave([logUpdate], [cms_handleACrisis_aX])
 // weave([logUpdate, authentifyWhenIdle], [cms_handleACrisis_a3])
-/**%
+/*%
   doInstantiate(reHandleOnChange, cms_handleACrisis, nf_uc21_rHOC_1,
                 [bind(cxt,id), bind(crisis,id)]),
   doInstantiate(lU_cmsEmployee, cms_handleACrisis, nf_lU_cE_23,
@@ -76,7 +76,7 @@
             weave(nf_aWI_lU_cE_7,[cms_handleACrisis_a3])]),
   doProcessSimplification(cms_handleACrisis),
   cccms_draw(cms_handleACrisis,'with-nf/2.1_handleACrisis'), 
-%**/
+%*/
 
 // composition cms::handleAMission {  toSet ir; toSet er;               
 //   apply unavailableIntResource  => a41; 
@@ -93,7 +93,7 @@
 // weave([logUpdate, authentifyWhenIdle], [cms_handleAMission_a9])
 // weave([logUpdate, authentifyWhenIdle], [cms_handleAMission_a9bis])
 
-/**%
+/*%
   doInstantiate(unavailableIntResource,cms_handleAMission,uc21_uIR_1,
                 [bind(op,'cms::findRelevantEmployee')]),         
   doClone(lC_cmsEmployee, nf_lC_cE_5),
@@ -166,7 +166,7 @@
 	  ]),
   doProcessSimplification(cms_handleAMission),
   cccms_draw(cms_handleAMission,'with-nf/2.1__handleAMission'),
-%**/
+%*/
    
 
 // composition cms::handleAWorker { 
@@ -194,7 +194,7 @@
 // weave([logUpdate], [cms_handleAWorker_a101bis])
 
 
-/**%
+/*%
   doInstantiate(useHelicopter, cms_handleAWorker, uc21_uH_1, [bind(m,m)]),
   doInstantiate(lostContact, cms_handleAWorker, uc21_lC_1, 
                 [bind(c, crisis), bind(action, requestForArrival)]),
@@ -244,7 +244,7 @@
 	     weave(nf_lU_w_13,[cms_handleAWorker_a101bis])
           ]),
   cccms_draw(cms_handleAWorker,'with-nf/2.1_handleAWorker'), 
-%**/   
+%*/   
 // doProcessSimplification(cms_handleAWorker), // IMPOSSIBLE, TOO LONG!!! :'(
 /*********************
  *** Use Case #2.2 ***
@@ -264,7 +264,7 @@
 // weave([logUpdate, authentifyWhenIdle], [cms_captureWitnessReport_a2])
 // weave([logUpdate, authentifyWhenIdle], [cms_captureWitnessReport_a4])
 
-/**%
+/*%
   doInstantiate(requestVideo, cms_captureWitnessReport, uc22_rV_1,
                 [bind(user,coord)]),
   doClone(fakeCrisisDetected,uc22_fCD_1),
@@ -309,7 +309,7 @@
 	                           cms_captureWitnessReport_a4   ]),
 	    weave(uc22_fWI_1,    [ cms_captureWitnessReport_a2a3 ])]),
   cccms_draw(cms_captureWitnessReport,'with-nf/2.2.captureWitnessReport'),
-%**/
+%*/
 //   doProcessSimplification(cms_captureWitnessReport),
 
 /*********************
@@ -325,7 +325,7 @@
 // weave([logUpdate, authentifyWhenIdle], [cms_assignIntRes_a2])
 
 
-/**%
+/*%
   doClone(mustAuthenticate,uc23_mA_1),
   doInstantiate(lU_cmsEmployee,  cms_captureWitnessReport, lU_cE_33,
                 [bind(op,'ui::promptCheckList')]), 
@@ -351,7 +351,7 @@
 	    weave(nf_eR_lU_cE_aWI_1,     [ cms_assignIntRes_a2  ])]),
   doProcessSimplification(cms_assignIntRes),
   cccms_draw(cms_assignIntRes,'with-nf/2.3.assignIntRes'), 
-%**/
+%*/
 
 
 /*********************
@@ -364,7 +364,7 @@
 // }
 // weave([logCreate], [cms_requestExtRes_a2])
 
-/**%
+/*%
    doInstantiate(degradedRes,cms_requestExtRes,uc24_dR_1,[bind(threshold,80)]),
    doInstantiate(noExtRes,cms_requestExtRes,uc24_nER_1,
                  [bind(op,'ers::providesWorker')]),
@@ -376,7 +376,7 @@
    doWeave([weave(uc24_dR_nER,[cms_requestExtRes_a2])]),
    doProcessSimplification(cms_requestExtRes),
    cccms_draw(cms_requestExtRes,'with-nf/2.4.requestExtRes'),
-%**/
+%*/
 
 
 /*********************
@@ -387,7 +387,7 @@
 // weave([logUpdate], [cms_executeMission_a2])
 // weave([logUpdate], [cms_executeMission_a3])
 // weave([logUpdate], [cms_executeMission_a4])
-/**%
+/*%
   doInstantiate(lU_worker,cms_executeMission, lU_w_14,
                 [bind(op,'cms::execSupObsMission')]),
   doInstantiate(lU_worker,cms_executeMission, lU_w_15,
@@ -402,7 +402,7 @@
 	   weave(lU_w_17,[cms_executeMission_a4])]),
   doProcessSimplification(cms_executeMission),
   cccms_draw(cms_executeMission,'with-nf/2.5.cms_executeMission'), 
-%**/
+%*/
 
 /*********************
  *** Use Case #2.6 ***
@@ -410,7 +410,7 @@
 
 // weave([logUpdate, authentifyWhenIdle], [cms_execSupObsMission_a2])
 // weave([logUpdate], [cms_execSupObsMission_aX])
-/**%
+/*%
   doInstantiate(lU_cmsEmployee, cms_execSupObsMission, lU_cE_35,
                 [bind(op,'ui::promptCheckList')]),
   doClone(authentifyWhenIdle,aWI_17),
@@ -423,7 +423,7 @@
            weave(lU_cE_36,[cms_execSupObsMission_a4x])]),
   doProcessSimplification(cms_execSupObsMission),
   cccms_draw(cms_execSupObsMission,'with-nf/2.6.execSupObsMissions'), 
-%**/
+%*/
 
 // composition cms::handleSupObsMissions {
 //   apply replaceMission         => a7;
@@ -435,7 +435,7 @@
 // weave([logUpdate], [cms_handleSupObsMissions_a92])
 // weave([logUpdate], [cms_handleSupObsMissions_a93])
 
-/**%
+/*%
   doInstantiate(noAvailableReplacement, cms_handleSupObsMissions,
                 uc26_nAR_1,[bind(user,so)]),
   doClone(replaceMission,uc26_rM_1),
@@ -478,8 +478,8 @@
 	   weave(lU_cE_40,[cms_handleSupObsMissions_a93])
           ]),
   doProcessSimplification(cms_handleSupObsMissions),
-  cccms_draw(cms_handleSupObsMissions,'with-nf/2.6.handleSupObsMissions'), halt,
-%**/
+  cccms_draw(cms_handleSupObsMissions,'with-nf/2.6.handleSupObsMissions'), 
+%*/
 
 /*********************
  *** Use Case #2.7 ***
@@ -498,7 +498,7 @@
 // weave([logTime, logUpdate], [cms_execRescMission_a5])
 // weave([logTime, logUpdate], [cms_execRescMission_a6])
 
-/**%
+/*%
   doInstantiate(retrieveVictimHistory, cms_execRescMission, 
                 uc27_rVH_1, [bind(wrk,wrk), bind(op,'guessHistory')]),
   doInstantiate(logError, cms_execRescMission, lE_1,
@@ -547,7 +547,7 @@
 	   weave(lU_w_lT_w_2,[cms_execRescMission_a6])]),
   doProcessSimplification(cms_execRescMission),
   cccms_draw(cms_execRescMission,'with-nf/2.7.execRescMission'), 
-%**/
+%*/
 
 /*********************
  *** Use Case #2.8 ***
