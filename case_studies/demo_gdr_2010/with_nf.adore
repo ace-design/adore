@@ -1,0 +1,122 @@
+
+
+
+/*%
+  doInstantiate(logTime,_,lT_cmsEmployee,[bind(keyType,cmsEmployee)]),
+  doInstantiate(logTime,_,lT_worker,[bind(keyType,worker)]),
+  doInstantiate(logTime,_,lT_resource,[bind(keyType,resource)]),
+  doInstantiate(logUpdate,_,lU_cmsEmployee,[bind(vType,cmsEmployee)]),
+  doInstantiate(logUpdate,_,lU_worker,[bind(vType,worker)]),
+%*/
+
+//weave([logUpdate], [authentifyWhenIdle_a1])
+//weave([logUpdate], [authentifyWhenIdle_a2])
+//weave([logUpdate], [authentifyWhenIdle_a21])
+/*%
+  doInstantiate(lU_cmsEmployee, authentifyWhenIdle, nf_lU_cE_1, 
+                [bind(op,'cms::notIdle')]),
+  doInstantiate(lU_cmsEmployee, authentifyWhenIdle, nf_lU_cE_2, 
+                [bind(op,'cms::killAuthentication')]),
+  doInstantiate(lU_cmsEmployee, authentifyWhenIdle, nf_lU_cE_3, 
+                [bind(op,'cms::authUser')]),
+  doWeave([ weave(nf_lU_cE_1,[authentifyWhenIdle_a1]), 
+            weave(nf_lU_cE_2,[authentifyWhenIdle_a21]),
+	    weave(nf_lU_cE_3,[authentifyWhenIdle_a2])]),
+  doProcessSimplification(authentifyWhenIdle),
+  adore2png(authentifyWhenIdle,'figs/7__authentifyWhenIdle_enhanced.png'),
+%*/
+
+//weave([logError], [callDisconnected_h])
+/*%
+  doInstantiate(logError,callDisconnected,nf_lE_2,
+                [bind(exc,disconnected),bind(msg,disconnected)]),
+  doWeave([weave(nf_lE_2,[callDisconnected_h])]),
+  doProcessSimplification(callDisconnected),
+  adore2png(callDisconnected,'figs/7__callDisconnected.png'),
+%*/
+
+
+// weave([logError], [ignoreDisconnection_h])
+/*%
+  doInstantiate(logError,ignoreDisconnection,nf_lE_5,
+                [bind(exc,disconnected), bind(msg,disconnected)]),
+  doWeave([weave(nf_lE_5,[ignoreDisconnection_h])]),
+  doProcessSimplification(ignoreDisconnection),
+  adore2png(ignoreDisconnection,'figs/7__ignoreDisconnection.png'),
+%*/
+
+
+
+// weave([logUpdate, authentifyWhenIdle], [fakeCrisisDetected_t])
+/*%
+  doClone(authentifyWhenIdle, nf_aWI_2),
+  doInstantiate(lU_cmsEmployee,fakeCrisisDetected,nf_lU_cE_16,
+                 [bind(op,'ui::prompt4RealCrisis')]),
+  doMerge([nf_aWI_2, nf_lU_cE_16],nf_aWI_lU_cE_1),
+  doProcessSimplification(nf_aWI_lU_cE_1),
+  adore2png(nf_aWI_lU_cE_1,'figs/7____fakeCrisisDetected_merged_on_t.png'),
+  doWeave([weave(nf_aWI_lU_cE_1,[fakeCrisisDetected_t])]),
+  doProcessSimplification(fakeCrisisDetected),
+  adore2png(fakeCrisisDetected,'figs/7__fakeCrisisDetected.png'),
+%*/
+
+// weave([logUpdate, authentifyWhenIdle], [requestVideo_a3])
+/*%
+  doClone(authentifyWhenIdle, nf_aWI_4),
+  doInstantiate(lU_cmsEmployee, requestVideo,nf_lU_cE_18,
+                [bind(op,'ui::displayVideoFeed')]),
+  doMerge([nf_aWI_4, nf_lU_cE_18],nf_aWI_lU_cE_3),
+  adore2png(nf_aWI_lU_cE_3,'figs/7____requestVideo_merged_on_a3.png'),
+  doProcessSimplification(nf_aWI_lU_cE_3),
+  doWeave([weave(nf_aWI_lU_cE_3,[requestVideo_a3])]),
+  doProcessSimplification(requestVideo),
+  adore2png(requestVideo,'figs/7__requestVideo.png'),
+%*/
+
+
+/*%
+  doInstantiate(requestVideo, cms_captureWitnessReport, uc22_rV_1,
+                [bind(user,coord)]),
+  doClone(fakeCrisisDetected,uc22_fCD_1),
+  identifyClone(requestVideo_a3,uc22_rV_1,UC22_rva3), 
+  doWeave([weave(uc22_fCD_1,[UC22_rva3])]),
+  doProcessSimplification(uc22_rV_1),
+  adore2png(uc22_rV_1,'figs/7_requestVideoEnhanced.png'),  
+
+  doInstantiate(callDisconnected, cms_captureWitnessReport, uc22_cD_1,
+                [bind(op,'ui::promptWitnessInfo')]), 
+  doInstantiate(lU_cmsEmployee,  cms_captureWitnessReport, lU_cE_30,
+                [bind(op,'ui::promptWitnessInfo')]), 
+  doClone(authentifyWhenIdle,aWI_12),
+  doMerge([uc22_cD_1,lU_cE_30, aWI_12], uc22_cD_lU_aWI),
+  doProcessSimplification(uc22_cD_lU_aWI),
+  adore2png(uc22_cD_lU_aWI,'figs/7_merged_on_a10.png'),
+
+  doInstantiate(callDisconnected, cms_captureWitnessReport, uc22_cD_2,
+                [bind(op,'ui::promptPrelimInfo')]),
+  doInstantiate(lU_cmsEmployee,  cms_captureWitnessReport, lU_cE_31,
+                [bind(op,'ui::promptPrelimInfo')]), 
+  doClone(authentifyWhenIdle,aWI_13),
+  doMerge([uc22_cD_2, lU_cE_31,aWI_13], nf_uc22_cD_cE_aWI_1),
+  doProcessSimplification(nf_uc22_cD_cE_aWI_1),
+  adore2png(nf_uc22_cD_cE_aWI_1,'figs/7_merged_on_a2.png'),
+
+  doClone(fakeWitnessInfo,uc22_fWI_1),
+  doInstantiate(ignoreDisconnection,cms_captureWitnessReport,uc22_iD_1,
+                [bind(op,'ui::promptCheckList')]), 
+  doClone(fakeCrisisDetected, uc22_fCD_2),
+  doInstantiate(lU_cmsEmployee,  cms_captureWitnessReport, lU_cE_32,
+                [bind(op,'ui::promptCheckList')]), 
+  doClone(authentifyWhenIdle,aWI_14),
+  doMerge([uc22_iD_1,uc22_fCD_2,lU_cE_32,aWI_14], uc22_iD_fCD_1),
+  doProcessSimplification(uc22_iD_fCD_1),
+  adore2png(uc22_iD_fCD_1,'figs/7_merged_on_a4.png'),
+
+  doWeave([ weave(uc22_cD_lU_aWI,      [ cms_captureWitnessReport_a10  ]),
+            weave(nf_uc22_cD_cE_aWI_1, [ cms_captureWitnessReport_a2   ]),
+            weave(uc22_iD_fCD_1, [ cms_captureWitnessReport_a4   ]),
+	    weave(uc22_rV_1,     [ cms_captureWitnessReport_a3,
+	                           cms_captureWitnessReport_a4   ]),
+	    weave(uc22_fWI_1,    [ cms_captureWitnessReport_a2a3 ])]),
+  adore2png(cms_captureWitnessReport,'figs/7.including_nf_concerns.png'),
+%*/

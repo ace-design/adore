@@ -3,9 +3,6 @@
  * submitted to the TAOSD special issue dedicated to AOM
  **/
 
-// Non functional entities
-// TODO
-
 // Shared Entities
 depict mustAuthenticate using 'lightpink';
 depict reHandleOnChange using 'lemonchiffon';

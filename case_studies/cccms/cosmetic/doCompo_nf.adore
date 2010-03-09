@@ -164,10 +164,9 @@
 	    weave(nf_aWI_lU_cE_8, [cms_handleAMission_a9]),
 	    weave(nf_aWI_lU_cE_9, [cms_handleAMission_a9bis])
 	  ]),
-  doProcessSimplification(cms_handleAMission),
   cccms_draw(cms_handleAMission,'with-nf/2.1__handleAMission'),
 %*/
-   
+//   doProcessSimplification(cms_handleAMission),
 
 // composition cms::handleAWorker { 
 //   apply useHelicopter(m: 'm')  => a6; 

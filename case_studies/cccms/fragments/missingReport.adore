@@ -6,3 +6,4 @@ fragment missingReport {
   }
   relations { ^ < h; fail(h) < a1; h << $; a1 << $; }
 }
+

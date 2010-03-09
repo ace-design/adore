@@ -1,0 +1,25 @@
+/** Merging a set of fragment before performing weaving
+ * @date: 2010/03/10 
+ */
+
+composition cms::captureWitnessReport{  
+  apply ignoreDisconnection => a4;      
+  apply fakeCrisisDetected  => a4;      
+}
+
+// Merging the set of fragments around the "shared join point"
+/*%
+  doClone(ignoreDisconnection,uc22_iD_1), 
+  doClone(fakeCrisisDetected, uc22_fCD_2),
+  adore2png(uc22_iD_1,'figs/4____ignoreDisconnection.png'),
+  adore2png(uc22_fCD_2,'figs/4____fakeCrisisDetected.png'),
+  doMerge([uc22_iD_1,uc22_fCD_2], uc22_iD_fCD_1),
+  adore2png(uc22_iD_fCD_1,'figs/4__merged_on_a4.png'),
+%*/
+
+// Weaving the merged fragment
+/*%
+  doWeave([ weave(uc22_iD_fCD_1, [ cms_captureWitnessReport_a4   ])]),
+  doProcessSimplification(cms_captureWitnessReport),
+  adore2png(cms_captureWitnessReport,'figs/4.merge_then_weave.png'),
+%*/

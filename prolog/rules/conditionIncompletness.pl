@@ -20,38 +20,31 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
-%%%%
-%% Debugging ADORE ...
-%%%%
+:- module(conditionIncompletness,[]).
 
-%debugSubscription(compiler).
+%% user interface:
 
-%% Atomic Actions
-%debugSubscription(create).
-%debugSubscription(def).
-%debugSubscription(set).
+play :- 
+	run(Result), show(Result).
 
-%% Algorithms
-debugSubscription(algo).
-debugSubscription(timer).
+%% technical implementation
 
-%debugSubscription(clone).
-%debugSubscription(setify).
-%debugSubscription(merge).
-%debugSubscription(weave).
-%debugSubscription(instantiate).
+show([]) :- !.
+show([conditionIncompletness(P,A,C,V)|T]) :- 
+	H = conditionIncompletness(P,A,C,V),
+	process(P), writef('Warning: %w\n',[H]),
+	show(T).
 
-%% Execution framework
-%debugSubscription(exec).
-
-%%%%
-%% Model transformation parameters: 
-%%%%
-
-%% Seb:
-adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
-
-%% Mireille:
-%% adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
+run(Pairs) :- 
+	findall(conditionIncompletness(P,A,C,V),isConflicting(P,A,C,V),Tmp),
+	sort(Tmp,Pairs).
 
 
+isConflicting(Process, Activity, Condition,Contrary) :- 
+	process(Process), 
+	activity:belongsTo(Activity, Process),
+	isGuardedBy(_, Activity, Condition, Value), invert(Value,Contrary),
+	\+ isGuardedBy(_, Activity, Condition, Contrary).
+	
+invert(true,false).
+invert(false,true).

@@ -1,0 +1,20 @@
+
+composition cms::captureWitnessReport{
+  apply requestVideo(user: 'coord') => {a3,a4};     
+  apply fakeCrisisDetected          => requestVideo::a3; 
+}
+
+/*%
+  doInstantiate(requestVideo, cms_captureWitnessReport, uc22_rV_1,
+                [bind(user,coord)]),
+  doClone(fakeCrisisDetected,uc22_fCD_1),
+  identifyClone(requestVideo_a3,uc22_rV_1,UC22_rva3), 
+  doWeave([weave(uc22_fCD_1,[UC22_rva3])]),
+  doProcessSimplification(uc22_rV_1),
+  adore2png(uc22_rV_1,'figs/5__requestVideo_enhanced.png'),  
+
+  doWeave([ weave(uc22_rV_1, [cms_captureWitnessReport_a3,
+	                      cms_captureWitnessReport_a4])]),
+  doProcessSimplification(cms_captureWitnessReport),
+  adore2png(cms_captureWitnessReport,'figs/5.fragment_on_fragment.png'),
+%*/

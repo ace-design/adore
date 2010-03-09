@@ -1,3 +1,7 @@
+/** Business Process realization for Use Case #2.2
+ * @date: 2010/03/10 
+ */
+
 orchestration cms::captureWitnessReport { 
   variables {
     id as crisisIdentifier; coord as cmsEmployee;
@@ -23,4 +27,3 @@ orchestration cms::captureWitnessReport {
     a50 < rpl; a10 < a2a12; a2a12 < a2a3; a2a3 < a50; a50 < a51;
   }
 }
-

@@ -1,0 +1,56 @@
+/** Car Crash Crisis Management System, Use Case #2.2
+ * Demonstration @GPL'10, based on TAOSD AOM special issue case study
+ * @date: 2010/03/10 
+ */
+
+/***********************************
+ ** Step #1: ADORE orchestrations **
+ ***********************************/
+
+require 'process.adore';
+
+/******************************
+ ** Step #2: ADORE fragments **
+ ******************************/
+
+require 'fragments.adore';
+
+/*********************************
+ ** Step #3: weaving a fragment **
+ *********************************/
+
+//require 'simple_weaving.adore';
+
+/******************************
+ ** Step #4: Fragments merge **
+ ******************************/
+
+//require 'merge_then_weave.adore';
+
+/*************************************
+ ** Step #5: Fragments On Fragments **
+ *************************************/
+
+//require 'fragment_on_fragment.adore';
+
+/*******************************
+ ** Step #6: The All Together **
+ *******************************/
+
+//require 'the_all_together.adore';
+
+/** Inconsistency Detection: [conditionIncompletness:play].
+isConflicting(Process, Activity, Condition,Contrary) :- 
+	process(Process), 
+	activity:belongsTo(Activity, Process),
+	isGuardedBy(_, Activity, Condition, Value), invert(Value,Contrary),
+	\+ isGuardedBy(_, Activity, Condition, Contrary).
+**/
+
+
+/************************************************
+ ** Step #7: Including Non-functional Concerns **
+ ************************************************/
+
+//knowledge 'pointcuts.pl';
+//require 'with_nf.adore';

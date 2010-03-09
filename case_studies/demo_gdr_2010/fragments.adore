@@ -1,0 +1,138 @@
+/** Business Extensions realization for Use Case #2.2
+ * @date: 2010/03/10 
+ */
+
+
+/** Extension **/
+fragment callDisconnected {
+  variables {}
+  activities { 
+    h. hook(); 
+    thr. throw('lostWitnessContact' as string); 
+  }
+  relations { 
+    ^ < h; h < $; fail(h,'disconnected') < thr; 
+  }
+}
+depict callDisconnected using 'gold';
+
+/** Extension **/
+fragment fakeCrisisDetected {
+  variables { user as cmsEmployee; isReal as boolean; }
+  activities {
+    h. hook(user);
+    t. isReal := ui::prompt4RealCrisis(user);
+    thr. throw('fakeCrisis' as string);
+  }
+  relations { ^ < h; h < $; ^<t; t < $ when isReal; t < thr when ! isReal; }
+}
+depict fakeCrisisDetected using 'darkseagreen3' ;
+
+
+/** Extension **/
+fragment requestVideo<user> {
+  variables {
+    c as boolean; info as preliminaryInformation;
+    user as cmsEmployee; feedId as videoFeedIdentifier;
+  }
+  activities {
+    t. c := survSys::canCover(info.loc);
+    h. hook(info);
+    a12. feedId := survSys::activateVideo(info.loc);
+    a3. ui::displayVideoFeed(user, feedId); 
+  }
+  relations { ^ < h; h < $; ^ < t; t < a12 when c; a12 < a3; }
+}
+depict requestVideo using 'skyblue';
+
+
+/** Extension **/
+fragment fakeWitnessInfo {
+  variables {
+    witInfo as witness; phInfo as phoneInformation;
+    isValid as boolean;
+  }
+  activities {
+    h. isValid := hook(witInfo,phInfo); 
+    thr. throw('fakeWitnessInformation' as string);
+  }
+  relations {
+    ^ < h; h < $ when isValid; h < thr when ! isValid;
+  }
+}
+depict fakeWitnessInfo using 'burlywood';
+
+/** Extension **/
+fragment ignoreDisconnection {
+  variables {}
+  activities { 
+    h. hook(); 
+  }
+  relations { 
+    ^ < h; h < $; fail(h,'disconnected') < $; 
+  }
+}
+
+
+
+/*****************************
+ ** Non functional Concerns **
+ *****************************/
+
+fragment logTime<keyType, op> {
+  variables { 
+    key as keyType; start as long ; end as long; delta as long; op as string; 
+  }
+  activities {
+    a1.  start := system_currentTimeMillis(); 
+    h.  hook(key);
+    a2. end := system_currentTimeMillis();
+    a3. delta := diff(end,start);
+    a4. dataBase::storeExecTime(key,op, delta);
+  }
+  relations {
+    ^<a1; a1<h; h<a2; a2<a3; a3<a4; a2<$; 
+  }
+}
+depict logTime using 'lightpink3';
+
+fragment logError<exc, msg, op>{
+  variables { msg as string; op as var; }
+  activities {
+    h.  hook();
+    a0. database::storeError(msg,op);
+  }
+  relations {
+     ^<h; fail(h,'exc')<a0; h<$;
+  }
+}
+depict logError using 'tomato2';
+
+
+fragment authentifyWhenIdle {
+  variables { u as cmsEmployee; still as boolean; auth as boolean; }
+  activities {
+    a1. still :=  cms::notIdle(u);
+    h. hook(u);
+    a21. cms::killAuthentification(u);
+    a2. auth := cms::authUser(u);
+    t. throw('BadAuthentification' as string);
+  }
+  relations {
+    ^ < a1; a1 < h when still; h < $; a1 < a21 when ! still; a21<a2;
+    a2 < h when auth; a2 < t when ! auth;
+  }
+}
+depict authentifyWhenIdle using 'tan3';
+
+fragment logUpdate<vType, op> {
+  variables { v as vType;  op as string;  }
+  activities {
+    h.  hook(v);
+    a2. crud::update(v, op);
+  }
+  relations {
+   ^<h ; h <a2; h< $; 
+  }
+}
+depict logUpdate using 'lavender';

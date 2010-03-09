@@ -11,3 +11,4 @@ fragment fakeWitnessInfo {
     ^ < h; h < $ when isValid; h < thr when ! isValid;
   }
 }
+

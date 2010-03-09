@@ -18,3 +18,4 @@ fragment unavailableExtResource {
     a1 < a2; a2<< $; 
   }
 }
+depict unavailableExtResource using 'skyblue';

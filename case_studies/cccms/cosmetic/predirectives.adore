@@ -9,9 +9,3 @@
   doInstantiate(logCreate,_,lC_worker,[bind(vType,worker)]),
 %*/
 
-// Specifiying knowledge
-/**%
-  identifyVarClone(logUpdate_v,lU_cmsEmployee,LU_CE_V),
-  assert(adoreEquivalence(variable,[[lU_cmsEmployee, LU_CE_V],
-                                     [authentifyWhenIdle, u]])),
-%**/
