@@ -89,18 +89,21 @@ fragment fakeCrisisDetected {
 depict fakeCrisisDetected using 'darkseagreen3' ;
 
 
+/***********************************************
+ ** Non Functional Concern: Statistic Logging **
+ ***********************************************/
 
-
-
-
-
-
-
-
-
-/*****************************
- ** Non functional Concerns **
- *****************************/
+/** Description:
+ * - The system shall record the following statistical information on both 
+ *   on-going and resolved crises: rate of progression; average response time 
+ *   of rescue teams; individual response time of each rescue team; success
+ *    rate of each rescue team; rate of casualties; success rate of missions.
+ *  - The system shall provide statistical analysis tools to analyse 
+ *    individual crisis data and data on multiple crises.
+ * Realization in ADORE:
+ *  -> logTime:  fragment to store execution time of operation
+ *  -> logError: fragment to store exceptional ending of operation
+ **/
 
 fragment logTime<keyType, op> {
   variables { 
@@ -132,6 +135,25 @@ fragment logError<exc, msg, op>{
 depict logError using 'tomato2';
 
 
+
+/**************************************
+ ** Non Functional Concern: Security **
+ **************************************/
+
+/** Description:
+ * - The system shall define access policies for various classes of users. 
+ *   The access policy shall describe the components and information each 
+ *   class may add, access and update.
+ * - The system shall authenticate users on the basis of the access policies 
+ *   when they first access any components or information. If a user remains 
+ *   idle for 30 minutes or longer, the system shall require them to 
+ *   re-authenticate.
+ * - All communications in the system shall use secure channels compliant with 
+ *   AES-128 standard encryption.
+ * ADORE Realization: Focus on point 2, wich is behavioral.
+ *   -> authentifyWhenIdle fragment
+**/
+
 fragment authentifyWhenIdle {
   variables { u as cmsEmployee; still as boolean; auth as boolean; }
   activities {
@@ -147,6 +169,21 @@ fragment authentifyWhenIdle {
   }
 }
 depict authentifyWhenIdle using 'tan3';
+
+
+
+/***************************************************
+ ** Non Functional Concern: Persistence (Extract) **
+ ***************************************************/
+
+/** Description:
+ * - The system shall provide support for storing, updating and accessing the 
+ *   following information on available and deployed resources (both internal 
+ *   and external): type of resource (human or equipment); capability; rescue 
+ *   team; location; estimated time of arrival (ETA) on crisis site.
+ * ADORE Realization:
+   -> logUpdate fragment to keep track of resource status
+**/
 
 fragment logUpdate<vType, op> {
   variables { v as vType;  op as string;  }
