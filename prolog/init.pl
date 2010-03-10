@@ -52,8 +52,7 @@ loadFiles :-
 	loadTransfo('adore2dot'), loadTransfo('adore2metrics'),
 	loadTransfo('adore2png'), loadTransfo('adore2dgraph'),
 	aw('%%%% Loading Detection Rules'), 
-        loadRule('concurrentAccess'),
-	loadRule('conditionIncompletness'),
+        loadRule('concurrentAccess'), loadRule('conditionIncompletness'),
 	aw('%%%% Loading Local Configuration'), 
         [config].
 
