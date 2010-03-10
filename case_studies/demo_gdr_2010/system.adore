@@ -1,17 +1,36 @@
-/** Car Crash Crisis Management System, Use Case #2.2
- * Demonstration @GPL'10, based on TAOSD AOM special issue case study
+/** The Car Crash Crisis Management System, (Focus on Use Case #2.2)
+ * @author: Sebastien Mosser, Mireille Blay-Fornarino
+ * @related: TAOSD Special Issue on Aspect Oriented Modeling
  * @date: 2010/03/10 
- */
+ **/
 
-/***********************************
- ** Step #1: ADORE orchestrations **
- ***********************************/
+
+/*********************************
+ ** Step #0: CCCMS & Uses Cases **
+ *********************************/
+
+// A Common Case Study to Compare Aspect Oriented Modeling Approaches
+// Requirement: AOM_Case_Study.pdf (textual description, 29 pages)
+// Use Cases: p16 -> p21.
+
+/** Focus on Use Case #2.2 (a good overview of ADORE key points) 
+ * Use Case:        Capture Witness Report
+ * Scope:           Car Crash Crisis Management System
+ * Primary Actor:   Coordinator
+ * Secondary Actor: PhoneCompany, SurveillanceSystem
+ * Intention:       The Coordinator intends to create a crisis record based 
+ *                  on the information obtained from witness.
+ **/
+
+/***********************************************************
+ ** Step #1: Main success scenario as ADORE orchestration **
+ ***********************************************************/
 
 require 'process.adore';
 
-/******************************
- ** Step #2: ADORE fragments **
- ******************************/
+/****************************************************
+ ** Step #2: Process Extensions as ADORE fragments **
+ ****************************************************/
 
 require 'fragments.adore';
 

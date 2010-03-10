@@ -1,6 +1,28 @@
-/** Business Process realization for Use Case #2.2
- * @date: 2010/03/10 
- */
+/** GDR GPL 2010, ADORE Demonstration
+ * @author: Sebastien Mosser, Mireille Blay-Fornarino
+ * @related: TAOSD Special Issue on Aspect Oriented Modeling
+ **/
+
+
+/** Requirement Description (UC #2.2 Main Success Scenario):
+ *
+ * Coordinator requests Witness to provide his identification.
+ * 1. Coordinator provides witness information1 to System as reported 
+ *    by the witness.
+ * 2. Coordinator informs System of location and type of crisis as reported 
+ *    by the witness.
+ * In parallel to steps 2-4:
+ *      2a.1 System contacts PhoneCompany to verify witness information.
+ *      2a.2 PhoneCompany sends address/phone information to System.
+ *      2a.3 System validates information received from the PhoneCompany.
+ * 3. System provides Coordinator with a crisis-focused checklist.
+ * 4. Coordinator provides crisis information2 to System as reported by the 
+ *    witness.
+ * 5. System assigns an initial emergency level to the crisis and sets the 
+ *    crisis status to active.
+ * Use case ends in success.
+ *
+ **/
 
 orchestration cms::captureWitnessReport { 
   variables {

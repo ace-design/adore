@@ -1,35 +1,32 @@
-/** Business Extensions realization for Use Case #2.2
- * @date: 2010/03/10 
- */
+/** GDR GPL 2010, ADORE Demonstration
+ * @author: Sebastien Mosser, Mireille Blay-Fornarino
+ * @related: TAOSD Special Issue on Aspect Oriented Modeling
+ **/
 
 
-/** Extension **/
+/*************************************************
+ ** Business Extensions (scenario alternatives) **
+ *************************************************/
+
+/** Extension #1a, #2a: 
+ * The call is disconnected. The base use case terminates.
+ **/ 
 fragment callDisconnected {
   variables {}
-  activities { 
-    h. hook(); 
-    thr. throw('lostWitnessContact' as string); 
-  }
-  relations { 
-    ^ < h; h < $; fail(h,'disconnected') < thr; 
-  }
+  activities { h. hook(); thr. throw('lostWitnessContact' as string); }
+  relations { ^ < h; h < $; fail(h,'disconnected') < thr; }
 }
 depict callDisconnected using 'gold';
 
-/** Extension **/
-fragment fakeCrisisDetected {
-  variables { user as cmsEmployee; isReal as boolean; }
-  activities {
-    h. hook(user);
-    t. isReal := ui::prompt4RealCrisis(user);
-    thr. throw('fakeCrisis' as string);
-  }
-  relations { ^ < h; h < $; ^<t; t < $ when isReal; t < thr when ! isReal; }
-}
-depict fakeCrisisDetected using 'darkseagreen3' ;
 
 
-/** Extension **/
+/** Extension #3a:
+ * In parallel to steps 3-4, 
+ *    if the crisis location is covered by camera surveillance:
+ *      3a.1 System requests video feed from SurveillanceSystem.
+ *      3a.2 SurveillanceSystem starts sending video feed to System.
+ *      3a.3 System starts displaying video feed for Coordinator.
+ **/
 fragment requestVideo<user> {
   variables {
     c as boolean; info as preliminaryInformation;
@@ -46,32 +43,58 @@ fragment requestVideo<user> {
 depict requestVideo using 'skyblue';
 
 
-/** Extension **/
+/** Extension #4a:
+ * The call is disconnected.
+ *   4a.1 Use case continues at step 5 without crisis information.
+ **/
+fragment ignoreDisconnection {
+  variables  {}
+  activities { h. hook(); }
+  relations  { ^ < h; h < $; fail(h,'disconnected') < $; }
+}
+
+
+/** Extension #5a: 
+ * PhoneCompany information does not match information received from Witness.
+ *   5a.1 The base use case is terminated.
+ **/
 fragment fakeWitnessInfo {
-  variables {
-    witInfo as witness; phInfo as phoneInformation;
-    isValid as boolean;
+  variables { 
+    witInfo as witness; phInfo as phoneInformation; isValid as boolean;
   }
   activities {
     h. isValid := hook(witInfo,phInfo); 
     thr. throw('fakeWitnessInformation' as string);
   }
-  relations {
-    ^ < h; h < $ when isValid; h < thr when ! isValid;
-  }
+  relations { ^ < h; h < $ when isValid; h < thr when ! isValid; }
 }
 depict fakeWitnessInfo using 'burlywood';
 
-/** Extension **/
-fragment ignoreDisconnection {
-  variables {}
-  activities { 
-    h. hook(); 
+
+/** Extension #5b:
+ * Camera vision of the location is perfect, but Coordinator cannot confirm 
+ * the situation that the witness describes or the Coordinator determines that 
+ * the witness is calling in a fake crisis.
+ *   5b.1 The base use case is terminated.
+ **/
+fragment fakeCrisisDetected {
+  variables { user as cmsEmployee; isReal as boolean; }
+  activities {
+    h. hook(user);
+    t. isReal := ui::prompt4RealCrisis(user);
+    thr. throw('fakeCrisis' as string);
   }
-  relations { 
-    ^ < h; h < $; fail(h,'disconnected') < $; 
-  }
+  relations { ^ < h; h < $; ^<t; t < $ when isReal; t < thr when ! isReal; }
 }
+depict fakeCrisisDetected using 'darkseagreen3' ;
+
+
+
+
+
+
+
+
 
 
 
