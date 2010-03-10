@@ -19,38 +19,30 @@ require 'fragments.adore';
  ** Step #3: weaving a fragment **
  *********************************/
 
-//require 'simple_weaving.adore';
+//require 'steps/simple_weaving.adore';
 
 /******************************
  ** Step #4: Fragments merge **
  ******************************/
 
-//require 'merge_then_weave.adore';
+//require 'steps/merge_then_weave.adore';
 
 /*************************************
  ** Step #5: Fragments On Fragments **
  *************************************/
 
-//require 'fragment_on_fragment.adore';
+//require 'steps/fragment_on_fragment.adore';
 
 /*******************************
  ** Step #6: The All Together **
  *******************************/
 
-//require 'the_all_together.adore';
-
-/** Inconsistency Detection: [conditionIncompletness:play].
-isConflicting(Process, Activity, Condition,Contrary) :- 
-	process(Process), 
-	activity:belongsTo(Activity, Process),
-	isGuardedBy(_, Activity, Condition, Value), invert(Value,Contrary),
-	\+ isGuardedBy(_, Activity, Condition, Contrary).
-**/
-
+//require 'steps/the_all_together.adore';  // ==> conditionIncompletness:play.
 
 /************************************************
  ** Step #7: Including Non-functional Concerns **
  ************************************************/
 
-//knowledge 'pointcuts.pl';
-//require 'with_nf.adore';
+//knowledge 'steps/pointcuts.pl'; // ==>  displayCuts.
+
+//require 'steps/with_nf.adore';
