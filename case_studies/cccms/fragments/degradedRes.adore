@@ -11,3 +11,4 @@ fragment degradedRes<treshold> {
   }
   relations { ^ < h;  h < a1; a1 < t; t < a2 when deg; t<$ when !deg; a2<$; }
 } 
+

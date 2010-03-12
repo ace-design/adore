@@ -6,3 +6,4 @@ fragment cancelAuth {
   }
   relations { ^ < h; fail(h,'cancel') < r; h < $; }
 }
+

@@ -7,3 +7,4 @@ fragment noExtRes {
   }
   relations { ^ < h; h < $; fail(h,'noResource') < a1; a1 < thr; }
 }
+
