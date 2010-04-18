@@ -1,0 +1,22 @@
+/***************************************
+ ** Generated Without Aspect Ordering **
+ ***************************************/
+
+composition picweb::run {
+  apply caching       => act1; // CAC < getPictureWithTag < CAC
+  apply picasaService => act1; // PIC < getPictureWithTag < PIC
+  apply payment       => act1; // PAY < getPictureWithTag < PAY
+  apply randomizer    => act3; // RAN < replied && endPoint(replied)
+}
+
+/**%
+  doClone(caching, f1), 
+  doClone(picasaService, f2), 
+  doClone(payment, f3),
+  doMerge([f1,f2,f3],f4),
+  adore2png(f4, 'f4.png'),
+  doClone(randomizer, f5),
+  doWeave([weave(f4,[picweb_run_act1]),weave(f5,[picweb_run_act3])]),
+  doProcessSimplification(picweb_run),
+  adore2png(picweb_run, 'picweb_run_default.png'),
+%**/

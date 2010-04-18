@@ -1,0 +1,131 @@
+
+orchestration picweb::run {
+  variables {
+    tag as string;  // renamed as tag
+    picture* as string; // renamed as picture, defined as a set
+    threshold as integer;
+    // nrPhotos as integer; // deleted
+  }                         
+  activities {
+    act0. (tag, threshold) := receive();                    
+    act1. (picture*) := flickr::getPicturesWithTag(tag); 
+    act2. picture* := truncate::run(threshold, picture*);// added as output
+    act3. reply(picture*); // added as input                      
+  }
+  relations {                           
+    act0 < act1; 
+    act1 < act2; 
+    act2 < act3;
+  }
+}
+
+
+orchestration truncate::run {
+  variables { 
+    c1 as boolean;        
+    data* as string; // added
+    nrPhotos as integer;  
+    threshold as integer; 
+  }
+  activities {
+    act0. (threshold, data*) := receive(); // nrPhotos -> data*
+    new0. nrPhotos := count(data*); // added;
+    test1. c1 := greaterThan(nrPhotos, threshold);
+    act1. nop();                   
+    act2. data* := restrictList(threshold,data*); // changed to system action 
+    act3. reply(data*);   
+  }
+  relations {          
+    act0 < new0; new0 < test1;
+    test1 < act1 when c1;
+    test1 < act2 when !c1;
+    act1 < act3; act2 < act3;
+  }
+}
+
+fragment picasaService {
+  variables { // all added
+    existing* as string;
+    picasa* as string;
+    tag as string;
+  }   
+  activities { // data enriched
+    hook1. existing* := hook(tag);     
+    act0. picasa* := picasa::exploreFolksonomy(tag); 
+    act1. existing* := merge::mergeResult(existing*, picasa*);      
+  }
+  relations { 
+    ^ < hook1; 
+    ^ < act0; 
+    hook1 < act1; 
+    act0 < act1; 
+    act1 < $;
+  }
+}
+depict picasaService using 'lightblue'; 
+
+fragment caching {
+  variables {
+    exists as boolean; 
+    c1 as boolean;    
+    key as string;   
+    data* as string;  // flagged as a set
+  }
+  activities {
+    act0. exists := checkCache(key); 
+    test1. c1 := exists;
+    act1. data* := dataRepository::read(key);
+    hook1. data* := hook(key); 
+    act2. dataRepository::store(key,data*); 
+  }
+  relations { 
+    ^ < act0; act0 < test1;
+    test1 < act1 when c1;
+    test1 < hook1 when !c1; hook1 < act2;
+    act1 < $; act2 < $;
+  }
+}
+depict caching using 'darkseagreen';
+
+fragment randomizer {
+  variables { // added
+    data* as string;
+  }
+  activities {
+    act0. data* := randomize(data*);
+    hook1. hook(data*);
+  }
+  relations { 
+    ^ < act0; 
+    act0 < hook1; 
+    hook1 < $; 
+  }
+}
+depict randomizer using 'navajowhite2';
+
+fragment payment {
+  variables {
+    c1 as boolean; 
+    count as integer; // added
+    result* as string; // added
+  }
+  activities {
+    new0. count := counter::get('flickr' as string); // added
+    test1. c1 := greaterThan(count,'50000' as integer); // edited
+    act0. result* := emptyList(); // edited
+    hook1. result* := hook(); // edited
+    new1. counter::increment('flickr' as string); // added
+  }
+  relations {
+    ^  < new0; new0 < test1; 
+    test1 < act0 when c1; 
+    test1 < hook1 when !c1; 
+    act0 < $; 
+    hook1 < new1; new1 < $;
+  }
+}
+depict payment using 'pink2';
+
+
+
+

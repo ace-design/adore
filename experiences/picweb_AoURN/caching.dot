@@ -1,0 +1,29 @@
+digraph caching {
+  fontname=Courier;
+  node [shape=record];
+  edge [fontname=Courier];
+label="Fragment caching"
+  caching_preds [label="P", shape=doublecircle];
+  caching_succs [label="S", shape=doublecircle];
+  caching_act0 [label="act0|(exists) := checkCache(key)",style=filled,fillcolor="darkseagreen"];
+  caching_test1 [label="test1|(c1) := id(exists)",style=filled,fillcolor="darkseagreen"];
+  caching_act1 [label="act1|(data) := dataRepository::read(key)",style=filled,fillcolor="darkseagreen"];
+  caching_hook1 [label="hook1|(data) := hook(key)"];
+  caching_act2 [label="act2|dataRepository::store(key,data)",style=filled,fillcolor="darkseagreen"];
+  a6 [label="a6|returnNoPhotos()",style=filled,fillcolor="pink2"];
+  a7 [label="a7|(v2) := true()",style=filled,fillcolor="pink2"];
+  a8 [label="a8|picasa::exploreFolksonomy()",style=filled,fillcolor="lightblue"];
+  a9 [label="a9|merge::mergeResult()",style=filled,fillcolor="lightblue"];
+  caching_preds -> caching_act0 ;
+  caching_act0 -> caching_test1 ;
+  caching_test1 -> caching_act1 [label="c1"];
+  caching_test1 -> a7 [label="!c1"];
+  caching_test1 -> a8 [label="!c1"];
+  caching_act1 -> caching_succs ;
+  caching_hook1 -> a9 ;
+  caching_act2 -> caching_succs ;
+  a6 -> a9 ;
+  a7 -> caching_hook1 [label="!v2"];
+  a7 -> a6 [label="v2"];
+  a8 -> a9 ;
+  a9 -> caching_act2 ; } 

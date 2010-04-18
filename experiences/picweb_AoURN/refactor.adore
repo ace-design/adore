@@ -1,0 +1,62 @@
+
+/****************************************
+ ** Issue #1: non-initialized variable **
+ ****************************************/
+
+// Unitialized variables := used in an orch., but never assigned
+//   def. decision := addParameter refactoring technique on the receive
+
+// truncate::run~threshold && truncate::run~nrPhotos added
+/*%
+  addAsOutput(truncate_run_threshold, truncate_run_act0),
+  addAsOutput(truncate_run_nrPhotos, truncate_run_act0),
+%*/
+
+/*******************************************
+ ** Issue #2: Enrichement through an Hook **
+ *******************************************/
+
+// Non-unif. hook var. := used in a hook, but not exists in the target act.
+//   def. decision: addParameter refactoring technique on the target
+// FIXME: refactor a cloneVariable macro-action from the existing one (set)
+// FIXME (cf. Kompose semantic, currently a bug in the ADORE weaver) 
+
+// caching~data && caching~key added, applied on picweb_run_act1
+/*%
+  createVariable(picweb_run_data), setVariableType(picweb_run_data, string),
+  traceRename(variable, data, picweb_run_data, refactor(picweb_run)),
+  addAsOutput(picweb_run_data, picweb_run_act1),
+  createVariable(picweb_run_key), setVariableType(picweb_run_key, string),
+  traceRename(variable, key, picweb_run_key, refactor(picweb_run)),
+  addAsInput(picweb_run_key, picweb_run_act1),
+%*/
+
+// Process Dependency => picweb::run~key is unitialized now
+/*%
+  addAsOutput(picweb_run_key, picweb_run_act0),
+%*/
+
+/**********************************
+ ** Issue #3: Interface mismatch **
+ ***********************************/
+
+// Int. mismatch. := called process receives more parameters than given
+//   def. decision: addParameter refactoring technique on the invocation
+
+/*%
+  createVariable(picweb_run_threshold), 
+  setVariableType(picweb_run_threshold, integer),
+  traceRename(variable, threshold, picweb_run_threshold, refactor(picweb_run)),
+  addAsInput(picweb_run_threshold, picweb_run_act2),
+  createVariable(picweb_run_nrPhotos), 
+  setVariableType(picweb_run_nrPhotos, integer),
+  traceRename(variable, nrPhotos, picweb_run_nrPhotos, refactor(picweb_run)),
+  addAsInput(picweb_run_nrPhotos, picweb_run_act2),
+%*/
+
+// Process Dependency => picweb::run~threshold is unitialized now
+// Process Dependency => picweb::run~nrPhotos is unitialized now
+/*%
+  addAsOutput(picweb_run_threshold, picweb_run_act0),
+  addAsOutput(picweb_run_nrPhotos, picweb_run_act0),
+%*/

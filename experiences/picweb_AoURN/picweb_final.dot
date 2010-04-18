@@ -1,0 +1,33 @@
+digraph picweb_run {
+  fontname=Courier;
+  node [shape=record];
+  edge [fontname=Courier];
+label="Orchestration picweb::run"
+  picweb_run_act0 [label="act0|(key,threshold, nrPhotos) := receive()"];
+  picweb_run_act1 [label="act1|(data) := flickr::getPicturesWithTag(key)"];
+  picweb_run_act2 [label="act2|truncate::run(threshold, nrPhotos)"];
+  picweb_run_act3 [label="act3|reply()"];
+  a13 [label="a13|returnNoPhotos()",style=filled,fillcolor="pink2"];
+  a14 [label="a14|(v7) := true()",style=filled,fillcolor="pink2"];
+  a15 [label="a15|picasa::exploreFolksonomy()",style=filled,fillcolor="lightblue"];
+  a16 [label="a16|merge::mergeResult()",style=filled,fillcolor="lightblue"];
+  a17 [label="a17|(v5) := checkCache(key)",style=filled,fillcolor="darkseagreen"];
+  a18 [label="a18|(data) := dataRepository::read(key)",style=filled,fillcolor="darkseagreen"];
+  a19 [label="a19|dataRepository::store(key,data)",style=filled,fillcolor="darkseagreen"];
+  a23 [label="a23|(v3) := id(v5)",style=filled,fillcolor="darkseagreen"];
+  a24 [label="a24|randomize()",style=filled,fillcolor="navajowhite2"];
+  picweb_run_act0 -> a17 ;
+  picweb_run_act1 -> a16 ;
+  picweb_run_act2 -> a24 ;
+  a13 -> a16 ;
+  a14 -> picweb_run_act1 [label="!v7"];
+  a14 -> a13 [label="v7"];
+  a15 -> a16 ;
+  a16 -> a19 ;
+  a17 -> a23 ;
+  a18 -> picweb_run_act2 ;
+  a19 -> picweb_run_act2 ;
+  a23 -> a14 [label="!v3"];
+  a23 -> a15 [label="!v3"];
+  a23 -> a18 [label="v3"];
+  a24 -> picweb_run_act3 ; } 

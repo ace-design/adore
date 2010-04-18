@@ -1,0 +1,195 @@
+/** An Attempt to Chain AoURN and ADORE
+ *
+ * The goal of this file is to sketch a transformation from an AoRN stuff
+ * into an ADORE one.
+ *
+ * @author Sebastien Mosser <mosser@polytech.unice.fr>
+ * @reference jucm model made by Gunter Mussbacher <gunterm@site.uottawa.ca>
+ *            & enriched by Sebastien Mosser
+ * @location: Bellairs McGill Research Institute, Holetown, St James, Barbados 
+ */
+
+/***************
+ ** Intention **
+ ***************/
+
+// Objective: sketch a transformation from UCM ~> ADORE
+// Input:  a Use Case Map defined using the AoRUN notation
+// Output: the associated set of ADORE artefacts
+
+// Example (PicWeb.jucm): 
+//   User input:      transform(System) 
+//   Expected output: PicWeb business processes & fragments
+
+// Vocabulary: 
+//  - BB   := 'Black Box'
+//  - orch := 'Orchestration'
+//  - frag := 'Fragment'
+//  - UCM  := 'Use Case Map'
+//  - refactoring: Fowler's refactoring techique catalog 
+//                 (http://www.refactoring.com/catalog/index.html)
+
+// Conventions (in the UCMs)
+//  - ST_type meta-information on a team == "business process" | \epsilon
+//  - ST_in  on a responsability := input data
+//  - ST_out on a responsability := output data
+
+// Assumptions:
+//  - exclusive branches in OrFork
+//  - strong order (complete?) between aspects, if exists
+
+/*******************************
+ ** From System jUCM Artefact **
+ *******************************/
+
+//  MetaInfo(PicWeb,ST_type) == 'business process' 
+//  && MetaInfo(run,ST_type) == 'operation' 
+//    ~> generate(orchestration, PicWeb, run)
+
+/*******************************
+ ** From PicWeb jUCM Artefact **
+ *******************************/
+
+orchestration picweb::run {
+  variables {}                          // (1) no ST_in or ST_out meta-info
+  activities {
+    act0. receive();                    // (2) start point 'get' && orch.
+    act1. flickr::getPicturesWithTag(); // (3) BB responsability in Flickr
+    act2. truncate::run();              // (4) stub in Truncate
+    act3. reply();                      // (5) end point 'replied' && orch.
+  }
+  relations {                           // (6) extracted from the path
+    act0 < act1; act1 < act2; act2 < act3;
+  }
+}
+
+//  MetaInfo(Truncate,ST_type) == 'business process' 
+//  &&   MetaInfo(run,ST_type) == 'operation' 
+//    ~> generate(orchestration, Truncate, run)
+
+/*********************************
+ ** From Truncate jUCM Artefact **
+ *********************************/
+
+orchestration truncate::run {
+  variables { 
+    c1 as boolean;        // (1) \exists OrFork defining a conditional path
+    nrPhotos as integer;  // (2) variable used by this OrFork formula
+    threshold as integer; // (3) variable used by this OrFork formula
+  }
+  activities {
+    act0. receive();                 // (4) orch && start point 'get'
+    test1. c1 := greaterThan(nrPhotos, threshold); // (5) 'OrFork' cond.
+    act1. nop();                     // (6) path without any responsability
+    act2. limitNumberOfPicts(threshold); 
+          // (7) not a stub but contained by a process => BB (internal)
+          // (8) MetaInfo(...,ST_in) = 'threshold' & isVariable(threshold)
+    act3. reply();                   // (9) orch && 'replied' end point
+  }
+  relations {                        // (10) extracted from paths
+    act0 < test1;
+    test1 < act1 when c1;
+    test1 < act2 when !c1;
+    act1 < act3; act2 < act3;
+  }
+}
+
+/**************************************
+ ** From PicasaService jUCM Artefact **
+ **************************************/
+
+// isAspect(Picasa Service) ~> generateFragment(Picasa Service)
+fragment picasaService {
+  variables {}                          // (1) no data defined
+  activities {
+    hook1. hook();                      // (2) Flickr Pointut definition
+    act0. picasa::exploreFolksonomy();  // (3) BB responsability in Picasa
+    act1. merge::mergeResult();         // (4) BB responsability in Merge
+  }
+  relations { 
+    // (5) frag => ^ binded to 'get' entry point
+    // (6) frag => $ binded to 'merged' end point
+    ^ < hook1; ^ < act0; hook1 < act1; act0 < act1; act1 < $;
+  }
+}
+depict picasaService using 'lightblue'; // (7) random color picked from X11
+
+/*******************************************
+ ** From Caching jUCM Artefact (detailed) **
+ *******************************************/
+
+// isAspect(Caching) ~> generateFragment(Caching)
+fragment caching {
+  variables {
+    exists as boolean; // (1) used in an OrFork
+    c1 as boolean;     // (2) condition used by the branches
+    key as string;     // (3) defined by a ST_* meta-information
+    data as string;    // (4) defined by a ST_* meta-information
+  }
+  activities {
+    act0. exists := checkCache(key); // (6) ST_in, ST_out && BB responsability
+    test1. c1 := exists; // (7) formula from the orFork
+    act1. data := dataRepository::read(key); // (8) BB resp. in DataRep...
+    hook1. data := hook(key); // (9) pointcut, ST_in, ST_out
+    act2. dataRepository::store(key,data); // (10) BB resp, ST_in
+  }
+  relations { // (11) extracted from path, ^ & $ binded ...
+    ^ < act0; act0 < test1;
+    test1 < act1 when c1;
+    test1 < hook1 when !c1; hook1 < act2;
+    act1 < $; act2 < $;
+  }
+}
+depict caching using 'darkseagreen';
+
+/************************************
+ ** From Randomizer jUCM Artefact  **
+ ************************************/
+
+fragment randomizer {
+  variables {}
+  activities {
+    act0. randomize();
+    hook1. hook();
+  }
+  relations { ^ < act0; act0 < hook1; hook1 < $; }
+}
+depict randomizer using 'navajowhite2';
+
+/********************************
+ ** From Payment jUCM Artefact **
+ ********************************/
+
+fragment payment {
+  variables {
+    c1 as boolean;
+  }
+  activities {
+    test1. c1 := true();
+    act0. returnNoPhotos();
+    hook1. hook();
+  }
+  relations {
+    ^  < test1; test1 < act0 when c1; 
+    test1 < hook1 when !c1; 
+    act0 < $; hook1 < $;
+  }
+}
+depict payment using 'pink2';
+
+/*****************************************************************
+ ** Adore checks to validate dataflow => Authomatic Refactoring **
+ *****************************************************************/
+
+require 'refactor.adore';
+
+/****************************************
+ ** Automatic integration of fragments **
+ ****************************************/
+
+//require 'composition_order.adore';     // According the CIG
+//require 'composition_default.adore'; // Default beahvior
+ 
+
+
+

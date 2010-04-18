@@ -1,0 +1,119 @@
+
+orchestration picweb::run {
+  variables {
+    key as string; 
+    data as string;
+    threshold as integer;
+    nrPhotos as integer;
+  }                         
+  activities {
+    act0. (key, threshold, nrPhotos) := receive();                    
+    act1. (data) := flickr::getPicturesWithTag(key); 
+    act2. truncate::run(threshold, nrPhotos);              
+    act3. reply();                      
+  }
+  relations {                           
+    act0 < act1; 
+    act1 < act2; 
+    act2 < act3;
+  }
+}
+
+
+orchestration truncate::run {
+  variables { 
+    c1 as boolean;        
+    nrPhotos as integer;  
+    threshold as integer; 
+  }
+  activities {
+    act0. (threshold, nrPhotos) := receive();                
+    test1. c1 := greaterThan(nrPhotos, threshold);
+    act1. nop();                   
+    act2. limitNumberOfPicts(threshold); 
+    act3. reply();   
+  }
+  relations {          
+    act0 < test1;
+    test1 < act1 when c1;
+    test1 < act2 when !c1;
+    act1 < act3; act2 < act3;
+  }
+}
+
+fragment picasaService {
+  variables {}   
+  activities {
+    hook1. hook();     
+    act0. picasa::exploreFolksonomy(); 
+    act1. merge::mergeResult();      
+  }
+  relations { 
+    ^ < hook1; 
+    ^ < act0; 
+    hook1 < act1; 
+    act0 < act1; 
+    act1 < $;
+  }
+}
+depict picasaService using 'lightblue'; 
+
+fragment caching {
+  variables {
+    exists as boolean; 
+    c1 as boolean;    
+    key as string;   
+    data as string;  
+  }
+  activities {
+    act0. exists := checkCache(key); 
+    test1. c1 := exists;
+    act1. data := dataRepository::read(key);
+    hook1. data := hook(key); 
+    act2. dataRepository::store(key,data); 
+  }
+  relations { 
+    ^ < act0; act0 < test1;
+    test1 < act1 when c1;
+    test1 < hook1 when !c1; hook1 < act2;
+    act1 < $; act2 < $;
+  }
+}
+depict caching using 'darkseagreen';
+
+fragment randomizer {
+  variables {}
+  activities {
+    act0. randomize();
+    hook1. hook();
+  }
+  relations { 
+    ^ < act0; 
+    act0 < hook1; 
+    hook1 < $; 
+  }
+}
+depict randomizer using 'navajowhite2';
+
+fragment payment {
+  variables {
+    c1 as boolean;
+  }
+  activities {
+    test1. c1 := true();
+    act0. returnNoPhotos();
+    hook1. hook();
+  }
+  relations {
+    ^  < test1; 
+    test1 < act0 when c1; 
+    test1 < hook1 when !c1; 
+    act0 < $; 
+    hook1 < $;
+  }
+}
+depict payment using 'pink2';
+
+
+
+
