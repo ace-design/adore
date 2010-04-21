@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:grl="http:///grl.ecore" xmlns:ucm.map="http:///ucm/map.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="gunterm" created="April 16, 2010 10:58:53 AM EDT" modified="April 17, 2010 8:09:07 PM AST" specVersion="75" urnVersion="0.923" nextGlobalID="667">
+<urn:URNspec xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:grl="http:///grl.ecore" xmlns:ucm.map="http:///ucm/map.ecore" xmlns:urn="http:///urn.ecore" name="URNspec" author="gunterm" created="April 16, 2010 10:58:53 AM EDT" modified="April 21, 2010 3:56:14 PM EDT" specVersion="81" urnVersion="0.923" nextGlobalID="689">
   <ucmspec>
     <scenarioGroups id="5" name="Flicker Service">
       <scenarios id="6" name="truncating not required">
         <initializations value="100" variable="//@ucmspec/@variables.1"/>
         <initializations value="200" variable="//@ucmspec/@variables.0"/>
+        <startPoints enabled="true" startPoint="//@urndef/@specDiagrams.1/@nodes.0"/>
+        <endPoints enabled="true" mandatory="true" endPoint="//@urndef/@specDiagrams.2/@nodes.0"/>
       </scenarios>
       <scenarios id="100" name="truncating required">
         <initializations value="300" variable="//@ucmspec/@variables.1"/>
         <initializations value="200" variable="//@ucmspec/@variables.0"/>
+        <startPoints enabled="true" startPoint="//@urndef/@specDiagrams.1/@nodes.0"/>
+        <endPoints enabled="true" mandatory="true" endPoint="//@urndef/@specDiagrams.2/@nodes.0"/>
       </scenarios>
     </scenarioGroups>
     <variables id="94" name="Threshold" type="integer"/>
     <variables id="97" name="NrPhotos" type="integer"/>
     <variables id="585" name="exists"/>
+    <variables id="688" name="RequestLimit" type="integer"/>
+    <variables id="689" name="NrRequests" type="integer"/>
   </ucmspec>
   <grlspec>
     <intElements id="328" name="Caching" linksDest="//@grlspec/@links.0 //@grlspec/@links.2" type="Task" refs="//@urndef/@specDiagrams.3/@nodes.0"/>
@@ -21,7 +27,6 @@
     <intElements id="332" name="PicWeb" linksSrc="//@grlspec/@links.0 //@grlspec/@links.1" type="Task" refs="//@urndef/@specDiagrams.3/@nodes.2"/>
     <intElements id="389" name="Payment" linksSrc="//@grlspec/@links.3" type="Task" refs="//@urndef/@specDiagrams.3/@nodes.3"/>
     <intElements id="394" name="Randomizer" linksDest="//@grlspec/@links.1" type="Task" refs="//@urndef/@specDiagrams.3/@nodes.4"/>
-    <intElements id="664" name="Softgoal664" refs="//@urndef/@specDiagrams.3/@nodes.5"/>
     <links xsi:type="grl:Dependency" id="334" name="Dependency334" refs="//@urndef/@specDiagrams.3/@connections.0" dest="//@grlspec/@intElements.0" src="//@grlspec/@intElements.2"/>
     <links xsi:type="grl:Dependency" id="396" name="Dependency396" refs="//@urndef/@specDiagrams.3/@connections.1" dest="//@grlspec/@intElements.4" src="//@grlspec/@intElements.2"/>
     <links xsi:type="grl:Contribution" id="460" name="Contribution460" refs="//@urndef/@specDiagrams.3/@connections.2" dest="//@grlspec/@intElements.0" src="//@grlspec/@intElements.1" contribution="Unknown" quantitativeContribution="0" correlation="true"/>
@@ -106,7 +111,7 @@
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.0/@nodes.6" target="//@urndef/@specDiagrams.0/@nodes.2"/>
     </specDiagrams>
     <specDiagrams xsi:type="ucm.map:UCMmap" id="398" name="PicWeb" parentStub="//@urndef/@specDiagrams.0/@nodes.4/@bindings.0">
-      <nodes xsi:type="ucm.map:StartPoint" id="403" name="get" x="179" y="97" contRef="//@urndef/@specDiagrams.1/@contRefs.1" succ="//@urndef/@specDiagrams.1/@connections.0" inBindings="//@urndef/@specDiagrams.0/@nodes.4/@bindings.0/@in.0">
+      <nodes xsi:type="ucm.map:StartPoint" id="403" name="get" x="179" y="97" contRef="//@urndef/@specDiagrams.1/@contRefs.1" succ="//@urndef/@specDiagrams.1/@connections.0" inBindings="//@urndef/@specDiagrams.0/@nodes.4/@bindings.0/@in.0" scenarioStartPoints="//@ucmspec/@scenarioGroups.0/@scenarios.0/@startPoints.0 //@ucmspec/@scenarioGroups.0/@scenarios.1/@startPoints.0">
         <label/>
         <precondition deltaX="40" deltaY="-17" label="" expression="true"/>
       </nodes>
@@ -139,7 +144,7 @@
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.1/@nodes.3" target="//@urndef/@specDiagrams.1/@nodes.1" outBindings="//@urndef/@specDiagrams.1/@nodes.3/@bindings.0/@out.0"/>
     </specDiagrams>
     <specDiagrams xsi:type="ucm.map:UCMmap" id="529" name="Truncate" parentStub="//@urndef/@specDiagrams.1/@nodes.3/@bindings.0 //@urndef/@specDiagrams.10/@nodes.3/@bindings.0">
-      <nodes xsi:type="ucm.map:EndPoint" id="535" name="replied" x="455" y="118" contRef="//@urndef/@specDiagrams.2/@contRefs.0" pred="//@urndef/@specDiagrams.2/@connections.5" outBindings="//@urndef/@specDiagrams.1/@nodes.3/@bindings.0/@out.0 //@urndef/@specDiagrams.10/@nodes.3/@bindings.0/@out.0">
+      <nodes xsi:type="ucm.map:EndPoint" id="535" name="replied" x="455" y="118" contRef="//@urndef/@specDiagrams.2/@contRefs.0" pred="//@urndef/@specDiagrams.2/@connections.5" outBindings="//@urndef/@specDiagrams.1/@nodes.3/@bindings.0/@out.0 //@urndef/@specDiagrams.10/@nodes.3/@bindings.0/@out.0" scenarioEndPoints="//@ucmspec/@scenarioGroups.0/@scenarios.0/@endPoints.0 //@ucmspec/@scenarioGroups.0/@scenarios.1/@endPoints.0">
         <label/>
         <postcondition deltaX="-40" deltaY="-20" label="" expression="true"/>
       </nodes>
@@ -173,7 +178,6 @@
       <nodes xsi:type="grl:IntentionalElementRef" id="333" name="IntentionalElementRef333" x="112" y="128" pred="//@urndef/@specDiagrams.3/@connections.0 //@urndef/@specDiagrams.3/@connections.1" def="//@grlspec/@intElements.2"/>
       <nodes xsi:type="grl:IntentionalElementRef" id="390" name="IntentionalElementRef390" x="468" y="303" succ="//@urndef/@specDiagrams.3/@connections.3" def="//@grlspec/@intElements.3"/>
       <nodes xsi:type="grl:IntentionalElementRef" id="395" name="IntentionalElementRef395" x="181" y="277" succ="//@urndef/@specDiagrams.3/@connections.1" def="//@grlspec/@intElements.4"/>
-      <nodes xsi:type="grl:IntentionalElementRef" id="665" name="IntentionalElementRef665" x="832" y="524" def="//@grlspec/@intElements.5"/>
       <connections xsi:type="grl:LinkRef" source="//@urndef/@specDiagrams.3/@nodes.0" target="//@urndef/@specDiagrams.3/@nodes.2" link="//@grlspec/@links.0"/>
       <connections xsi:type="grl:LinkRef" source="//@urndef/@specDiagrams.3/@nodes.4" target="//@urndef/@specDiagrams.3/@nodes.2" link="//@grlspec/@links.1"/>
       <connections xsi:type="grl:LinkRef" source="//@urndef/@specDiagrams.3/@nodes.1" target="//@urndef/@specDiagrams.3/@nodes.0" link="//@grlspec/@links.2"/>
@@ -184,7 +188,7 @@
         <label/>
         <precondition deltaX="40" deltaY="-17" label="" expression="true"/>
       </nodes>
-      <nodes xsi:type="ucm.map:EndPoint" id="104" name="merged" x="593" y="176" contRef="//@urndef/@specDiagrams.4/@contRefs.2" pred="//@urndef/@specDiagrams.4/@connections.5">
+      <nodes xsi:type="ucm.map:EndPoint" id="104" name="merged" x="593" y="176" contRef="//@urndef/@specDiagrams.4/@contRefs.2" pred="//@urndef/@specDiagrams.4/@connections.5" outBindings="//@urndef/@specDiagrams.10/@nodes.9/@bindings.0/@out.0">
         <label/>
         <postcondition deltaX="-40" deltaY="-20" label="" expression="true"/>
       </nodes>
@@ -361,10 +365,10 @@
       <nodes xsi:type="ucm.map:DirectionArrow" id="388" name="DirectionArrow388" x="562" y="189" succ="//@urndef/@specDiagrams.9/@connections.7" pred="//@urndef/@specDiagrams.9/@connections.4"/>
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.9/@nodes.0" target="//@urndef/@specDiagrams.9/@nodes.2"/>
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.9/@nodes.2" target="//@urndef/@specDiagrams.9/@nodes.3" inBindings="//@urndef/@specDiagrams.9/@nodes.3/@bindings.0/@in.0">
-        <condition deltaX="92" deltaY="-9" label="&lt;= 5000 requests" expression="true" description=""/>
+        <condition deltaX="92" deltaY="-9" label="&lt;= 50000 requests" expression="NrRequests &lt;= RequestLimit" description=""/>
       </connections>
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.9/@nodes.2" target="//@urndef/@specDiagrams.9/@nodes.5">
-        <condition deltaX="92" deltaY="23" label="> 5000 requests" expression="true" description=""/>
+        <condition deltaX="92" deltaY="23" label="> 50000 requests" expression="NrRequests > RequestLimit" description=""/>
       </connections>
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.9/@nodes.3" target="//@urndef/@specDiagrams.9/@nodes.4" outBindings="//@urndef/@specDiagrams.9/@nodes.3/@bindings.0/@out.0"/>
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.9/@nodes.4" target="//@urndef/@specDiagrams.9/@nodes.7"/>
@@ -409,7 +413,7 @@
           <precondition label="" expression="true"/>
         </bindings>
       </nodes>
-      <nodes xsi:type="ucm.map:Stub" id="634" name="CAC" x="435" y="319" contRef="//@urndef/@specDiagrams.10/@contRefs.0" succ="//@urndef/@specDiagrams.10/@connections.6" pred="//@urndef/@specDiagrams.10/@connections.8" aspect="Exit">
+      <nodes xsi:type="ucm.map:Stub" id="634" name="CAC" x="435" y="319" contRef="//@urndef/@specDiagrams.10/@contRefs.0" succ="//@urndef/@specDiagrams.10/@connections.6" pred="//@urndef/@specDiagrams.10/@connections.8" aspect="Regular">
         <label/>
         <bindings plugin="//@urndef/@specDiagrams.6">
           <out endPoint="//@urndef/@specDiagrams.6/@nodes.4" stubExit="//@urndef/@specDiagrams.10/@connections.6"/>
@@ -426,6 +430,7 @@
       <nodes xsi:type="ucm.map:Stub" id="637" name="PIC" x="414" y="458" contRef="//@urndef/@specDiagrams.10/@contRefs.0" succ="//@urndef/@specDiagrams.10/@connections.8" pred="//@urndef/@specDiagrams.10/@connections.10" aspect="Regular">
         <label/>
         <bindings plugin="//@urndef/@specDiagrams.4">
+          <out endPoint="//@urndef/@specDiagrams.4/@nodes.1" stubExit="//@urndef/@specDiagrams.10/@connections.8"/>
           <precondition label="" expression="true"/>
         </bindings>
       </nodes>
@@ -460,7 +465,7 @@
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.10/@nodes.6" target="//@urndef/@specDiagrams.10/@nodes.8" inBindings="//@urndef/@specDiagrams.10/@nodes.8/@bindings.0/@in.0"/>
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.10/@nodes.7" target="//@urndef/@specDiagrams.10/@nodes.3" inBindings="//@urndef/@specDiagrams.10/@nodes.3/@bindings.0/@in.0" outBindings="//@urndef/@specDiagrams.10/@nodes.7/@bindings.0/@out.0"/>
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.10/@nodes.8" target="//@urndef/@specDiagrams.10/@nodes.10" inBindings="//@urndef/@specDiagrams.10/@nodes.10/@bindings.0/@in.0"/>
-      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.10/@nodes.9" target="//@urndef/@specDiagrams.10/@nodes.7"/>
+      <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.10/@nodes.9" target="//@urndef/@specDiagrams.10/@nodes.7" outBindings="//@urndef/@specDiagrams.10/@nodes.9/@bindings.0/@out.0"/>
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.10/@nodes.10" target="//@urndef/@specDiagrams.10/@nodes.2"/>
       <connections xsi:type="ucm.map:NodeConnection" source="//@urndef/@specDiagrams.10/@nodes.11" target="//@urndef/@specDiagrams.10/@nodes.9" outBindings="//@urndef/@specDiagrams.10/@nodes.11/@bindings.0/@out.0"/>
       <comments description="Associations&#xD;&#xD;CAC := 'Cache'&#xD;&#xD;PAY := 'Payment'&#xD;&#xD;PIC := 'Picasa Service'&#xD;&#xD;RAN := 'Randomizer'" x="506" y="356" width="206" height="150"/>
