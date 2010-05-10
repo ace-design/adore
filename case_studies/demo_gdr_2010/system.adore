@@ -64,4 +64,4 @@ require 'fragments.adore';
 
 knowledge 'steps/pointcuts.pl'; // ==>  displayCuts.
 
-require 'steps/with_nf.adore';
+//require 'steps/with_nf.adore';

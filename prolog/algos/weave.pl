@@ -135,8 +135,10 @@ identifyVariableUnification(Hook, Block, [Var|Tail],Actions) :-
  	identifyVariableUnification(Hook,Block,Tail,Others),
 	flatten([substVariable(Var,Selected),Others],Actions).
 
-validateCandidates(V,[],_) :- 
-	dfail(weave,'Cannot unify \'~w\' with existing variable!',[V]),!.
+validateCandidates(V,[],V) :- !,true.
+        %% TODO: fixme (according to Kompose semantic: enrichment)
+	%dfail(weave,'Cannot unify \'~w\' with existing variable!',[V]).
+
 validateCandidates(_,[C],C) :- !.
 validateCandidates(V,L,C) :-
 	member(C,L), variable:belongsTo(C,P), variableBinding(P,Bindings),

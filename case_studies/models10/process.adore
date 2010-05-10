@@ -1,0 +1,29 @@
+orchestration cms::captureWitnessReport { 
+  variables {
+    id as crisisIdentifier; 
+    coord as cmsEmployee;
+    wi as witness; 
+    i as preliminaryInformation;
+    ccl as crisisCheckList; 
+    ci as crisisInformation;
+    pi as phoneInformation; 
+    exact as boolean;
+  }
+  activities {
+    rcv. (coord, id) := receive(); // DONE
+    a10. wi := ui::promptWitnessInfo(coord); // DONE
+    a11. cms::setWitness(wi,id); // DONE
+    a2. i := ui::promptPrelimInfo(coord); // DONE 
+    a2a12. pi := phoneCie::getInfo(wi.id); // DONE
+    a2a3. exact := cms::validateWitnessInfo(wi,pi); // DONE
+    a3. ccl := cms::buildCheckList(i); // DONE
+    a4. ci := ui::promptCheckList(coord,id, ccl);
+    a50. cms::assignEmergencyLvl(id,ci); // DONE
+    a51. msgBus::send('status' as string, 'active' as string,id); // DONE
+    rpl. reply(); // DONE
+  }
+  relations {
+    rcv < a10; a10 < a11; a10 < a2; a2 < a3; a3 < a4; a4 < a50; 
+    a50 < rpl; a10 < a2a12; a2a12 < a2a3; a2a3 < a50; a50 < a51;
+  }
+}

@@ -1,0 +1,23 @@
+
+require 'picweb.adore';
+
+
+/**%
+  doInstantiate(restrictCardinality, picweb_get, rC,[bind(limit,threshold)]),
+  doWeave( [weave(rC, [picweb_get_a3])]),
+  doProcessSimplification(picweb_get),
+  adore2png(picweb_get,'v0.png'),
+%**/
+
+
+/*%
+  doInstantiate(restrictCardinality, picweb_get, rC,[bind(limit,threshold)]),
+  doClone(addPicasa, aP),
+  doWeave( [ weave(rC, [picweb_get_a3]),
+             weave(aP, [picweb_get_a2])]),
+  doProcessSimplification(picweb_get),
+  adore2png(picweb_get,'v1.png'),
+%*/
+
+
+

@@ -35,11 +35,11 @@
 debugSubscription(algo).
 debugSubscription(timer).
 
-%debugSubscription(clone).
-%debugSubscription(setify).
-%debugSubscription(merge).
-%debugSubscription(weave).
-%debugSubscription(instantiate).
+debugSubscription(clone).
+debugSubscription(setify).
+debugSubscription(merge).
+debugSubscription(weave).
+debugSubscription(instantiate).
 
 %% Execution framework
 %debugSubscription(exec).

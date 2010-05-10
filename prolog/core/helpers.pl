@@ -72,7 +72,9 @@ getAbsoluteNames(Cxt,[H|T],[R|O]) :-
 adoreAssert(Fact) :- Fact, !.
 adoreAssert(Fact) :- assert(Fact).
 
-
+%% assert a list of facts, using adoreAssert as assretion backend
+adoreAssertAList([]).
+adoreAssertAList([H|T]) :- adoreAssert(H), adoreAssertAList(T).
 
 
 

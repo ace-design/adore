@@ -258,6 +258,12 @@
 		   "adore-normalized" "Composition Context Normalization"
 		   ".adore" ))
 
+(defun adore-get-exec-semantic () (interactive)
+  (adore-do-n-show-temp "buildExecutionSemantic"
+		   "adore-semantic" "Execution Semantic Computation"
+		   ".txt" ))
+
+
 (defun adore-show-universe () (interactive)
   (adore-do-n-show-temp "dumpUniverse" "adore-universe" "Serialized Universe"
 			".adore" ))
@@ -328,6 +334,8 @@
     (define-key genMap [xml] '("As XML..." . adore-as-xml)))
   (let ((algoMap (make-sparse-keymap "ADORE Algo KeyMap")))
     (define-key menuMap [algo] (cons "Algorithms" algoMap))
+    (define-key algoMap [exec] '("Execution Semantic" . 
+				 adore-get-exec-semantic))
     (define-key algoMap [norm] '("Composition Normalisation" . 
 				 adore-normalize-compositions)))
   (define-key menuMap [s2] '("--"))

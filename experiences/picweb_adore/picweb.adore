@@ -1,0 +1,56 @@
+/** Pic Web Adore experiment
+ * @author: sebastien mosser <mosser@polytech.unice.fr>
+ * @date: 2010/04/16
+ * @location: Bellairs McGill institute, St James, Barbados ^_^
+ **/
+
+
+/******************
+ ** Base Process **
+ ******************/
+orchestration picweb::get {
+  variables {
+    tag as word; threshold as integer; 
+    key as string; result* as string;
+  }
+  activities {
+    a0. (tag, threshold) := receive();
+    a1. key := keyRegistry::get('flickr' as string);
+    a2. result* := flickr::exploreFolksonomy(key,tag);
+    a3. reply(result*);
+  }
+  relations { a0 < a1; a1 < a2; a2 < a3; }
+}
+
+/****************************************
+ * First evolution: including threshold *
+ ****************************************/
+
+fragment restrictCardinality<limit> {
+  variables {
+    set* as string; limit as integer;
+  }
+  activities {
+    r. set* := truncate::run(set*,limit);
+    h. hook(set*);
+  }
+  relations { ^ < r; r < h; h < $; }
+}
+depict restrictCardinality using 'lightsalmon';
+
+composition picweb::get as v0 {
+  apply restrictCardinality(limit: 'threshold') => a3;
+}
+
+fragment addPicasa {
+  variables {
+    tag as word; picasa* as string; others* as string;
+  }
+  activities {
+    h. others* := hook(tag);
+    aP1. picasa* := picasa::getOnTag(tag);
+    aP2. others* := merge::run(others*, picasa*);
+  }
+  relations { ^ < h; ^ < aP1; h < aP2; aP1 < aP2; aP2 < $; }
+}
+depict addPicasa using 'lightskyblue2';

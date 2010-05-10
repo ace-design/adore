@@ -5,8 +5,8 @@
 
 composition cms::captureWitnessReport {
   apply callDisconnected            => a10;     
-  apply callDisconnected            => a2;    
   apply requestVideo(user: 'coord') => {a3,a4}; 
+  apply callDisconnected            => a2;    
 }
 
 /*%
