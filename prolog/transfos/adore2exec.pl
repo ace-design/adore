@@ -56,7 +56,9 @@ genActFormula(Process,Result) :-
 %%%%
 
 getPredsPartition(Act, Control, Guards, Faults) :- 
-	activity:getPredecessors(Act,Raws), 
+	activity:getPredecessors(Act,RawControls), 
+	findall(A,onFailure(Act,A,_), RawFaults), 
+	flatten([RawControls,RawFaults],Raws),
 	partition(Act, Raws, Control, Guards , Faults).
 
 partition(_,[],[],[],[]). %% Empty List
@@ -69,17 +71,22 @@ partition(Root, [H|T], Control, [[[H|Sim],NotSim]|Guards], Faults) :-
 	flatten([Sim,NotSim], ToDelete), 
 	removeList(ToDelete,T,RemovedTail),
 	partition(Root, RemovedTail, Control, Guards, Faults),!.
-partition(Root, [H|T], Control, Guards, [H|Faults]) :- 
+partition(Root, [H|T], Control, Guards, [[H|SimFaults]|Faults]) :- 
 	%% Fault branch pouring into normal activity flow
 	tag(fault, H, error(Fault, FaultyAct)),
 	\+ tag(fault, Root, error(Fault, FaultyAct)),
-	partition(Root, T, Control, Guards, Faults),!.
+	getSimFaults(T, error(Fault, FaultyAct), SimFaults),
+	removeList(SimFaults,T,RemovedTail),
+	partition(Root, RemovedTail, Control, Guards, Faults),!.
 partition(Root, [H|T], [H|Control], Guards, Faults) :- 
 	%% Normal continuation (aka control)
 	partition(Root, T, Control, Guards, Faults).
 
 getSimGuards(List,Meta,Result) :- 
 	findall(A,(member(A,List), tag(guard,A,Meta)),Result),!.
+
+getSimFaults(List,Meta,Result) :- 
+	findall(A,(member(A,List), tag(fault,A,Meta)), Result),!.
 
 %% (Hard) Computation
 
@@ -89,36 +96,12 @@ buildActFormula(Act,Formula) :-  %% normal case
 	buildCtrlFormula(Act,Control,CtrlForm), 
 	buildGuardFormula(Act,Guards,GuardForm),
 	buildFaultFormula(Act,Faults,FaultForm),
-	swritef(Formula, '%w , %w , %w',  [CtrlForm, GuardForm, FaultForm]).
+	buildFinalFormula(CtrlForm,GuardForm, FaultForm, Formula),!.
 buildActFormula(_, 'false'). %% unknown case (should never happend)
 
-
-buildCtrlFormula(_,_,'').
-%% buildCtrlFormula(Act,[H],R) :- buildRelation(Act,H,R),!.
-%% buildCtrlFormula(Act,[H|T],R) :- 
-%% 	buildRelation(Act,H,This), buildCtrlFormula(Act,T,Others), 
-%% 	swritef(R,'%w & %w',[This,Others]).
-
-buildGuardFormula(_,_,'').
-%% buildGuardFormula(Act,[ExcList],R) :- 
-%% 	buildExclusiveList(Act,ExcList,R),!.
-%% buildGuardFormula(Act,[H|T],R) :- 
-%% 	buildExclusiveList(Act,H, This), buildGuardFormula(Act,T,Others),
-%% 	swritef(R,'(%w) & %w',[This,Others]).
-
-buildFaultFormula(_,_,'').
-%% buildFaultformula(Act,[H],R) :- 
-%% 	buildRelation(Act,H,R),!.
-%% buildFaultformula(Act,[H|T],R) :- 
-%% 	buildRelation(Act,H, This), buildFaultFormula(Act,T,Others), 
-%% 	swritef(R, '%w | %w', [This,Others]).
-
-
-%% buildExclusiveList(_,[],'').
-%% buildExclusiveList(Act,[H],R) :- buildRelation(Act,H,R),!.
-%% buildExclusiveList(Act,[H|T],R) :- 
-%% 	buildRelation(Act,H,R), buildExclusiveList(Act,T,Others), 
-%% 	swritef(R,'%w | %w',
+%%%%
+%% Building pretty equations (helpers)
+%%%%
 
 buildRelation(Act, Pred, R) :- 
 	waitFor(Act,Pred), findUserRoot(Pred,Root), 
@@ -130,20 +113,51 @@ buildRelation(Act, Pred, R) :-
 buildRelation(Act, Pred, R) :- 
 	onFailure(Act, Pred, Fault), findUserRoot(Pred,Root),
 	swritef(R,'fail(%w,%w)',[Root,Fault]).
+
+
+buildCtrlFormula(_,[],'').
+buildCtrlFormula(Root,L,Result) :- 
+	mapOperation('&', Root, L, Result).
+
+buildGuardFormula(_,[],'').
+buildGuardFormula(Root,[[OnValList,OnNotValList]],Result) :-
+	mapOperation('&', Root, OnValList, OnValForm),
+	mapOperation('&', Root, OnNotValList, OnNotValForm),
+	swritef(Result,'((%w) | (%w))',[OnValForm,OnNotValForm]), !.
+buildGuardFormula(Root,[[OnValList,OnNotValList]|Tail],Result) :-
+	mapOperation('&', Root, OnValList, OnValForm),
+	mapOperation('&', Root, OnNotValList, OnNotValForm),
+	buildGuardFormula(Root,Tail,Others),
+	swritef(Result,'((%w) | (%w)) & %w',[OnValForm,OnNotValForm,Others]).
+
+buildFaultFormula(_,[],'').
+buildFaultFormula(Root,[List],Result) :- 
+	mapOperation('&',Root,List,Result), !.
+buildFaultFormula(Root,[List|Tail],Result) :- 
+	mapOperation('&',Root,List, This),
+	buildFaultFormula(Root,Tail,Others), 
+	swritef(Result,'%w & %w',[This, Others]).
+
+
+buildFinalFormula(Control, '', '', Control) :- !.
+buildFinalFormula(Control, Guards, '', Result) :- 
+	swritef(Result,'%w & %w',[Control, Guards]), !.
+buildFinalFormula(Control, '', Faults, Result) :- 
+	swritef(Result,'(%w) | (%w)',[Control, Faults]), !.
+buildFinalFormula(Control, Guards, Faults, Result) :- 
+	swritef(Result,'(%w & %w) | (%w)',[Control, Guards, Faults]).
 	
-
-
-
-
-%%%%
-%% Building pretty equations (helpers)
-%%%%
-
-
 
 %%%%
 %% Helper:
-%%%%
+%%%%	
+
+mapOperation(_,_,[],'').
+mapOperation(_, Root, [Act], Result) :- 
+	buildRelation(Root,Act,Result), !.
+mapOperation(Op, Root, [Act|Tail], Result) :- 
+	buildRelation(Root,Act, This), mapOperation(Op, Root, Tail, Others),
+	swritef(Result,'%w %w %w',[This, Op, Others]), !.
 
 invert(true,false).
 invert(false,true).
