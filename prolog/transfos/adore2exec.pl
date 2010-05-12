@@ -35,7 +35,7 @@ buildExecutionSemantic(FileName) :-
 %% Syntaxtic Sugar
 
 genExecForAllProcess(Text) :- 
-	findall(T,(process:exists(P),adore2exec:genExecutionSemantic(P,T)), A),
+	findall(T,(process(P),adore2exec:genExecutionSemantic(P,T)), A),
 	dumpList(A,Text).
 
 genExecutionSemantic(Process, Text) :-  
@@ -55,44 +55,57 @@ genActFormula(Process,Result) :-
 %% Predecessors partition
 %%%%
 
-getPredsPartition(Act, Control, Guards, Faults) :- 
+getPredsDispatch(Act, Control, Guards, Faults) :- 
 	activity:getPredecessors(Act,RawControls), 
 	findall(A,onFailure(Act,A,_), RawFaults), 
 	flatten([RawControls,RawFaults],Raws),
-	partition(Act, Raws, Control, Guards , Faults).
+	dispatch(Act, Raws, Control, Guards , Faults).
 
-partition(_,[],[],[],[]). %% Empty List
-partition(Root, [H|T], Control, [[[H|Sim],NotSim]|Guards], Faults) :- 
-	%% Exclusive condition detected in the Predecessors flags
-	tag(guard, H ,condition(Var, Test, Val)), 
-	\+ tag(guard, Root, condition(Var, Test, Val)), 
-	getSimGuards(T, condition(Var, Test, Val), Sim), invert(Val, NotVal), 
-	getSimGuards(T, condition(Var, Test, NotVal), NotSim),
-	flatten([Sim,NotSim], ToDelete), 
-	removeList(ToDelete,T,RemovedTail),
-	partition(Root, RemovedTail, Control, Guards, Faults),!.
-partition(Root, [H|T], Control, Guards, [[H|SimFaults]|Faults]) :- 
+dispatch(_,[],[],[],[]). %% Empty List
+dispatch(Root, [H|T], Control, Guards, [[H|SimFaults]|Faults]) :- 
 	%% Fault branch pouring into normal activity flow
 	tag(fault, H, error(Fault, FaultyAct)),
 	\+ tag(fault, Root, error(Fault, FaultyAct)),
 	getSimFaults(T, error(Fault, FaultyAct), SimFaults),
 	removeList(SimFaults,T,RemovedTail),
-	partition(Root, RemovedTail, Control, Guards, Faults),!.
-partition(Root, [H|T], [H|Control], Guards, Faults) :- 
+	dispatch(Root, RemovedTail, Control, Guards, Faults),!.
+dispatch(Root, [H|T], [H|Control], Guards, Faults) :- 
 	%% Normal continuation (aka control)
-	partition(Root, T, Control, Guards, Faults).
-
-getSimGuards(List,Meta,Result) :- 
-	findall(A,(member(A,List), tag(guard,A,Meta)),Result),!.
+	dispatch(Root, T, Control, Guards, Faults).
 
 getSimFaults(List,Meta,Result) :- 
 	findall(A,(member(A,List), tag(fault,A,Meta)), Result),!.
+
+
+%% dispatch(Root, [H|T], Control, [[[H|Sim],NotSim]|Guards], Faults) :- 
+%% 	%% Exclusive condition detected in the Predecessors flags
+%% 	tag(guard, H ,condition(Var, Test, Val)), 
+%% 	\+ tag(guard, Root, condition(Var, Test, Val)), 
+%% 	getSimGuards(T, condition(Var, Test, Val), Sim), invert(Val, NotVal), 
+%% 	getSimGuards(T, condition(Var, Test, NotVal), NotSim),
+%% 	flatten([Sim,NotSim], ToDelete), 
+%% 	removeList(ToDelete,T,RemovedTail),
+%% 	dispatch(Root, RemovedTail, Control, Guards, Faults),!.
+
+
+	
+%% extractConditions([],[]).
+%% extractConditions([H|Tail], [Conds|Others]) :- 
+%% 	findall(Var,tag(guard,H,condition(Var,_,_)),Raw), sort(Raw,Conds),
+%% 	extractConditions(Tail,Others).
+
+%% partition([],_,[]).
+%% partition(L,[],L).
+%% partition(Acts,[[Cond]|Tail],L) :- 
+%% 	partitionOncondition(Cond, Acts, Done, Rest),
+%% 	removeConditionInList
+
 
 %% (Hard) Computation
 
 buildActFormula(Act, 'true') :- \+ path(_,Act), !. %% entry point
 buildActFormula(Act,Formula) :-  %% normal case
-	getPredsPartition(Act, Control, Guards, Faults), 
+	getPredsDispatch(Act, Control, Guards, Faults), 
 	buildCtrlFormula(Act,Control,CtrlForm), 
 	buildGuardFormula(Act,Guards,GuardForm),
 	buildFaultFormula(Act,Faults,FaultForm),
@@ -107,9 +120,11 @@ buildRelation(Act, Pred, R) :-
 	waitFor(Act,Pred), findUserRoot(Pred,Root), 
 	swritef(R,'end(%w)',[Root]).
 buildRelation(Act, Pred, R) :- 
-	isGuardedBy(Act, Pred, Var, Val), 
-	findUserRoot(Pred,PredRoot), findUserRoot(Var,VarRoot),
-	swritef(R,'(end(%w) & %w(%w))',[PredRoot,Val,VarRoot]).
+	isGuardedBy(Act, Pred, Var, Val), findUserRoot(Pred,PredRoot),
+	( tag(guard, Act, condition(Var, Pred, Val)), findUserRoot(Var,VarRoot),
+	  swritef(R,'(end(%w) & %w(%w))',[PredRoot,Val,VarRoot])
+	| \+ tag(guard, Act, condition(Var, Pred, Val)), 
+	  swritef(R,'end(%w)',[PredRoot])).
 buildRelation(Act, Pred, R) :- 
 	onFailure(Act, Pred, Fault), findUserRoot(Pred,Root),
 	swritef(R,'fail(%w,%w)',[Root,Fault]).
@@ -140,6 +155,8 @@ buildFaultFormula(Root,[List|Tail],Result) :-
 
 
 buildFinalFormula(Control, '', '', Control) :- !.
+buildFinalFormula('', Guards, '', Guards) :- !.
+buildFinalFormula('', '', Faults, Faults) :- !.
 buildFinalFormula(Control, Guards, '', Result) :- 
 	swritef(Result,'%w & %w',[Control, Guards]), !.
 buildFinalFormula(Control, '', Faults, Result) :- 
