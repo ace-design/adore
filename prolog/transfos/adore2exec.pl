@@ -91,6 +91,32 @@ getActConditionTags(Act, Tags) :-
 	findall(C, tag(guard, Act, condition(C,_,_)), Raws),
 	sort(Raws, Tags).
 
+partition(Acts, Var, OnVar, OnNotVar, Rest) :- 
+	findall(A,
+	        ( member(A,Acts),tag(guard, A, condition(Var,_,true)) ),
+		OnVar),
+	findall(A,
+	        ( member(A,Acts),tag(guard, A, condition(Var,_,false)) ),
+		OnNotVar),
+	flatten([OnVar, OnNotVar], Guarded), removeList(Guarded, Acts, Rest).
+
+%%%%%%%%%%%%%%%%%%%%%
+%%% Formula Model %%%
+%%%%%%%%%%%%%%%%%%%%%
+%% formula(and|or,Formula1, Formula2).
+
+%% formula simplification
+simplify(V,V) :- atom(V), !.
+simplify([V],V) :- atom(V), !.
+simplify(formula(_, Form, []),R) :- simplify(Form, R),!.
+simplify(formula(_, [], Form),R) :- simplify(Form, R),!.
+simplify(formula(Op, Form1, Form2), formula(Op, R1, R2)) :- 
+	simplify(Form1, R1), simplify(Form2, R2).
+
+%% formula display
+%% TODO
+
+
 %%%%%%%%%%%%%%%
 %%% Helpers %%%
 %%%%%%%%%%%%%%%
