@@ -37,7 +37,7 @@ buildExecutionSemantic(FileName) :-
 %%%%%%%%%%%%%%%%%%%%%%%
 
 genExecForAllProcess(Text) :- 
-	findall(T,(process:exists(P),adore2exec:genExecutionSemantic(P,T)), A),
+	findall(T,(process(P),adore2exec:genExecutionSemantic(P,T)), A),
 	dumpList(A,Text).
 
 genExecutionSemantic(Process, Text) :-  
@@ -46,23 +46,40 @@ genExecutionSemantic(Process, Text) :-
 	clearTags, dumpList(FormulaList, FormulaText), 
 	swritef(Text, '// %w \n%w\n',[Process, FormulaText]).
 
-
 genActFormula(Process,Result) :- 
-	activity:belongsTo(Act, Process), buildActFormula(Act, Formula),
-	findUserRoot(Act,Root), 
-	swritef(Result, 'start(%w) => %w', [Root, Formula]).
+	activity:belongsTo(Act, Process), 
+	buildActFormula(Act, Formula),
+	findUserRoot(Act,Root), display(Act, Formula, FinalFormula),
+	swritef(Result, 'start(%w) => %w', [Root, FinalFormula]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%% Formula Building %%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 
+buildActFormula(Act, 'true') :-	isEntryPoint(Act),!.
 buildActFormula(Act, Formula) :-
-	flowDispatch(Act, Ctrl, Alts),
-	Formula = ''.
+	flowDispatch(Act, Ctrl, Alts), getConditions(Ctrl, Conds),
+	buildControlFormula(Ctrl, Conds, CtrlFormula),
+	build(or, Alts, AltFormula),
+	simplify(formula(or, CtrlFormula, AltFormula), Formula).
 
-%%%%%%%%%%%%%%%%%%%%%
-%%% Flow Dispatch %%%
-%%%%%%%%%%%%%%%%%%%%%
+buildControlFormula([Act], _,Act) :- activity(Act),!. 
+buildControlFormula(Activities, [], Formula) :- 
+	build(and, Activities, Formula).
+buildControlFormula(Activities, [[]|Tail], Formula) :- 
+	buildControlFormula(Activities,Tail, Formula).
+buildControlFormula(Activities, [[Cond|Others]|Tail], Formula) :- 
+	partition(Activities, Cond, OnCond, OnNotCond, Rest),
+	pushOut(Cond, Tail, NewTail), Nexts = [Others|NewTail],
+	buildControlFormula(OnCond, Nexts, OnCondForm),
+	buildControlFormula(OnNotCond, Nexts, OnNotCondForm),
+	buildControlFormula(Rest, Nexts, RestForm),
+	RawForm = formula(and, formula(or,OnCondForm,OnNotCondForm),RestForm),
+	simplify(RawForm, Formula).
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Flow Dispatch & Entry Point %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 flowDispatch(Act, Control, Alternatives) :- 
 	%% retrieving all the predecessors
@@ -77,6 +94,8 @@ flowDispatch(Act, Control, Alternatives) :-
 	flatten([Weaks, Exceptions], Alternatives),
 	%% Retrieving the control-flow (the rest).
 	removeList(Exceptions, WithoutWeak, Control).
+
+isEntryPoint(Act) :- activity(Act), \+ path(_,Act).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Control Partition (exclusivity induced by guards) %%%
@@ -103,9 +122,10 @@ partition(Acts, Var, OnVar, OnNotVar, Rest) :-
 %%%%%%%%%%%%%%%%%%%%%
 %%% Formula Model %%%
 %%%%%%%%%%%%%%%%%%%%%
-%% formula(and|or,Formula1, Formula2).
 
-%% formula simplification
+%% formula(and|or,SubFormula1, SubFormula2) | Atom.
+
+%% formula simplification:
 simplify(V,V) :- atom(V), !.
 simplify([V],V) :- atom(V), !.
 simplify(formula(_, Form, []),R) :- simplify(Form, R),!.
@@ -113,15 +133,27 @@ simplify(formula(_, [], Form),R) :- simplify(Form, R),!.
 simplify(formula(Op, Form1, Form2), formula(Op, R1, R2)) :- 
 	simplify(Form1, R1), simplify(Form2, R2).
 
-%% formula display
-%% TODO
+%% formula builder:
+build(_,[],[]).
+build(Op,[H|T],formula(Op,H,R)) :- build(Op,T,R).
 
+%% formula display, according to a root activity:
+display(_, 'true', 'true').
+display(Root, Activity, Result) :- 
+	activity(Activity), !, buildRelation(Root, Activity, Result).
+display(Root, formula(Op,SF1,SF2), R) :- 
+	display(Root, SF1, D1),	display(Root, SF2, D2), operator(Op,Dop),
+	addParenthesis(SF1,D1,PD1), addParenthesis(SF2,D2,PD2), 
+	swritef(R,'%w %w %w',[PD1,Dop,PD2]).
+
+addParenthesis(formula(_,_,_), Text, P) :- !, swritef(P,'(%w)',[Text]).
+addParenthesis(_,Text,Text).
 
 %%%%%%%%%%%%%%%
 %%% Helpers %%%
 %%%%%%%%%%%%%%%
 
-dumpList([],'') :- !.
+dumpList([],'').
 dumpList([H|T], Text) :- 
 	dumpList(T,TailText), swritef(Text, "%w\n%w", [H,TailText]).
 
@@ -131,6 +163,23 @@ sortByLength([H|T],R) :-
 	append(T,[H],Tmp), sortByLength(Tmp,R).
 sortByLength([H|T], [H|R]) :- sortByLength(T,R).
 
+operator(and,'&').
+operator(or, '|').
+
+pushOut(_,[],[]).
+pushOut(Cond, [Head|Tail], [NewHead|NewTail]) :- 
+	remove(Cond, Head, NewHead), pushOut(Cond, Tail, NewTail).
+
+buildRelation(Act, Pred, R) :- 
+	waitFor(Act,Pred), findUserRoot(Pred,Root), 
+	swritef(R,'end(%w)',[Root]).
+buildRelation(Act, Pred, R) :- 
+	isGuardedBy(Act, Pred, Var, Val), 
+	findUserRoot(Pred,PredRoot), findUserRoot(Var,VarRoot),
+	swritef(R,'(end(%w) & %w(%w))',[PredRoot,Val,VarRoot]).
+buildRelation(Act, Pred, R) :- 
+	onFailure(Act, Pred, Fault), findUserRoot(Pred,Root),
+	swritef(R,'fail(%w,%w)',[Root,Fault]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% OLD CODE, DO NOT EDIT !!!!! %%%
@@ -190,16 +239,7 @@ sortByLength([H|T], [H|R]) :- sortByLength(T,R).
 %% %% Building pretty equations (helpers)
 %% %%%%
 
-%% buildRelation(Act, Pred, R) :- 
-%% 	waitFor(Act,Pred), findUserRoot(Pred,Root), 
-%% 	swritef(R,'end(%w)',[Root]).
-%% buildRelation(Act, Pred, R) :- 
-%% 	isGuardedBy(Act, Pred, Var, Val), 
-%% 	findUserRoot(Pred,PredRoot), findUserRoot(Var,VarRoot),
-%% 	swritef(R,'(end(%w) & %w(%w))',[PredRoot,Val,VarRoot]).
-%% buildRelation(Act, Pred, R) :- 
-%% 	onFailure(Act, Pred, Fault), findUserRoot(Pred,Root),
-%% 	swritef(R,'fail(%w,%w)',[Root,Fault]).
+
 
 
 %% buildCtrlFormula(_,[],'').
