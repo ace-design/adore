@@ -60,9 +60,10 @@ buildActFormula(Act, 'true') :-	isEntryPoint(Act),!.
 buildActFormula(Act, Formula) :-
 	flowDispatch(Act, Ctrl, Alts), getConditions(Ctrl, Conds),
 	buildControlFormula(Ctrl, Conds, CtrlFormula),
-	build(or, Alts, AltFormula),
+	buildAltsFormula(Alts, AltFormula), 
 	simplify(formula(or, CtrlFormula, AltFormula), Formula).
 
+%% Control
 buildControlFormula([Act], _,Act) :- activity(Act),!. 
 buildControlFormula(Activities, [], Formula) :- 
 	build(and, Activities, Formula).
@@ -77,6 +78,12 @@ buildControlFormula(Activities, [[Cond|Others]|Tail], Formula) :-
 	RawForm = formula(and, formula(or,OnCondForm,OnNotCondForm),RestForm),
 	simplify(RawForm, Formula).
 	
+%% alternatives
+buildAltsFormula([],[]).
+buildAltsFormula([H|T],Formula) :- 
+	build(and,H,Conjunction), buildAltsFormula(T,Others),
+	Raw = formula(or, Conjunction, Others),	simplify(Raw,Formula).
+	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Flow Dispatch & Entry Point %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -89,9 +96,12 @@ flowDispatch(Act, Control, Alternatives) :-
 	%% retrieving the weak wait flow (part of Alternatives)
 	findall(W,weakWait(Act,W),Weaks), removeList(Weaks, Raws, WithoutWeak),
 	%% retrieving exceptional flow (part of Alternatives)
-	findall(E,( tag(fault, E, error(Fault, FaultyAct)),
+	findall(E,( member(E, WithoutWeak),
+	            tag(fault, E, error(Fault, FaultyAct)),
 	            \+ tag(fault, Act, error(Fault, FaultyAct))), Exceptions),
-	flatten([Weaks, Exceptions], Alternatives),
+		    write(Exceptions),
+	faultPartition(Exceptions, PartitionnedExceptions),
+	Alternatives = [Weaks|PartitionnedExceptions],
 	%% Retrieving the control-flow (the rest).
 	removeList(Exceptions, WithoutWeak, Control).
 
@@ -112,12 +122,23 @@ getActConditionTags(Act, Tags) :-
 
 partition(Acts, Var, OnVar, OnNotVar, Rest) :- 
 	findall(A,
-	        ( member(A,Acts),tag(guard, A, condition(Var,_,true)) ),
+	        ( member(A,Acts), tag(guard, A, condition(Var,_,true)) ),
 		OnVar),
 	findall(A,
-	        ( member(A,Acts),tag(guard, A, condition(Var,_,false)) ),
+	        ( member(A,Acts), tag(guard, A, condition(Var,_,false)) ),
 		OnNotVar),
 	flatten([OnVar, OnNotVar], Guarded), removeList(Guarded, Acts, Rest).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Exception Partition (exclusivity induced by Faults) %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+faultPartition([],[]).
+faultPartition([H|T],[[H|Sims]|Others]) :- 
+	tag(fault, H, error(Fault, Source)), 
+	findall(S, (member(S,T), tag(fault, S, error(Fault, Source))), Sims),
+	removeList([H|Sims],T,WithoutSims), faultPartition(WithoutSims,Others).
+	
 
 %%%%%%%%%%%%%%%%%%%%%
 %%% Formula Model %%%
