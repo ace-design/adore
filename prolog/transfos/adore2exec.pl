@@ -19,18 +19,12 @@
 %%
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
-
 :- module(adore2exec, [buildExecutionSemantic/1]).
 
 buildExecutionSemantic(FileName) :- 
 	genExecForAllProcess(Text),
 	swritef(Complete,"/** Adore Execution Semantic **/\n\n%w",[Text]),
 	open(FileName,write,Stream), write(Stream,Complete), close(Stream).
-
-
-%%%%
-%% Internal Definition
-%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %%% Syntactic Sugar %%%
@@ -84,24 +78,42 @@ buildAltsFormula([H|T],Formula) :-
 	build(and,H,Conjunction), buildAltsFormula(T,Others),
 	Raw = formula(or, Conjunction, Others),	simplify(Raw,Formula).
 	
+%% build a relationship according to a given root (end, fail, condition?)
+buildRelation(Act, Pred, R) :- 
+	(waitFor(Act,Pred)|weakWait(Act,Pred)), findUserRoot(Pred,Root), 
+	swritef(R,'end(%w)',[Root]).
+buildRelation(Act, Pred, R) :- 
+	isGuardedBy(Act, Pred, Var, Val), findUserRoot(Pred,PredRoot),
+	( extractAllPredecessors(Act,Preds), member(E,Preds), 
+	  invert(Val, Not), tag(guard, E, condition(Var, _, Not)), !, 
+	  swritef(R,'end(%w)', [PredRoot])
+	 | findUserRoot(Var,VarRoot), 
+	   swritef(R,'(end(%w) & %w(%w))', [PredRoot,Val,VarRoot])).
+buildRelation(Act, Pred, R) :- 
+	onFailure(Act, Pred, Fault), findUserRoot(Pred,Root),
+	swritef(R,'fail(%w,%w)',[Root,Fault]).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Flow Dispatch & Entry Point %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-flowDispatch(Act, Control, Alternatives) :- 
-	%% retrieving all the predecessors
+extractAllPredecessors(Act,Preds) :- 
 	activity:getPredecessors(Act,RawControls), 
  	findall(A, onFailure(Act,A,_), RawFaults), 
-	flatten([RawControls,RawFaults], Raws),
+	flatten([RawControls,RawFaults], Preds).
+
+flowDispatch(Act, Control, Alternatives) :- 
+	extractAllPredecessors(Act,Raws),
 	%% retrieving the weak wait flow (part of Alternatives)
-	findall(W,weakWait(Act,W),Weaks), removeList(Weaks, Raws, WithoutWeak),
+	findall([W],weakWait(Act,W),Weaks), flatten(Weaks,FlatWeaks),
+	removeList(FlatWeaks, Raws, WithoutWeak),
 	%% retrieving exceptional flow (part of Alternatives)
 	findall(E,( member(E, WithoutWeak),
 	            tag(fault, E, error(Fault, FaultyAct)),
 	            \+ tag(fault, Act, error(Fault, FaultyAct))), Exceptions),
-		    write(Exceptions),
 	faultPartition(Exceptions, PartitionnedExceptions),
-	Alternatives = [Weaks|PartitionnedExceptions],
+	append(Weaks, PartitionnedExceptions, Alternatives),
+	%Alternatives = [Weaks|PartitionnedExceptions],
 	%% Retrieving the control-flow (the rest).
 	removeList(Exceptions, WithoutWeak, Control).
 
@@ -144,9 +156,9 @@ faultPartition([H|T],[[H|Sims]|Others]) :-
 %%% Formula Model %%%
 %%%%%%%%%%%%%%%%%%%%%
 
-%% formula(and|or,SubFormula1, SubFormula2) | Atom.
+%% 'Grammar': formula(and|or,SubFormula1, SubFormula2) | Atom.
 
-%% formula simplification:
+%% formula simplification (term rewriting):
 simplify(V,V) :- atom(V), !.
 simplify([V],V) :- atom(V), !.
 simplify(formula(_, Form, []),R) :- simplify(Form, R),!.
@@ -167,6 +179,7 @@ display(Root, formula(Op,SF1,SF2), R) :-
 	addParenthesis(SF1,D1,PD1), addParenthesis(SF2,D2,PD2), 
 	swritef(R,'%w %w %w',[PD1,Dop,PD2]).
 
+%% add parenthesis, only when needed
 addParenthesis(formula(_,_,_), Text, P) :- !, swritef(P,'(%w)',[Text]).
 addParenthesis(_,Text,Text).
 
@@ -191,122 +204,5 @@ pushOut(_,[],[]).
 pushOut(Cond, [Head|Tail], [NewHead|NewTail]) :- 
 	remove(Cond, Head, NewHead), pushOut(Cond, Tail, NewTail).
 
-buildRelation(Act, Pred, R) :- 
-	waitFor(Act,Pred), findUserRoot(Pred,Root), 
-	swritef(R,'end(%w)',[Root]).
-buildRelation(Act, Pred, R) :- 
-	isGuardedBy(Act, Pred, Var, Val), 
-	findUserRoot(Pred,PredRoot), findUserRoot(Var,VarRoot),
-	swritef(R,'(end(%w) & %w(%w))',[PredRoot,Val,VarRoot]).
-buildRelation(Act, Pred, R) :- 
-	onFailure(Act, Pred, Fault), findUserRoot(Pred,Root),
-	swritef(R,'fail(%w,%w)',[Root,Fault]).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% OLD CODE, DO NOT EDIT !!!!! %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-%% %%%%
-%% %% Predecessors partition
-%% %%%%
-
-%% getPredsPartition(Act, Control, Guards, Faults) :- 
-%% 	activity:getPredecessors(Act,RawControls), 
-%% 	findall(A,onFailure(Act,A,_), RawFaults), 
-%% 	flatten([RawControls,RawFaults],Raws),
-%% 	partition(Act, Raws, Control, Guards , Faults).
-
-%% partition(_,[],[],[],[]). %% Empty List
-%% partition(Root, [H|T], Control, [[[H|Sim],NotSim]|Guards], Faults) :- 
-%% 	%% Exclusive condition detected in the Predecessors flags
-%% 	tag(guard, H ,condition(Var, Test, Val)), 
-%% 	\+ tag(guard, Root, condition(Var, Test, Val)), 
-%% 	getSimGuards(T, condition(Var, Test, Val), Sim), invert(Val, NotVal), 
-%% 	getSimGuards(T, condition(Var, Test, NotVal), NotSim),
-%% 	flatten([Sim,NotSim], ToDelete), 
-%% 	removeList(ToDelete,T,RemovedTail),
-%% 	partition(Root, RemovedTail, Control, Guards, Faults),!.
-%% partition(Root, [H|T], Control, Guards, [[H|SimFaults]|Faults]) :- 
-%% 	%% Fault branch pouring into normal activity flow
-%% 	tag(fault, H, error(Fault, FaultyAct)),
-%% 	\+ tag(fault, Root, error(Fault, FaultyAct)),
-%% 	getSimFaults(T, error(Fault, FaultyAct), SimFaults),
-%% 	removeList(SimFaults,T,RemovedTail),
-%% 	partition(Root, RemovedTail, Control, Guards, Faults),!.
-%% partition(Root, [H|T], [H|Control], Guards, Faults) :- 
-%% 	%% Normal continuation (aka control)
-%% 	partition(Root, T, Control, Guards, Faults).
-
-%% getSimGuards(List,Meta,Result) :- 
-%% 	findall(A,(member(A,List), tag(guard,A,Meta)),Result),!.
-
-%% getSimFaults(List,Meta,Result) :- 
-%% 	findall(A,(member(A,List), tag(fault,A,Meta)), Result),!.
-
-%% %% (Hard) Computation
-
-%% buildActFormula(Act, 'true') :- \+ path(_,Act), !. %% entry point
-%% buildActFormula(Act,Formula) :-  %% normal case
-%% 	getPredsPartition(Act, Control, Guards, Faults), 
-%% 	buildCtrlFormula(Act,Control,CtrlForm), 
-%% 	buildGuardFormula(Act,Guards,GuardForm),
-%% 	buildFaultFormula(Act,Faults,FaultForm),
-%% 	buildFinalFormula(CtrlForm,GuardForm, FaultForm, Formula),!.
-%% buildActFormula(_, 'false'). %% unknown case (should never happend)
-
-%% %%%%
-%% %% Building pretty equations (helpers)
-%% %%%%
-
-
-
-
-%% buildCtrlFormula(_,[],'').
-%% buildCtrlFormula(Root,L,Result) :- 
-%% 	mapOperation('&', Root, L, Result).
-
-%% buildGuardFormula(_,[],'').
-%% buildGuardFormula(Root,[[OnValList,OnNotValList]],Result) :-
-%% 	mapOperation('&', Root, OnValList, OnValForm),
-%% 	mapOperation('&', Root, OnNotValList, OnNotValForm),
-%% 	swritef(Result,'((%w) | (%w))',[OnValForm,OnNotValForm]), !.
-%% buildGuardFormula(Root,[[OnValList,OnNotValList]|Tail],Result) :-
-%% 	mapOperation('&', Root, OnValList, OnValForm),
-%% 	mapOperation('&', Root, OnNotValList, OnNotValForm),
-%% 	buildGuardFormula(Root,Tail,Others),
-%% 	swritef(Result,'((%w) | (%w)) & %w',[OnValForm,OnNotValForm,Others]).
-
-%% buildFaultFormula(_,[],'').
-%% buildFaultFormula(Root,[List],Result) :- 
-%% 	mapOperation('&',Root,List,Result), !.
-%% buildFaultFormula(Root,[List|Tail],Result) :- 
-%% 	mapOperation('&',Root,List, This),
-%% 	buildFaultFormula(Root,Tail,Others), 
-%% 	swritef(Result,'%w & %w',[This, Others]).
-
-
-%% buildFinalFormula(Control, '', '', Control) :- !.
-%% buildFinalFormula(Control, Guards, '', Result) :- 
-%% 	swritef(Result,'%w & %w',[Control, Guards]), !.
-%% buildFinalFormula(Control, '', Faults, Result) :- 
-%% 	swritef(Result,'(%w) | (%w)',[Control, Faults]), !.
-%% buildFinalFormula(Control, Guards, Faults, Result) :- 
-%% 	swritef(Result,'(%w & %w) | (%w)',[Control, Guards, Faults]).
-	
-
-%% %%%%
-%% %% Helper:
-%% %%%%	
-
-%% mapOperation(_,_,[],'').
-%% mapOperation(_, Root, [Act], Result) :- 
-%% 	buildRelation(Root,Act,Result), !.
-%% mapOperation(Op, Root, [Act|Tail], Result) :- 
-%% 	buildRelation(Root,Act, This), mapOperation(Op, Root, Tail, Others),
-%% 	swritef(Result,'%w %w %w',[This, Op, Others]), !.
-
-%% invert(true,false).
-%% invert(false,true).
-
+invert(true, false).
+invert(false, true).
