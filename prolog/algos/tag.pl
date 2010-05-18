@@ -95,7 +95,7 @@ shouldBeSimplified(L, [OnTrue, OnFalse]) :-
 	member(tag(guard, Act, condition(Var, Test, true)), L),
 	member(tag(guard, Act, condition(Var, Test, false)), L),
 	OnTrue  = tag(guard, Act, condition(Var, Test, true)),
-	OnFalse  = tag(guard, Act, condition(Var, Test, false)).
+	OnFalse = tag(guard, Act, condition(Var, Test, false)).
 
 %%%%
 %% Algorithm helpers

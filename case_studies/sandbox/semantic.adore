@@ -100,8 +100,26 @@ orchestration weakWaits::hierarchy { // WeakWait synchronization
  ** Exceptions Artefacts **
  **************************/
 
+orchestration faults::intricated {
+ variables {}
+  activities {
+    a0. receive();
+    a1. nop();
+    a2. nop();
+    a3. nop();
+    a4. nop();
+    a5. nop();
+    a6. reply();
+  }
+  relations { 
+    a0 < a1; a1 < a6; fail(a0,'f1') < a2; a2 < a3; fail(a2,'f2') < a4; 
+    a3 < a5; a4 < a5; a5 < a6;
+  }
+}
+
+
 orchestration faults::faultJoin {
-variables {}
+  variables {}
   activities {
     a0. receive();
     a1. nop();
@@ -114,7 +132,6 @@ variables {}
     a0 < a1; a1 < a5; fail(a0,'f1') < a2; fail(a0,'f2') < a3; 
     a2 < a4; a3 < a4; a4 < a5;
   }
-
 }
 
 /*******************************
