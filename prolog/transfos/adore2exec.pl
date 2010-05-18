@@ -52,10 +52,17 @@ genActFormula(Process,Result) :-
 
 buildActFormula(Act, 'true') :-	isEntryPoint(Act),!.
 buildActFormula(Act, Formula) :-
-	flowDispatch(Act, Ctrl, Alts), getConditions(Ctrl, Conds),
+	flowDispatch(Act, Ctrl, Weaks, Faults), 
+	%% Control Flow Formula
+	getConditions(Ctrl, Conds), 
 	buildControlFormula(Ctrl, Conds, CtrlFormula),
-	buildAltsFormula(Alts, AltFormula), 
-	simplify(formula(or, CtrlFormula, AltFormula), Formula).
+	%% Weak Flow Formula
+	build(or, Weaks, WeakFormula),
+	%% Exceptional Flow Formula
+	buildFaultsFormula(Faults, FaultFormula), 
+	%% Final Formula
+	Raw = formula(or, formula(and, CtrlFormula, WeakFormula), FaultFormula),
+	simplify(Raw, Formula).
 
 %% Control
 buildControlFormula([Act], _,Act) :- activity(Act),!. 
@@ -72,10 +79,10 @@ buildControlFormula(Activities, [[Cond|Others]|Tail], Formula) :-
 	RawForm = formula(and, formula(or,OnCondForm,OnNotCondForm),RestForm),
 	simplify(RawForm, Formula).
 	
-%% alternatives
-buildAltsFormula([],[]).
-buildAltsFormula([H|T],Formula) :- 
-	build(and,H,Conjunction), buildAltsFormula(T,Others),
+%% Exceptions
+buildFaultsFormula([],[]).
+buildFaultsFormula([H|T],Formula) :- 
+	build(and,H,Conjunction), buildFaultsFormula(T,Others),
 	Raw = formula(or, Conjunction, Others),	simplify(Raw,Formula).
 	
 %% build a relationship according to a given root (end, fail, condition?)
@@ -102,19 +109,16 @@ extractAllPredecessors(Act,Preds) :-
  	findall(A, onFailure(Act,A,_), RawFaults), 
 	flatten([RawControls,RawFaults], Preds).
 
-flowDispatch(Act, Control, Alternatives) :- 
+flowDispatch(Act, Control, Weaks, PartitionnedExceptions) :- 
 	extractAllPredecessors(Act,Raws),
-	%% retrieving the weak wait flow (part of Alternatives)
-	findall([W],weakWait(Act,W),Weaks), flatten(Weaks,FlatWeaks),
-	removeList(FlatWeaks, Raws, WithoutWeak),
-	%% retrieving exceptional flow (part of Alternatives)
+	%% retrieving the weak wait flow 
+	findall(W,weakWait(Act,W),Weaks), removeList(Weaks, Raws, WithoutWeak),
+	%% retrieving exceptional flow 
 	findall(E,( member(E, WithoutWeak),
 	            tag(fault, E, error(Fault, FaultyAct)),
 	            \+ tag(fault, Act, error(Fault, FaultyAct))), Exceptions),
 	faultPartition(Exceptions, PartitionnedExceptions),
-	append(Weaks, PartitionnedExceptions, Alternatives),
-	%Alternatives = [Weaks|PartitionnedExceptions],
-	%% Retrieving the control-flow (the rest).
+	%% Interpolating the control-flow (the rest).
 	removeList(Exceptions, WithoutWeak, Control).
 
 isEntryPoint(Act) :- activity(Act), \+ path(_,Act).

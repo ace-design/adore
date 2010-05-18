@@ -1,3 +1,185 @@
+/** A simple file to explain ADORE execution semantic
+ * @author: sebastien Mosser
+ * @date: Tue May 18, 2010  2:41 PM
+ **/
+
+/**********************
+ ** Simple Artefacts **
+ **********************/
+
+orchestration simple::controlFlow {   // Simple control flow
+  variables {}
+  activities {
+    a0. receive();
+    a1. nop();
+    a2. nop();
+    a3. reply();
+  }
+  relations { a0 < a1; a0 < a2; a1 < a3; a2 < a3;}
+}
+
+orchestration simple::weakWaitFlow {   // Weak wait flow
+  variables {}
+  activities {
+    a0. receive();
+    a1. nop();
+    a2. nop();
+    a3. reply();
+  }
+  relations { a0 < a1; a0 < a2; a1 << a3; a2 << a3; }
+}
+
+orchestration simple::guardedFlow {   // Guarded flow
+  variables { c as boolean; }
+  activities {
+    a0. c := receive();
+    a1. nop();
+    a2. nop();
+    a3. reply();
+  }
+  relations { a0 < a1 when c; a0 < a2 when !c; a1 < a3; a2 < a3;}
+}
+
+orchestration simple::faultyFlow {   // Exceptional flow
+  variables {}
+  activities {
+    a0. receive();
+    a1. nop();
+    a2. nop();
+    a3. reply();
+  }
+  relations { a0 < a1; a1 < a3; fail(a0,'fault') < a2; a2 < a3;}
+}
+
+/************************
+ ** WeakWait Artefacts **
+ ************************/
+
+orchestration weakWaits::fullJoin { // WeakWait at the same level
+  variables {}
+  activities {
+    a0. receive();
+    a1. nop();
+    a2. nop();
+    a3. nop();
+    a4. nop();
+    a5. reply();
+  }
+  relations { 
+    a0 < a1; a0 < a2; a0 < a3; a0 < a4; 
+    a1 << a5; a2 << a5; a3 << a5; a4 << a5; 
+  }
+}
+
+orchestration weakWaits::hierarchy { // WeakWait synchronization
+  variables {}
+  activities {
+    a0. receive();
+    a1. nop();
+    a2. nop();
+    a3. nop();
+    a4. nop();
+    sync1. nop();
+    sync2. nop();
+    a5. reply();
+  }
+  relations { 
+    a0 < a1; a0 < a2; a0 < a3; a0 < a4; 
+    a1 << sync1; a2 << sync1; a3 << sync2; a4 << sync2; 
+    sync1 < a5; sync2 < a5; 
+  }
+}
+
+/**********************
+ ** Guards Artefatcs **
+ **********************/
+
+// TODO
+
+/**************************
+ ** Exceptions Artefacts **
+ **************************/
+
+orchestration faults::faultJoin {
+variables {}
+  activities {
+    a0. receive();
+    a1. nop();
+    a2. nop();
+    a3. nop();
+    a4. nop();
+    a5. reply();
+  }
+  relations { 
+    a0 < a1; a1 < a5; fail(a0,'f1') < a2; fail(a0,'f2') < a3; 
+    a2 < a4; a3 < a4; a4 < a5;
+  }
+
+}
+
+/*******************************
+ ** Mixed Relations Artefacts **
+ *******************************/
+
+orchestration mixed::controlAndWeaks { 
+variables {}
+ activities {
+    a0. receive();
+    a1. nop();
+    a2. nop();
+    a3. nop();
+    a4. reply();
+  }
+  relations { a0 < a1; a0 < a2; a0 < a3; a1 < a4; a2 << a4; a3 << a4; }
+}
+
+orchestration mixed::controlAndFaults {
+  variables {}
+  activities {
+    a0. receive();
+    a1. nop();
+    a2. nop();
+    a3. nop();
+    a4. reply();
+  }
+  relations { 
+    a0 < a1;  fail(a0,'f1') < a2; fail(a0,'f2') < a3; 
+    a1 < a4; a2 < a4; a3 < a4;
+  }
+}
+
+
+
+/*****************
+ ** Limitations **
+ *****************/
+
+orchestration limitations::controlAndWeakedFaults {
+  // @related mixed::controlAndFaults
+  // @problem: doesn't make sense at all
+  variables {}
+  activities {
+    a0. receive();
+    a1. nop();
+    a2. nop();
+    a3. nop();
+    a4. reply();
+  }
+  relations { 
+    a0 < a1;  fail(a0,'f1') < a2; fail(a0,'f2') < a3; 
+    a1 < a4; a2 << a4; a3 << a4;
+  }
+}
+
+
+
+
+
+/*******************
+ ** Old Artefacts **
+ *******************/
+
+/*
 orchestration semantic::test1 {
   variables {
     c1 as boolean; c2 as boolean;
@@ -60,9 +242,5 @@ orchestration semantic::test3 {
     a3 < a7; a4 < a7; a5 < a7; a6 < a7;
   }
 }
+*/
 
-/*%
-  doTag(semantic_test1),   
-  doTag(semantic_test2),   
-  doTag(semantic_test3), 
-%*/
