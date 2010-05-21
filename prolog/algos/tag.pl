@@ -53,20 +53,23 @@ clearTags :-
 generate(Process, tag(guard, Act, condition(Var, Root, Val))) :- 
 	activity:belongsTo(Act,Process), isGuardedBy(Act, Root, Var, Val).
 generate(Process, tag(guard, Act, condition(Var, Root, Val))) :- 
-	activity:belongsTo(Act,Process), activity:belongsTo(OnVarAct,Process),
-	isGuardedBy(OnVarAct, Root, Var, Val),
-	relations:existsControlPath(OnVarAct, Act), invert(Val, NotVal), 
-	activity:belongsTo(OnVarAct,Process),
+	activity:belongsTo(Act,Process), 
+	%% There is a guard on this activity
+	activity:areInSameProcess(Act, OnVarAct),
+	isGuardedBy(OnVarAct, Root, Var, Val), 
+	relations:existsControlPath(OnVarAct, Act), 
+	%% And there is no oposite guard defined 
+	invert(Val, NotVal), activity:belongsTo(OnNotVarAct,Process),
 	isGuardedBy(OnNotVarAct, Root, Var, NotVal),
 	\+ (relations:existsControlPath(OnNotVarAct, Act)).
 
 %% Faults
-%% generate(Process,tag(fault, Act, error(Fault, Root))) :- 
-%% 	activity:belongsTo(Act, Process), onFailure(Act,Root,Fault).
-%% generate(Process,tag(fault, Act, error(Fault, Root))) :- 
-%% 	activity:belongsTo(Act, Process), onFailure(OnFaultAct,Root,Fault),
-%% 	relations:existsControlPath(OnFaultAct, Act), 
-%% 	\+ relations:existsControlPath(Root, Act).
+generate(Process,tag(fault, Act, error(Fault, Root))) :- 
+	activity:belongsTo(Act, Process), onFailure(Act,Root,Fault).
+generate(Process,tag(fault, Act, error(Fault, Root))) :- 
+	activity:belongsTo(Act, Process), onFailure(OnFaultAct,Root,Fault),
+	relations:existsPath(OnFaultAct, Act), 
+	\+ relations:existsControlPath(Root, Act).
 	
 
 %%%%%%%%%%%%%%%

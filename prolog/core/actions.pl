@@ -240,7 +240,7 @@ defWaitFor(_,A) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(def,'defWaitFor/2: Unknown activity \'~w\'!',A).
 defWaitFor(A1,A2) :- %% \exists path(a1 -> a2) => fail
-	existsPath(A1,A2), !, 
+	relations:existsPath(A1,A2), !, 
 	dfail(def,'defWaitFor/2: \'~w\' < \'~w\' introduces a cycle!',[A2,A1]).
 defWaitFor(A1,A2) :- %% \exists a2 < a1 \in WaitFor* => warning
 	waitFor(A1,A2), !, 
@@ -257,7 +257,7 @@ defWeakWait(_,A) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(def,'defWeakWait/2: Unknown activity \'~w\'!',A).
 defWeakWait(A1,A2) :- %% \exists path(a1 -> a2)  => fail
-	existsPath(A1,A2), !, 
+	relations:existsPath(A1,A2), !, 
 	dfail(def,'defWeakWait/2: \'~w\' < \'~w\' introduces a cycle!',[A2,A1]).
 defWeakWait(A1,A2) :- %% \exists a2 < a1 \in WeakWait* => warning
 	weakWait(A1,A2), !, 
@@ -275,7 +275,7 @@ defGuard(_,A,_,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(def,'defGuard/4: Unknown activity \'~w\'!',A).
 defGuard(A1,A2,_,_) :- %% \exists path(a1 -> a2)  => fail
-	existsPath(A1,A2), !, 
+	relations:existsPath(A1,A2), !, 
 	dfail(def,'defGuard/4: \'~w\' < \'~w\' introduces a cycle!',[A2,A1]).
 defGuard(_,A,V,_) :- %% v \not \in Outputs(a) => fail
 	\+ usesAsOutput(A,V), !, 
@@ -292,7 +292,7 @@ defOnFail(_,A,_) :- %% \not \exists a \in Activity* => fail
 	\+ activity(A), !, 
 	dfail(def,'defOnFail/3: Unknown activity \'~w\'!',A).
 defOnFail(A1,A2,_) :- %% \exists path(a1 -> a2)  => fail
-	existsPath(A1,A2), !, 
+	relations:existsPath(A1,A2), !, 
 	dfail(def,'defOnFail/4: \'~w\' < \'~w\' introduces a cycle!',[A2,A1]).
 defOnFail(A1,A2,M) :- 
 	adoreAssert(onFailure(A1,A2,M)),

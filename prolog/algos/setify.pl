@@ -114,8 +114,8 @@ buildPolicyApplication(Pid,[H|T],Actions) :-
 buildNewOrders(Core,OrderActs) :- 
 	findall(A,setify:reSchedule(Core,A),Raw), sort(Raw,OrderActs).
 reSchedule(Core,shiftAPath(Act,NAct,X)) :- 
-	member(Act,Core), \+ activity:isLast(Core,Act), path(Act,X),
+	member(Act,Core), \+ activity:isLast(Core,Act), relations:path(Act,X),
 	\+ member(X,Core), activity:isLast(Core,NAct).
 reSchedule(Core,shiftAPath(Act,NAct,X)) :- 
-	member(Act,Core), \+ activity:isFirst(Core,Act), path(X,Act),
+	member(Act,Core), \+ activity:isFirst(Core,Act), relations:path(X,Act),
 	\+ member(X,Core), activity:isFirst(Core,NAct).

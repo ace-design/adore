@@ -86,6 +86,7 @@ buildFaultsFormula([H|T],Formula) :-
 	Raw = formula(or, Conjunction, Others),	simplify(Raw,Formula).
 	
 %% build a relationship according to a given root (end, fail, condition?)
+%% TODO: take care of $P and $S in the relationship generation
 buildRelation(Act, Pred, R) :- 
 	(waitFor(Act,Pred)|weakWait(Act,Pred)), findUserRoot(Pred,Root), 
 	swritef(R,'end(%w)',[Root]).
@@ -119,9 +120,9 @@ flowDispatch(Act, Control, Weaks, PartitionnedExceptions) :-
 	            \+ tag(fault, Act, error(Fault, FaultyAct))), Exceptions),
 	faultPartition(Exceptions, PartitionnedExceptions),
 	%% Interpolating the control-flow (the rest).
-	removeList(Exceptions, WithoutWeak, Control).
+	removeList(Exceptions, WithoutWeak, Control),!.
 
-isEntryPoint(Act) :- activity(Act), \+ path(_,Act).
+isEntryPoint(Act) :- activity(Act), \+ relations:path(_,Act).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Control Partition (exclusivity induced by guards) %%%
@@ -150,10 +151,11 @@ partition(Acts, Var, OnVar, OnNotVar, Rest) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 faultPartition([],[]).
-faultPartition([H|T],[[H|Sims]|Others]) :- 
+faultPartition([H|T],[Currents|Others]) :- 
 	tag(fault, H, error(Fault, Source)), 
 	findall(S, (member(S,T), tag(fault, S, error(Fault, Source))), Sims),
-	removeList([H|Sims],T,WithoutSims), faultPartition(WithoutSims,Others).
+	sort([H|Sims],Currents),
+	removeList(Currents,T,WithoutSims), faultPartition(WithoutSims,Others).
 	
 
 %%%%%%%%%%%%%%%%%%%%%

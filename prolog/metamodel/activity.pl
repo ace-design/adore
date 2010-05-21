@@ -89,18 +89,20 @@ areUnifiable(ActSet,Kind,Process) :-
 getFirsts(Block,Activities) :- 
 	findall(A,activity:isFirst(Block,A),Tmp), sort(Tmp,Activities).
 isFirst(Block,Activity) :- 
-	member(Activity,Block), \+ path(_,Activity).
+	member(Activity,Block), \+ relations:path(_,Activity).
 isFirst(Block,Activity) :- 
-	member(Activity,Block), path(APrime,Activity), \+ member(APrime,Block),
-	findall(X,(member(X,Block), path(X,Activity)),[]).
+	member(Activity,Block), relations:path(APrime,Activity), 
+	\+ member(APrime,Block),
+	findall(X,(member(X,Block), relations:path(X,Activity)),[]).
 
 getLasts(Block,Activities) :- 
 	findall(A,activity:isLast(Block,A),Tmp), sort(Tmp,Activities).
 isLast(Block,Activity) :- 
-	member(Activity,Block),	\+ path(Activity,_).
+	member(Activity,Block),	\+ relations:path(Activity,_).
 isLast(Block,Activity) :- 
-	member(Activity,Block), path(Activity,APrime), \+ member(APrime,Block),
-	findall(X,(member(X,Block), path(Activity,X)),[]).
+	member(Activity,Block), relations:path(Activity,APrime), 
+	\+ member(APrime,Block),
+	findall(X,(member(X,Block), relations:path(Activity,X)),[]).
 
 getBlockInterfaceVariable(Block,Vars,Dir) :- 
 	findall(X,activity:isBlockInterfaceVariable(Block,X,Dir),Raws),

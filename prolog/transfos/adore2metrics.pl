@@ -131,7 +131,7 @@ getProcessHeight(P,H) :-
 
 metrics_processHeight(P,H) :- 
 	process(P), isProcessEntryPoint(P,Entry), isProcessExitPoint(P,Exit),
-	getPath(Entry,Exit,Path), length(Path,H).
+	relations:getPath(Entry,Exit,Path), length(Path,H).
 
 getProcessWidth(P,0) :- findall(T,metrics_processWidth(P,T), []).
 getProcessWidth(P,W) :- 

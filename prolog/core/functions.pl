@@ -48,23 +48,23 @@ isProcess(P) :- context(C), contextOutput(C,P),!.
 %% Relations between activities (==> deprecated, use 'relations' predicates)
 %%%%
 
-sameProcess(X,Y) :- isContainedBy(X,P), isContainedBy(Y,P).
+%% sameProcess(X,Y) :- isContainedBy(X,P), isContainedBy(Y,P).
 
-%% path/2: path(+A,+B) => a direct path exists between A and B
-%path(X,X) :- fail.
-path(X,Y) :- sameProcess(X,Y), waitFor(Y,X).
-path(X,Y) :- sameProcess(X,Y), isGuardedBy(Y,X,_,_).
-path(X,Y) :- sameProcess(X,Y), weakWait(Y,X).
-path(X,Y) :- sameProcess(X,Y), onFailure(Y,X,_).
+%% %% path/2: path(+A,+B) => a direct path exists between A and B
+%% %path(X,X) :- fail.
+%% path(X,Y) :- sameProcess(X,Y), waitFor(Y,X).
+%% path(X,Y) :- sameProcess(X,Y), isGuardedBy(Y,X,_,_).
+%% path(X,Y) :- sameProcess(X,Y), weakWait(Y,X).
+%% path(X,Y) :- sameProcess(X,Y), onFailure(Y,X,_).
 
-%% existsPath/2: existsPath(+A,+B) => transitive closure for path
-existsPath(X,Y) :- path(X,Y).
-existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).
+%% %% existsPath/2: existsPath(+A,+B) => transitive closure for path
+%% existsPath(X,Y) :- path(X,Y).
+%% existsPath(X,Y) :- path(X,Z), existsPath(Z,Y).
 
-%% getPath/3: getPath(+A,+B,-Path) => return activities from A to B
-getPath(A,B,[A|O]) :- extractPath(A,B,O). 
-extractPath(A,B,[B]) :- path(A,B).
-extractPath(A,B,[X|O]) :- path(A,X), extractPath(X,B,O).
+%% %% getPath/3: getPath(+A,+B,-Path) => return activities from A to B
+%% getPath(A,B,[A|O]) :- extractPath(A,B,O). 
+%% extractPath(A,B,[B]) :- path(A,B).
+%% extractPath(A,B,[X|O]) :- path(A,X), extractPath(X,B,O).
 
 %%%%
 %% Access to variable  (==> deprecated, use 'variables' predicates)
@@ -88,42 +88,6 @@ usesElem(A,V) :- usesElemAsOutput(A,V).
 
 usedByProcess(P,V) :- 
 	isContainedBy(A,P), activity(A), usesElem(A,V).
-
-%%%%
-%% Block Handling
-%%%%
-
-%% getFirstActivitiesOfBlock(Block,Activities) :- 
-%% 	findall(A,isFirstActivity(Block,A),Tmp), sort(Tmp,Activities).
-%% isFirstActivity(Block,Activity) :- 
-%% 	member(Activity,Block), \+ path(_,Activity).
-%% isFirstActivity(Block,Activity) :- 
-%% 	member(Activity,Block), path(APrime,Activity), \+ member(APrime,Block).
-
-%% getLastActivitiesOfBlock(Block,Activities) :- 
-%% 	findall(A,isLastActivity(Block,A),Tmp), sort(Tmp,Activities).
-%% isLastActivity(Block,Activity) :- 
-%% 	member(Activity,Block),	\+ path(Activity,_).
-%% isLastActivity(Block,Activity) :- 
-%% 	member(Activity,Block), path(Activity,APrime),
-%% 	\+ member(APrime,Block). 
-
-%% getBlockInputVariable(Block, Vars) :-
-%% 	findall(V,isBlockInputVariable(Block,V),Tmp),
-%% 	sort(Tmp,Vars).
-%% isBlockInputVariable(Block,V) :- 
-%% 	isFirstActivity(Block,A), usesElemAsInput(A,V), \+ isConstant(V).
-
-%% getBlockOutputVariable(Block, Vars) :-
-%% 	findall(V,isBlockOutputVariable(Block,V),Tmp),
-%% 	sort(Tmp,Vars).
-%% isBlockOutputVariable(Block,V) :- 
-%% 	isLastActivity(Block,A), usesElemAsOutput(A,V).
-
-%% isWellFormed(Block,P) :- 
-%% 	activityBlock(_,Block,Activities),
-%% 	map(isContainedBy,Activities,Processes),
-%% 	sort(Processes,[P]),!.
 
 %%%%
 %% Process entry and exit points

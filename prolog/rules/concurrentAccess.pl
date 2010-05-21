@@ -31,6 +31,6 @@ isConflicting(Pair,Resource) :-
 	process(P), 
 	activity:belongsTo(A,P), activity:belongsTo(APrime,P), A \= APrime,
 	usesElemAsOutput(A,Resource), usesElem(APrime, Resource),
-	\+ (existsPath(A,APrime) | existsPath(APrime,A)),!,
+	\+ (relations:existsPath(A,APrime) | relations:existsPath(APrime,A)),!,
 	Tmp = [A,APrime], sort(Tmp, Pair).
 	

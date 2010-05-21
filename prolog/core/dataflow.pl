@@ -41,13 +41,13 @@ variableUsageClosure(V,A) :-
 	isContainedBy(APrime,P), isContainedBy(A,P),
 	isDfActivity(A), isDfActivity(APrime), \+ A == APrime, 
 	usesElemAsInput(A,Vin), usesElemAsOutput(APrime,Vin), 
-	existsPath(APrime,A), 
+	relations:existsPath(APrime,A), 
 	variableUsageClosure(V,APrime).
 variableUsageClosure(V,A) :- 
 	isDfActivity(A), isDfActivity(APrime), \+ A == APrime, 
 	isContainedBy(APrime,P), isContainedBy(A,P), 
 	usesElemAsOutput(A,Vout), usesElemAsOutput(APrime,Vout), 
-	existsPath(APrime,A), 
+	relations:existsPath(APrime,A), 
 	variableUsageClosure(V,APrime).
 variableUsageClosure(V,A) :- %% to take care of user's datalink
 	dataLink(DLProcess,DLVar,DLAct),
