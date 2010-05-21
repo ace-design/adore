@@ -30,7 +30,8 @@ path(X,Y) :- activity:sameProcess(X,Y), weakWait(Y,X).
 path(X,Y) :- activity:sameProcess(X,Y), onFailure(Y,X,_).
 
 %% controlPath (not error handling).
-controlPath(X,Y) :- path(X,Y), \+ onFailure(Y,X,_).
+controlPath(X,Y) :- 
+	path(X,Y), \+ onFailure(Y,X,_).
 
 %% existsPath/2: existsPath(+A,+B) => transitive closure for path
 existsPath(X,Y) :- path(X,Y).
@@ -44,7 +45,14 @@ extractPath(A,B,[X|O]) :- path(A,X), extractPath(X,B,O).
 %% contreol path (not onFail)
 getControlPath(A,B,[A|O]) :- extractControlPath(A,B,O). 
 extractControlPath(A,B,[B]) :- controlPath(A,B).
+%% FAUX !!!!!!!!! (to do: backward compatibility) 
 extractControlPath(A,B,[X|O]) :- controlPath(A,X), extractPath(X,B,O).
+%% FAUX !!!!!!!!! (to do: backward compatibility)
+
+existsControlPath(X,Y) :- controlPath(X,Y).
+existsControlPath(X,Y) :- 
+	%activity:areInSameProcess(X,Z), write(Z),nl,
+	controlPath(X,Z), existsControlPath(Z,Y).
 
 getGuardPath(A,X,[guard(V,C)]) :- 
 	activity:sameProcess(X,A), isGuardedBy(X,A,V,C).

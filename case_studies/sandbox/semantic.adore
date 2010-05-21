@@ -94,7 +94,59 @@ orchestration weakWaits::hierarchy { // WeakWait synchronization
  ** Guards Artefatcs **
  **********************/
 
-// TODO
+orchestration guards::transitivity {
+  variables { c as boolean; }
+  activities {
+    a0. c := receive();
+    a1. nop();
+    a2. nop();
+    a3. nop();
+    a4. nop();
+    a5. reply();
+  }
+  relations { 
+    a0 < a1 when c; a0 < a2 when !c; a1 < a3; a2 < a4; a3 < a5; a4 < a5;
+  }
+}
+
+orchestration guards::parallel {
+  variables { c1 as boolean; c2 as boolean; }
+  activities {
+    a0. receive();
+    a1. c1 := nop();
+    a2. c2 := nop();
+    a3. nop();
+    a4. nop();
+    a5. nop();
+    a6. nop();
+    a7. reply();
+  }
+  relations {
+    a0 < a1; a0 < a2; 
+    a1 < a3 when c1; a1 < a4 when !c1;
+    a2 < a5 when c2; a2 < a6 when !c2;
+    a3 < a7; a4 < a7; a5 < a7; a6 < a7;
+  }
+}
+
+orchestration guards::intricated {
+  variables { c1 as boolean; c2 as boolean; }
+  activities {
+    a0. receive();
+    a1. c1 := nop();
+    a2. c2 := nop();
+    a3. nop();
+    a5. nop();
+    a6. nop();
+    a7. reply();
+  }
+  relations {
+    a0 < a1;  
+    a1 < a3 when c1; a1 < a2 when !c1;
+    a2 < a5 when c2; a2 < a6 when !c2;
+    a3 < a7; a2 < a2; a5 < a7; a6 < a7;
+  }
+}
 
 /**************************
  ** Exceptions Artefacts **

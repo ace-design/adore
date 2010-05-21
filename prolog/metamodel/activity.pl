@@ -34,7 +34,8 @@ useVariable(Act,Var,out) :-
 	activity(Act), variable(Var), 
 	( usesAsOutput(Act,Var) | usesAsOutput(Act,F), fieldAccess(F,Var,_) ).
 
-areInSameProcess(X,Y) :- belongsTo(X,P), belongsTo(Y,P).
+sameProcess(X,Y) :- isContainedBy(X,P), isContainedBy(Y,P).
+areInSameProcess(X,Y) :- isContainedBy(X,P), isContainedBy(Y,P).
 
 
 getPredecessors(A,Preds) :- 

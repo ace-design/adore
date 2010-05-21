@@ -19,11 +19,8 @@
 %%
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
-:- module(tag, [doTag/1, tag/2, tag/3, clearTags/0]).
-
-:- dynamic tag/2.
+:- module(tag, [doTag/1, clearTags/0, tag/3]).
 :- dynamic tag/3.
-
 
 %%%%%%
 %%% end user interface
@@ -37,84 +34,119 @@ doTag(Process) :-
 
 buildTagList(Process,FinalTagList) :- 
 	process:exists(Process), 
-	findall(Tags,tag:generate(Process,Tags), AllTags),
-	flatten(AllTags, RawTags), simplify(RawTags, Simplified), 
-	sort(Simplified,FinalTagList).
+	findall(Tags,tag:generate(Process,Tags), AllTags), 
+	sort(AllTags,FinalTagList).
 
 clearTags :- 
 	retractall(tag(_,_)), retractall(tag(_,_,_)).
 
-%%% Internal algorithm
+%%%%%%%%%%%%%%%%%
+%%% Tag Model %%%
+%%%%%%%%%%%%%%%%%
 
 %% Available tags
-% ~> tag(control, Act).
-% ~> tag(guard, Act, condition(Var, Other), true|false).
-% ~> tag(fault, Act, error(Fault, Other)).
+% ~> tag(guard, Act, condition(Var, Root, true|false)).
+% ~> tag(fault, Act, error(Fault, Root)).
 %%
 
-%%%%
-%% Initial Control-flow (receive -> ...)
-%%%%
-generate(Process, [tag(control, EntryPoint)|Propagation]) :- 
-	activity:belongsTo(EntryPoint, Process), \+ path(_,EntryPoint), 
-	findControlSuccessors(EntryPoint, Succs),
-	propagate(control,Succs,[],Propagation).
+%% Guard
+generate(Process, tag(guard, Act, condition(Var, Root, Val))) :- 
+	activity:belongsTo(Act,Process), isGuardedBy(Act, Root, Var, Val).
+generate(Process, tag(guard, Act, condition(Var, Root, Val))) :- 
+	activity:belongsTo(Act,Process), activity:belongsTo(OnVarAct,Process),
+	isGuardedBy(OnVarAct, Root, Var, Val),
+	relations:existsControlPath(OnVarAct, Act), invert(Val, NotVal), 
+	activity:belongsTo(OnVarAct,Process),
+	isGuardedBy(OnNotVarAct, Root, Var, NotVal),
+	\+ (relations:existsControlPath(OnNotVarAct, Act)).
 
-%%%%
-%% Guards
-%%%%
-generate(Process, [tag(guard, Act, Meta)|Propagation]) :- 
-	activity:belongsTo(Act,Process), isGuardedBy(Act,Other,Var,Value),
-	Meta = condition(Var,Other,Value), findAllSuccessors(Act,Succs), 
-	propagate(guard, Succs, Meta, Propagation).
-
-%%%%
 %% Faults
-%%%%
+%% generate(Process,tag(fault, Act, error(Fault, Root))) :- 
+%% 	activity:belongsTo(Act, Process), onFailure(Act,Root,Fault).
+%% generate(Process,tag(fault, Act, error(Fault, Root))) :- 
+%% 	activity:belongsTo(Act, Process), onFailure(OnFaultAct,Root,Fault),
+%% 	relations:existsControlPath(OnFaultAct, Act), 
+%% 	\+ relations:existsControlPath(Root, Act).
+	
 
-generate(Process, [tag(fault, Act, Meta)|Propagation]) :- 
-	activity:belongsTo(Act,Process), onFailure(Act, FaultyAct, Fault),
-	Meta = error(Fault,FaultyAct), findAllSuccessors(Act,Succs), 
-	propagate(fault, Succs, Meta, Propagation).
+%%%%%%%%%%%%%%%
+%%% Helpers %%%
+%%%%%%%%%%%%%%%
 
+invert(true, false).
+invert(false, true).
 
-%%%%
-%% Simplification rules
-%%%%
+%%%%%%%
+%%% OLD CODE 
+%%%%%%%
 
-%simplify(L,L).
-simplify(L,Simplified) :- 
- 	findall(X,tag:shouldBeSimplified(L,X),Raws), flatten(Raws,ToDelete),
- 	removeList(ToDelete, L, Simplified).
-
-%% Fault Flow pouring into regular control-flow
-shouldBeSimplified(L, [tag(fault, Act, Meta)]) :- 
-	member(tag(control,Act), L), member(tag(fault, Act, Meta), L).
-%% Exclusive conditions means no conditions
-shouldBeSimplified(L, [OnTrue, OnFalse]) :- 
-	member(tag(guard, Act, condition(Var, Test, true)), L),
-	member(tag(guard, Act, condition(Var, Test, false)), L),
-	OnTrue  = tag(guard, Act, condition(Var, Test, true)),
-	OnFalse = tag(guard, Act, condition(Var, Test, false)).
-
-%%%%
-%% Algorithm helpers
-%%%%
-
-%% does not make any sense outside this algorithm (too restrictive)
-restrictedControlPath(A,B) :- ( waitFor(B,A) | weakWait(B,A) ).
-restrictedControlPath(A,B) :- 
-	( waitFor(O,A) | weakWait(O,A) ), restrictedControlPath(O,B).
-
-findAllSuccessors(Act,Succs) :- 
-	findall(O,relations:existsPath(Act,O),Others), sort(Others, Succs).
-
-findControlSuccessors(Act,Succs) :- 
-	findall(O,tag:restrictedControlPath(Act,O),Others), sort(Others, Succs).
+%% %%% Internal algorithm
 
 
-propagate(_,[],_,[]).
-propagate(Flag,[H|T],[],[tag(Flag,H)|Others]) :- 
-	propagate(Flag,T,[],Others),!.
-propagate(Flag,[H|T],Meta,[tag(Flag,H,Meta)|Others]) :- 
-	propagate(Flag,T,Meta,Others).
+
+%% %%%%
+%% %% Initial Control-flow (receive -> ...)
+%% %%%%
+%% generate(Process, [tag(control, EntryPoint)|Propagation]) :- 
+%% 	activity:belongsTo(EntryPoint, Process), \+ path(_,EntryPoint), 
+%% 	findControlSuccessors(EntryPoint, Succs),
+%% 	propagate(control,Succs,[],Propagation).
+
+%% %%%%
+%% %% Guards
+%% %%%%
+%% generate(Process, [tag(guard, Act, Meta)|Propagation]) :- 
+%% 	activity:belongsTo(Act,Process), isGuardedBy(Act,Other,Var,Value),
+%% 	Meta = condition(Var,Other,Value), findAllSuccessors(Act,Succs), 
+%% 	propagate(guard, Succs, Meta, Propagation).
+
+%% %%%%
+%% %% Faults
+%% %%%%
+
+%% generate(Process, [tag(fault, Act, Meta)|Propagation]) :- 
+%% 	activity:belongsTo(Act,Process), onFailure(Act, FaultyAct, Fault),
+%% 	Meta = error(Fault,FaultyAct), findAllSuccessors(Act,Succs), 
+%% 	propagate(fault, Succs, Meta, Propagation).
+
+
+%% %%%%
+%% %% Simplification rules
+%% %%%%
+
+%% %simplify(L,L).
+%% simplify(L,Simplified) :- 
+%%  	findall(X,tag:shouldBeSimplified(L,X),Raws), flatten(Raws,ToDelete),
+%%  	removeList(ToDelete, L, Simplified).
+
+%% %% Fault Flow pouring into regular control-flow
+%% shouldBeSimplified(L, [tag(fault, Act, Meta)]) :- 
+%% 	member(tag(control,Act), L), member(tag(fault, Act, Meta), L).
+%% %% Exclusive conditions means no conditions
+%% shouldBeSimplified(L, [OnTrue, OnFalse]) :- 
+%% 	member(tag(guard, Act, condition(Var, Test, true)), L),
+%% 	member(tag(guard, Act, condition(Var, Test, false)), L),
+%% 	OnTrue  = tag(guard, Act, condition(Var, Test, true)),
+%% 	OnFalse = tag(guard, Act, condition(Var, Test, false)).
+
+%% %%%%
+%% %% Algorithm helpers
+%% %%%%
+
+%% %% does not make any sense outside this algorithm (too restrictive)
+%% restrictedControlPath(A,B) :- ( waitFor(B,A) | weakWait(B,A) ).
+%% restrictedControlPath(A,B) :- 
+%% 	( waitFor(O,A) | weakWait(O,A) ), restrictedControlPath(O,B).
+
+%% findAllSuccessors(Act,Succs) :- 
+%% 	findall(O,relations:existsPath(Act,O),Others), sort(Others, Succs).
+
+%% findControlSuccessors(Act,Succs) :- 
+%% 	findall(O,tag:restrictedControlPath(Act,O),Others), sort(Others, Succs).
+
+
+%% propagate(_,[],_,[]).
+%% propagate(Flag,[H|T],[],[tag(Flag,H)|Others]) :- 
+%% 	propagate(Flag,T,[],Others),!.
+%% propagate(Flag,[H|T],Meta,[tag(Flag,H,Meta)|Others]) :- 
+%% 	propagate(Flag,T,Meta,Others).
