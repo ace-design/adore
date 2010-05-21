@@ -18,10 +18,10 @@ orchestration test::test {
     a12. nop();
     a13. nop();
     a14. nop();
-    a15. nop();
-/*    aa. d := nop();
+    a15. nop(); 
+    aa. d := nop();
     aa1. nop();
-    aa2. nop(); */
+    aa2. nop(); 
   }
   relations {
     a1 < a2; a2 < a4; a4 < a7; a7 < a9; a1 < a3; a1 < a14; a14 < a4; 
@@ -29,7 +29,7 @@ orchestration test::test {
     a3 < a6 when !c; a6 < a12; a6 < a13; a12 < a7; a13 < a7;
     fail(a1,'f') < a8; a8 < a10; a10 < a9; a8 < a15; a15 < a9;
     // Mireille:
-    //a1 < aa; aa < aa1 when d; aa < aa2 when !d; aa1 < a11; aa2 < a11; 
-    //aa1 < a13; aa2 < a12;
+    a1 < aa; aa < aa1 when d; aa < aa2 when !d; aa1 < a11; aa2 < a11; 
+    aa1 < a13; aa2 < a12;
   }
 }

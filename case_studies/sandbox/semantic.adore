@@ -136,16 +136,37 @@ orchestration guards::intricated {
     a1. c1 := nop();
     a2. c2 := nop();
     a3. nop();
+    a4. nop();
+    a5. nop();
+    a6. reply();
+  }
+  relations {
+    a0 < a1;  
+    a1 < a3 when c1; a1 < a2 when !c1;
+    a2 < a4 when c2; a2 < a5 when !c2;
+    a3 < a6; a4 < a6; a5 < a6;
+  }
+}
+
+orchestration guards::fullyMelted {
+  variables { c1 as boolean; c2 as boolean; }
+  activities {
+    a0. receive();
+    a1. c1 := nop();
+    a2. c2 := nop();
+    a3. nop();
+    a4. nop();
     a5. nop();
     a6. nop();
     a7. reply();
   }
   relations {
-    a0 < a1;  
-    a1 < a3 when c1; a1 < a2 when !c1;
-    a2 < a5 when c2; a2 < a6 when !c2;
-    a3 < a7; a2 < a2; a5 < a7; a6 < a7;
+    a0 < a1; a0 < a2;  
+    a1 < a3 when c1; a1 < a4 when c1;  a1 < a5 when !c1; a1 < a6 when !c1;
+    a2 < a3 when c2; a2 < a4 when !c2; a2 < a5 when c2;  a2 < a6 when !c2;
+    a3 < a7; a4 < a7; a5 < a7; a6 < a7;
   }
+
 }
 
 /**************************
