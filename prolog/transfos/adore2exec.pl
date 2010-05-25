@@ -88,18 +88,23 @@ buildFaultsFormula([H|T],Formula) :-
 %% build a relationship according to a given root (end, fail, condition?)
 %% TODO: take care of $P and $S in the relationship generation
 buildRelation(Act, Pred, R) :- 
-	(waitFor(Act,Pred)|weakWait(Act,Pred)), findUserRoot(Pred,Root), 
+	(waitFor(Act,Pred)|weakWait(Act,Pred)), buildActName(Pred,Root), 
 	swritef(R,'end(%w)',[Root]).
 buildRelation(Act, Pred, R) :- 
-	isGuardedBy(Act, Pred, Var, Val), findUserRoot(Pred,PredRoot),
+	isGuardedBy(Act, Pred, Var, Val), buildActName(Pred,PredRoot),
 	( extractAllPredecessors(Act,Preds), member(E,Preds), 
 	  invert(Val, Not), tag(guard, E, condition(Var, _, Not)), !, 
 	  swritef(R,'end(%w)', [PredRoot])
 	 | findUserRoot(Var,VarRoot), 
 	   swritef(R,'(end(%w) & %w(%w))', [PredRoot,Val,VarRoot])).
 buildRelation(Act, Pred, R) :- 
-	onFailure(Act, Pred, Fault), findUserRoot(Pred,Root),
+	onFailure(Act, Pred, Fault), buildActName(Pred,Root),
 	swritef(R,'fail(%w,%w)',[Root,Fault]).
+
+buildActName(A,'^') :- activity(A), hasForKind(A,predecessors),!.
+buildActName(A,'$') :- activity(A), hasForKind(A,successors),!.
+buildActName(A,N) :- getPreviousName(A,N).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Flow Dispatch & Entry Point %%%
@@ -110,14 +115,21 @@ extractAllPredecessors(Act,Preds) :-
  	findall(A, onFailure(Act,A,_), RawFaults), 
 	flatten([RawControls,RawFaults], Preds).
 
+extractException(Root, Acts, Exc) :- 
+	member(Exc, Acts), tag(fault, Exc, error(Fault, FaultyAct)),
+	\+ tag(fault, Root, error(Fault, FaultyAct)).
+extractException(_, Acts, Exc) :- 
+	member(Exc, Acts), member(Exc2, Acts),
+	tag(fault, Exc, error(Fault1, FaultyAct)),
+	tag(fault, Exc2, error(Fault2, FaultyAct)), Fault1 \= Fault2.
+	
 flowDispatch(Act, Control, Weaks, PartitionnedExceptions) :- 
 	extractAllPredecessors(Act,Raws),
 	%% retrieving the weak wait flow 
 	findall(W,weakWait(Act,W),Weaks), removeList(Weaks, Raws, WithoutWeak),
 	%% retrieving exceptional flow 
-	findall(E,( member(E, WithoutWeak),
-	            tag(fault, E, error(Fault, FaultyAct)),
-	            \+ tag(fault, Act, error(Fault, FaultyAct))), Exceptions),
+	findall(E,extractException(Act,WithoutWeak,E), RawExceptions),
+	sort(RawExceptions,Exceptions),
 	faultPartition(Exceptions, PartitionnedExceptions),
 	%% Interpolating the control-flow (the rest).
 	removeList(Exceptions, WithoutWeak, Control),!.
@@ -165,12 +177,14 @@ faultPartition([H|T],[Currents|Others]) :-
 %% 'Grammar': formula(and|or,SubFormula1, SubFormula2) | Atom.
 
 %% formula simplification (term rewriting):
+rewrite(_,[],F,F) :- !.
+rewrite(_,F,[],F) :- !.
+rewrite(Op,F1,F2,formula(Op,F1,F2)).
+
 simplify(V,V) :- atom(V), !.
 simplify([V],V) :- atom(V), !.
-simplify(formula(_, Form, []),R) :- simplify(Form, R),!.
-simplify(formula(_, [], Form),R) :- simplify(Form, R),!.
-simplify(formula(Op, Form1, Form2), formula(Op, R1, R2)) :- 
-	simplify(Form1, R1), simplify(Form2, R2).
+simplify(formula(Op, Form1, Form2), Result) :- 
+	simplify(Form1, R1), simplify(Form2, R2), rewrite(Op,R1,R2,Result).
 
 %% formula builder:
 build(_,[],[]).

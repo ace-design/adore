@@ -62,6 +62,6 @@ require 'fragments.adore';
  ** Step #7: Including Non-functional Concerns **
  ************************************************/
 
-knowledge 'steps/pointcuts.pl'; // ==>  displayCuts.
+//knowledge 'steps/pointcuts.pl'; // ==>  displayCuts.
 
 //require 'steps/with_nf.adore';
