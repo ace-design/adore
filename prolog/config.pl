@@ -20,38 +20,47 @@
 %% @author      Main Sébastien Mosser          [mosser@polytech.unice.fr]
 %%%%
 
+%%%
+% ADORE parameter API 
+%%%
+
+:- dynamic adore_param/2.
+storeParameter(Name, Value) :- 
+	adore_param(Name, Old),!, retract(adore_param(Name,Old)),
+	assert(adore_param(Name, Value)).
+storeParameter(Name, Value) :- assert(adore_param(Name, Value)).
+
+readParameter(Name, Value) :- adore_param(Name, Value),!.
+readParameter(_, '').
+
+%%%
+% Global (default) configuration
+%%%
+
+:- storeParameter(adore2png_exec,'dot').
+
+%%%
+% Local Configuration (if any)
+%%%
+
+%% load '~/.adore.pl' only if such a file exists
+:- getenv('HOME',Home),	swritef(F,'%w/.adore.pl',[Home]), 
+   exists_file(F), [F].
+	
+
 %%%%
-%% Debugging ADORE ...
+%% Debugging ADORE ... (if any)
 %%%%
 
 %debugSubscription(compiler).
-
-%% Atomic Actions
 %debugSubscription(create).
 %debugSubscription(def).
 %debugSubscription(set).
-
-%% Algorithms
 debugSubscription(algo).
 debugSubscription(timer).
-
-debugSubscription(clone).
-debugSubscription(setify).
-debugSubscription(merge).
-debugSubscription(weave).
-debugSubscription(instantiate).
-
-%% Execution framework
+%debugSubscription(clone).
+%debugSubscription(setify).
+%debugSubscription(merge).
+%debugSubscription(weave).
+%debugSubscription(instantiate).
 %debugSubscription(exec).
-
-%%%%
-%% Model transformation parameters: 
-%%%%
-
-%% Seb:
-adore2png_param(exec,'/sw/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
-
-%% Mireille:
-%% adore2png_param(exec,'/usr/local/bin/dot -Nfontname=Courier -Gfontpath=/System/Library/Fonts').
-
-

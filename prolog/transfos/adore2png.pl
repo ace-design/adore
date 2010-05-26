@@ -25,5 +25,6 @@
 adore2png(P,F) :- 
 	adore2dot(P,DotCode), tmp_file('adore2dot',Tmp), 
 	open(Tmp,write,Stream), write(Stream,DotCode), close(Stream),
-	adore2png_param(exec,E), 
+	%adore2png_param(exec,E), 
+	readParameter(adore2png_exec,E),
 	swritef(Cmd,'%w -Tpng %w > %w',[E,Tmp,F]), shell(Cmd).

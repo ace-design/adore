@@ -50,7 +50,7 @@ genGraph(Core,F) :-
 	swritef(Code,'digraph dependencies {\n  fontname=Courier;\n  node [shape=record];\n  edge [fontname=Courier];\n rankdir=LR;\n%w } \n',[Core]), !, 
         tmp_file('dot',TmpDot),
 	open(TmpDot,write,Stream), write(Stream,Code), close(Stream),
-	adore2png_param(exec,Exec), 
+	readParameter(adore2png_exec,Exec), 
  	swritef(CmdExec,'%w -Tpng %w > %w',[Exec,TmpDot,F]), 
         shell(CmdExec).	
 
