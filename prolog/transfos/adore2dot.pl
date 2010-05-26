@@ -127,10 +127,15 @@ genActivity(P,C) :-
 
 drawActivity(A,C) :- 
 	hasForKind(A,predecessors), 
-	swritef(C,'  %w [label="P", shape=doublecircle];',[A]), !.
+	swritef(C,'  %w [label="P", style=dotted, shape=circle];',[A]), !.
 drawActivity(A,C) :- 
 	hasForKind(A,successors), 
-	swritef(C,'  %w [label="S", shape=doublecircle];',[A]), !.
+	swritef(C,'  %w [label="S", style=dotted, shape=circle];',[A]), !.
+drawActivity(A,C) :- 
+	hasForKind(A, hook), !,	getPreviousName(A,Id),
+	genOutputs(A,Outs), genLabel(A,Label),
+	genInputs(A,Ins),
+	swritef(C,'  %w [label="%w|%w%w%w", style=dotted];',[A,Id,Outs,Label,Ins]).
 drawActivity(A,C) :- 
 	getPreviousName(A,Id),
 	genOutputs(A,Outs),
@@ -215,6 +220,12 @@ genOrder(P,C) :-
 	\+ Left == Rght, 
 	drawOrder(Left,Rght,C).
 
+drawOrder(L,R,C) :- 
+	relations:path(L,R), hasForKind(L,predecessors),!,
+	swritef(C,'  %w -> %w [style=dotted, arrowhead=none];',[L,R]).
+drawOrder(L,R,C) :- 
+	relations:path(L,R), hasForKind(R,successors),!,
+	swritef(C,'  %w -> %w [style=dotted, arrowhead=none];',[L,R]).
 drawOrder(L,R,C) :- 
 	waitFor(R,L),
 	swritef(C,'  %w -> %w ;',[L,R]).

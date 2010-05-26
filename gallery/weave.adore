@@ -9,30 +9,268 @@
 
 orchestration simple::sequence {
   variables{}
-  activities {a0. receive(); a1. nop(); a2. reply(); }
+  activities {a0. receive(); a1. targeted::call(); a2. reply(); }
   relations { a0 < a1; a1 < a2; }
 }
 
 orchestration simple::parallel {
   variables{}
-  activities {a0. receive(); a1. nop(); a2. nop(); a3. reply(); }
+  activities {a0. receive(); a1. targeted::call(); a2. nop(); a3. reply(); }
   relations { a0 < a1; a0 < a2; a1 < a3; a2 < a3; }
+}
+
+orchestration simple::alternatives {
+  variables{}
+  activities {a0. receive(); a1. targeted::call(); a2. nop(); a3. reply(); }
+  relations { a0 < a1; a0 < a2; a1 << a3; a2 << a3; }
 }
 
 orchestration simple::guards {
   variables{ c as boolean; }
-  activities { a0. c := receive(); a1. nop(); a2. nop(); a3. reply(); }
+  activities { 
+    a0. c := receive(); a1. targeted::call(); a2. nop(); a3. reply(); 
+  }
   relations{ a0 < a1 when c; a0 < a2 when !c; a1 < a3; a2 < a3; }
 }
 
-orchestration simple::faults {
+orchestration simple::caughtFault {
   variables{}
-  activities {a0. receive(); a1. nop(); a2. nop(); a3. reply(); }
-  relations { a0 < a1; a1 < a3; fail(a0,'f') < a2; a2 < a3;}
+  activities {a0. receive(); a1. targeted::call(); a2. nop(); a3. reply(); }
+  relations { a0 < a2; a2 < a3; fail(a0,'f') < a1; a1 < a3;}
+}
+
+orchestration simple::threwFault {
+  variables{}
+  activities {a0. receive(); a1. targeted::call(); a2. nop(); a3. reply(); }
+  relations { a0 < a1; a1 < a3; fail(a1,'f') < a2; a2 < a3;}
 }
 
 /************************
  ** Fragments artefact **
  ************************/
+
+fragment before {
+  variables {}
+  activities { bef. before::do(); h. hook(); }
+  relations { ^ < bef; bef < h; h < $; }
+}
+depict before using 'darkseagreen';
+
+fragment after {
+  variables {}
+  activities { aft. after::do(); h. hook(); }
+  relations { ^ < h; h < aft; aft < $; }
+}
+depict after using 'darksalmon';
+
+fragment parallel {
+  variables {}
+  activities { h. hook(); par. parallel::do();  }
+  relations { ^ < h; h < $; ^ < par; par < $;}
+}
+depict parallel using 'lemonchiffon3';
+
+fragment complete {
+  variables {}
+  activities { 
+    bef. before::do(); h. hook(); aft. after::do(); par. parallel::do(); 
+  }
+  relations {
+    ^ < bef; bef < h; h < aft; aft < $; ^ < par; par < $;
+  }
+}
+depict complete using 'lightblue';
+
+/************************************************
+ ** Composition on 'simple::sequence' artefact **
+ ************************************************/
+
+// apply before => simple::sequence::a1
+/*%
+  doClone(before, b1), doClone(simple_sequence, ss1),
+  identifyClone(simple_sequence_a1, ss1, SSA1_1),
+  doWeave([weave(b1,[SSA1_1])]), doProcessSimplification(ss1),
+%*/
+
+// apply after => simple::sequence::a1
+/*%
+  doClone(after, a1), doClone(simple_sequence, ss2),
+  identifyClone(simple_sequence_a1, ss2, SSA1_2),
+  doWeave([weave(a1,[SSA1_2])]), doProcessSimplification(ss2),
+%*/
+
+// apply parallel => simple::sequence::a1
+/*%
+  doClone(parallel, p1), doClone(simple_sequence, ss3),
+  identifyClone(simple_sequence_a1, ss3, SSA1_3),
+  doWeave([weave(p1,[SSA1_3])]), doProcessSimplification(ss3),
+%*/
+
+// apply complete => simple::sequence::a1
+/*%
+  doClone(complete, c1), doClone(simple_sequence, ss4),
+  identifyClone(simple_sequence_a1, ss4, SSA1_4),
+  doWeave([weave(c1,[SSA1_4])]), doProcessSimplification(ss4),
+%*/
+
+/************************************************
+ ** Composition on 'simple::parallel' artefact **
+ ************************************************/
+
+// apply before => simple::parallel::a1
+/*%
+  doClone(before, b2), doClone(simple_parallel, sp1),
+  identifyClone(simple_parallel_a1, sp1, SPA1_1),
+  doWeave([weave(b2,[SPA1_1])]), doProcessSimplification(sp1),
+%*/
+
+// apply after => simple::parallel::a1
+/*%
+  doClone(after, a2), doClone(simple_parallel, sp2),
+  identifyClone(simple_parallel_a1, sp2, SPA1_2),
+  doWeave([weave(a2,[SPA1_2])]), doProcessSimplification(sp2),
+%*/
+
+// apply parallel => simple::parallel::a1
+/*%
+  doClone(parallel, p2), doClone(simple_parallel, sp3),
+  identifyClone(simple_parallel_a1, sp3, SPA1_3),
+  doWeave([weave(p2,[SPA1_3])]), doProcessSimplification(sp3),
+%*/
+
+// apply complete => simple::parallel::a1
+/*%
+  doClone(complete, c2), doClone(simple_parallel, sp4),
+  identifyClone(simple_parallel_a1, sp4, SPA1_4),
+  doWeave([weave(c2,[SPA1_4])]), doProcessSimplification(sp4),
+%*/
+
+/****************************************************
+ ** Composition on 'simple::alternatives' artefact **
+ ****************************************************/
+
+// apply before => simple::alternatives::a1
+/*%
+  doClone(before, b3), doClone(simple_alternatives, sa1),
+  identifyClone(simple_alternatives_a1, sa1, SAA1_1),
+  doWeave([weave(b3,[SAA1_1])]), doProcessSimplification(sa1),
+%*/
+
+// apply after => simple::alternatives::a1
+/*%
+  doClone(after, a3), doClone(simple_alternatives, sa2),
+  identifyClone(simple_alternatives_a1, sa2, SAA1_2),
+  doWeave([weave(a3,[SAA1_2])]), doProcessSimplification(sa2),
+%*/
+
+// apply parallel => simple::alternatives::a1
+/*%
+  doClone(parallel, p3), doClone(simple_alternatives, sa3),
+  identifyClone(simple_alternatives_a1, sa3, SAA1_3),
+  doWeave([weave(p3,[SAA1_3])]), doProcessSimplification(sa3),
+%*/
+
+// apply complete => simple::alternatives::a1
+/*%
+  doClone(complete, c3), doClone(simple_alternatives, sa4),
+  identifyClone(simple_alternatives_a1, sa4, SAA1_4),
+  doWeave([weave(c3,[SAA1_4])]), doProcessSimplification(sa4),
+%*/
+
+/**********************************************
+ ** Composition on 'simple::guards' artefact **
+ ***********************************************/
+
+// apply before => simple::guards::a1
+/*%
+  doClone(before, b4), doClone(simple_guards, sg1),
+  identifyClone(simple_guards_a1, sg1, SGA1_1),
+  doWeave([weave(b4,[SGA1_1])]), doProcessSimplification(sg1),
+%*/
+
+// apply after => simple::guards::a1
+/*%
+  doClone(after, a4), doClone(simple_guards, sg2),
+  identifyClone(simple_guards_a1, sg2, SGA1_2),
+  doWeave([weave(a4,[SGA1_2])]), doProcessSimplification(sg2),
+%*/
+
+// apply parallel => simple::guards::a1
+/*%
+  doClone(parallel, p4), doClone(simple_guards, sg3),
+  identifyClone(simple_guards_a1, sg3, SGA1_3),
+  doWeave([weave(p4,[SGA1_3])]), doProcessSimplification(sg3),
+%*/
+
+// apply complete => simple::guards::a1
+/*%
+  doClone(complete, c4), doClone(simple_guards, sg4),
+  identifyClone(simple_guards_a1, sg4, SGA1_4),
+  doWeave([weave(c4,[SGA1_4])]), doProcessSimplification(sg4),
+%*/
+
+/***************************************************
+ ** Composition on 'simple::caughtFault' artefact **
+ ***************************************************/
+
+// apply before => simple::caughtFault::a1
+/*%
+  doClone(before, b5), doClone(simple_caughtFault, scf1),
+  identifyClone(simple_caughtFault_a1, scf1, SCFA1_1),
+  doWeave([weave(b5,[SCFA1_1])]), doProcessSimplification(scf1),
+%*/
+
+// apply after => simple::caughtFault::a1
+/*%
+  doClone(after, a5), doClone(simple_caughtFault, scf2),
+  identifyClone(simple_caughtFault_a1, scf2, SCFA1_2),
+  doWeave([weave(a5,[SCFA1_2])]), doProcessSimplification(scf2),
+%*/
+
+// apply parallel => simple::caughtFault::a1
+/*%
+  doClone(parallel, p5), doClone(simple_caughtFault, scf3),
+  identifyClone(simple_caughtFault_a1, scf3, SCFA1_3),
+  doWeave([weave(p5,[SCFA1_3])]), doProcessSimplification(scf3),
+%*/
+
+// apply complete => simple::caughtFault::a1
+/*%
+  doClone(complete, c5), doClone(simple_caughtFault, scf4),
+  identifyClone(simple_caughtFault_a1, scf4, SCFA1_4),
+  doWeave([weave(c5,[SCFA1_4])]), doProcessSimplification(scf4),
+%*/
+
+/**************************************************
+ ** Composition on 'simple::threwFault' artefact **
+ **************************************************/
+
+// apply before => simple::threwFault::a1
+/*%
+  doClone(before, b6), doClone(simple_threwFault, stf1),
+  identifyClone(simple_threwFault_a1, stf1, STFA1_1),
+  doWeave([weave(b6,[STFA1_1])]), doProcessSimplification(stf1),
+%*/
+
+// apply after => simple::threwFault::a1
+/*%
+  doClone(after, a6), doClone(simple_threwFault, stf2),
+  identifyClone(simple_threwFault_a1, stf2, STFA1_2),
+  doWeave([weave(a6,[STFA1_2])]), doProcessSimplification(stf2),
+%*/
+
+// apply parallel => simple::threwFault::a1
+/*%
+  doClone(parallel, p6), doClone(simple_threwFault, stf3),
+  identifyClone(simple_threwFault_a1, stf3, STFA1_3),
+  doWeave([weave(p6,[STFA1_3])]), doProcessSimplification(stf3),
+%*/
+
+// apply complete => simple::threwFault::a1
+/*%
+  doClone(complete, c6), doClone(simple_threwFault, stf4),
+  identifyClone(simple_threwFault_a1, stf4, STFA1_4),
+  doWeave([weave(c6,[STFA1_4])]), doProcessSimplification(stf4),
+%*/
 
 

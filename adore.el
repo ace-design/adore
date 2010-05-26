@@ -307,6 +307,7 @@
 (define-key adore-map (kbd "C-c C-f") 'adore-facts)
 (define-key adore-map (kbd "C-c C-k") 'adore-kill)
 (define-key adore-map (kbd "C-c C-p") 'adore-gen-current-pict)
+(define-key adore-map (kbd "C-c p") 'adore-pict)
 (define-key adore-map (kbd "C-c C-g") 'adore-goal)
 (define-key adore-map (kbd "C-c C-o") 'adore-navigate-to-required-file)
 (define-key adore-map (kbd "C-c C-u") 'adore-show-universe)
@@ -334,10 +335,10 @@
     (define-key genMap [xml] '("As XML..." . adore-as-xml)))
   (let ((algoMap (make-sparse-keymap "ADORE Algo KeyMap")))
     (define-key menuMap [algo] (cons "Algorithms" algoMap))
-    (define-key algoMap [exec] '("Execution Semantic" . 
-				 adore-get-exec-semantic))
     (define-key algoMap [norm] '("Composition Normalisation" . 
-				 adore-normalize-compositions)))
+				 adore-normalize-compositions))
+    (define-key algoMap [exec] '("Execution Semantic" . 
+				 adore-get-exec-semantic)))
   (define-key menuMap [s2] '("--"))
   (let ((prologMap (make-sparse-keymap "Prolog KeyMap")))
     (define-key menuMap [prolog] (cons "Prolog" prologMap))
