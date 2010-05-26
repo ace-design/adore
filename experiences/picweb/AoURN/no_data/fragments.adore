@@ -1,0 +1,61 @@
+/** PicWeb Fragment, extracted from 'PicWeb - No Data.jucm' file
+ * @author: Sebastien Mosser
+ * @date: Wed May 26, 2010 10:29 AM
+ * @version: 1.0
+ **/
+
+// From 'PicasaService' UCM
+fragment picasaService {
+  variables {}
+  activities {
+    act1. hook();
+    act2. picasa::exploreFolksonomy();
+    act3. merge::mergeResult();
+  }
+  relations {^ < act1; ^ < act2; act1 < act3; act2 < act3; act3 < $;}
+}
+depict picasaService using 'skyblue';
+
+// From 'Caching' UCM
+fragment caching {
+  variables { condition as boolean; }
+  activities {
+    act1. cacheServer::checkCache();
+    act2. condition := test('exists' as string);
+    act3. dataRepository::read();
+    act4. hook();
+    act5. dataRepository::store();
+  }
+  relations {
+    ^  < act1; act1 < act2; 
+    act2 < act3 when condition; act2 < act4 when !condition; 
+    act3 < $; act4 < act5; act5 < $;
+  }
+}
+depict caching using 'darkseagreen3';
+
+// From 'Randomizer' UCM
+fragment randomizer {
+  variables {}
+  activities {
+    act1. shuffle::randomize();
+    act2. hook();
+  }
+  relations { ^ < act1; act1 < act2; act2 < $; }
+}
+depict randomizer using 'burlywood';
+
+// From 'Payment' UCM
+fragment payment {
+  variables { condition as boolean;}
+  activities {
+    act1. condition := test('NrRequests, RequestLimit' as string);
+    act2. returnNoPhotos();
+    act3. hook();
+  }
+  relations {
+    ^ < act1; act1 < act2 when condition; act1 < act3 when !condition; 
+    act3 < $; act2 < $;
+  }
+} 
+depict payment using 'lavenderblush';

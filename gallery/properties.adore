@@ -1,0 +1,54 @@
+
+orchestration sample::simple {
+  variables {}
+  activities {
+    act0. receive();
+    act1. nop();
+    act2. reply();
+  }
+  relations { act0 < act1; act1 < act2; }
+}
+
+fragment guardAlt {
+  variables { c as boolean; }
+  activities {
+    e0. c := nop();
+    e1. hook();
+    e2. nop();
+  }
+  relations { ^ < e0; e0 < e1 when c; e0 < e2 when !c; e1 < $; e2 < $;}
+}
+depict guardAlt using 'darksalmon';
+
+fragment guardCtrl {
+  variables { c as boolean; }
+  activities {
+    e0. c := nop();
+    e1. hook();
+    e2. nop();
+    e3. throw('FAIL' as string);
+  }
+  relations { ^ < e0; e0 < e1 when c; e0 < e2 when !c; e1 < $; e2 < e3;}
+}
+depict guardCtrl using 'lemonchiffon3';
+
+
+/***************************************
+ ** Composition on the simple example **
+ ***************************************/
+
+composition sample::simple { apply guardAlt => act1; }
+/*%
+  doClone(guardAlt, gA1), doClone(sample_simple, ssAlt),
+  identifyClone(sample_simple_act1, ssAlt, SSA1),
+  doWeave([weave(gA1,[SSA1])]),
+  doProcessSimplification(ssAlt),
+%*/
+
+composition sample::simple { apply guardCtrl => act1; }
+/*%
+  doClone(guardCtrl, gC1), doClone(sample_simple, ssCtrl),
+  identifyClone(sample_simple_act1, ssCtrl, SSA2),
+  doWeave([weave(gC1,[SSA2])]),
+  doProcessSimplification(ssCtrl),
+%*/

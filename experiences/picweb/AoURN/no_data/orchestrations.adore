@@ -1,0 +1,35 @@
+/** PicWeb Orchestrations, extracted from 'PicWeb - No Data.jucm' file
+ * @author: Sebastien Mosser
+ * @date: Wed May 26, 2010 10:29 AM
+ * @version: 1.0
+ **/
+
+// From 'PicWeb' UCM
+orchestration picweb::getPictures {
+  variables {}
+  activities {
+    act1. receive();
+    act2. flickr::getPicturesWithTag();
+    act3. truncate::truncate();
+    act4. reply();
+  }
+  relations { act1 < act2; act2 < act3; act3 < act4; }
+}
+
+// From 'Truncate' UCM
+orchestration truncate::truncate {
+  variables { condition as boolean; }
+  activities {
+    act1. receive();
+    act2. condition := test('NrPhotos, threshold' as string);
+    act3. limitNumberOfPictures();
+    act4. reply();
+  }
+  relations {
+    act1 < act2; act2 < act3 when condition; act2 < act4 when !condition; 
+    act3 < act4;
+  }
+}
+
+
+

@@ -46,11 +46,15 @@ simplify(Activities,myRetract(waitFor(X,Y))) :-
 
 %%% TO DO: check correctness on the CCCMS (ouch ...)
 simplify(Activities,myRetract(waitFor(X,Z))) :- 
-	%% waitFor is absorbed 
-	member(X, Activities), member(Y, Activities), member(Y, Activities),
+	%% waitFor is absorbed when guard is defined
+	member(X, Activities), member(Y, Activities), member(Z, Activities),
 	isGuardedBy(X,Y,_,_), waitFor(X,Z),
 	relations:existsControlPath(Z,Y).
 
+simplify(Activities,myRetract(waitFor(X,Y))) :- 
+	member(X,Activities), member(Y, Activities),
+	relations:getControlPath(Y,X,L), L \= [Y,X].
+%% Enf of TODO
 
 simplify(Activities,[myRetract(weakWait(X,Y)),defWaitFor(X,Y)]) :- 
 	%% just a SINGLE weak wait <==> normal waitFor

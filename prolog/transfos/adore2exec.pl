@@ -34,6 +34,8 @@ genExecForAllProcess(Text) :-
 	findall(T,(process(P),adore2exec:genExecutionSemantic(P,T)), A),
 	dumpList(A,Text).
 
+genExecutionSemantic(Process, '') :- 
+	process(Process), process:getActivities(Process,[]),!.
 genExecutionSemantic(Process, Text) :-  
 	doTag(Process), 
 	findall(X, adore2exec:genActFormula(Process,X), FormulaList),
@@ -43,7 +45,7 @@ genExecutionSemantic(Process, Text) :-
 genActFormula(Process,Result) :- 
 	activity:belongsTo(Act, Process), 
 	buildActFormula(Act, Formula),
-	findUserRoot(Act,Root), display(Act, Formula, FinalFormula),
+	buildActName(Act,Root), display(Act, Formula, FinalFormula),
 	swritef(Result, 'start(%w) => %w', [Root, FinalFormula]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,7 +57,7 @@ buildActFormula(Act, Formula) :-
 	flowDispatch(Act, Ctrl, Weaks, Faults), 
 	%% Control Flow Formula
 	getConditions(Ctrl, Conds), 
-	buildControlFormula(Ctrl, Conds, CtrlFormula),
+	buildControlFormula(Act, Ctrl, Conds, CtrlFormula),
 	%% Weak Flow Formula
 	build(or, Weaks, WeakFormula),
 	%% Exceptional Flow Formula
@@ -65,17 +67,17 @@ buildActFormula(Act, Formula) :-
 	simplify(Raw, Formula).
 
 %% Control
-buildControlFormula([Act], _,Act) :- activity(Act),!. 
-buildControlFormula(Activities, [], Formula) :- 
+buildControlFormula(_,[Act], _,Act) :- activity(Act),!. 
+buildControlFormula(_,Activities, [], Formula) :- 
 	build(and, Activities, Formula).
-buildControlFormula(Activities, [[]|Tail], Formula) :- 
-	buildControlFormula(Activities,Tail, Formula).
-buildControlFormula(Activities, [[Cond|Others]|Tail], Formula) :- 
-	partition(Activities, Cond, OnCond, OnNotCond, Rest),
+buildControlFormula(Root, Activities, [[]|Tail], Formula) :- 
+	buildControlFormula(Root, Activities,Tail, Formula).
+buildControlFormula(Root, Activities, [[Cond|Others]|Tail], Formula) :- 
+	partition(Root, Activities, Cond, OnCond, OnNotCond, Rest),
 	pushOut(Cond, Tail, NewTail), Nexts = [Others|NewTail],
-	buildControlFormula(OnCond, Nexts, OnCondForm),
-	buildControlFormula(OnNotCond, Nexts, OnNotCondForm),
-	buildControlFormula(Rest, Nexts, RestForm),
+	buildControlFormula(Root, OnCond, Nexts, OnCondForm),
+	buildControlFormula(Root, OnNotCond, Nexts, OnNotCondForm),
+	buildControlFormula(Root, Rest, Nexts, RestForm),
 	RawForm = formula(and, formula(or,OnCondForm,OnNotCondForm),RestForm),
 	simplify(RawForm, Formula).
 	
@@ -86,17 +88,21 @@ buildFaultsFormula([H|T],Formula) :-
 	Raw = formula(or, Conjunction, Others),	simplify(Raw,Formula).
 	
 %% build a relationship according to a given root (end, fail, condition?)
-%% TODO: take care of $P and $S in the relationship generation
 buildRelation(Act, Pred, R) :- 
 	(waitFor(Act,Pred)|weakWait(Act,Pred)), buildActName(Pred,Root), 
 	swritef(R,'end(%w)',[Root]).
+%% buildRelation(Act, Pred, R) :- 
+%% 	isGuardedBy(Act, Pred, Var, Val), buildActName(Pred,PredRoot),
+%% 	( extractAllPredecessors(Act,Preds), member(E,Preds), 
+%% 	  invert(Val, Not), tag(guard, E, condition(Var, _, Not)), !, 
+%% 	  swritef(R,'end(%w)', [PredRoot])
+%% 	 | findUserRoot(Var,VarRoot), 
+%% 	   swritef(R,'(end(%w) & %w(%w))', [PredRoot,Val,VarRoot])).
 buildRelation(Act, Pred, R) :- 
-	isGuardedBy(Act, Pred, Var, Val), buildActName(Pred,PredRoot),
-	( extractAllPredecessors(Act,Preds), member(E,Preds), 
-	  invert(Val, Not), tag(guard, E, condition(Var, _, Not)), !, 
-	  swritef(R,'end(%w)', [PredRoot])
-	 | findUserRoot(Var,VarRoot), 
-	   swritef(R,'(end(%w) & %w(%w))', [PredRoot,Val,VarRoot])).
+ 	isGuardedBy(Act, Pred, Var, Val), buildActName(Pred,PredRoot),
+	getPreviousName(Var,VarRoot), 
+	swritef(R,'(end(%w) & %w(%w))', [PredRoot,Val,VarRoot]).
+	
 buildRelation(Act, Pred, R) :- 
 	onFailure(Act, Pred, Fault), buildActName(Pred,Root),
 	swritef(R,'fail(%w,%w)',[Root,Fault]).
@@ -126,12 +132,13 @@ extractException(_, Acts, Exc) :-
 flowDispatch(Act, Control, Weaks, PartitionnedExceptions) :- 
 	extractAllPredecessors(Act,Raws),
 	%% retrieving the weak wait flow 
-	findall(W,weakWait(Act,W),Weaks), removeList(Weaks, Raws, WithoutWeak),
+	findall(W,weakWait(Act,W),Weaks), 
+	removeList(Weaks, Raws, WithoutWeak),
 	%% retrieving exceptional flow 
 	findall(E,extractException(Act,WithoutWeak,E), RawExceptions),
 	sort(RawExceptions,Exceptions),
 	faultPartition(Exceptions, PartitionnedExceptions),
-	%% Interpolating the control-flow (the rest).
+	%% Interpolating the control-flow (everything else).
 	removeList(Exceptions, WithoutWeak, Control),!.
 
 isEntryPoint(Act) :- activity(Act), \+ relations:path(_,Act).
@@ -149,14 +156,23 @@ getActConditionTags(Act, Tags) :-
 	findall(C, tag(guard, Act, condition(C,_,_)), Raws),
 	sort(Raws, Tags).
 
-partition(Acts, Var, OnVar, OnNotVar, Rest) :- 
+partition(Root, Acts, Var, OnVar, OnNotVar, Rest) :- 
 	findall(A,
-	        ( member(A,Acts), tag(guard, A, condition(Var,_,true)) ),
+	        adore2exec:belongsToPartition(Root, Acts, Var, true, A),
+	        %( member(A,Acts), tag(guard, A, condition(Var,_,true)) ),
 		OnVar),
 	findall(A,
-	        ( member(A,Acts), tag(guard, A, condition(Var,_,false)) ),
+	        adore2exec:belongsToPartition(Root, Acts, Var, false, A),
+	        % ( member(A,Acts), tag(guard, A, condition(Var,_,false)) ),
 		OnNotVar),
 	flatten([OnVar, OnNotVar], Guarded), removeList(Guarded, Acts, Rest).
+
+belongsToPartition(Root, Acts, Var, Value, A) :- 
+        member(A,Acts), isGuardedBy(Root, A, Var, Value).
+belongsToPartition(_, Acts, Var, Value, A) :- 
+	member(A,Acts), tag(guard, A, condition(Var,_,Value)).
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Exception Partition (exclusivity induced by Faults) %%%
@@ -208,6 +224,7 @@ addParenthesis(_,Text,Text).
 %%%%%%%%%%%%%%%
 
 dumpList([],'').
+dumpList([''|T], Text) :- dumpList(T,Text),!.
 dumpList([H|T], Text) :- 
 	dumpList(T,TailText), swritef(Text, "%w\n%w", [H,TailText]).
 

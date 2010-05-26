@@ -1,0 +1,38 @@
+/** PicWeb composition, extracted from 'PicWeb - No Data.jucm' file
+ * @remark: this file is intended to be defined manually
+ * @author: Sebastien Mosser
+ * @date: Wed May 26, 2010 11:45 AM
+ * @version: 1.0
+ **/
+require 'fragments.adore';
+require 'orchestrations.adore';
+
+
+/****************************
+ ** Composition Directives **
+ ****************************/
+// From CIG goal model (aspect dependencies => fragment ordering)
+composition caching       { apply picasaService => act4; }
+composition picasaService { apply payment       => act1; }
+
+// From 'PicWeb Composed' UCM 
+composition picweb::getPictures {
+  apply caching    => act2;
+  apply randomizer => act4;
+}
+
+/*********************************************************************
+ ** Algorithms translation associated to the composition directives **
+ *********************************************************************/
+/*%
+  doClone(payment, f1), doWeave([weave(f1,[picasaService_act1])]),
+  doProcessSimplification(picasaService),
+  adore2png(picasaService,'picasaService_composed.png'),
+  doClone(picasaService, f2), doWeave([weave(f2,[caching_act4])]),
+  doProcessSimplification(caching), adore2png(caching,'caching_composed.png'),
+  doClone(caching, f4), doClone(randomizer, f5),
+  doWeave([weave(f4, [picweb_getPictures_act2]), 
+           weave(f5, [picweb_getPictures_act4])]),
+  doProcessSimplification(picweb_getPictures),
+  adore2png(picweb_getPictures,'picWeb_getPictures_composed.png')
+%*/

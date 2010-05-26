@@ -42,14 +42,15 @@ existsPath(X,Y) :-
 %% getPath/3: getPath(+A,+B,-Path) => return activities from A to B
 getPath(A,B,[A|O]) :- extractPath(A,B,O). 
 extractPath(A,B,[B]) :- path(A,B).
-extractPath(A,B,[X|O]) :- path(A,X), 
-	
-	extractPath(X,B,O).
+extractPath(A,B,[X|O]) :- path(A,X), extractPath(X,B,O).
 
 %% contreol path (not onFail) (appearently dead code ... weird)
 getControlPath(A,B,[A|O]) :- extractControlPath(A,B,O). 
 extractControlPath(A,B,[B]) :- controlPath(A,B).
-extractControlPath(A,B,[X|O]) :- controlPath(A,X), extractControlPath(X,B,O).
+extractControlPath(A,B,[X|O]) :- 
+	activity:areInSameProcess(A,X), activity:areInSameProcess(X,B),
+	A \= X, X \= B, 
+	controlPath(A,X), extractControlPath(X,B,O).
 
 
 existsControlPath(X,Y) :- controlPath(X,Y).

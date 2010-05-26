@@ -1,0 +1,38 @@
+/** Example to illustrate Adore weaving  algorithm
+ * @author: Sebastien Mosse <mosser@polytech.unice.fr>
+ * @date: Wed May 26, 2010  5:47 PM 
+ **/
+
+/*****************************
+ ** Orchestration Artefatcs **
+ *****************************/
+
+orchestration simple::sequence {
+  variables{}
+  activities {a0. receive(); a1. nop(); a2. reply(); }
+  relations { a0 < a1; a1 < a2; }
+}
+
+orchestration simple::parallel {
+  variables{}
+  activities {a0. receive(); a1. nop(); a2. nop(); a3. reply(); }
+  relations { a0 < a1; a0 < a2; a1 < a3; a2 < a3; }
+}
+
+orchestration simple::guards {
+  variables{ c as boolean; }
+  activities { a0. c := receive(); a1. nop(); a2. nop(); a3. reply(); }
+  relations{ a0 < a1 when c; a0 < a2 when !c; a1 < a3; a2 < a3; }
+}
+
+orchestration simple::faults {
+  variables{}
+  activities {a0. receive(); a1. nop(); a2. nop(); a3. reply(); }
+  relations { a0 < a1; a1 < a3; fail(a0,'f') < a2; a2 < a3;}
+}
+
+/************************
+ ** Fragments artefact **
+ ************************/
+
+
