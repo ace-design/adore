@@ -85,6 +85,8 @@ depict complete using 'lightblue';
  ** Composition on 'simple::sequence' artefact **
  ************************************************/
 
+/**guitracer **/
+
 // apply before => simple::sequence::a1
 /*%
   doClone(before, b1), doClone(simple_sequence, ss1),

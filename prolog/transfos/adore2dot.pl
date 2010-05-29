@@ -221,14 +221,11 @@ genOrder(P,C) :-
 	drawOrder(Left,Rght,C).
 
 drawOrder(L,R,C) :- 
-	relations:path(L,R), hasForKind(L,predecessors),!,
+	waitFor(R,L), (hasForKind(L,predecessors)|hasForKind(R,successors)),
 	swritef(C,'  %w -> %w [style=dotted, arrowhead=none];',[L,R]).
 drawOrder(L,R,C) :- 
-	relations:path(L,R), hasForKind(R,successors),!,
-	swritef(C,'  %w -> %w [style=dotted, arrowhead=none];',[L,R]).
-drawOrder(L,R,C) :- 
-	waitFor(R,L),
-	swritef(C,'  %w -> %w ;',[L,R]).
+	waitFor(R,L), \+ (hasForKind(L,predecessors)|hasForKind(R,successors)),
+	swritef(C,'  %w -> %w;',[L,R]).
 drawOrder(L,R,C) :- 
 	weakWait(R,L),
 	swritef(C,'  %w -> %w [style=dashed,arrowhead=odot];',[L,R]).

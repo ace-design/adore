@@ -52,13 +52,10 @@ extractControlPath(A,B,[X|O]) :-
 	A \= X, X \= B, 
 	controlPath(A,X), extractControlPath(X,B,O).
 
-
 existsControlPath(X,Y) :- controlPath(X,Y).
 existsControlPath(X,Y) :- 
 	activity:areInSameProcess(X,Z), activity:areInSameProcess(Z,Y),
-	Z \= X, Z \= Y, 
-%	writef("x := %w, y := %w, z := %w\n",[X,Y,Z]),
-	controlPath(X,Z), existsControlPath(Z,Y).
+	Z \= X, Z \= Y, controlPath(X,Z), existsControlPath(Z,Y).
 
 getGuardPath(A,X,[guard(V,C)]) :- 
 	activity:sameProcess(X,A), isGuardedBy(X,A,V,C).

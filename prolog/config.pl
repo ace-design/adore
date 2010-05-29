@@ -36,14 +36,11 @@ readParameter(_, '').
 %%%
 % Global (default) configuration
 %%%
-
 :- storeParameter(adore2png_exec,'dot').
 
 %%%
-% Local Configuration (if any)
+% Local Configuration (load '~/.adore.pl' only if such a file exists)
 %%%
-
-%% load '~/.adore.pl' only if such a file exists
 :- getenv('HOME',Home),	swritef(F,'%w/.adore.pl',[Home]), 
    exists_file(F), [F].
 	

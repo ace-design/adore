@@ -38,12 +38,19 @@ sameProcess(X,Y) :- isContainedBy(X,P), isContainedBy(Y,P).
 areInSameProcess(X,Y) :- isContainedBy(X,P), isContainedBy(Y,P).
 
 
+%%% TO DO: can we unify getPreds and getAllPreds?
 getPredecessors(A,Preds) :- 
 	findall(X,relations:controlPath(X,A),Preds). %% was 'path'
 
 getSuccessors(A,Succs) :- 
 	findall(X,relations:controlPath(A,X),Succs). %% was 'path'
 
+getAllPredecessors(A,Preds) :- 
+	findall(X,relations:path(X,A),Preds). 
+
+getAllSuccessors(A,Succs) :- 
+	findall(X,relations:path(A,X),Succs).
+%%%% end of TODO
 
 getTransitiveGuards(A,Guards) :- 
 	activity:belongsTo(A,Process), process:getActivities(Process,Acts),
