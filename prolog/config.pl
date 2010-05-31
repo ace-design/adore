@@ -58,6 +58,6 @@ debugSubscription(timer).
 %debugSubscription(clone).
 %debugSubscription(setify).
 %debugSubscription(merge).
-%debugSubscription(weave).
+debugSubscription(weave).
 %debugSubscription(instantiate).
 %debugSubscription(exec).

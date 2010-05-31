@@ -88,7 +88,6 @@ bindsPredecessors(Frag,Targets,Acts) :-
         maplist(activity:getAllPredecessors, Firsts, RawPreds), 
 	flatten(RawPreds,RealPreds),
 	findall(A,weave:shiftPredRel(PredGhost, RealPreds, Firsts, A),Acts).
-        
 
 shiftPredRel(Ghost, RealPreds, Block, [Add, Del]) :- 
 	relations:path(Ghost, FragAct), \+ hasForKind(FragAct, hook),
@@ -174,42 +173,35 @@ keepHookToSuccRel(SuccGhost, Hook, Targets,  Actions) :-
 	findall(A, (member(L,Lasts), relations:path(L,X), 
 	            weave:shiftPath([Hook,SuccGhost],[L,X],A,_)), Actions).
 
-
 %%
-% Hook variables unification
+% Hook variables unification & enrichment
 %%
 
-:- dynamic weave_consumed/1.
-unifyVariables(Hook,TargetBlock,Substitutions) :- 
-	findall(V,activity:useVariable(Hook,V),HookVariables),
-	identifyVariableUnification(Hook, TargetBlock, 
-	                            HookVariables,Substitutions),
-	retractall(weave_consumed(_)).
+unifyVariables(Hook, TargetBlock, Actions) :- 
+	findall(S,weave:identifyVariableUnif(Hook,TargetBlock,S), Substs),
+	findall(A,weave:enrichTarget(Hook, TargetBlock, Substs, A),Adds),
+	flatten([Substs, Adds], Actions).
 
-identifyVariableUnification(_,_,[],[]).
-identifyVariableUnification(Hook,Block,[Var|Tail],Actions) :- 
-	member(A,Block), activity:belongsTo(A,P), variable:belongsTo(Var,P),!,	
-	identifyVariableUnification(Hook,Block,Tail,Actions).
-identifyVariableUnification(Hook, Block, [Var|Tail],Actions) :- 
-	findall(Equiv,variable:findEquivalentInBlock(Hook,Var,Block,Equiv),
-	        RawCandidates),
-	sort(RawCandidates,Candidates),
-	validateCandidates(Var,Candidates,Selected),
-	traceSubstitution(Var,Selected),
- 	identifyVariableUnification(Hook,Block,Tail,Others),
-	flatten([substVariable(Var,Selected),Others],Actions).
+%% Unification
+identifyVariableUnif(Hook, Block, Action) :-  %% regular unification
+	activity:useVariable(Hook,V), 
+	variable:findEquivalentInBlock(Hook,V, Block, Candidate),
+	Action = [substVariable(V, Candidate)].
+identifyVariableUnif(Hook, Block, Action) :- %% user-given unification
+	activity:useVariable(Hook,V), member(A,Block), 
+	variable:belongsTo(A,P), variableBinding(P,Bindings), 
+	findUserRoot(V,Target), member([Candidate,Target],Bindings),
+	Action = [substVariable(V, Candidate)].
 
-%% TODO: fixme (according to Kompose semantic: enrichment)
-validateCandidates(V,[],V) :- !, true.
-validateCandidates(_,[C],C) :- !.
-validateCandidates(V,L,C) :-
-	member(C,L), variable:belongsTo(C,P), variableBinding(P,Bindings),
-	findUserRoot(V,Target), member([C,Target],Bindings),
-	\+ weave_consumed([C,Target]), assert(weave_consumed([C,Target])),!.
-validateCandidates(V,L,_) :- 
-	dfail(weave,
-	      'There is multiple candidates to be unified with \'~w\': ~w',
-	      [V,L]),!.
+%% enrichment
+enrichTarget(Hook, TargetBlock, Substs, Action) :- %% inputs
+	usesElemAsInput(Hook,V), \+ member([substVariable(V,_)],Substs),
+	activity:getFirsts(TargetBlock,[First]), 
+	Action = [addAsInput(V,First)].
+enrichTarget(Hook, TargetBlock, Substs, Action) :- %% outputs
+	usesElemAsOutput(Hook,V), \+ member([substVariable(V,_)],Substs),
+	activity:getLasts(TargetBlock,[Last]), 
+	Action = [addAsOutput(V,Last)].
 
 %%%
 % Technical Stuff
@@ -238,7 +230,9 @@ shiftPath([OldSrc,OldTgt],[NewSrc,NewTgt],Add,Del) :-
 
 push([],X,X).
 push([substVariable(Old, New)|Tail],Actions,Result) :- 
-	propagate(Old,New,Actions, Tmp), push(Tail,Tmp, Result).
+	propagate(Old,New,Actions, Tmp), !, push(Tail,Tmp, Result).
+push([_|Tail],Actions,Result) :- 
+	push(Tail,Actions, Result).
 
 propagate(_,_,[],[]).
 propagate(Old, New,[defGuard(A,G, Old, V)|Tail],[defGuard(A,G,New,V)|Others]) :-
@@ -292,108 +286,3 @@ doVarSubst(Old,New,Actions) :-
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%% OLD / DO NOT TOUCH %%%%%%%%%%%%
-
-
-%% bindsHook(Frag,Targets,Actions) :- 
-%% 	process:getHook(Frag,Hook), 
-%% 	unifyVariables(Hook, Targets, VarActs),
-%% 	dinfo(weave,'VarActs: ~w' , [VarActs]),
-%% 	findall(A,weave:shiftRelation(Hook,Targets,A),ShiftActs),
-%% 	dinfo(weave,'ShiftRelations: ~w' , [ShiftActs]),	
-%% 	findall(A,weave:adaptRelation(Hook,Targets,A),AdaptActs),
-%% 	dinfo(weave,'AdaptRelations: ~w' , [AdaptActs]),
-%% 	flatten([VarActs, AdaptActs, ShiftActs],Actions).
-
-
-%% bindsPredecessors(Frag,Targets,Actions) :- 
-%% 	process:getPreds(Frag,Pred), activity:getFirsts(Targets,Firsts),
-%% 	maplist(activity:getPredecessors,Firsts,RawPreds), 
-%% 	flatten(RawPreds,Preds),
-%% 	findall(A,weave:shiftRelation(Pred,Preds,A),Actions).
-
-%% bindsSuccessors(Frag,Targets,Actions) :- 
-%% 	process:getSuccs(Frag,Succ), activity:getLasts(Targets,Lasts),
-%% 	maplist(activity:getSuccessors,Lasts,RawSuccs), 
-%% 	flatten(RawSuccs,Succs), 
-%% 	findall(A,weave:shiftRelation(Succ,Succs,A),Actions).
-
-%shiftRelation(Activity, Block, defGuard(X,F,VUnif,C))
-%shiftRelation(_,_,[]).
-
-%% shiftRelation(Activity, Block, defWaitFor(X,F)) :- 
-%% 	waitFor(X,Activity), activity:isLast(Block,F).
-%% shiftRelation(Activity, Block, defWeakWait(X,F)) :- 
-%% 	weakWait(X,Activity), activity:getLasts(Block,[F]).
-%% shiftRelation(Activity, Block, Actions) :- 
-%% 	weakWait(X,Activity), activity:getLasts(Block,Lasts),
-%% 	length(Lasts,Length), Length > 1, 
-%% 	Block = [B|_], activity:belongsTo(B,Process),
-%% 	genActivityId(NopId), 
-%% 	findall(defWaitFor(NopId,L),member(L,Lasts),ReOrderActs),
-%% 	CreateActions=[createActivity(NopId), setActivityKind(NopId,nop), 
-%% 	         setContainment(NopId,Process)], 
-%% 	flatten([CreateActions, defWeakWait(X,NopId), ReOrderActs],Actions).
-
-%% shiftRelation(Activity, Block, defGuard(X,F,VUnif,C)) :- 
-%% 	isGuardedBy(X,Activity,V,C), resolveUnifiedVariable(X,V,VUnif),
-%% 	activity:isLast(Block,F).
-%% shiftRelation(Activity, Block, defOnFail(X,F,E)) :- 
-%% 	onFailure(X,Activity,E), activity:isLast(Block,F).
-
-%% shiftRelation(Activity, Block, defWaitFor(L,X)) :- 
-%% 	waitFor(Activity,X), activity:isFirst(Block,L).
-%% shiftRelation(Activity, Block, defWeakWait(L,X)) :- 
-%% 	weakWait(Activity,X), activity:isFirst(Block,L).
-%% shiftRelation(Activity, Block, defGuard(L,X,VUnif,C)) :- 
-%% 	isGuardedBy(Activity,X,V,C), resolveUnifiedVariable(X,V,VUnif),
-%% 	activity:isFirst(Block,L).
-%% shiftRelation(Activity, Block, defOnFail(L,X,E)) :- 
-%% 	onFailure(Activity,X,E), activity:isFirst(Block,L).
-
-
-%%WARNING: waitFor(a,b) ==> path(b,a) !!!!! 
-%% adaptRelation(Hook, Block, defWaitFor(F,Y)) :- 
-%% 	waitFor(Hook,X), hasForKind(X,predecessors), 
-%% 	activity:isFirst(Block, F), relations:controlPath(Y,F). %% was Path
-%% adaptRelation(Hook, Block, defWeakWait(F,Y)) :- 
-%% 	weakWait(Hook,X), hasForKind(X,predecessors), 
-%% 	activity:isFirst(Block, F), relations:controlPath(Y,F).%% was Path
-%% adaptRelation(Hook, Block, defGuard(F,Y,VUnif,C)) :- 
-%% 	isGuardedBy(Hook,X,V,C), hasForKind(X,predecessors), 
-%% 	activity:isFirst(Block, F), relations:controlPath(Y,F),%% was Path
-%% 	resolveUnifiedVariable(Y,V,VUnif).
-%% adaptRelation(Hook, Block, defOnFail(F,Y,E)) :- 
-%% 	onFailure(Hook,X,E), hasForKind(X,predecessors),
-%% 	activity:isFirst(Block, F), relations:controlPath(Y,F).%% was Path
-
-%% adaptRelation(Hook, Block, defWaitFor(Y,L)) :- 
-%% 	waitFor(X,Hook), hasForKind(X,successors), 
-%% 	activity:isLast(Block, L), relations:controlPath(L,Y).
-%% adaptRelation(Hook, Block, defWeakWait(Y,L)) :- 
-%% 	weakWait(X,Hook), hasForKind(X,successors), 
-%% 	activity:isLast(Block, L), relations:controlPath(L,Y).
-
-%% adaptRelation(Hook, Block, defGuard(Y,L,VUnif,C)) :- 
-%% 	isGuardedBy(X,Hook,V,C), hasForKind(X,successors), 
-%% 	activity:isLast(Block, L), relations:controlPath(L,Y),
-%% 	resolveUnifiedVariable(Y, V,VUnif).
-%% adaptRelation(Hook, Block, defOnFail(Y,L,E)) :- 
-%% 	onFailure(X,Hook,E), hasForKind(X,successors),
-%% 	activity:isLast(Block, L), relations:controlPath(L,Y).

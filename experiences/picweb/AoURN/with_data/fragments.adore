@@ -1,0 +1,184 @@
+/** PicWeb Fragment, extracted from 'PicWeb - No Data.jucm' file
+ * @author: Sebastien Mosser
+ * @date: Wed May 26, 2010 10:29 AM
+ * @version: 1.0
+ **/
+
+/*************************
+ *** /!\ WITH DATA /!\ ***
+ *************************/
+
+/**********************************************************
+ ** Initial artefacts, generated before data refactoring **
+ **********************************************************/
+
+// From 'PicasaService' UCM
+fragment psRaw {
+  variables { 
+    pictures as pictures;  tag as tag;
+    picasaPictures as picasaPictures;
+  }
+  activities {
+    act1. pictures := hook(tag);
+    act2. picasaPictures := picasa::exploreFolksonomy(tag);
+    act3. pictures := merge::mergeResult(picasaPictures, pictures);
+  }
+  relations {^ < act1; ^ < act2; act1 < act3; act2 < act3; act3 < $;}
+}
+depict psRaw using 'skyblue';
+
+// From 'Caching' UCM
+fragment cRaw {
+  variables { 
+    condition as boolean; exists as boolean; tag as tag; pictures as pictures;
+  }
+  activities {
+    act1. exists := cacheServer::checkCache(tag);
+    act2. condition := isTrue(exists);
+    act3. pictures := dataRepository::read(tag);
+    act4. pictures := hook(tag);
+    act5. dataRepository::store(tag, pictures);
+  }
+  relations {
+    ^  < act1; act1 < act2; 
+    act2 < act3 when condition; act2 < act4 when !condition; 
+    act3 < $; act4 < act5; act5 < $;
+  }
+}
+depict cRaw using 'darkseagreen3';
+
+// From 'Randomizer' UCM
+fragment rRaw {
+  variables { pictures as pictures; }
+  activities {
+    act1. pictures := shuffle::randomize(pictures);
+    act2. hook();
+  }
+  relations { ^ < act1; act1 < act2; act2 < $; }
+}
+depict rRaw using 'burlywood';
+
+// From 'Payment' UCM
+fragment pRaw {
+  variables { 
+    condition as boolean; pictures as pictures; tag as tag;
+    nrRequests as nrRequests; requestLimit as requestLimit;
+  }
+  activities {
+    act1. condition := isGreaterThan(nrRequests,requestLimit);
+    act2. pictures := returnNoPhotos();
+    act3. pictures := hook(tag);
+  }
+  relations {
+    ^ < act1; act1 < act2 when condition; act1 < act3 when !condition; 
+    act3 < $; act2 < $;
+  }
+} 
+depict pRaw using 'lavenderblush';
+
+/******************************************************
+ ** Refactored artefacts (Enrich, Pull in, Push out) **
+ ******************************************************/
+
+// Enrichment: nothing
+// Pulled in:  nothing
+// Pushed out: nothing
+fragment picasaService{
+  variables { 
+    pictures as pictures;  tag as tag;
+    picasaPictures as picasaPictures;
+  }
+  activities {
+    act1. pictures := hook(tag);
+    act2. picasaPictures := picasa::exploreFolksonomy(tag);
+    act3. pictures := merge::mergeResult(picasaPictures, pictures);
+  }
+  relations {^ < act1; ^ < act2; act1 < act3; act2 < act3; act3 < $;}
+}
+depict picasaService using 'skyblue';
+
+// Enrichment: nothing
+// Pulled in:  nothing
+// Pushed out: nothing
+fragment caching {
+  variables { 
+    condition as boolean; exists as boolean; tag as tag; pictures as pictures;
+  }
+  activities {
+    act1. exists := cacheServer::checkCache(tag);
+    act2. condition := isTrue(exists);
+    act3. pictures := dataRepository::read(tag);
+    act4. pictures := hook(tag);
+    act5. dataRepository::store(tag, pictures);
+  }
+  relations {
+    ^  < act1; act1 < act2; 
+    act2 < act3 when condition; act2 < act4 when !condition; 
+    act3 < $; act4 < act5; act5 < $;
+  }
+}
+depict caching using 'darkseagreen3';
+
+// Enrichment: nothing
+// Pulled in:  pictures
+// Pushed out: nothing
+fragment randomizer {
+  variables { pictures as pictures; }
+  activities {
+    act1. pictures := shuffle::randomize(pictures);
+    act2. hook(pictures);
+  }
+  relations { ^ < act1; act1 < act2; act2 < $; }
+}
+depict randomizer using 'burlywood';
+
+// Enrichment: nothing
+// Pulled in:  nrRequests, requestLimit
+// Pushed out: nothing
+fragment paymentWrong {
+  variables { 
+    condition as boolean; pictures as pictures; tag as tag;
+    nrRequests as nrRequests; requestLimit as requestLimit;
+  }
+  activities {
+    act1. condition := isGreaterThan(nrRequests,requestLimit);
+    act2. pictures := returnNoPhotos();
+    act3. pictures := hook(tag, nrRequests, requestLimit);
+  }
+  relations {
+    ^ < act1; act1 < act2 when condition; act1 < act3 when !condition; 
+    act3 < $; act2 < $;
+  }
+} 
+depict paymentWrong using 'lavenderblush';
+
+
+/*************************************************
+ ** Final Artefacts (after requirement changes) **
+ *************************************************/
+
+// Enrichment: nothing
+// Pulled in: nothing
+// Pushed out: nothing
+fragment payment {
+  variables { 
+    condition as boolean; pictures as pictures; tag as tag;
+    nrRequests as nrRequests; requestLimit as requestLimit;
+    const flickr := 'flickr' as string;
+  }
+  activities {
+    act1. condition := isGreaterThan(nrRequests,requestLimit);
+    act2. pictures := returnNoPhotos();
+    act3. pictures := hook(tag);
+    act4. requestLimit := counter::getLimit(flickr);
+    act5. nrRequests := counter::get(flickr);
+    act6. counter::increment(flickr);
+  }
+  relations {
+    ^ < act4; ^ < act5; 
+    act4 < act1; act5 < act1; act1 < act2 when condition; 
+    act1 < act3 when !condition; act3 < act6; act6 < $; act2 < $;
+  }
+} 
+depict payment using 'lavenderblush';
+

@@ -1,0 +1,122 @@
+/** PicWeb Orchestrations, extracted from 'PicWeb - Data.jucm' file
+ * @author: Sebastien Mosser
+ * @date: Wed May 26, 2010 10:29 AM
+ * @version: 1.0
+ **/
+
+/*************************
+ *** /!\ WITH DATA /!\ ***
+ *************************/
+
+/**********************************************************
+ ** Initial artefacts, generated before data refactoring **
+ **********************************************************/
+
+// From 'PicWeb' UCM
+orchestration picweb::gpRaw {
+  variables { tag as tag; pictures as pictures; }
+  activities {
+    act1. receive();
+    act2. pictures := flickr::getPicturesWithTag(tag);
+    act3. truncate::truncate();
+    act4. reply();
+  }
+  relations { act1 < act2; act2 < act3; act3 < act4; }
+}
+
+// From 'Truncate' UCM
+orchestration truncate::tRaw {
+  variables { 
+    condition as boolean; threshold as threshold; pictures as pictures;
+    nrPhotos as nrPhotos;
+  }
+  activities {
+    act1. receive();
+    act2. condition := isGreaterThan(nrPhotos, threshold);
+    act3. pictures := limitNumberOfPictures(pictures, threshold);
+    act4. reply();
+  }
+  relations {
+    act1 < act2; act2 < act3 when condition; act2 < act4 when !condition; 
+    act3 < act4;
+  }
+}
+
+/******************************************************
+ ** Refactored artefacts (Enrich, Pull in, Push out) **
+ ******************************************************/
+
+// Enrichment: nothing
+// Pulled in:  nrPhotos, threshold, pictures
+// Pushed out: pictures
+orchestration truncate::wrong {
+  variables { 
+    condition as boolean; threshold as threshold; pictures as pictures;
+    nrPhotos as nrPhotos;
+  }
+  activities {
+    act1. (nrPhotos, threshold, pictures) := receive();
+    act2. condition := isGreaterThan(nrPhotos, threshold);
+    act3. pictures := limitNumberOfPictures(pictures, threshold);
+    act4. reply(pictures);
+  }
+  relations {
+    act1 < act2; act2 < act3 when condition; act2 < act4 when !condition; 
+    act3 < act4;
+  }
+}
+
+// Invocation enrichment: nothing
+// Enrichment: act3(+nrPhotos, +threshold, +pictures)
+// Pulled in: 
+// Pushed out: 
+orchestration picweb::wrong {
+  variables { 
+    tag as tag; pictures as pictures;             // initial
+    threshold as threshold; nrPhotos as nrPhotos; // enriched
+  }
+  activities {
+    act1. (tag, nrPhotos, threshold) := receive();
+    act2. pictures := flickr::getPicturesWithTag(tag);
+    act3. pictures := truncate::wrong(nrPhotos, threshold, pictures);
+    act4. reply(pictures);
+  }
+  relations { act1 < act2; act2 < act3; act3 < act4; }
+}
+
+
+/************************************************
+ ** Final artefacts (after requirement change) **
+ ************************************************/
+
+orchestration truncate::truncate {
+  variables { 
+    condition as boolean; threshold as threshold; pictures as pictures;
+    nrPhotos as nrPhotos;
+  }
+  activities {
+    act1. (threshold, pictures) := receive();
+    act2. condition := isGreaterThan(nrPhotos, threshold);
+    act3. pictures := limitNumberOfPictures(pictures, threshold);
+    act4. reply(pictures);
+    act5. nrPhotos := getLength(pictures); // ADDED AT REQ. LVL
+  }
+  relations {
+    act1 < act5; act5 < act2; act2 < act3 when condition; 
+    act2 < act4 when !condition; act3 < act4;
+  }
+}
+
+orchestration picweb::getPictures {
+  variables { 
+    tag as tag; pictures as pictures;             // initial
+    threshold as threshold; nrPhotos as nrPhotos; // enriched
+  }
+  activities {
+    act1. receive(tag, threshold);
+    act2. pictures := flickr::getPicturesWithTag(tag);
+    act3. pictures := truncate::truncate(threshold, pictures);
+    act4. reply(pictures);
+  }
+  relations { act1 < act2; act2 < act3; act3 < act4; }
+}

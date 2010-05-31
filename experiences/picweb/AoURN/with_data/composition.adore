@@ -4,19 +4,24 @@
  * @date: Wed May 26, 2010 11:45 AM
  * @version: 1.0
  **/
+
+/*************************
+ *** /!\ WITH DATA /!\ ***
+ *************************/
+
 require 'fragments.adore';
 require 'orchestrations.adore';
 
-/****************************
- ** Composition Directives **
- ****************************/
+/*********************************************************
+ ** Composition Directives (before requirement changes) **
+ *********************************************************/
 
 // From CIG goal model (aspect dependencies => fragment ordering)
 composition caching       { apply picasaService => act4; }
-composition picasaService { apply payment       => act1; }
+composition picasaService { apply paymentWrong  => act1; }
 
 // From 'PicWeb Composed' UCM 
-composition picweb::getPictures {
+composition picweb::wrong {
   apply caching    => act2;
   apply randomizer => act4;
 }
