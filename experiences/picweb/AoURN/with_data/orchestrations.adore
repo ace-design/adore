@@ -1,7 +1,7 @@
 /** PicWeb Orchestrations, extracted from 'PicWeb - Data.jucm' file
  * @author: Sebastien Mosser
  * @date: Wed May 26, 2010 10:29 AM
- * @version: 1.0
+ * @version: 1.1
  **/
 
 /*************************
@@ -12,8 +12,28 @@
  ** Initial artefacts, generated before data refactoring **
  **********************************************************/
 
+orchestration truncate::truncate {
+  variables { 
+    condition as boolean; threshold as threshold; pictures as pictures;
+    nrPhotos as nrPhotos;
+  }
+  activities {
+    act1. receive();
+    act2. condition := isGreaterThan(nrPhotos, threshold);
+    act3. pictures := limitNumberOfPictures(pictures, threshold);
+    act4. reply();
+  }
+  relations {
+    act1 < act2; act2 < act3 when condition; act2 < act4 when !condition; 
+    act3 < act4;
+  }
+}
+/*% doRefactor(truncate_truncate) %*/ 
+// Summary: in(nrPhotos, threshold, pictures), out(pictures).
+
+
 // From 'PicWeb' UCM
-orchestration picweb::gpRaw {
+orchestration picweb::getPictures {
   variables { tag as tag; pictures as pictures; }
   activities {
     act1. receive();
@@ -23,48 +43,15 @@ orchestration picweb::gpRaw {
   }
   relations { act1 < act2; act2 < act3; act3 < act4; }
 }
+/*% doRefactor(picweb_getPictures) %*/ 
 
-// From 'Truncate' UCM
-orchestration truncate::tRaw {
-  variables { 
-    condition as boolean; threshold as threshold; pictures as pictures;
-    nrPhotos as nrPhotos;
-  }
-  activities {
-    act1. receive();
-    act2. condition := isGreaterThan(nrPhotos, threshold);
-    act3. pictures := limitNumberOfPictures(pictures, threshold);
-    act4. reply();
-  }
-  relations {
-    act1 < act2; act2 < act3 when condition; act2 < act4 when !condition; 
-    act3 < act4;
-  }
-}
 
 /******************************************************
  ** Refactored artefacts (Enrich, Pull in, Push out) **
  ******************************************************/
+/*
 
-// Enrichment: nothing
-// Pulled in:  nrPhotos, threshold, pictures
-// Pushed out: pictures
-orchestration truncate::wrong {
-  variables { 
-    condition as boolean; threshold as threshold; pictures as pictures;
-    nrPhotos as nrPhotos;
-  }
-  activities {
-    act1. (nrPhotos, threshold, pictures) := receive();
-    act2. condition := isGreaterThan(nrPhotos, threshold);
-    act3. pictures := limitNumberOfPictures(pictures, threshold);
-    act4. reply(pictures);
-  }
-  relations {
-    act1 < act2; act2 < act3 when condition; act2 < act4 when !condition; 
-    act3 < act4;
-  }
-}
+
 
 // Invocation enrichment: nothing
 // Enrichment: act3(+nrPhotos, +threshold, +pictures)
@@ -83,12 +70,12 @@ orchestration picweb::wrong {
   }
   relations { act1 < act2; act2 < act3; act3 < act4; }
 }
-
+*/
 
 /************************************************
  ** Final artefacts (after requirement change) **
  ************************************************/
-
+/*
 orchestration truncate::truncate {
   variables { 
     condition as boolean; threshold as threshold; pictures as pictures;
@@ -120,3 +107,4 @@ orchestration picweb::getPictures {
   }
   relations { act1 < act2; act2 < act3; act3 < act4; }
 }
+*/
