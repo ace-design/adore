@@ -1,23 +1,79 @@
+/** Pic Web Adore experiment
+ * @author: sebastien mosser <mosser@polytech.unice.fr>
+ * @date: 2010/05/30
+ * @location: Sophia Antipolis (but started in Bellairs ^_^)
+ **/
 
+// Loading the behavioral artefacts
 require 'picweb.adore';
 
+// Loading prolog helpers, if any
+knowledge 'helpers.pl';
 
-/**%
-  doInstantiate(restrictCardinality, picweb_get, rC,[bind(limit,threshold)]),
-  doWeave( [weave(rC, [picweb_get_a3])]),
-  doProcessSimplification(picweb_get),
-  adore2png(picweb_get,'v0.png'),
-%**/
+/*********************************
+ ** Step #0: PicWeb + Threshold **
+ *********************************/
 
+composition picweb::get as v0 {
+  apply restrictCardinality(limit: 'threshold') => a3;
+}
 
 /*%
-  doInstantiate(restrictCardinality, picweb_get, rC,[bind(limit,threshold)]),
-  doClone(addPicasa, aP),
-  doWeave( [ weave(rC, [picweb_get_a3]),
-             weave(aP, [picweb_get_a2])]),
-  doProcessSimplification(picweb_get),
-  adore2png(picweb_get,'v1.png'),
+  doClone(picweb_get, pgv0),
+  identifyVarClone(picweb_get_threshold, pgv0, PGT_1), 
+  doInstantiate(restrictCardinality, pgv0, rC1, [bind(limit,PGT_1)]),
+  identifyClone(picweb_get_a3, pgv0, PGA3_1),
+  doWeave([weave(rC1,[PGA3_1])]), 
+  doProcessSimplification(pgv0),
 %*/
 
+/******************************************
+ ** Step #1: PicWeb + Threshold + Picasa **
+ ******************************************/
 
+composition picweb::get as v1 {
+  apply addPicasa => a2;
+  apply restrictCardinality(limit: 'threshold') => a3;
+}
+
+/*%
+  doClone(picweb_get, pgv1),
+  doClone(addPicasa, aP_1),
+  identifyVarClone(picweb_get_threshold, pgv1, PGT_2), 
+  doInstantiate(restrictCardinality, pgv1, rC2, [bind(limit,PGT_2)]),
+  identifyClone(picweb_get_a2, pgv1, PGA2_1),
+  identifyClone(picweb_get_a3, pgv1, PGA3_2),
+  doWeave([weave(aP_1,[PGA2_1]), weave(rC2,[PGA3_2])]), 
+  doProcessSimplification(pgv1),
+%*/
+
+// Conflict solving
+/*%
+  identifyClone(addPicasa_aP2, aP_1, AP2_1), 
+  identifyClone(restrictCardinality_r, rC2, RCR_1),
+  defWaitFor(RCR_1, AP2_1), doProcessSimplification(pgv1),
+%*/
+
+/**************************************************
+ ** Step #2: PicWeb + Threshold + Picasa + Cache **
+ **************************************************/
+
+composition picweb::get as v2 {
+  apply addPicasa => a2; 
+  apply cache     => a2;
+  apply restrictCardinality(limit: 'threshold') => a3;
+}
+
+/*%
+  doClone(picweb_get, pgv2),
+  doClone(addPicasa, aP_2),
+  doClone(cache, c1),
+  doMerge([aP_2, c1], c_aP_1), doProcessSimplification(c_aP_1),
+  identifyVarClone(picweb_get_threshold, pgv2, PGT_3), 
+  doInstantiate(restrictCardinality, pgv2, rC3, [bind(limit,PGT_3)]),
+  identifyClone(picweb_get_a2, pgv2, PGA2_2),
+  identifyClone(picweb_get_a3, pgv2, PGA3_3),
+  doWeave([weave(aP_2, [PGA2_2]), weave(rC3, [PGA3_3])]), 
+  doProcessSimplification(pgv2),
+%*/
 

@@ -4,7 +4,6 @@
  * @location: Bellairs McGill institute, St James, Barbados ^_^
  **/
 
-
 /******************
  ** Base Process **
  ******************/
@@ -38,19 +37,39 @@ fragment restrictCardinality<limit> {
 }
 depict restrictCardinality using 'lightsalmon';
 
-composition picweb::get as v0 {
-  apply restrictCardinality(limit: 'threshold') => a3;
-}
+/**************************************
+ * Second evolution: including Picasa *
+ **************************************/
 
 fragment addPicasa {
-  variables {
-    tag as word; picasa* as string; others* as string;
-  }
+  variables { t as word; picasa* as string; others* as string; }
   activities {
-    h. others* := hook(tag);
-    aP1. picasa* := picasa::getOnTag(tag);
+    h. others* := hook(t);
+    aP1. picasa* := picasa::getOnTag(t);
     aP2. others* := merge::run(others*, picasa*);
   }
   relations { ^ < h; ^ < aP1; h < aP2; aP1 < aP2; aP2 < $; }
 }
 depict addPicasa using 'lightskyblue2';
+
+/**********************************
+ * Third evolution: cache concern *
+ **********************************/
+
+fragment cache {
+  variables {
+    isValid as boolean; key as word; pict* as string;
+  }
+  activities {
+    c1. isValid := cacheServer::checkCache(key);
+    c2. pict* := dataRepository::read();
+    c3. pict* := hook(key);
+    c4. dataRepository::store(pict*);
+  }
+  relations {
+    ^  < c1; c1 < c2 when isValid; c1 < c3 when !isValid; 
+    c2 < $; c3 < c4; c4 < $;
+  }
+}
+depict cache using 'darkseagreen3';
+
