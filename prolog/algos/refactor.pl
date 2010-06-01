@@ -34,11 +34,20 @@ pullIn(P, Actions) :-
 	findall(A,refactor:pullInCandidate(P,A),Raws), sort(Raws, Actions).
 
 pullInCandidate(P, Action) :- 
-	process(P), variable:belongsTo(V,P), usesAsInput(A,V), 
+	process(P), isFragment(P), variable:belongsTo(V,P), usesAsInput(A,V), 
 	(\+ usesAsOutput(APrime, V)
-         |  usesAsOutput(APrime,V), \+ relations:path(APrime,A)), 
-	 activity:belongsTo(R,P), hasForKind(R,receive),
-	 Action = addAsOutput(V,R).
+        |  findall(Act,usesAsOutput(Act,V),[A])
+        |  usesAsOutput(APrime,V), APrime \= A, \+ relations:path(APrime,A)),
+	activity:belongsTo(H,P), hasForKind(H,hook),  \+ isConstant(V),
+	Action = addAsInput(V,H).
+
+pullInCandidate(P, Action) :- 
+	process(P), \+ isFragment(P), variable:belongsTo(V,P),usesAsInput(A,V), 
+	(\+ usesAsOutput(APrime, V)
+        | findall(Act,usesAsOutput(Act,V),[A])
+        | usesAsOutput(APrime,V), APrime \= A, \+ relations:path(APrime,A)),
+	activity:belongsTo(R,P),  \+ isConstant(V),
+	hasForKind(R,receive), Action = addAsOutput(V,R).
 
 %% Push out:
 %%  variable assigned in the process, but not used by others 
@@ -49,21 +58,28 @@ pushOut(P, Actions) :-
 	findall(A,refactor:pushOutCandidate(P,A),Raws), sort(Raws, Actions).
 
 pushOutCandidate(P, Action) :- 
-	process(P), variable:belongsTo(V,P), \+ isGuardedBy(_,_,V,_),
-	usesAsOutput(A,V),
+	process(P), \+ isFragment(P),  variable:belongsTo(V,P), 
+	\+ isGuardedBy(_,_,V,_), usesAsOutput(A,V),
 	(\+ usesAsInput(APrime, V)
-         |  usesAsInput(APrime,V), \+ relations:path(A,APrime)),
-	 activity:belongsTo(R,P), hasForKind(R,reply),
+         |  usesAsInput(APrime,V),  \+ relations:path(A,APrime)),
+	 activity:belongsTo(R,P), hasForKind(R,reply), \+ isConstant(V),
 	 Action = addAsInput(V,R).
+pushOutCandidate(P, Action) :- 
+	process(P), isFragment(P),  variable:belongsTo(V,P), 
+	\+ isGuardedBy(_,_,V,_), usesAsOutput(A,V),
+	(\+ usesAsInput(APrime, V)
+         |  usesAsInput(APrime,V),  \+ relations:path(A,APrime)),
+	 activity:belongsTo(R,P), hasForKind(R,hook),  \+ isConstant(V),
+	 Action = addAsOutput(V,R).
 
 %% Enrichment:
 %% 
 enrich(P,Actions) :- 
 	findall(A,refactor:enrichCandidate(P,A), Raws), 
-	sort(Raws, Actions).
+	flatten(Raws, Actions).
 
 enrichCandidate(P, Actions) :- 
-	process(P), whiteBoxCall(P, Invoke, Target),
+	whiteBoxCall(P, Invoke, Target),
 	validateRequest(Invoke, Target, ReqActs),
 	validateResponse(Invoke, Target, RespActs),
 	flatten([ReqActs, RespActs], Actions).
@@ -79,28 +95,56 @@ validateRequest(Activity, Target, Acts) :-
 	findall([V,T], (usesAsOutput(R, V), hasForType(V,T)), Required),
 	match(Activity, input, Used, Required, Acts).
 
-validateResponse(_,_,[]).
-
+validateResponse(Activity, Target, Acts) :- 
+	findall([V,T],(usesAsOutput(Activity, V), hasForType(V,T)), Used),
+	activity:belongsTo(R,Target), hasForKind(R,reply),
+	findall([V,T], (usesAsInput(R, V), hasForType(V,T)), Required),
+	match(Activity, output, Used, Required, Acts).
 
 %%%%
-%% Helper (technical stuff)
+%% Helper (technical stuff, not that contributive)
 %%%%
 
 match(A, Direction, [], Required, Acts) :- 
 	propagate(A, Direction, Required, Acts).
+match(A, Direction, [[_, _]|Tail], Required, Acts) :- 
+	match(A, Direction, Tail, Required, Acts). %% TODO: fixme
 
 propagate(_,_,[],[]).
-propagate(Activity, input, [[Var, _]|Tail], Acts) :- 
-	findUserRoot(Var,RootName), activity:belongsTo(Activity, P),
-	buildVarName(P,RootName, VarName), clone(Var,VarName,CloneActs),
+propagate(Activity, input, [[Var, _]|Tail], Acts) :-  %% INPUT
+	activity:belongsTo(Activity, P),
+	exists(P, Var, VarName), !, 
 	propagate(Activity, input, Tail, Others),
-	flatten([CloneActs, addAsInput(VarName, Activity), Others], Acts).
+	flatten([addAsInput(VarName, Activity), Others], Acts).
+propagate(Activity, input, [[Var, _]|Tail], Acts) :-  %% INPUT
+	findUserRoot(Var,RootName), activity:belongsTo(Activity, P),
+	buildVarName(P,RootName, VarName, Trace), clone(Var,VarName,CloneActs),
+	propagate(Activity, input, Tail, Others),
+	flatten([CloneActs, Trace, addAsInput(VarName,Activity),Others],Acts).
 
+propagate(Activity, output, [[Var, _]|Tail], Acts) :- %% OUTPUT
+	activity:belongsTo(Activity, P),
+	exists(P, Var, VarName), !, 
+	propagate(Activity, output, Tail, Others),
+	flatten([addAsOutput(VarName, Activity), Others], Acts).
+propagate(Activity, output, [[Var, _]|Tail], Acts) :-  %% OUTPUT
+	findUserRoot(Var,RootName), activity:belongsTo(Activity, P),
+	buildVarName(P,RootName, VarName, Trace), clone(Var,VarName,CloneActs),
+	propagate(Activity, output, Tail, Others),
+	flatten([CloneActs, Trace, addAsOutput(VarName,Activity),Others],Acts).
 
-buildVarName(Process, RootName, VarName) :- 
+exists(Process, RealVar, VarName) :- 
+	findUserRoot(RealVar, RootName), hasForType(RealVar, T),
+	hasForSrvName(Process, Srv), hasForOpName(Process, Op),
+	swritef(Str,'%w_%w_%w',[Srv,Op,RootName]), 
+        string_to_atom(Str, VarName), variable:belongsTo(VarName, Process),
+	hasForType(VarName, T).
+
+buildVarName(Process, RootName, VarName, Trace) :- 
 	process(Process), hasForSrvName(Process, Srv), 
-	hasForOpName(Process, Op), gensym(RootName, Symb),
-	swritef(Str,'%w_%w_%w',[Srv,Op,Symb]), string_to_atom(Str, VarName).
+	hasForOpName(Process, Op), %gensym(RootName, Symb),
+	swritef(Str,'%w_%w_%w',[Srv,Op,RootName]), string_to_atom(Str, VarName),
+        Trace = traceRename(rename(variable), RootName, VarName, refactor(Process)).
 
 %% local clone (only take care of sets, should not be triggered in other cases)
 clone(Old, New, Acts) :- 

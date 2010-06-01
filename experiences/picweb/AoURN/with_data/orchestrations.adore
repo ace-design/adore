@@ -8,9 +8,9 @@
  *** /!\ WITH DATA /!\ ***
  *************************/
 
-/**********************************************************
- ** Initial artefacts, generated before data refactoring **
- **********************************************************/
+/****************************************************************
+ ** Initial artefacts, generated directly from AoURN artefacts **
+ ****************************************************************/
 
 orchestration truncate::truncate {
   variables { 
@@ -31,7 +31,6 @@ orchestration truncate::truncate {
 /*% doRefactor(truncate_truncate) %*/ 
 // Summary: in(nrPhotos, threshold, pictures), out(pictures).
 
-
 // From 'PicWeb' UCM
 orchestration picweb::getPictures {
   variables { tag as tag; pictures as pictures; }
@@ -44,48 +43,23 @@ orchestration picweb::getPictures {
   relations { act1 < act2; act2 < act3; act3 < act4; }
 }
 /*% doRefactor(picweb_getPictures) %*/ 
-
-
-/******************************************************
- ** Refactored artefacts (Enrich, Pull in, Push out) **
- ******************************************************/
-/*
-
-
-
-// Invocation enrichment: nothing
-// Enrichment: act3(+nrPhotos, +threshold, +pictures)
-// Pulled in: 
-// Pushed out: 
-orchestration picweb::wrong {
-  variables { 
-    tag as tag; pictures as pictures;             // initial
-    threshold as threshold; nrPhotos as nrPhotos; // enriched
-  }
-  activities {
-    act1. (tag, nrPhotos, threshold) := receive();
-    act2. pictures := flickr::getPicturesWithTag(tag);
-    act3. pictures := truncate::wrong(nrPhotos, threshold, pictures);
-    act4. reply(pictures);
-  }
-  relations { act1 < act2; act2 < act3; act3 < act4; }
-}
-*/
+// Summary: enrich(act3(+nrPhotos, +threshold, +pictures)), 
+//          in(nrPhotos, threshold, pictures), out(pictures) 
 
 /************************************************
  ** Final artefacts (after requirement change) **
  ************************************************/
-/*
-orchestration truncate::truncate {
+
+orchestration truncate::final {
   variables { 
     condition as boolean; threshold as threshold; pictures as pictures;
     nrPhotos as nrPhotos;
   }
   activities {
-    act1. (threshold, pictures) := receive();
+    act1. receive();
     act2. condition := isGreaterThan(nrPhotos, threshold);
     act3. pictures := limitNumberOfPictures(pictures, threshold);
-    act4. reply(pictures);
+    act4. reply();
     act5. nrPhotos := getLength(pictures); // ADDED AT REQ. LVL
   }
   relations {
@@ -93,18 +67,18 @@ orchestration truncate::truncate {
     act2 < act4 when !condition; act3 < act4;
   }
 }
+/*% doRefactor(truncate_final) %*/
 
-orchestration picweb::getPictures {
+orchestration picweb::final {
   variables { 
     tag as tag; pictures as pictures;             // initial
-    threshold as threshold; nrPhotos as nrPhotos; // enriched
   }
   activities {
-    act1. receive(tag, threshold);
+    act1. receive();
     act2. pictures := flickr::getPicturesWithTag(tag);
-    act3. pictures := truncate::truncate(threshold, pictures);
-    act4. reply(pictures);
+    act3. truncate::final();
+    act4. reply();
   }
   relations { act1 < act2; act2 < act3; act3 < act4; }
 }
-*/
+/*% doRefactor(picweb_final) %*/
