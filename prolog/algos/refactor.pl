@@ -33,20 +33,22 @@ buildActions(P, Actions) :-
 pullIn(P, Actions) :- 
 	findall(A,refactor:pullInCandidate(P,A),Raws), sort(Raws, Actions).
 
-pullInCandidate(P, Action) :-  %% fragment
-	process(P), isFragment(P), variable:belongsTo(V,P), usesAsInput(A,V), 
-	(\+ usesAsOutput(APrime, V)
-        |  findall(Act,usesAsOutput(Act,V),[A])
-        |  usesAsOutput(APrime,V), APrime \= A, \+ relations:path(APrime,A)),
-	activity:belongsTo(H,P), hasForKind(H,hook),  \+ isConstant(V), 
-	\+ usesElem(H,V), Action = addAsInput(V,H).
 pullInCandidate(P, Action) :- %%process
 	process(P), \+ isFragment(P), variable:belongsTo(V,P),usesAsInput(A,V), 
 	(\+ usesAsOutput(APrime, V)
         | findall(Act,usesAsOutput(Act,V),[A])
-        | usesAsOutput(APrime,V), APrime \= A, \+ relations:path(APrime,A)),
+        | usesAsOutput(APrime,V), APrime \= A, activity:belongsTo(APrime,P),
+	  \+ relations:existsPath(APrime,A)),
 	activity:belongsTo(R,P),  \+ isConstant(V),
 	hasForKind(R,receive), Action = addAsOutput(V,R).
+pullInCandidate(P, Action) :-  %% fragment
+	process(P), isFragment(P), variable:belongsTo(V,P), \+ isConstant(V), 
+	usesAsInput(A,V), activity:belongsTo(H,P), hasForKind(H,hook),
+	\+ usesElem(H,V), relations:path(A,H), 
+	( \+ usesAsOutput(APrime, V) | findall(Act,usesAsOutput(Act,V),[A])
+        | usesAsOutput(APrime,V), APrime \= A, activity:belongsTo(APrime,P),
+	  \+ relations:existsPath(APrime,A)),
+	Action = addAsInput(V,H).
 
 %% Push out:
 %%  variable assigned in the process, but not used by others 
@@ -56,21 +58,31 @@ pullInCandidate(P, Action) :- %%process
 pushOut(P, Actions) :- 
 	findall(A,refactor:pushOutCandidate(P,A),Raws), sort(Raws, Actions).
 
-pushOutCandidate(P, Action) :-  %% fragment
-	process(P), isFragment(P),  variable:belongsTo(V,P), 
-	\+ isGuardedBy(_,_,V,_), usesAsOutput(A,V),
-	(\+ usesAsInput(APrime, V)
-         |  usesAsInput(APrime,V),  \+ relations:path(A,APrime)),
-	 activity:belongsTo(R,P), hasForKind(R,hook),  \+ isConstant(V),
-	 \+ usesElem(R,V), Action = addAsOutput(V,R).
 pushOutCandidate(P, Action) :-  %% process
 	process(P), \+ isFragment(P),  variable:belongsTo(V,P), 
 	\+ isGuardedBy(_,_,V,_), usesAsOutput(A,V),
 	(\+ usesAsInput(APrime, V)
-         |  usesAsInput(APrime,V),  \+ relations:path(A,APrime)),
+         |  usesAsInput(APrime,V),  activity:belongsTo(APrime, P),
+	    \+ relations:existsPath(A,APrime)),
 	 activity:belongsTo(R,P), hasForKind(R,reply), \+ isConstant(V),
-	 Action = addAsInput(V,R).
+	 \+ usesAsInput(R,V), Action = addAsInput(V,R).
+pushOutCandidate(P, Action) :-  %% fragment
+	process(P), isFragment(P), variable:belongsTo(V,P), \+ isConstant(V), 
+ 	usesAsOutput(A,V), activity:belongsTo(H,P), hasForKind(H,hook),
+ 	\+ usesElem(H,V), relations:existsPath(H,A), 
+ 	( \+ usesAsInput(APrime, V)
+          |  usesAsInput(APrime,V), activity:belongsTo(APrime, P), 
+	     \+ relations:existsPath(A,APrime)),
+	Action = addAsOutput(V,H).
 
+
+%% pushOutCandidate(P, Action) :-  %% fragment
+%% 	process(P), isFragment(P),  variable:belongsTo(V,P), 
+%% 	\+ isGuardedBy(_,_,V,_), usesAsOutput(A,V),
+%% 	(\+ usesAsInput(APrime, V)
+%%          |  usesAsInput(APrime,V),  \+ relations:path(A,APrime)),
+%% 	 activity:belongsTo(R,P), hasForKind(R,hook),  \+ isConstant(V),
+%% 	 \+ usesElem(R,V), Action = addAsOutput(V,R).
 
 %% Enrichment:
 %% 

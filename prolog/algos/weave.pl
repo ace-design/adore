@@ -256,7 +256,9 @@ delActivity(Old,Actions) :-
 	RetractActs = [ myRetract(activity(Old)), myRetract(hasForKind(Old,K)), 
 	                myRetract(isContainedBy(Old,P))],
 	findall(A, relations:delAPath(Old,A), RelActions),
-	flatten([RetractActs,RelActions],Actions).
+	findall(retract(usesAsInput(Old,V)),usesAsInput(Old,V),Ins),
+	findall(retract(usesAsOutput(Old,V)),usesAsOutput(Old,V),Outs),
+	flatten([RetractActs,RelActions,Ins,Outs],Actions).
 
 :- assert(user:isMacroAction(substVariable,3)).
 substVariable(Old,New, Actions) :- 
