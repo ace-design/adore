@@ -33,15 +33,14 @@ buildActions(P, Actions) :-
 pullIn(P, Actions) :- 
 	findall(A,refactor:pullInCandidate(P,A),Raws), sort(Raws, Actions).
 
-pullInCandidate(P, Action) :- 
+pullInCandidate(P, Action) :-  %% fragment
 	process(P), isFragment(P), variable:belongsTo(V,P), usesAsInput(A,V), 
 	(\+ usesAsOutput(APrime, V)
         |  findall(Act,usesAsOutput(Act,V),[A])
         |  usesAsOutput(APrime,V), APrime \= A, \+ relations:path(APrime,A)),
-	activity:belongsTo(H,P), hasForKind(H,hook),  \+ isConstant(V),
-	Action = addAsInput(V,H).
-
-pullInCandidate(P, Action) :- 
+	activity:belongsTo(H,P), hasForKind(H,hook),  \+ isConstant(V), 
+	\+ usesElem(H,V), Action = addAsInput(V,H).
+pullInCandidate(P, Action) :- %%process
 	process(P), \+ isFragment(P), variable:belongsTo(V,P),usesAsInput(A,V), 
 	(\+ usesAsOutput(APrime, V)
         | findall(Act,usesAsOutput(Act,V),[A])
@@ -57,20 +56,21 @@ pullInCandidate(P, Action) :-
 pushOut(P, Actions) :- 
 	findall(A,refactor:pushOutCandidate(P,A),Raws), sort(Raws, Actions).
 
-pushOutCandidate(P, Action) :- 
+pushOutCandidate(P, Action) :-  %% fragment
+	process(P), isFragment(P),  variable:belongsTo(V,P), 
+	\+ isGuardedBy(_,_,V,_), usesAsOutput(A,V),
+	(\+ usesAsInput(APrime, V)
+         |  usesAsInput(APrime,V),  \+ relations:path(A,APrime)),
+	 activity:belongsTo(R,P), hasForKind(R,hook),  \+ isConstant(V),
+	 \+ usesElem(R,V), Action = addAsOutput(V,R).
+pushOutCandidate(P, Action) :-  %% process
 	process(P), \+ isFragment(P),  variable:belongsTo(V,P), 
 	\+ isGuardedBy(_,_,V,_), usesAsOutput(A,V),
 	(\+ usesAsInput(APrime, V)
          |  usesAsInput(APrime,V),  \+ relations:path(A,APrime)),
 	 activity:belongsTo(R,P), hasForKind(R,reply), \+ isConstant(V),
 	 Action = addAsInput(V,R).
-pushOutCandidate(P, Action) :- 
-	process(P), isFragment(P),  variable:belongsTo(V,P), 
-	\+ isGuardedBy(_,_,V,_), usesAsOutput(A,V),
-	(\+ usesAsInput(APrime, V)
-         |  usesAsInput(APrime,V),  \+ relations:path(A,APrime)),
-	 activity:belongsTo(R,P), hasForKind(R,hook),  \+ isConstant(V),
-	 Action = addAsOutput(V,R).
+
 
 %% Enrichment:
 %% 

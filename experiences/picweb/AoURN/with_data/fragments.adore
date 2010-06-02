@@ -50,7 +50,7 @@ depict caching using 'darkseagreen3';
 /*% doRefactor(caching) %*/
 
 // From 'Randomizer' UCM
-fragment randomizer {
+fragment randomizer { 
   variables { pictures as pictures; }
   activities {
     act1. pictures := shuffle::randomize(pictures);
@@ -69,7 +69,7 @@ fragment payment {
   }
   activities {
     act1. condition := isGreaterThan(nrRequests,requestLimit);
-    act2. pictures := returnNoPhotos();
+    act2. returnNoPhotos();
     act3. pictures := hook(tag);
   }
   relations {
