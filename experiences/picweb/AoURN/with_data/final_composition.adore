@@ -38,6 +38,8 @@ composition picweb::final {
   doClone(caching, f4), doClone(randomizer, f5),
   doWeave([weave(f4, [picweb_final_act2]), 
            weave(f5, [picweb_final_act4])]),
-  doProcessSimplification(picweb_final)
+  doProcessSimplification(picweb_final),
 %*/
+
+/*% doRefactor(picweb_final) %*/
 

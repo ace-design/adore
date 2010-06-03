@@ -38,10 +38,7 @@ composition picweb::getPictures {
   doClone(caching, f4), doClone(randomizer, f5),
   doWeave([weave(f4, [picweb_getPictures_act2]), 
            weave(f5, [picweb_getPictures_act4])]),
-  doProcessSimplification(picweb_getPictures),
-  doRefactor(picweb_getPictures)
-
+  doProcessSimplification(picweb_getPictures)
 %*/
 
-
-//   
+/*% doRefactor(picweb_getPictures) %*/

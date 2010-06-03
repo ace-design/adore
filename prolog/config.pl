@@ -46,18 +46,19 @@ readParameter(_, '').
 	
 
 %%%%
-%% Debugging ADORE ... (if any)
+%% Debugging ADORE ... (if any, use ~/.adore.el to declare it ...)
 %%%%
 
 %debugSubscription(compiler).
 %debugSubscription(create).
 %debugSubscription(def).
 %debugSubscription(set).
-debugSubscription(algo).
-debugSubscription(timer).
+%debugSubscription(algo).
+%debugSubscription(timer).
 %debugSubscription(clone).
 %debugSubscription(setify).
 %debugSubscription(merge).
-debugSubscription(weave).
+%debugSubscription(weave).
 %debugSubscription(instantiate).
 %debugSubscription(exec).
+%debugSubscription(refactor).

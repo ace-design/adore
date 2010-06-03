@@ -70,7 +70,8 @@ fragment payment {
   activities {
     act1. condition := isGreaterThan(nrRequests,requestLimit);
     act2. returnNoPhotos();
-    act3. pictures := hook(tag);
+    //act3. pictures := hook(tag);
+    act3. hook();
   }
   relations {
     ^ < act1; act1 < act2 when condition; act1 < act3 when !condition; 

@@ -31,23 +31,23 @@ buildActions(P, Actions) :-
 %%  preceding control-flow => assigned when receiving the invocation message.
 
 pullIn(P, Actions) :- 
-	findall(A,refactor:pullInCandidate(P,A),Raws), sort(Raws, Actions).
+	findall(A,refactor:pullInCandidate(P,A),Raws), sort(Raws, Actions),
+	dinfo(refactor,'  PullIn:',[]), dWriteList(Actions).
 
 pullInCandidate(P, Action) :- %%process
 	process(P), \+ isFragment(P), variable:belongsTo(V,P),usesAsInput(A,V), 
 	(\+ usesAsOutput(APrime, V)
         | findall(Act,usesAsOutput(Act,V),[A])
-        | usesAsOutput(APrime,V), APrime \= A, activity:belongsTo(APrime,P),
-	  \+ relations:existsPath(APrime,A)),
+        | \+ (activity:usesAsOutput(APrime,V),relations:existsPath(APrime,A))),
 	activity:belongsTo(R,P),  \+ isConstant(V),
 	hasForKind(R,receive), Action = addAsOutput(V,R).
 pullInCandidate(P, Action) :-  %% fragment
 	process(P), isFragment(P), variable:belongsTo(V,P), \+ isConstant(V), 
 	usesAsInput(A,V), activity:belongsTo(H,P), hasForKind(H,hook),
 	\+ usesElem(H,V), relations:path(A,H), 
-	( \+ usesAsOutput(APrime, V) | findall(Act,usesAsOutput(Act,V),[A])
-        | usesAsOutput(APrime,V), APrime \= A, activity:belongsTo(APrime,P),
-	  \+ relations:existsPath(APrime,A)),
+	(\+ usesAsOutput(APrime, V)
+        | findall(Act,usesAsOutput(Act,V),[A])
+        | \+ (activity:usesAsOutput(APrime,V),relations:existsPath(APrime,A))),
 	Action = addAsInput(V,H).
 
 %% Push out:
@@ -56,7 +56,8 @@ pullInCandidate(P, Action) :-  %% fragment
 %%  output message.
 
 pushOut(P, Actions) :- 
-	findall(A,refactor:pushOutCandidate(P,A),Raws), sort(Raws, Actions).
+	findall(A,refactor:pushOutCandidate(P,A),Raws), sort(Raws, Actions),
+	dinfo(refactor,'  PushOut:',[]), dWriteList(Actions).
 
 pushOutCandidate(P, Action) :-  %% process
 	process(P), \+ isFragment(P),  variable:belongsTo(V,P), 
@@ -75,20 +76,11 @@ pushOutCandidate(P, Action) :-  %% fragment
 	     \+ relations:existsPath(A,APrime)),
 	Action = addAsOutput(V,H).
 
-
-%% pushOutCandidate(P, Action) :-  %% fragment
-%% 	process(P), isFragment(P),  variable:belongsTo(V,P), 
-%% 	\+ isGuardedBy(_,_,V,_), usesAsOutput(A,V),
-%% 	(\+ usesAsInput(APrime, V)
-%%          |  usesAsInput(APrime,V),  \+ relations:path(A,APrime)),
-%% 	 activity:belongsTo(R,P), hasForKind(R,hook),  \+ isConstant(V),
-%% 	 \+ usesElem(R,V), Action = addAsOutput(V,R).
-
 %% Enrichment:
 %% 
 enrich(P,Actions) :- 
 	findall(A,refactor:enrichCandidate(P,A), Raws), 
-	flatten(Raws, Actions).
+	flatten(Raws, Actions), dWriteList(Actions).
 
 enrichCandidate(P, Actions) :- 
 	whiteBoxCall(P, Invoke, Target),
@@ -124,8 +116,11 @@ match(A, Direction, [[_, _]|Tail], Required, Acts) :-
 
 propagate(_,_,[],[]).
 propagate(Activity, input, [[Var, _]|Tail], Acts) :-  %% INPUT
-	activity:belongsTo(Activity, P),
-	exists(P, Var, VarName), !, 
+	activity:belongsTo(Activity, P), exists(P, Var, VarName),
+	usesAsInput(Activity, VarName), !,
+	propagate(Activity, input, Tail, Acts).
+propagate(Activity, input, [[Var, _]|Tail], Acts) :-  %% INPUT
+	activity:belongsTo(Activity, P), exists(P, Var, VarName), !, 
 	propagate(Activity, input, Tail, Others),
 	flatten([addAsInput(VarName, Activity), Others], Acts).
 propagate(Activity, input, [[Var, _]|Tail], Acts) :-  %% INPUT
@@ -135,8 +130,11 @@ propagate(Activity, input, [[Var, _]|Tail], Acts) :-  %% INPUT
 	flatten([CloneActs, Trace, addAsInput(VarName,Activity),Others],Acts).
 
 propagate(Activity, output, [[Var, _]|Tail], Acts) :- %% OUTPUT
-	activity:belongsTo(Activity, P),
-	exists(P, Var, VarName), !, 
+	activity:belongsTo(Activity, P), exists(P, Var, VarName), 
+	usesAsOutput(Activity, VarName), !, 
+	propagate(Activity, output, Tail, Acts).
+propagate(Activity, output, [[Var, _]|Tail], Acts) :- %% OUTPUT
+	activity:belongsTo(Activity, P), exists(P, Var, VarName), !, 
 	propagate(Activity, output, Tail, Others),
 	flatten([addAsOutput(VarName, Activity), Others], Acts).
 propagate(Activity, output, [[Var, _]|Tail], Acts) :-  %% OUTPUT
@@ -156,7 +154,8 @@ buildVarName(Process, RootName, VarName, Trace) :-
 	process(Process), hasForSrvName(Process, Srv), 
 	hasForOpName(Process, Op), %gensym(RootName, Symb),
 	swritef(Str,'%w_%w_%w',[Srv,Op,RootName]), string_to_atom(Str, VarName),
-        Trace = traceRename(rename(variable), RootName, VarName, refactor(Process)).
+        Trace = 
+          traceRename(rename(variable), RootName, VarName,refactor(Process)).
 
 %% local clone (only take care of sets, should not be triggered in other cases)
 clone(Old, New, Acts) :- 
@@ -165,3 +164,8 @@ clone(Old, New, Acts) :-
 clone(Old, New, Acts) :- 
 	\+ isSet(Old), hasForType(Old, T), 
 	Acts = [createVariable(New), setVariableType(New,T)].
+
+%% Write a List of action in debug mode.
+dWriteList([]).
+dWriteList([H|T]) :- 
+	dinfo(refactor,'   -> ~w',[H]), dWriteList(T).
