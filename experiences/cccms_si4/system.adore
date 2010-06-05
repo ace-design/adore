@@ -1,0 +1,28 @@
+/** CCCMS System, implemented as orchestrations of web services
+ ** @author: Sebastien Mosser
+ ** @date:   Sat Jun  5, 2010  5:39 PM
+ **/
+
+require 'orchestration.adore';
+require 'ext1.adore';
+
+/***********************
+ ** First Composition **
+ ***********************/
+
+composition cms::captureWitnessReport {
+  apply callDisconnected => a10;
+  apply callDisconnected => a2;
+  apply ignoreDisconnection => a4;
+  apply fakeWitnessInfo => a2a3;
+}
+
+/*%
+  doClone(callDisconnected, cD1), doClone(callDisconnected, cD2),
+  doClone(ignoreDisconnection, iD1), doClone(fakeWitnessInfo, fWI1),
+  doWeave([ weave(cD1,  [cms_captureWitnessReport_a10]),
+            weave(cD2,  [cms_captureWitnessReport_a2]),
+	    weave(iD1,  [cms_captureWitnessReport_a4]),
+	    weave(fWI1, [cms_captureWitnessReport_a2a3])]),
+  doProcessSimplification(cms_captureWitnessReport)
+%*/

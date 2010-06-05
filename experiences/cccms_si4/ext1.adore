@@ -1,0 +1,50 @@
+/** Behavioural extension #1
+ * @author:   Sebastien Mosser
+ * @date:     Sat Jun  5, 2010  5:26 PM
+ * @rational: Deal with faults in the initial workflow
+ **/
+
+// Steps 1a, 2a: 
+//    "The call is disconnected. The base use case terminates."
+fragment callDisconnected {
+  variables {}
+  activities { 
+    h. hook(); 
+    thr. throw('lostWitnessContact' as string); 
+  }
+  relations { ^ < h; h < $; fail(h,'disconnected') < thr; }
+}
+depict callDisconnected using 'lightpink';
+
+// Step 4a: 
+//    "The call is disconnected. Use case continues at step 5 without 
+//     crisis information."
+fragment ignoreDisconnection {
+  variables {}
+  activities { h. hook(); }
+  relations { ^ < h; h < $; fail(h,'disconnected') < $; }
+}
+
+
+// Step 5a: 
+//    "PhoneCompany information does not match information received from 
+//     Witness. The base use case is terminated."
+fragment fakeWitnessInfo {
+  variables {
+    witInfo as witness; phInfo as phoneInformation; 
+    isValid as boolean;
+  }
+  activities {
+    h. isValid := hook(witInfo,phInfo); 
+    thr. throw('fakeWitnessInformation' as string);
+  }
+  relations { 
+    ^ < h; h < $ when isValid; h < thr when ! isValid; 
+  }
+}
+depict fakeWitnessInfo using 'darksalmon';
+
+
+
+
+
