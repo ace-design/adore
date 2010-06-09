@@ -1,0 +1,66 @@
+/************************
+ ** Fourth composition **
+ ************************/
+
+composition cms::captureWitnessReport {
+  apply callDisconnected            => a2;
+  apply ignoreDisconnection         => a4;
+  apply fakeCrisisDetected          => a4;
+  apply callDisconnected            => a10;
+  apply fakeWitnessInfo             => a2a3;
+  apply requestVideo(user: 'coord') => {a3,a4}; 
+  apply logCreate => rcv;
+  apply logUpdate(op: 'prompt4RealCrisis')  => fakeCrisisDetected::t; // FoF
+  apply logUpdate(op: 'displayVideoFeed')   => requestVideo::a3; // FoF
+  apply logUpdate(op: 'buildCheckList')     => a4; // Merge
+  apply logUpdate(op: 'promptPrelimInfo')   => a2; // Merge
+  apply logUpdate(op: 'promptWitnessInfo')  => a10; // Merge
+}
+
+
+/*%
+  doInstantiate(logUpdate, cms_captureWitnessReport, lU1,
+                [bind(op,'prompt4RealCrisis')]),
+  doWeave([ weave(lU1,[fakeCrisisDetected_t])]),
+  doInstantiate(logUpdate, cms_captureWitnessReport, lU2,
+                [bind(op,'displayVideoFeed')]),
+  doWeave([ weave(lU2,[requestVideo_a3])])
+%*/
+
+/*%
+  doClone(ignoreDisconnection, iD1), doClone(fakeCrisisDetected,fCD2),
+  doInstantiate(logUpdate, cms_captureWitnessReport, lU3,
+                [bind(op,'promptCheckList')]),
+  doMerge([iD1, fCD2, lU3],iD_fCD_lU),
+%*/
+
+/*%
+  doClone(callDisconnected, cD1),
+  doInstantiate(logUpdate, cms_captureWitnessReport, lU4,
+                [bind(op,'promptPrelimInfo')]),
+  doMerge([cD1, lU4],cD_lU),
+%*/
+
+/*%
+  doClone(callDisconnected, cD2),
+  doInstantiate(logUpdate, cms_captureWitnessReport, lU5,
+                [bind(op,'promptWitnessInfo')]),
+  doMerge([cD2, lU5],cD_lU2),
+%*/
+
+/*%
+  doClone(logCreate,lC1),
+  doClone(callDisconnected, cD2), doClone(cD_lU,cD_lU1), 
+  doClone(cD_lU2,cD_lU21),
+  doClone(fakeWitnessInfo, fWI1),  doClone(iD_fCD_lU, iD_fCD_lU1),
+  doInstantiate(requestVideo, cms_captureWitnessReport, rV1,
+                [bind(user, coord)]),
+  doWeave([ weave(lC1,  [cms_captureWitnessReport_rcv]),
+            weave(cD_lU21,  [cms_captureWitnessReport_a10]),
+            weave(cD_lU1,  [cms_captureWitnessReport_a2]),
+	    weave(iD_fCD_lU1,  [cms_captureWitnessReport_a4]),
+	    weave(fWI1, [cms_captureWitnessReport_a2a3]),
+	    weave(rV1, [cms_captureWitnessReport_a3, 
+	                    cms_captureWitnessReport_a4])]),
+  doProcessSimplification(cms_captureWitnessReport)
+%*/

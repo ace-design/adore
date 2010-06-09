@@ -1,31 +1,7 @@
-/** Behavioural extension #2
- * @author:   Sebastien Mosser
- * @date:     Tue Jun  8, 2010  7:47 PM
- * @rational: Validate Crisis throuh the human coordinator
- **/
-
-
-fragment fakeCrisisDetected {
-  variables { user as cmsEmployee; 
-    isReal as boolean; 
-  }
-  activities {
-    h. hook(user);
-    t. isReal := ui::prompt4RealCrisis(user);
-    thr. throw('fakeCrisis' as string);
-  }
-  relations { 
-    ^ < h; h < t;  t < $ when isReal; 
-    t < thr when ! isReal; }
-}
-depict fakeCrisisDetected using 'palegreen3';
-
-
 /************************
  ** Second Composition **
  ************************/
 
-/*
 composition cms::captureWitnessReport {
   apply callDisconnected    => a10;
   apply callDisconnected    => a2;
@@ -33,15 +9,13 @@ composition cms::captureWitnessReport {
   apply fakeWitnessInfo     => a2a3;
   apply fakeCrisisDetected  => a4;
 } 
-*/
 
-
-/*
+/*%
   doClone(ignoreDisconnection, iD1), doClone(fakeCrisisDetected,fCD1),
   doMerge([iD1, fCD1],iD_fCD), doClone(iD_fCD, iD_fCD1)
-*/
+%*/
 
-/*
+/*%
   doClone(callDisconnected, cD1), doClone(callDisconnected, cD2),
   doClone(fakeWitnessInfo, fWI1),
   doWeave([ weave(cD1,  [cms_captureWitnessReport_a10]),
@@ -49,4 +23,4 @@ composition cms::captureWitnessReport {
 	    weave(iD_fCD1,  [cms_captureWitnessReport_a4]),
 	    weave(fWI1, [cms_captureWitnessReport_a2a3])]),
   doProcessSimplification(cms_captureWitnessReport)
-*/
+%*/

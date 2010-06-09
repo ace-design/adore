@@ -1,0 +1,37 @@
+/** Behavioural extension #4
+ * @author:   Sebastien Mosser
+ * @date:     Wed Jun  9, 2010  4:54 PM
+ * @rational: statistical logging
+ **/
+
+
+fragment logTime<op> {
+  variables { 
+    key as cmsEmployee; 
+    start as long ; end as long; delta as long; op as string; 
+  }
+  activities {
+    a1.  start := system_currentTimeMillis(); 
+    h.  hook(key);
+    a2. end := system_currentTimeMillis();
+    a3. delta := diff(end,start);
+    a4. database::storeExecTime(key,op, delta);
+  }
+  relations {
+    ^<a1; a1<h; h<a2; a2<a3; a3<a4; a2<$; 
+  }
+}
+depict logTime using 'lightpink3';
+
+
+fragment logError<exc, msg, op>{
+  variables { msg as string; op as var; }
+  activities {
+    h.  hook();
+    a0. database::storeError(msg,op);
+  }
+  relations {
+     ^<h; fail(h,'exc')<a0; h<$;
+  }
+}
+depict logError using 'tomato2';

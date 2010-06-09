@@ -1,0 +1,30 @@
+/** Behavioural extension #4
+ * @author:   Sebastien Mosser
+ * @date:     Wed Jun  9, 2010  4:54 PM
+ * @rational: Dealing with persistence
+ **/
+
+
+fragment logCreate {
+  variables { employee as cmsEmployee; }
+  activities {
+    h. employee := hook();
+    a1. crud::create(employee);
+  }
+  relations { ^ < h; h < a1 ; a1 < $; }
+}
+depict logCreate using 'lemonchiffon2';
+
+fragment logUpdate<op> {
+  variables { employee as cmsEmployee;  op as string;  }
+  activities {
+    h.  hook(employee);
+    a2. crud::update(employee, op);
+  }
+  relations {
+   ^<h ; h <a2; h< $; 
+  }
+}
+depict logUpdate using 'lavender';
+
+

@@ -1,0 +1,32 @@
+/***********************
+ ** Third Composition **
+ ***********************/
+
+composition cms::captureWitnessReport {
+  apply callDisconnected            => a2;
+  apply ignoreDisconnection         => a4;
+  apply fakeCrisisDetected          => a4;
+  apply callDisconnected            => a10;
+  apply fakeWitnessInfo             => a2a3;
+  apply requestVideo(user: 'coord') => {a3,a4}; 
+}
+
+
+/*%
+  doClone(ignoreDisconnection, iD1), doClone(fakeCrisisDetected,fCD2),
+  doMerge([iD1, fCD2],iD_fCD),
+%*/
+
+/*%
+  doClone(callDisconnected, cD1), doClone(callDisconnected, cD2),
+  doClone(fakeWitnessInfo, fWI1),  doClone(iD_fCD, iD_fCD1),
+  doInstantiate(requestVideo, cms_captureWitnessReport, rV1,
+                [bind(user, coord)]),
+  doWeave([ weave(cD1,  [cms_captureWitnessReport_a10]),
+            weave(cD2,  [cms_captureWitnessReport_a2]),
+	    weave(iD_fCD1,  [cms_captureWitnessReport_a4]),
+	    weave(fWI1, [cms_captureWitnessReport_a2a3]),
+	    weave(rV1, [cms_captureWitnessReport_a3, 
+	                    cms_captureWitnessReport_a4])]),
+  doProcessSimplification(cms_captureWitnessReport)
+%*/

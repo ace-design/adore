@@ -4,8 +4,6 @@
  * @rational: Deal with faults in the initial workflow
  **/
 
-// Steps 1a, 2a: 
-//    "The call is disconnected. The base use case terminates."
 fragment callDisconnected {
   variables {}
   activities { 
@@ -16,9 +14,7 @@ fragment callDisconnected {
 }
 depict callDisconnected using 'lightpink';
 
-// Step 4a: 
-//    "The call is disconnected. Use case continues at step 5 without 
-//     crisis information."
+
 fragment ignoreDisconnection {
   variables {}
   activities { h. hook(); }
@@ -26,9 +22,6 @@ fragment ignoreDisconnection {
 }
 
 
-// Step 5a: 
-//    "PhoneCompany information does not match information received from 
-//     Witness. The base use case is terminated."
 fragment fakeWitnessInfo {
   variables {
     witInfo as witness; phInfo as phoneInformation; 
@@ -43,7 +36,6 @@ fragment fakeWitnessInfo {
   }
 }
 depict fakeWitnessInfo using 'darksalmon';
-
 
 
 

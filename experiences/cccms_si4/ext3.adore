@@ -1,0 +1,24 @@
+/** Behavioural extension #3
+ * @author:   Sebastien Mosser
+ * @date:     Wed Jun  9, 2010  4:27 PM
+ * @rational: Requesting video, if available
+ **/
+
+fragment requestVideo<user> {
+  variables {
+    c as boolean; info as preliminaryInformation;
+    user as cmsEmployee; feedId as videoFeedIdentifier;
+  }
+  activities {
+    t. c := survSys::canCover(info.loc);
+    h. hook(info);
+    a12. feedId := survSys::activateVideo(info.loc);
+    a3. ui::displayVideoFeed(user, feedId); 
+  }
+  relations { 
+    ^ < t; t < a12 when c; a12 < a3; a3 < h; t < h when !c; h < $;
+  }
+}
+depict requestVideo using 'skyblue';
+
+
