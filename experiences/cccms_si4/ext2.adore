@@ -1,0 +1,27 @@
+/** Behavioural extension #2
+ * @author:   Sebastien Mosser
+ * @date:     Tue Jun  8, 2010  7:47 PM
+ * @rational: Validate Crisis throuh the human coordinator
+ **/
+
+
+fragment fakeCrisisDetected {
+  variables { user as cmsEmployee; 
+    isReal as boolean; 
+  }
+  activities {
+    h. hook(user);
+    t. isReal := ui::prompt4RealCrisis(user);
+    thr. throw('fakeCrisis' as string);
+  }
+  relations { 
+    ^ < h; h < t;  t < $ when isReal; 
+    t < thr when ! isReal; }
+}
+depict fakeCrisisDetected using 'palegreen3';
+
+
+
+
+
+

@@ -91,18 +91,10 @@ buildFaultsFormula([H|T],Formula) :-
 buildRelation(Act, Pred, R) :- 
 	(waitFor(Act,Pred)|weakWait(Act,Pred)), buildActName(Pred,Root), 
 	swritef(R,'end(%w)',[Root]).
-%% buildRelation(Act, Pred, R) :- 
-%% 	isGuardedBy(Act, Pred, Var, Val), buildActName(Pred,PredRoot),
-%% 	( extractAllPredecessors(Act,Preds), member(E,Preds), 
-%% 	  invert(Val, Not), tag(guard, E, condition(Var, _, Not)), !, 
-%% 	  swritef(R,'end(%w)', [PredRoot])
-%% 	 | findUserRoot(Var,VarRoot), 
-%% 	   swritef(R,'(end(%w) & %w(%w))', [PredRoot,Val,VarRoot])).
 buildRelation(Act, Pred, R) :- 
  	isGuardedBy(Act, Pred, Var, Val), buildActName(Pred,PredRoot),
 	getPreviousName(Var,VarRoot), 
 	swritef(R,'(end(%w) & %w(%w))', [PredRoot,Val,VarRoot]).
-	
 buildRelation(Act, Pred, R) :- 
 	onFailure(Act, Pred, Fault), buildActName(Pred,Root),
 	swritef(R,'fail(%w,%w)',[Root,Fault]).
@@ -122,6 +114,8 @@ extractAllPredecessors(Act,Preds) :-
 	flatten([RawControls,RawFaults], Preds).
 
 extractException(Root, Acts, Exc) :- 
+ 	member(Exc, Acts), onFailure(Root, Exc, _).
+extractException(Root, Acts, Exc) :- 
 	member(Exc, Acts), tag(fault, Exc, error(Fault, FaultyAct)),
 	\+ tag(fault, Root, error(Fault, FaultyAct)).
 extractException(_, Acts, Exc) :- 
@@ -137,7 +131,7 @@ flowDispatch(Act, Control, Weaks, PartitionnedExceptions) :-
 	%% retrieving exceptional flow 
 	findall(E,extractException(Act,WithoutWeak,E), RawExceptions),
 	sort(RawExceptions,Exceptions),
-	faultPartition(Exceptions, PartitionnedExceptions),
+	faultPartition(Act,Exceptions, PartitionnedExceptions),
 	%% Interpolating the control-flow (everything else).
 	removeList(Exceptions, WithoutWeak, Control),!.
 
@@ -178,12 +172,16 @@ belongsToPartition(_, Acts, Var, Value, A) :-
 %%% Exception Partition (exclusivity induced by Faults) %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-faultPartition([],[]).
-faultPartition([H|T],[Currents|Others]) :- 
+faultPartition(_,[],[]).
+faultPartition(Root,[H|T],[Currents|Others]) :- 
+	onFailure(Root, H,_), Currents = [H],
+	faultPartition(Root, T,Others).
+faultPartition(Root,[H|T],[Currents|Others]) :- 
 	tag(fault, H, error(Fault, Source)), 
 	findall(S, (member(S,T), tag(fault, S, error(Fault, Source))), Sims),
-	sort([H|Sims],Currents),
-	removeList(Currents,T,WithoutSims), faultPartition(WithoutSims,Others).
+	sort([H|Sims],Currents), removeList(Currents,T,WithoutSims), 
+	faultPartition(Root,WithoutSims,Others).
+
 	
 
 %%%%%%%%%%%%%%%%%%%%%

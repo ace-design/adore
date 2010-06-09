@@ -109,6 +109,12 @@ shiftSuccRel(Ghost, RealSuccs, RealActs, [Add, Del]) :-
 	\+ hasForKind(FragmentAct, hook),
 	shiftPath([A,S], [FragmentAct,S], Add, Del).
 
+shiftSuccRel(Ghost, RealSuccs, RealActs, [Add, Del]) :-  
+	member(S, RealSuccs), member(A, RealActs), 
+	relations:controlPath(A,S), relations:path(FragmentAct,Ghost),
+	\+ hasForKind(FragmentAct, hook),
+	shiftPath([FragmentAct,Ghost], [FragmentAct,S],Add, Del).
+
 %%%
 % Hook
 %%%
