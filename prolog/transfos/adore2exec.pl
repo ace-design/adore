@@ -55,16 +55,47 @@ genActFormula(Process,Result) :-
 buildActFormula(Act, 'true') :-	isEntryPoint(Act),!.
 buildActFormula(Act, Formula) :-
 	flowDispatch(Act, Ctrl, Weaks, Faults), 
-	%% Control Flow Formula
-	getConditions(Ctrl, Conds), 
-	buildControlFormula(Act, Ctrl, Conds, CtrlFormula),
+	partitionByBranch(Act, Faults, Ctrl, Branches),
+	buildBranchesFormulas(Act, Branches, BranchesFormulas),
 	%% Weak Flow Formula
 	build(or, Weaks, WeakFormula),
-	%% Exceptional Flow Formula
-	buildFaultsFormula(Faults, FaultFormula), 
-	%% Final Formula
-	Raw = formula(or, formula(and, CtrlFormula, WeakFormula), FaultFormula),
+	Raw = formula(and, BranchesFormulas, WeakFormula),
 	simplify(Raw, Formula).
+
+%% Branch Partition:
+partitionByBranch(_,[],Ctrl,[branch([],Ctrl)]). %% no faults partition
+partitionByBranch(Act, [H|T], Ctrl, [Branch|Others]) :-
+	extractFaultBranch(Act, H, Ctrl, BranchActs),
+	removeList(BranchActs, Ctrl, Nexts), 
+	partitionByBranch(Act,T,Nexts,Others), 
+	Branch = branch(H,BranchActs).
+
+extractFaultBranch(Root, FaultPartition, CtrlPreds, Branch) :- 
+	getFaultPartitionOrigin(Root,FaultPartition, O),
+	findall(A, (member(A,CtrlPreds), relations:existsPath(O,A)), Branch).
+
+getFaultPartitionOrigin(Root,Partition, Origin) :- 
+	member(F,Partition),!, 
+	(tag(fault,F,error(_,Origin)) | onFailure(Root,Origin,_), F = Origin).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Branch Formula Building %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+buildBranchesFormulas(_, [],[]).
+buildBranchesFormulas(Act,[branch(Faults,Ctrl)|Others], Formula) :-
+	%% Control Flow Formula:
+	getConditions(Ctrl, Conds), 
+	buildControlFormula(Act, Ctrl, Conds, CtrlFormula),
+	%% Exceptional Flow Formula:
+	buildFaultsFormula([Faults], FaultFormula), 
+	%% Current Formula: Ctrl|Fault
+	Raw = formula(or, CtrlFormula, FaultFormula),
+	simplify(Raw,CurrentForm),
+	%% Rest
+	buildBranchesFormulas(Act, Others, OthersFormula),
+	Formula = formula(and, CurrentForm, OthersFormula).
 
 %% Control
 buildControlFormula(_,[Act], _,Act) :- activity(Act),!. 
