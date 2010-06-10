@@ -7,12 +7,11 @@
 require 'orchestration.adore'; // cms_captureWitnessReport
 
 // Behavioural Extensions
-require 'ext1.adore'; // business-driven faults
-require 'ext2.adore'; // human--driven faults
-require 'ext3.adore'; // using video
-require 'ext4.adore'; // persistence framework
-require 'ext5.adore'; // statistical logging
-require 'ext6.adore'; // security
+require 'extensions/ext1.adore'; // business-driven faults
+require 'extensions/ext2.adore'; // human--driven faults
+require 'extensions/ext3.adore'; // using video
+require 'extensions/ext4.adore'; // persistence framework
+require 'extensions/ext5.adore'; // statistical logging
 
 // Composition load
 require 'compo/5.adore';

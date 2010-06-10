@@ -140,7 +140,7 @@ getProcessWidth(P,W) :-
 
 metrics_processWidth(P,W) :- 
 	process(P), isContainedBy(A,P), activity(A), 
-	findall(Next,path(A,Next),L), length(L,W).
+	findall(Next,relations:path(A,Next),L), length(L,W).
 
 getProcessMazeLevel(P,Maze) :- 
 	findall(T,metrics_processHeight(P,T), Tmp), length(Tmp,Maze).

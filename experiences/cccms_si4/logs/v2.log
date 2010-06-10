@@ -1,0 +1,140 @@
+#####
+## ADORE Shell Wrapper
+#  - Input File: '/Users/mosser/work/adore/experiences/cccms_si4/system.adore' 
+#  - Goal: nothing specified
+#  - Strict compilation: relaxed
+#####
+## Compiling conrete syntax into facts ...
+## Using '/var/folders/sF/sFsyOSuEFo0d19Tdumv3yE+++TI/-Tmp-/run_sh_XXXXXX.gImwV6CS' as compiler output
+% library(swi_hooks) compiled into pce_swi_hooks 0.00 sec, 3,688 bytes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%            ADORE Copyright (C) 2008 - ...           %%
+%%  Activity moDel supOrting oRchestration Evolution   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Authors: Sebastien Mosser & Mireille Blay-Fornarino %%
+%% Main contact: mosser@polytech.unice.fr              %%
+%% Website:      http://www.adore-design.org           %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  This program comes with ABSOLUTELY NO WARRANTY.    %%
+%%  This is free software, and you are welcome to      %%
+%%  redistribute it under certain conditions.          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% Loading the ADORE engine ...
+%%%% Loading Prolog Internal Core
+%  core/facts_model compiled 0.00 sec, 12,640 bytes
+%  core/engine compiled 0.00 sec, 3,576 bytes
+%  core/debug compiled 0.02 sec, 367,368 bytes
+%  core/trace compiled 0.00 sec, 12,136 bytes
+%  core/actions compiled 0.00 sec, 44,328 bytes
+%  core/gensym compiled 0.00 sec, 1,424 bytes
+%  core/helpers compiled 0.00 sec, 11,584 bytes
+%  core/functions compiled 0.00 sec, 4,656 bytes
+%  core/dependencies compiled 0.00 sec, 2,992 bytes
+%  core/dataflow compiled 0.01 sec, 8,064 bytes
+%  core/substitution compiled 0.00 sec, 2,584 bytes
+%%%% Loading ADORE Metamodel
+%  metamodel/universe compiled into universe 0.00 sec, 2,040 bytes
+%  metamodel/activity compiled into activity 0.00 sec, 16,104 bytes
+%  metamodel/context compiled into context 0.00 sec, 3,584 bytes
+%  metamodel/process compiled into process 0.00 sec, 4,432 bytes
+%  metamodel/variable compiled into variable 0.00 sec, 3,376 bytes
+%  metamodel/relations compiled into relations 0.00 sec, 12,584 bytes
+%%%% Loading Algorithms
+%  algos/contextMerge compiled into contextMerge 0.00 sec, 11,856 bytes
+%  algos/applyRewrite compiled into applyRewrite 0.00 sec, 7,344 bytes
+%  algos/contextNormalization compiled into ctxNorm 0.00 sec, 1,576 bytes
+%  algos/setify compiled into setify 0.00 sec, 13,048 bytes
+%  algos/clone compiled into clone 0.00 sec, 18,184 bytes
+%  algos/merge compiled into merge 0.01 sec, 24,296 bytes
+%  algos/weave compiled into weave 0.00 sec, 30,024 bytes
+%  algos/instantiateFragment compiled into instantiate 0.00 sec, 13,344 bytes
+%  algos/processNormalization compiled into processNormalization 0.00 sec, 5,408 bytes
+%  algos/processSimplification compiled into processSimplification 0.00 sec, 10,152 bytes
+%  algos/tag compiled into tag 0.00 sec, 6,496 bytes
+%  algos/refactor compiled into refactor 0.00 sec, 22,440 bytes
+%%%% Loading Transformations
+%  transfos/adore2dsl compiled into adore2dsl 0.00 sec, 30,600 bytes
+%  transfos/adore2xml compiled into adore2xml 0.00 sec, 24,520 bytes
+%  transfos/adore2dot compiled into adore2dot 0.00 sec, 27,032 bytes
+%  transfos/adore2metrics compiled into metrics 0.01 sec, 23,536 bytes
+%  transfos/adore2png compiled into adore2png 0.00 sec, 2,336 bytes
+%  transfos/adore2dgraph compiled into adore2dgraph 0.00 sec, 26,736 bytes
+%  transfos/adore2exec compiled into adore2exec 0.00 sec, 29,696 bytes
+%%%% Loading Detection Rules
+%  rules/concurrentAccess compiled into concurrentAccess 0.00 sec, 2,768 bytes
+%  rules/conditionIncompletness compiled into conditionIncompletness 0.00 sec, 3,880 bytes
+%%%% Loading Local Configuration
+%   /Users/mosser/.adore.pl compiled 0.00 sec, 960 bytes
+%  config compiled 0.00 sec, 3,088 bytes
+%%%% Debug Channels Activation
+% Listening debug channel algo
+% Listening debug channel timer
+%%%% Checking ADORE consistency
+%%%%%%%% ADORE engine loaded !
+% /Users/mosser/work/adore/prolog/init.pl compiled 0.07 sec, 938,976 bytes
+% INFO: Running doClone(ignoreDisconnection,iD1)
+% INFO:   Computing action set
+% 3,220 inferences, 0.000 CPU in 0.001 seconds (0% CPU, Infinite Lips)
+% INFO:   => Result: 14 actions
+% INFO:   Executing action set
+% 490 inferences, 0.000 CPU in 0.000 seconds (0% CPU, Infinite Lips)
+% INFO: doClone(ignoreDisconnection,iD1) ended with success!
+% INFO: Running doClone(fakeCrisisDetected,fCD1)
+% INFO:   Computing action set
+% 3,844 inferences, 0.010 CPU in 0.001 seconds (1159% CPU, 384400 Lips)
+% INFO:   => Result: 35 actions
+% INFO:   Executing action set
+% 1,087 inferences, 0.000 CPU in 0.000 seconds (0% CPU, Infinite Lips)
+% INFO: doClone(fakeCrisisDetected,fCD1) ended with success!
+% INFO: Running doMerge([iD1, fCD1],iD_fCD)
+% INFO:   Computing action set
+% 1,960 inferences, 0.000 CPU in 0.001 seconds (0% CPU, Infinite Lips)
+% INFO:   => Result: 17 actions
+% INFO:   Executing action set
+% 4,833 inferences, 0.000 CPU in 0.001 seconds (0% CPU, Infinite Lips)
+% INFO: doMerge([iD1, fCD1],iD_fCD) ended with success!
+% INFO: Running doClone(iD_fCD,iD_fCD1)
+% INFO:   Computing action set
+% 3,977 inferences, 0.000 CPU in 0.001 seconds (0% CPU, Infinite Lips)
+% INFO:   => Result: 37 actions
+% INFO:   Executing action set
+% 1,512 inferences, 0.000 CPU in 0.000 seconds (0% CPU, Infinite Lips)
+% INFO: doClone(iD_fCD,iD_fCD1) ended with success!
+% INFO: Running doClone(callDisconnected,cD1)
+% INFO:   Computing action set
+% 3,177 inferences, 0.000 CPU in 0.001 seconds (0% CPU, Infinite Lips)
+% INFO:   => Result: 22 actions
+% INFO:   Executing action set
+% 735 inferences, 0.000 CPU in 0.000 seconds (0% CPU, Infinite Lips)
+% INFO: doClone(callDisconnected,cD1) ended with success!
+% INFO: Running doClone(callDisconnected,cD2)
+% INFO:   Computing action set
+% 3,282 inferences, 0.000 CPU in 0.001 seconds (0% CPU, Infinite Lips)
+% INFO:   => Result: 22 actions
+% INFO:   Executing action set
+% 735 inferences, 0.000 CPU in 0.000 seconds (0% CPU, Infinite Lips)
+% INFO: doClone(callDisconnected,cD2) ended with success!
+% INFO: Running doClone(fakeWitnessInfo,fWI1)
+% INFO:   Computing action set
+% 3,757 inferences, 0.000 CPU in 0.001 seconds (0% CPU, Infinite Lips)
+% INFO:   => Result: 31 actions
+% INFO:   Executing action set
+% 843 inferences, 0.000 CPU in 0.000 seconds (0% CPU, Infinite Lips)
+% INFO: doClone(fakeWitnessInfo,fWI1) ended with success!
+% INFO: Running doWeave(...)
+% INFO:   Computing action set
+% INFO:   weave(cD1,[cms_captureWitnessReport_a10])
+% INFO:   weave(cD2,[cms_captureWitnessReport_a2])
+% INFO:   weave(iD_fCD1,[cms_captureWitnessReport_a4])
+% INFO:   weave(fWI1,[cms_captureWitnessReport_a2a3])
+% 29,879 inferences, 0.010 CPU in 0.037 seconds (27% CPU, 2987900 Lips)
+% INFO:   => Result: 58 actions
+% INFO:   Executing action set
+% 33,637 inferences, 0.010 CPU in 0.006 seconds (163% CPU, 3363700 Lips)
+% INFO: doWeave(...) ended with success!
+% INFO: doProcessSimplification(cms_captureWitnessReport) ...
+% 564,081 inferences, 0.080 CPU in 0.077 seconds (104% CPU, 7051013 Lips)
+% 16,611 inferences, 0.000 CPU in 0.002 seconds (0% CPU, Infinite Lips)
+% INFO: ... done (86 actions).
+% /var/folders/sF/sFsyOSuEFo0d19Tdumv3yE+++TI/-Tmp-/run_sh_XXXXXX.gImwV6CS compiled 0.12 sec, 179,632 bytes
+?- 
