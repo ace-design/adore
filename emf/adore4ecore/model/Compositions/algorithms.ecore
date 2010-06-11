@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="algorithms"
+    nsURI="http://algorithms/1.0" nsPrefix="algorithms">
+  <eClassifiers xsi:type="ecore:EClass" name="Algorithm" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="output" upperBound="-1"
+        eType="ecore:EClass ../Core/actions.ecore#//Action" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ActivityDrivenAlgorithm" abstract="true"
+      eSuperTypes="#//Algorithm"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DataDrivenAlgorithm" abstract="true"
+      eSuperTypes="#//Algorithm"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ToSet" eSuperTypes="#//DataDrivenAlgorithm">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="target" lowerBound="1"
+        eType="ecore:EClass ../Core/variables.ecore#//Variable"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Clone" eSuperTypes="#//ActivityDrivenAlgorithm">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="source" lowerBound="1"
+        eType="ecore:EClass ../Core/kernel.ecore#//BusinessProcess"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Weave" eSuperTypes="#//ActivityDrivenAlgorithm">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bindings" lowerBound="1"
+        upperBound="-1" eType="#//Binding" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Merge" eSuperTypes="#//ActivityDrivenAlgorithm">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fragments" lowerBound="2"
+        upperBound="-1" eType="ecore:EClass ../Fragments/fragments.ecore#//Fragment"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Binding">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fragment" lowerBound="1"
+        eType="ecore:EClass ../Fragments/fragments.ecore#//Fragment"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="target" lowerBound="1"
+        eType="#//ActivityBlock" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ActivityBlock">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="content" lowerBound="1"
+        upperBound="-1" eType="ecore:EClass ../Core/activities.ecore#//Activity"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Inline" eSuperTypes="#//ActivityDrivenAlgorithm">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="source" lowerBound="1"
+        eType="ecore:EClass ../Core/kernel.ecore#//BusinessProcess"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="invocation" lowerBound="1"
+        eType="ecore:EClass ../Core/activities.ecore#//Activity"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Instantiate" eSuperTypes="#//Clone">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bindings" lowerBound="1"
+        upperBound="-1" eType="#//TemplateBinding" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TemplateBinding">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="old" lowerBound="1" eType="#//Symbol"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="new" lowerBound="1" eType="#//Symbol"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Symbol"/>
+</ecore:EPackage>

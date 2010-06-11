@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="fragments"
+    nsURI="http://fragments/1.0" nsPrefix="fragments">
+  <eClassifiers xsi:type="ecore:EClass" name="Fragment" eSuperTypes="../Core/kernel.ecore#//BusinessProcess"/>
+  <eClassifiers xsi:type="ecore:EClass" name="FragmentActivity" abstract="true" eSuperTypes="../Core/activities.ecore#//Activity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Hook" eSuperTypes="#//FragmentActivity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Predecessors" eSuperTypes="#//FragmentActivity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Successors" eSuperTypes="#//FragmentActivity"/>
+</ecore:EPackage>
