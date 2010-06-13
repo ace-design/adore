@@ -3,7 +3,10 @@
     xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="activities"
     nsURI="http://activities/1.0" nsPrefix="activities">
-  <eClassifiers xsi:type="ecore:EClass" name="Activity" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Activity" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="policy" eType="ecore:EClass variables.ecore#//IterationPolicy"
+        eOpposite="variables.ecore#//IterationPolicy/activities"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Assign" eSuperTypes="#//BusinessActivity">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="function" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
