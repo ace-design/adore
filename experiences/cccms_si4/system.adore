@@ -14,7 +14,7 @@ require 'extensions/ext4.adore'; // persistence framework
 require 'extensions/ext5.adore'; // statistical logging
 
 // Composition load
-require 'compo/5.adore';
+require 'compo/1.adore';
 
 
 

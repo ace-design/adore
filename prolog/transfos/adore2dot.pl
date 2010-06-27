@@ -237,7 +237,7 @@ drawOrder(L,R,C) :-
 	swritef(C,'  %w -> %w [label="!%w"];',[L,R,Label]).
 drawOrder(L,R,C) :- 
 	onFailure(R,L,E),
-	swritef(C,'  %w -> %w [color="red",label="%w"];',[L,R,E]).
+	swritef(C,'  %w -> %w [color="red",arrowhead=odiamond,label="%w"];',[L,R,E]).
 
 
 

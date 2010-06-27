@@ -249,99 +249,31 @@ orchestration mixed::controlAndFaults {
   }
 }
 
+/********************
+ ** Branch Example **
+ ********************/
 
-
-/*****************
- ** Limitations **
- *****************/
-
-orchestration limitations::controlAndWeakedFaults {
-  // @related mixed::controlAndFaults
-  // @problem: doesn't make sense at all
+orchestration branches::conjunction {
   variables {}
   activities {
     a0. receive();
     a1. nop();
     a2. nop();
     a3. nop();
-    a4. reply();
-  }
-  relations { 
-    a0 < a1;  fail(a0,'f1') < a2; fail(a0,'f2') < a3; 
-    a1 < a4; a2 << a4; a3 << a4;
-  }
-}
-
-
-
-
-
-/*******************
- ** Old Artefacts **
- *******************/
-
-/*
-orchestration semantic::test1 {
-  variables {
-    c1 as boolean; c2 as boolean;
-  }
-  activities {
-    a0. c1 := nop();
-    a1. nop();
-    a2. nop();
-    a3. receive();
-    a4. c2 := nop();
-    a5. nop();
-    a6. nop();
-    a7. reply();
-  }
-  relations{
-    a3 < a4; a3 < a0; 
-    a4 < a5 when c2; a4 < a6 when !c2; a5 < a7; a6 < a7;
-    a0 < a1 when c1; a0 < a2 when !c1; a1  < a7; a2 < a7;
-  }
-}
-
-orchestration semantic::test2 {
-  variables {
-    c1 as boolean; c2 as boolean;
-  }
-  activities {
-    a0. c1 := nop();
-    a1. nop();
-    a2. nop();
-    a4. c2 := receive();
-    a5. nop();
-    a6. reply();
-  }
-  relations {
-    a4 < a5 when c2; a4 < a0 when !c2; a5 < a6;
-    a0 < a2 when c1; a0 < a1 when !c1;
-    a1 < a6; a2 < a6;
-    
-  }
-}
-
-orchestration semantic::test3 {
-  variables {
-    c1 as boolean; c2 as boolean;
-  }
-  activities {
-    a0. receive();
-    a1. c1 := nop();
-    a2. c2 := nop();
-    a3. nop();
     a4. nop();
     a5. nop();
     a6. nop();
     a7. reply();
   }
-  relations {
+  relations{
     a0 < a1; a0 < a2; 
-    a1 < a3 when c1; a1 < a4 when c1; a1 < a5 when !c1; a1 < a6 when !c1;
-    a2 < a3 when c2; a2 < a4 when !c2; a2 < a5 when c2; a2 < a6 when !c2;
+    a1 < a3; fail(a1,'f1') < a4; 
+    a2 < a5; fail(a2,'f2') < a6;
     a3 < a7; a4 < a7; a5 < a7; a6 < a7;
   }
 }
-*/
+
+/*****************
+ ** Limitations **
+ *****************/
 

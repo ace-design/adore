@@ -60,36 +60,38 @@ buildActFormula(Act, Formula) :-
 	%% Weak Flow Formula
 	build(or, Weaks, WeakFormula),
 	Raw = formula(and, BranchesFormulas, WeakFormula),
-	simplify(Raw, Formula).
+	simplify(Raw, Formula),!.
 
 %% Branch Partition:
 partitionByBranch(_,[],Ctrl,[branch([],Ctrl)]). %% no faults partition
 partitionByBranch(Act, [H|T], Ctrl, [Branch|Others]) :-
-	extractFaultBranch(Act, H, Ctrl, BranchActs),
-	removeList(BranchActs, Ctrl, Nexts), 
-	partitionByBranch(Act,T,Nexts,Others), 
-	Branch = branch(H,BranchActs).
-
-extractFaultBranch(Root, FaultPartition, CtrlPreds, Branch) :- 
-	getFaultPartitionOrigin(Root,FaultPartition, O),
-	findall(A, (member(A,CtrlPreds), relations:existsPath(O,A)), Branch).
-
-getFaultPartitionOrigin(Root,Partition, Origin) :- 
-	member(F,Partition),!, 
+	getFaultOrigin(Act, H, Origin),
+	%% Branches came from the same point of origin
+	findall(A,(member(A,Ctrl), (relations:existsPath(Origin,A)|Origin=A)),CtrlBranch),
+	findall(F,(member(F,T), getFaultOrigin(Act,F,Origin)), RawFault),
+	sort(RawFault, FaultBranch),
+	Branch = branch([H|FaultBranch],CtrlBranch),
+	%% Cleaning up tail and Ctrl rest
+	removeList(FaultBranch,T,FaultTail),
+	removeList(CtrlBranch, Ctrl, CtrlTail),
+	%% Computing Others
+	partitionByBranch(Act, FaultTail, CtrlTail, Others).
+	
+getFaultOrigin(Root, F, Origin) :- 
 	(tag(fault,F,error(_,Origin)) | onFailure(Root,Origin,_), F = Origin).
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Branch Formula Building %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 buildBranchesFormulas(_, [],[]).
-buildBranchesFormulas(Act,[branch(Faults,Ctrl)|Others], Formula) :-
+buildBranchesFormulas(Act,[branch(RawFaults,Ctrl)|Others], Formula) :-
 	%% Control Flow Formula:
 	getConditions(Ctrl, Conds), 
 	buildControlFormula(Act, Ctrl, Conds, CtrlFormula),
 	%% Exceptional Flow Formula:
-	buildFaultsFormula([Faults], FaultFormula), 
+	faultPartition(Act,RawFaults, Faults),
+	buildFaultsFormula(Faults, FaultFormula), 
 	%% Current Formula: Ctrl|Fault
 	Raw = formula(or, CtrlFormula, FaultFormula),
 	simplify(Raw,CurrentForm),
@@ -154,7 +156,7 @@ extractException(_, Acts, Exc) :-
 	tag(fault, Exc, error(Fault1, FaultyAct)),
 	tag(fault, Exc2, error(Fault2, FaultyAct)), Fault1 \= Fault2.
 	
-flowDispatch(Act, Control, Weaks, PartitionnedExceptions) :- 
+flowDispatch(Act, Control, Weaks, Exceptions) :- 
 	extractAllPredecessors(Act,Raws),
 	%% retrieving the weak wait flow 
 	findall(W,weakWait(Act,W),Weaks), 
@@ -162,7 +164,6 @@ flowDispatch(Act, Control, Weaks, PartitionnedExceptions) :-
 	%% retrieving exceptional flow 
 	findall(E,extractException(Act,WithoutWeak,E), RawExceptions),
 	sort(RawExceptions,Exceptions),
-	faultPartition(Act,Exceptions, PartitionnedExceptions),
 	%% Interpolating the control-flow (everything else).
 	removeList(Exceptions, WithoutWeak, Control),!.
 
@@ -238,7 +239,12 @@ build(Op,[H|T],formula(Op,H,R)) :- build(Op,T,R).
 %% formula display, according to a root activity:
 display(_, 'true', 'true').
 display(Root, Activity, Result) :- 
-	activity(Activity), !, buildRelation(Root, Activity, Result).
+	activity(Activity),
+	findall(R,buildRelation(Root, Activity,R), [Result]),!.
+display(Root, Activity, Result) :- 
+	activity(Activity),
+	findall(R,buildRelation(Root, Activity,R), L),
+	pushOrSymbol(L,Result).
 display(Root, formula(Op,SF1,SF2), R) :- 
 	display(Root, SF1, D1),	display(Root, SF2, D2), operator(Op,Dop),
 	addParenthesis(SF1,D1,PD1), addParenthesis(SF2,D2,PD2), 
@@ -247,6 +253,12 @@ display(Root, formula(Op,SF1,SF2), R) :-
 %% add parenthesis, only when needed
 addParenthesis(formula(_,_,_), Text, P) :- !, swritef(P,'(%w)',[Text]).
 addParenthesis(_,Text,Text).
+
+%% push or symbol
+pushOrSymbol([H],H) :- !.
+pushOrSymbol([H|T],R) :- 
+	operator(or,Op), pushOrSymbol(T,Others),
+	swritef(R,'(%w %w %w)',[H,Op,Others]).
 
 %%%%%%%%%%%%%%%
 %%% Helpers %%%
