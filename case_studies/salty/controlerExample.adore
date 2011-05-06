@@ -1,0 +1,161 @@
+/** An Adore modelisation of the Overload control System
+ * author: blay@unice.fr
+ * date:   6/5/11
+ */
+
+/**************************
+ ** Conroler 1 Process v0 **
+ **************************/
+orchestration control::controlSubmissionRate {
+  variables {
+    ok as boolean; jobNumber as integer; jobNumberAverage as integer;
+    clientNumber as integer; serviceRateAverage as integer;
+    serviceRate as integer; serviceRateAvg as integer;
+    dagmanDelay as integer;
+  }
+  activities {
+    a0. (jobNumber) := receive();
+    l1. ok := link::transmit(jobNumber);
+    a2. jobNumberAverage := queueStateAverage::filter(jobNumber);
+    l2. link::transmit(jobNumberAverage);
+    a3. c1::beginControlSubmissionRate(jobNumberAverage);
+    l3. link::transmit();
+    a4. clientNumber := dagmanCounter::get();
+    l4. link::transmit(clientNumber);
+    a5. serviceRate := cserviceRate::get();
+    l5. link::transmit(serviceRate); 
+    a6. serviceRateAvg := cserviceRateAvf::filter(serviceRate);
+    a7. dagmanDelay := c1::computeDagmanDelay(jobNumberAverage,serviceRate,clientNumber);
+    l6. link::transmit(dagmanDelay); 
+    a8. cDagmanDelay::change(dagmanDelay);
+    r. reply();
+  }
+  relations { a0 < l1; l1 < a2 when ok; l1< r when !ok;  
+              a2 < l2 ; l2< a3; a3 < l3; l3<a4; a3<l4;l4<a5;a5<l5;l5<a6;
+              a6 < a7; a4 < a7 ; a7 < l6; l6< a8; a8 < r ; }
+}
+
+
+/**************************
+ ** Controler 1 Process simple V1 **
+ **************************/
+orchestration control::controlSubmissionRateV1 {
+  variables {
+    jobNumber as integer; 
+    clientNumber as integer; 
+    serviceRate as integer;
+    dagmanDelay as integer;
+  }
+  activities {
+    a0. (jobNumber) := receive();
+    l1. link1::transmit(jobNumber);
+    a3. c1::beginControlSubmissionRate(jobNumber);
+    a4. clientNumber := dagmanCounter::get();
+    l3. link2::transmit(clientNumber);
+    a5. serviceRate := cserviceRate::get();
+    l5. link3::transmit(serviceRate); 
+    a7. dagmanDelay := c1::computeDagmanDelay(jobNumber,serviceRate,clientNumber);
+    l6. link4::transmit(dagmanDelay); 
+    a8. cDagmanDelay::change(dagmanDelay);
+    r. reply();
+  }
+  relations { a0 < l1; l1 < a3;  
+              a3 < a4; a4< l3; l3<a7 ;
+              a3< a5 ; a5 < l5;
+              l5<a7 ; a7 < l6; l6< a8; a8 < r ; }
+}
+
+
+
+/**********************************************************
+ ** The hook activity correspond to a "link" transmitting a value **
+ **************************************************/
+fragment getAverageValue {
+  variables {
+    value as integer;  
+    valueAvg as integer;
+    aServiceName as string;
+  }
+  activities {
+    h.  hook(value);
+    e0. valueAvg := movingAverage::getAverage(value);
+    e1. value := valueAvg;
+    l1. link5::transmit(value);
+  }
+  relations { 
+    ^ < h; h < e0; e0 < e1; e1 < l1; l1 < $; 
+  }
+}
+
+depict getAverageValue using 'lightyellow';
+
+
+/**********************************************************
+ ** The hook activity correspond to a "link" transmitting a value **
+ ** The link is replaced by a periodic link
+ **************************************************/
+fragment setPeriodic {
+  variables {
+    value as integer;  
+    valueAvg as integer;
+    aServiceName as string;
+    now as boolean;
+  }
+  activities {
+    h.  hook(value);
+    e0. now := isTime();
+    r. reply();
+  }
+  relations { 
+    ^ < h; h < e0; e0 < $ when now; e0 < r when !now;
+  }
+}
+
+depict setPeriodic using 'lightblue';
+
+
+/**********************************************************
+ ** Controller 2 **
+ **************************************************/
+
+orchestration control::controlTriggerRate {
+  variables {
+    execTime as integer;  triggerRate as integer;
+  }
+  activities {
+    t0. (execTime) := receive();
+    l1. link6::transmit(execTime);
+    t1. triggerRate := c2::computeTriggerRate(execTime);
+    l2. link7::transmit(triggerRate);
+    t3. link1::setExecTime(triggerRate);
+    r. reply();
+  }
+  relations { 
+   t0 < l1 ; l1 < t1 ; t1 < l2; l2 < t3; t3 < r ;
+  }
+}
+
+
+/**********************************************************
+ ** Controller 3 **
+ **************************************************/
+
+orchestration control::maxQueueSize {
+  variables {
+    systemMemory as integer;  criticalNumberOfJobs as integer;
+    targetNumberOfJobs as integer;
+  }
+  activities {
+    t0. (systemMemory) := receive();
+    l1. link10::transmit(systemMemory);
+    t1. (targetNumberOfJobs, criticalNumberOfJobs):= c3::computeMxQueueSize(systemMemory);
+    l8. link8::transmit(targetNumberOfJobs);
+    l9. link9::transmit(criticalNumberOfJobs);
+    t2. c1::setTargetNumberOfJobs(targetNumberOfJobs);
+    t3. c1::setcriticalNumberOfJobs(criticalNumberOfJobs);
+    r. reply();
+  }
+  relations { 
+   t0 < l1 ; l1 < t1 ; t1 < l8; t1 < l9; l8<t2;  l9 < t3; t2 < r ; t3 < r ;
+  }
+}
